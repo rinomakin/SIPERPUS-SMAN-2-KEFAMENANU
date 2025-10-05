@@ -185,13 +185,6 @@
                             </a>
                             @endif
                             
-                            @if(Auth::user()->hasAnyPermission(['user.view', 'user.manage']) || Auth::user()->isAdmin())
-                            <a href="{{ route('user.index') }}" 
-                               class="sidebar-link flex items-center px-4 py-2 text-gray-600 rounded-lg transition-all duration-200 text-sm {{ request()->routeIs('user.*') ? 'active' : '' }}">
-                                <i class="fas fa-user-cog mr-3 text-xs"></i>
-                                <span>User</span>
-                            </a>
-                            @endif
                             
                             @if(Auth::user()->hasAnyPermission(['jurusan.view', 'jurusan.manage']) || Auth::user()->isAdmin())
                             <a href="{{ route('jurusan.index') }}" 

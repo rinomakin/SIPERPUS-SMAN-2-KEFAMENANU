@@ -67,47 +67,60 @@
                 <h3 class="text-[14px] font-semibold text-white">Form Pengembalian Buku</h3>
             </div>
             
-            <!-- Step 1: Scan/Search Anggota -->
+            <!-- Step 1: Select Anggota -->
             <div class="p-6 border-b border-gray-200">
                 <h4 class="text-xs font-semibold text-gray-900 mb-4 ">
-                    <i class="fas fa-user-check mr-2"></i>Langkah 1: Identifikasi Anggota
+                    <i class="fas fa-user-check mr-2"></i>Langkah 1: Pilih Anggota
                 </h4>
                 
                 <div class="grid grid-cols-1 lg:grid-cols-1 gap-6 border ">
-                    <!-- Scan Barcode -->
+                    <!-- Dropdown Anggota -->
                     <div class="">
-                        <div class="bg-blue-50 p-4 text-xs rounded-lg border ">
-                            <h5 class="font-semibold text-blue-900 mb-2">Cari Anggota</h5>
-                            <p class="text-sm text-blue-700 mb-4">Arahkan kamera ke barcode kartu anggota untuk identifikasi otomatis</p>
+                        <div class="bg-blue-50 p-4 text-xs rounded-lg border relative">
+                            <h5 class="font-semibold text-blue-900 mb-2">Cari Anggota dengan Peminjaman Aktif</h5>
+                            <p class="text-sm text-blue-700 mb-4">Ketik nama/ID anggota untuk mencari peminjaman aktif</p>
                             
-                            <div class="flex gap-4">
-
-                            <div class=" w-96">
-                                <div class="relative">
-                                    <input type="text" id="anggota_search" 
-                                        placeholder="Cari nama anggota atau nomor anggota (hanya yang sedang meminjam)..." 
-                                        class="w-full px-4 py-3 border outline-none border-gray-300 rounded-lg focus:ring-1 focus:ring-green-300 focus:border-green-300 transition-all duration-200">
-                                    
-                                    <!-- Dropdown hasil pencarian -->
-                                    <div id="anggotaDropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto">
-                                        <!-- Hasil pencarian akan muncul di sini -->
+                            <div class="flex flex-col md:flex-row gap-4">
+                                <div class="w-full">
+                                    <div class="relative">
+                                        <input type="text" id="searchAnggotaInput" 
+                                               placeholder="Ketik minimal 2 karakter untuk mencari anggota dengan peminjaman aktif..." 
+                                               class="w-full px-4 py-3 border outline-none border-gray-300 rounded-lg focus:ring-1 focus:ring-green-300 focus:border-green-300 transition-all duration-200"
+                                               autocomplete="off">
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 hidden" id="searchSpinner">
+                                            <i class="fas fa-spinner fa-spin text-blue-500"></i>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-
-                                <div class="">
+                                
+                                <div class="w-full md:w-auto flex flex-col sm:flex-row gap-2">
+                                    <button type="button" id="refreshAnggotaBtn" 
+                                    class="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-all duration-200 flex-1">
+                                    <i class="fas fa-sync mr-2"></i>Refresh
+                                </button>
+                                
                                     <button type="button" id="scanAnggotaBtn" 
-                                    class="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-all duration-200">
-                                    <i class="fas fa-qrcode mr-2"></i>scan
+                                    class="px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold transition-all duration-200 flex-1">
+                                    <i class="fas fa-qrcode mr-2"></i>Scan
                                 </button>
                                 </div>
                             </div>
-
+                            
+                            <!-- Search results container -->
+                            <div id="anggotaSearchResults" class="mt-4 max-h-60 overflow-y-auto border border-gray-200 rounded-lg hidden">
+                                <!-- Search results will be populated here -->
+                            </div>
+                            
+                            <!-- Link to active loans if no active returns available -->
+                            <div class="mt-3 text-center">
+                                <p class="text-xs text-gray-600">Tidak menemukan anggota yang bisa mengembalikan buku?</p>
+                                <a href="{{ route('pengembalian.aktif') }}" 
+                                   class="inline-flex items-center text-xs text-blue-600 hover:text-blue-800 font-medium">
+                                    <i class="fas fa-external-link-alt mr-1"></i>Lihat semua peminjaman aktif
+                                </a>
+                            </div>
                         </div>
                     </div>
-
-
-                   
                 </div>
 
                 <!-- Info Anggota yang Dipilih -->
@@ -331,11 +344,13 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribut
 let html5QrcodeScanner = null;
 let selectedAnggota = null;
 let selectedPeminjaman = null;
+let anggotaList = []; // Store the list of anggota with active borrowings
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     startRealTimeUpdate();
+    loadAnggotaWithActiveBorrowings(); // Load anggota on page load
 });
 
 // Fungsi untuk mengatur tanggal dan jam secara real-time
@@ -367,11 +382,127 @@ function startRealTimeUpdate() {
     setInterval(updateDateTime, 1000); // Update setiap detik
 }
 
+// Load anggota with active borrowings
+function loadAnggotaWithActiveBorrowings() {
+    const searchInput = document.getElementById('searchAnggotaInput');
+    const searchResults = document.getElementById('anggotaSearchResults');
+    const searchSpinner = document.getElementById('searchSpinner');
+    
+    // Clear previous results and show loading
+    searchSpinner.classList.remove('hidden');
+    searchResults.classList.remove('hidden');
+    searchResults.innerHTML = '<div class="p-4 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat anggota dengan peminjaman aktif...</div>';
+    
+    fetch('/admin/pengembalian/search-anggota?query=', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        searchSpinner.classList.add('hidden');
+        if (data.success && data.data) {
+            anggotaList = data.data;
+            displayAnggotaSearchResults(data.data);
+            if (data.data.length === 0) {
+                searchResults.innerHTML = '<div class="p-4 text-center text-gray-500">Saat ini tidak ada anggota yang sedang meminjam buku</div>';
+                showNotification('Saat ini tidak ada anggota yang sedang meminjam buku', 'info');
+            }
+        } else {
+            searchResults.innerHTML = '<div class="p-4 text-center text-red-500">' + (data.message || 'Tidak ada anggota dengan peminjaman aktif') + '</div>';
+            showNotification(data.message || 'Tidak ada anggota dengan peminjaman aktif', 'info');
+        }
+    })
+    .catch(error => {
+        searchSpinner.classList.add('hidden');
+        console.error('Error loading anggota:', error);
+        searchResults.innerHTML = '<div class="p-4 text-center text-red-500">Terjadi kesalahan saat memuat data anggota</div>';
+        showNotification('Terjadi kesalahan saat memuat data anggota: ' + error.message, 'error');
+    });
+}
+
+// Display anggota search results
+function displayAnggotaSearchResults(anggotaData) {
+    const searchResults = document.getElementById('anggotaSearchResults');
+    searchResults.classList.remove('hidden');
+    
+    if (anggotaData.length === 0) {
+        searchResults.innerHTML = '<div class="p-4 text-center text-gray-500">Tidak ditemukan anggota dengan peminjaman aktif</div>';
+        return;
+    }
+    
+    let html = '';
+    anggotaData.forEach(anggota => {
+        html += `
+            <div class="p-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer anggota-item" data-anggota='${JSON.stringify(anggota).replace(/'/g, '&apos;')}'>
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-blue-600"></i>
+                        </div>
+                    </div>
+                    <div class="ml-3">
+                        <div class="text-sm font-medium text-gray-900">${anggota.nama_lengkap || 'N/A'}</div>
+                        <div class="flex flex-wrap gap-2 text-xs text-gray-500">
+                            <span>${anggota.nomor_anggota || anggota.nis || 'N/A'}</span>
+                            <span>•</span>
+                            <span>${anggota.kelas}</span>
+                            <span>•</span>
+                            <span class="font-semibold text-blue-600">${anggota.jumlah_peminjaman_aktif} peminjaman aktif</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Show peminjaman details if available -->
+                ${anggota.detail_peminjaman && anggota.detail_peminjaman.length > 0 ? `
+                    <div class="mt-2 ml-13 text-xs">
+                        <div class="space-y-1">
+                            ${anggota.detail_peminjaman.slice(0, 2).map(peminjaman => `
+                                <div class="bg-gray-50 p-2 rounded">
+                                    <div class="font-medium text-gray-800">${peminjaman.nomor_peminjaman}</div>
+                                    <div class="text-gray-600">Kembali: ${peminjaman.tanggal_harus_kembali}</div>
+                                    ${peminjaman.buku && peminjaman.buku.length > 0 ? `
+                                        <div class="mt-1 text-gray-500">
+                                            ${peminjaman.buku.slice(0, 2).map(b => b.judul).join(', ')}
+                                            ${peminjaman.buku.length > 2 ? `+${peminjaman.buku.length - 2} buku lainnya` : ''}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                            ${anggota.detail_peminjaman.length > 2 ? `
+                                <div class="text-blue-500 font-medium">+${anggota.detail_peminjaman.length - 2} peminjaman lainnya...</div>
+                            ` : ''}
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    });
+    
+    searchResults.innerHTML = html;
+    
+    // Add click event listeners to anggota items
+    document.querySelectorAll('.anggota-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const anggota = JSON.parse(this.getAttribute('data-anggota'));
+            selectAnggotaFromSearch(anggota);
+        });
+    });
+}
+
 function setupEventListeners() {
     // Scan button
     document.getElementById('scanAnggotaBtn').addEventListener('click', function() {
         document.getElementById('scannerModal').classList.remove('hidden');
         initializeScanner();
+    });
+
+    // Refresh button
+    document.getElementById('refreshAnggotaBtn').addEventListener('click', function() {
+        loadAnggotaWithActiveBorrowings();
     });
 
     // Close scanner
@@ -381,22 +512,17 @@ function setupEventListeners() {
     // Clear anggota
     document.getElementById('clearAnggota').addEventListener('click', clearAnggota);
 
-    // Search anggota
-    document.getElementById('anggota_search').addEventListener('input', function() {
+    // Search input event (for searching all members, not just active ones)
+    document.getElementById('searchAnggotaInput').addEventListener('input', function() {
         const query = this.value.trim();
-        if (query.length >= 2) {
-            searchAnggota(query);
-        } else {
-            document.getElementById('anggotaDropdown').classList.add('hidden');
+        if (query === '') {
+            // If search is cleared, reload active borrowings
+            loadAnggotaWithActiveBorrowings();
+            return;
         }
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-        const search = document.getElementById('anggota_search');
-        const dropdown = document.getElementById('anggotaDropdown');
-        if (!search.contains(event.target) && !dropdown.contains(event.target)) {
-            dropdown.classList.add('hidden');
+        
+        if (query.length >= 2) {
+            searchAllAnggota(query);
         }
     });
     
@@ -435,6 +561,90 @@ function setupEventListeners() {
     // Catatan pembayaran denda event listener
     document.getElementById('catatan_pembayaran_denda').addEventListener('input', function() {
         document.getElementById('hiddenCatatanPembayaranDenda').value = this.value;
+    });
+}
+
+// Function to handle when an anggota is selected from search results
+function selectAnggotaFromSearch(anggota) {
+    selectedAnggota = anggota;
+    
+    document.getElementById('anggotaNama').textContent = anggota.nama_lengkap;
+    document.getElementById('anggotaNomor').textContent = anggota.nomor_anggota;
+    document.getElementById('anggotaKelas').textContent = anggota.kelas + ' - ' + anggota.jenis_anggota;
+    document.getElementById('anggotaInfo').classList.remove('hidden');
+    
+    // Check if anggota has active peminjaman
+    if (anggota.memiliki_peminjaman_aktif && anggota.detail_peminjaman && anggota.detail_peminjaman.length > 0) {
+        // Convert detail_peminjaman ke format yang diharapkan loadPeminjamanAktif
+        const formattedPeminjaman = anggota.detail_peminjaman.map(detail => ({
+            id: detail.id,
+            nomor_peminjaman: detail.nomor_peminjaman,
+            tanggal_peminjaman: detail.tanggal_peminjaman,
+            tanggal_harus_kembali: detail.tanggal_harus_kembali,
+            is_late: detail.is_late || false, // Use server-side calculated value
+            days_late: detail.days_late || 0,
+            jumlah_buku: detail.jumlah_buku || (detail.buku ? detail.buku.reduce((sum, item) => sum + (item.jumlah || 1), 0) : 0),
+            detail_peminjaman: detail.buku || []
+        }));
+        loadPeminjamanAktif(formattedPeminjaman);
+    } else {
+        // Show message that anggota doesn't have active peminjaman
+        document.getElementById('peminjamanSection').classList.remove('hidden');
+        document.getElementById('noPeminjaman').classList.remove('hidden');
+        document.getElementById('peminjamanList').innerHTML = '';
+        document.getElementById('noPeminjaman').innerHTML = `
+            <div class="text-center py-8">
+                <i class="fas fa-info-circle text-2xl text-blue-500 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak Ada Peminjaman Aktif</h3>
+                <p class="text-gray-600">Anggota ini sedang tidak pinjam buku</p>
+            </div>
+        `;
+        document.getElementById('pengembalianForm').classList.add('hidden');
+        showNotification('Anggota ini sedang tidak pinjam buku', 'info');
+    }
+    
+    // Scroll to anggota info
+    document.getElementById('anggotaInfo').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Function to search all active anggota (not just those with active borrowings)
+function searchAllAnggota(query) {
+    const searchResults = document.getElementById('anggotaSearchResults');
+    const searchSpinner = document.getElementById('searchSpinner');
+    
+    searchSpinner.classList.remove('hidden');
+    searchResults.classList.remove('hidden');
+    searchResults.innerHTML = '<div class="p-4 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Mencari anggota...</div>';
+    
+    // Using the same search endpoint but it will filter based on query
+    fetch(`/admin/pengembalian/search-anggota?query=${encodeURIComponent(query)}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        searchSpinner.classList.add('hidden');
+        if (data.success && data.data) {
+            anggotaList = data.data;
+            displayAnggotaSearchResults(data.data);
+            if (data.data.length === 0) {
+                searchResults.innerHTML = '<div class="p-4 text-center text-gray-500">Tidak ditemukan anggota dengan peminjaman aktif</div>';
+                showNotification('Tidak ditemukan anggota dengan peminjaman aktif', 'info');
+            }
+        } else {
+            searchResults.innerHTML = '<div class="p-4 text-center text-red-500">' + (data.message || 'Tidak ditemukan anggota dengan peminjaman aktif') + '</div>';
+            showNotification(data.message || 'Tidak ditemukan anggota dengan peminjaman aktif', 'info');
+        }
+    })
+    .catch(error => {
+        searchSpinner.classList.add('hidden');
+        console.error('Error searching anggota:', error);
+        searchResults.innerHTML = '<div class="p-4 text-center text-red-500">Terjadi kesalahan saat mencari anggota</div>';
+        showNotification('Terjadi kesalahan saat mencari anggota: ' + error.message, 'error');
     });
 }
 
@@ -517,7 +727,9 @@ function processScannedBarcode(barcode) {
             closeScanner();
             showNotification(`Anggota ditemukan: ${data.data.anggota.nama_lengkap}`, 'success');
         } else {
-            showNotification(data.message || 'Anggota tidak ditemukan', 'error');
+            // Handle error messages for barcode scanning
+            const message = data.message || 'Anggota tidak ditemukan';
+            showNotification(message, 'error');
             document.getElementById('scannerStatus').textContent = 'Scan gagal - coba lagi';
         }
     })
@@ -546,106 +758,6 @@ function closeScanner() {
     scannerVideo.classList.add('hidden');
 }
 
-// Search functions
-function searchAnggota(query) {
-    const dropdown = document.getElementById('anggotaDropdown');
-    
-    console.log('🔍 Searching for:', query);
-    
-    dropdown.innerHTML = '<div class="px-4 py-3 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Mencari...</div>';
-    dropdown.classList.remove('hidden');
-    
-    // Sementara gunakan route test untuk debugging
-    const url = `/test-pengembalian-search?query=${encodeURIComponent(query)}`;
-    console.log('🌐 Search URL:', url);
-    
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => {
-        console.log('📡 Response status:', response.status);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('📦 Search response:', data);
-        
-        if (data.success && data.data && data.data.length > 0) {
-            dropdown.innerHTML = '';
-            data.data.forEach((anggota) => {
-                console.log('👤 Processing anggota:', anggota);
-                
-                const item = document.createElement('div');
-                item.className = 'px-4 py-3 hover:bg-green-50 cursor-pointer border-b border-gray-100 transition-colors duration-150 dropdown-item';
-                
-                // Langsung ambil dari structure anggota
-                const jumlahPeminjaman = anggota.jumlah_peminjaman_aktif || 0;
-                const detailPeminjaman = anggota.detail_peminjaman || [];
-                
-                item.innerHTML = `
-                    <div class="font-medium text-gray-900">${anggota.nama_lengkap || 'N/A'}</div>
-                    <div class="text-sm text-gray-600">${anggota.nis || anggota.nomor_anggota || 'N/A'} - ${anggota.kelas || 'N/A'} (${anggota.jenis_anggota || anggota.jurusan || 'N/A'})</div>
-                    <div class="text-xs text-gray-500">Barcode: ${anggota.barcode_anggota || 'Belum ada barcode'}</div>
-                    <div class="text-xs text-blue-600 font-medium mt-1">
-                        <i class="fas fa-book mr-1"></i>${jumlahPeminjaman} peminjaman aktif
-                    </div>
-                    ${detailPeminjaman.length > 0 ? `
-                        <div class="text-xs text-gray-500 mt-1">
-                            <i class="fas fa-info-circle mr-1"></i>Buku: ${detailPeminjaman[0].nomor_peminjaman || 'N/A'}
-                        </div>
-                    ` : ''}
-                `;
-                
-                item.addEventListener('click', () => {
-                    console.log('🎯 Selected anggota:', anggota);
-                    selectAnggota(anggota);
-                    if (detailPeminjaman.length > 0) {
-                        // Convert detail_peminjaman ke format yang diharapkan loadPeminjamanAktif
-                        const formattedPeminjaman = detailPeminjaman.map(detail => ({
-                            id: detail.id,
-                            nomor_peminjaman: detail.nomor_peminjaman,
-                            tanggal_peminjaman: detail.tanggal_peminjaman,
-                            tanggal_harus_kembali: detail.tanggal_harus_kembali,
-                            is_late: false, // Will be calculated server side
-                            days_late: 0,
-                            detail_peminjaman: detail.buku || []
-                        }));
-                        loadPeminjamanAktif(formattedPeminjaman);
-                    } else {
-                        getPeminjamanAktif(anggota.id);
-                    }
-                    dropdown.classList.add('hidden');
-                });
-                dropdown.appendChild(item);
-            });
-        } else {
-            dropdown.innerHTML = `
-                <div class="px-4 py-3 text-center text-gray-500">
-                    <i class="fas fa-search mr-2"></i>Tidak ada anggota dengan peminjaman aktif ditemukan
-                    <div class="text-xs text-gray-400 mt-1">Coba cari dengan nama, NIS, atau nomor anggota yang sedang meminjam buku</div>
-                    <div class="text-xs text-red-400 mt-1">Query: "${query}"</div>
-                </div>
-            `;
-        }
-    })
-    .catch(error => {
-        console.error('❌ Error searching anggota:', error);
-        dropdown.innerHTML = `
-            <div class="px-4 py-3 text-center text-red-500">
-                <i class="fas fa-exclamation-triangle mr-2"></i>Terjadi kesalahan saat mencari
-                <div class="text-xs text-red-400 mt-1">${error.message}</div>
-                <div class="text-xs text-gray-500 mt-1">Coba refresh halaman atau hubungi admin</div>
-            </div>
-        `;
-    });
-}
-
 function selectAnggota(anggota) {
     selectedAnggota = anggota;
     
@@ -653,8 +765,9 @@ function selectAnggota(anggota) {
     document.getElementById('anggotaNomor').textContent = anggota.nomor_anggota;
     document.getElementById('anggotaKelas').textContent = anggota.kelas + ' - ' + anggota.jenis_anggota;
     document.getElementById('anggotaInfo').classList.remove('hidden');
-    document.getElementById('anggota_search').value = anggota.nama_lengkap;
-    document.getElementById('anggotaDropdown').classList.add('hidden');
+    
+    // Set dropdown to selected value
+    document.getElementById('anggota_dropdown').value = anggota.id;
 }
 
 function clearAnggota() {
@@ -664,7 +777,7 @@ function clearAnggota() {
     document.getElementById('anggotaInfo').classList.add('hidden');
     document.getElementById('peminjamanSection').classList.add('hidden');
     document.getElementById('pengembalianForm').classList.add('hidden');
-    document.getElementById('anggota_search').value = '';
+    document.getElementById('anggota_dropdown').value = '';
     document.getElementById('selectedPeminjamanId').value = '';
 }
 
@@ -684,6 +797,13 @@ function getPeminjamanAktif(anggotaId) {
             showNotification(data.message, 'warning');
             document.getElementById('peminjamanSection').classList.remove('hidden');
             document.getElementById('noPeminjaman').classList.remove('hidden');
+            document.getElementById('noPeminjaman').innerHTML = `
+                <div class="text-center py-8">
+                    <i class="fas fa-info-circle text-2xl text-blue-500 mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak Ada Peminjaman Aktif</h3>
+                    <p class="text-gray-600">Anggota ini sedang tidak pinjam buku</p>
+                </div>
+            `;
         }
     })
     .catch(error => {
@@ -725,33 +845,51 @@ function loadPeminjamanAktif(peminjamanData) {
 
 function createPeminjamanItem(peminjaman) {
     const div = document.createElement('div');
-    div.className = `p-4 border text-xs rounded-lg cursor-pointer transition-all duration-200 ${
-        peminjaman.is_late ? 'late-warning border-red-300' : 'border-gray-200 hover:border-green-300'
-    }`;
+    div.className = `p-4 border text-xs rounded-lg transition-all duration-200 ${peminjaman.is_late ? 'late-warning border-red-300' : 'border-gray-200'}`;
     div.setAttribute('data-peminjaman-id', peminjaman.id);
     
     let lateWarning = '';
+    let dendaInfo = '';
     if (peminjaman.is_late) {
+        const dendaAmount = peminjaman.days_late * 1000; // Assuming 1000 per day
         lateWarning = `
             <div class="flex items-center text-red-600 mb-2">
                 <i class="fas fa-exclamation-triangle mr-2"></i>
-                <span class="text-xs font-semibold">Terlambat ${peminjaman.days_late} hari - Denda: Rp ${(peminjaman.days_late * 1000).toLocaleString()}</span>
+                <span class="text-xs font-semibold">Terlambat ${peminjaman.days_late} hari</span>
+            </div>
+        `;
+        dendaInfo = `
+            <div class="bg-red-50 p-3 rounded mb-3 border border-red-200">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-medium text-red-700">Denda Keterlambatan:</span>
+                    <span class="text-sm font-bold text-red-800">Rp ${dendaAmount.toLocaleString()}</span>
+                </div>
             </div>
         `;
     }
     
+    // Add button to process return for this specific peminjaman
+    const kembalikanButton = `
+        <div class="mt-4 flex justify-end">
+            <button type="button" 
+                    onclick="selectAndProcessPeminjaman(${JSON.stringify(peminjaman).replace(/"/g, '&quot;')})"
+                    class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-semibold transition-colors duration-200 flex items-center">
+                <i class="fas fa-undo mr-2"></i>Proses Pengembalian
+            </button>
+        </div>
+    `;
+    
     div.innerHTML = `
         ${lateWarning}
+        ${dendaInfo}
         <div class="flex justify-between items-start mb-3">
             <div>
                 <h6 class="font-semibold text-gray-900">${peminjaman.nomor_peminjaman}</h6>
                 <p class="text-xs text-gray-600">Dipinjam: ${peminjaman.tanggal_peminjaman}</p>
                 <p class="text-xs text-gray-600">Harus kembali: ${peminjaman.tanggal_harus_kembali}</p>
             </div>
-            <span class="px-3 py-1 text-xs font-medium rounded-full ${
-                peminjaman.is_late ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
-            }">
-                ${peminjaman.detail_peminjaman.length} buku
+            <span class="px-3 py-1 text-xs font-medium rounded-full ${peminjaman.is_late ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}">
+                ${peminjaman.jumlah_buku || (peminjaman.detail_peminjaman ? peminjaman.detail_peminjaman.reduce((sum, item) => sum + (item.jumlah || 1), 0) : (peminjaman.buku ? peminjaman.buku.reduce((sum, item) => sum + (item.jumlah || 1), 0) : 0))} buku
             </span>
         </div>
         <div class="space-y-2">
@@ -765,9 +903,8 @@ function createPeminjamanItem(peminjaman) {
                 </div>
             `).join('')}
         </div>
+        ${kembalikanButton}
     `;
-    
-    div.addEventListener('click', () => selectPeminjaman(peminjaman));
     
     return div;
 }
@@ -805,6 +942,17 @@ function selectPeminjaman(peminjaman) {
     showNotification(`Peminjaman ${peminjaman.nomor_peminjaman} dipilih`, 'success');
 }
 
+// Function to be called by the "Proses Pengembalian" button
+function selectAndProcessPeminjaman(peminjaman) {
+    // Select this peminjaman and show the return form
+    selectPeminjaman(peminjaman);
+    
+    // Scroll to the return form
+    document.getElementById('pengembalianForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    
+    showNotification(`Memproses pengembalian untuk ${peminjaman.nomor_peminjaman}`, 'success');
+}
+
 function loadKondisiBuku(detailPeminjaman) {
     const kondisiList = document.getElementById('kondisiBukuList');
     kondisiList.innerHTML = '';
@@ -820,6 +968,7 @@ function loadKondisiBuku(detailPeminjaman) {
             <select name="kondisi_kembali[${detail.id}]" required 
                     class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500">
                 <option value="baik">Baik</option>
+                <option value="sedikit_rusak">Sedikit Rusak</option>
                 <option value="rusak">Rusak</option>
                 <option value="hilang">Hilang</option>
             </select>
@@ -829,12 +978,18 @@ function loadKondisiBuku(detailPeminjaman) {
 }
 
 function showDendaInfo(daysLate) {
-    const dendaAmount = daysLate * 1000;
+    const dendaAmount = daysLate * 1000; // Assuming 1000 per day
     document.getElementById('dendaDetail').innerHTML = `
-        <p><strong>Keterlambatan:</strong> ${daysLate} hari</p>
-        <p><strong>Denda per hari:</strong> Rp 1.000</p>
-        <p><strong>Total denda:</strong> Rp ${dendaAmount.toLocaleString()}</p>
-        <p class="mt-2 text-xs">Denda akan otomatis ditambahkan ke sistem</p>
+        <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+                <p><strong>Keterlambatan:</strong> ${daysLate} hari</p>
+                <p><strong>Denda per hari:</strong> Rp 1.000</p>
+            </div>
+            <div class="text-lg font-bold text-red-600">
+                Total: Rp ${dendaAmount.toLocaleString()}
+            </div>
+        </div>
+        <p class="mt-2 text-xs text-gray-700">Denda akan otomatis ditambahkan ke sistem saat pengembalian diproses</p>
     `;
     document.getElementById('dendaInfo').classList.remove('hidden');
     

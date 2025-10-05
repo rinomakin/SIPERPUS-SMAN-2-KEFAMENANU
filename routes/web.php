@@ -25,6 +25,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PermissionController;
 
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -113,6 +114,8 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH'])->prefix('admin')->group
     Route::get('/peminjaman/search-anggota', [PeminjamanController::class, 'searchAnggota'])->name('peminjaman.search-anggota');
     Route::get('/peminjaman/search-buku', [PeminjamanController::class, 'searchBuku'])->name('peminjaman.search-buku');
     
+
+    
     // CRUD Anggota
     Route::get('/anggota/export', [AnggotaController::class, 'export'])->name('anggota.export');
     Route::get('/anggota/download-template', [AnggotaController::class, 'downloadTemplate'])->name('anggota.download-template');
@@ -192,9 +195,6 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH'])->prefix('admin')->group
     Route::post('/peminjaman/scan-buku', [PeminjamanController::class, 'scanBuku'])->name('peminjaman.scan-buku');
     Route::post('/peminjaman/scan-multiple-buku', [PeminjamanController::class, 'scanMultipleBuku'])->name('peminjaman.scan-multiple-buku');
     
-    // CRUD Pengembalian
-    Route::resource('pengembalian', PengembalianController::class);
-    
     // Route pencarian anggota untuk pengembalian - dengan detail peminjaman
     Route::get('/pengembalian/search-anggota', [PengembalianController::class, 'searchAnggota'])
         ->name('pengembalian.search-anggota');
@@ -204,6 +204,15 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH'])->prefix('admin')->group
     Route::post('/pengembalian/scan-barcode-anggota', [PengembalianController::class, 'scanBarcodeAnggota'])->name('pengembalian.scan-barcode-anggota');
     Route::post('/pengembalian/{id}/update-status-pembayaran-denda', [PengembalianController::class, 'updateStatusPembayaranDenda'])->name('pengembalian.update-status-pembayaran-denda');
     Route::get('/pengembalian/{id}/denda-info', [PengembalianController::class, 'getDendaInfo'])->name('pengembalian.denda-info');
+    
+    // Add a specific route for active borrowings
+    Route::get('/pengembalian/aktif', function () {
+        request()->merge(['view' => 'active']);
+        return app(App\Http\Controllers\PengembalianController::class)->index(request());
+    })->name('pengembalian.aktif');
+    
+    // CRUD Pengembalian - harus diletakkan setelah route custom
+    Route::resource('pengembalian', PengembalianController::class);
 
     // Riwayat Pengembalian
     Route::get('/riwayat-pengembalian', [RiwayatPengembalianController::class, 'index'])->name('riwayat-pengembalian.index');

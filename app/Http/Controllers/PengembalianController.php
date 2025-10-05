@@ -24,38 +24,67 @@ class PengembalianController extends Controller
 
     public function index(Request $request)
     {
-        $query = Pengembalian::with([
-            'anggota.kelas', 
-            'user', 
-            'detailPengembalian.buku.kategoriBuku',
-            'peminjaman.detailPeminjaman.buku'
-        ])
-        ->whereDate('tanggal_pengembalian', today())
-        ->orderBy('created_at', 'desc');
+        // Check if user wants to see active loans to return or completed returns
+        $viewType = $request->get('view', 'returns'); // 'returns' for completed returns, 'active' for active loans to return
         
-        // Add search functionality
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('nomor_pengembalian', 'like', "%{$search}%")
-                  ->orWhereHas('anggota', function($q2) use ($search) {
-                      $q2->where('nama_lengkap', 'like', "%{$search}%")
-                         ->orWhere('nama', 'like', "%{$search}%")
-                         ->orWhere('nomor_anggota', 'like', "%{$search}%")
-                         ->orWhere('nis', 'like', "%{$search}%")
-                         ->orWhere('barcode_anggota', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('detailPengembalian.buku', function($q3) use ($search) {
-                      $q3->where('judul_buku', 'like', "%{$search}%")
-                         ->orWhere('isbn', 'like', "%{$search}%")
-                         ->orWhere('barcode', 'like', "%{$search}%");
-                  });
-            });
-        }
-        
-        $pengembalian = $query->paginate(10);
+        if ($viewType === 'active') {
+            // Show active borrowings that haven't been returned yet
+            $query = Peminjaman::with(['anggota', 'user', 'detailPeminjaman.buku'])
+                ->where('status', 'dipinjam')
+                ->orderBy('tanggal_harus_kembali', 'asc');
             
-        return view('admin.pengembalian.index', compact('pengembalian'));
+            // Add search functionality for active borrowings
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('nomor_peminjaman', 'like', "%{$search}%")
+                      ->orWhereHas('anggota', function($q2) use ($search) {
+                          $q2->where('nama_lengkap', 'like', "%{$search}%")
+                             ->orWhere('nama', 'like', "%{$search}%")
+                             ->orWhere('nomor_anggota', 'like', "%{$search}%")
+                             ->orWhere('nis', 'like', "%{$search}%")
+                             ->orWhere('barcode_anggota', 'like', "%{$search}%");
+                      });
+                });
+            }
+            
+            $peminjaman = $query->paginate(10);
+            return view('admin.pengembalian.index_active', compact('peminjaman'));
+        } else {
+            // Show completed returns for today (original functionality)
+            $query = Pengembalian::with([
+                'anggota.kelas', 
+                'user', 
+                'detailPengembalian.buku.kategoriBuku',
+                'peminjaman.detailPeminjaman.buku'
+            ])
+            ->whereDate('tanggal_pengembalian', today())
+            ->orderBy('created_at', 'desc');
+            
+            // Add search functionality for returns
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('nomor_pengembalian', 'like', "%{$search}%")
+                      ->orWhereHas('anggota', function($q2) use ($search) {
+                          $q2->where('nama_lengkap', 'like', "%{$search}%")
+                             ->orWhere('nama', 'like', "%{$search}%")
+                             ->orWhere('nomor_anggota', 'like', "%{$search}%")
+                             ->orWhere('nis', 'like', "%{$search}%")
+                             ->orWhere('barcode_anggota', 'like', "%{$search}%");
+                      })
+                      ->orWhereHas('detailPengembalian.buku', function($q3) use ($search) {
+                          $q3->where('judul_buku', 'like', "%{$search}%")
+                             ->orWhere('isbn', 'like', "%{$search}%")
+                             ->orWhere('barcode', 'like', "%{$search}%");
+                      });
+                });
+            }
+            
+            $pengembalian = $query->paginate(10);
+                
+            return view('admin.pengembalian.index', compact('pengembalian'));
+        }
     }
 
     public function create()
@@ -90,17 +119,9 @@ class PengembalianController extends Controller
             ]);
 
             $query = $request->get('query', '');
-            
-            if (strlen($query) < 2) {
-                return response()->json([
-                    'success' => false,
-                    'data' => [],
-                    'message' => 'Query terlalu pendek, minimal 2 karakter'
-                ]);
-            }
 
-            // Cari anggota yang memiliki peminjaman aktif dengan eager loading
-            $anggota = Anggota::with([
+            // Build the base query for anggota with active borrowings
+            $anggotaQuery = Anggota::with([
                 'kelas', 
                 'jurusan',
                 'peminjaman' => function($q) {
@@ -111,20 +132,27 @@ class PengembalianController extends Controller
             ->where('status', 'aktif')
             ->whereHas('peminjaman', function($q) {
                 $q->where('status', 'dipinjam');
-            })
-            ->where(function($q) use ($query) {
-                $q->where('nama', 'LIKE', "%{$query}%")
-                  ->orWhere('nama_lengkap', 'LIKE', "%{$query}%")
-                  ->orWhere('nis', 'LIKE', "%{$query}%")
-                  ->orWhere('nomor_anggota', 'LIKE', "%{$query}%")
-                  ->orWhere('barcode_anggota', 'LIKE', "%{$query}%");
-            })
-            ->limit(10)
-            ->get();
+            });
+
+            // Add search filter if query is provided
+            if (strlen($query) >= 2) {
+                $anggotaQuery->where(function($q) use ($query) {
+                    $q->where('nama', 'LIKE', "%{$query}%")
+                      ->orWhere('nama_lengkap', 'LIKE', "%{$query}%")
+                      ->orWhere('nis', 'LIKE', "%{$query}%")
+                      ->orWhere('nomor_anggota', 'LIKE', "%{$query}%")
+                      ->orWhere('barcode_anggota', 'LIKE', "%{$query}%");
+                });
+            }
+
+            // Get results
+            $anggota = $anggotaQuery->limit(50)->get();
 
             $result = $anggota->map(function($anggota) {
-                // Ambil peminjaman aktif dengan detail buku
-                $peminjamanAktif = $anggota->peminjaman->where('status', 'dipinjam');
+                // Filter peminjaman aktif dengan detail buku
+                $peminjamanAktif = $anggota->peminjaman->filter(function($p) {
+                    return $p->status === 'dipinjam';
+                });
                 
                 return [
                     'id' => $anggota->id,
@@ -136,16 +164,18 @@ class PengembalianController extends Controller
                     'jurusan' => $anggota->jurusan ? $anggota->jurusan->nama_jurusan : 'N/A',
                     'jenis_anggota' => $anggota->jenis_anggota ?: 'Siswa',
                     'jumlah_peminjaman_aktif' => $peminjamanAktif->count(),
+                    'memiliki_peminjaman_aktif' => $peminjamanAktif->count() > 0,
                     'detail_peminjaman' => $peminjamanAktif->map(function($peminjaman) {
                         return [
                             'id' => $peminjaman->id,
                             'nomor_peminjaman' => $peminjaman->nomor_peminjaman,
                             'tanggal_peminjaman' => $peminjaman->tanggal_peminjaman,
                             'tanggal_harus_kembali' => $peminjaman->tanggal_harus_kembali,
+                            'jumlah_buku' => $peminjaman->detailPeminjaman->sum('jumlah'),
                             'buku' => $peminjaman->detailPeminjaman->map(function($detail) {
                                 return [
                                     'id' => $detail->id,
-                                    'judul' => $detail->buku ? $detail->buku->judul : 'N/A',
+                                    'judul' => $detail->buku ? $detail->buku->judul_buku : 'N/A',
                                     'pengarang' => $detail->buku ? $detail->buku->pengarang : 'N/A',
                                     'jumlah' => $detail->jumlah ?: 1
                                 ];
@@ -233,7 +263,7 @@ class PengembalianController extends Controller
                             return [
                                 'id' => $detail->id,
                                 'buku_id' => $detail->buku_id,
-                                'judul_buku' => $detail->buku ? $detail->buku->judul : 'N/A',
+                                'judul_buku' => $detail->buku ? $detail->buku->judul_buku : 'N/A',
                                 'pengarang' => $detail->buku ? $detail->buku->pengarang : 'N/A',
                                 'kategori' => $detail->buku && $detail->buku->kategoriBuku ? $detail->buku->kategoriBuku->nama_kategori : 'N/A',
                                 'jumlah' => $detail->jumlah ?? 1,
@@ -271,7 +301,10 @@ class PengembalianController extends Controller
 
             $anggota = Anggota::where('barcode_anggota', $request->barcode)
                               ->where('status', 'aktif')
-                              ->with(['kelas', 'jurusan'])
+                              ->with(['kelas', 'jurusan', 'peminjaman' => function($q) {
+                                  $q->where('status', 'dipinjam')
+                                    ->with(['detailPeminjaman.buku.kategoriBuku']);
+                              }])
                               ->first();
 
             if (!$anggota) {
@@ -281,38 +314,48 @@ class PengembalianController extends Controller
                 ], 404);
             }
 
-            // Get active peminjaman for this anggota
-            $peminjaman = Peminjaman::with(['detailPeminjaman.buku.kategoriBuku', 'anggota'])
-                ->where('anggota_id', $anggota->id)
-                ->where('status', 'dipinjam')
-                ->get()
-                ->map(function($item) {
-                    $today = Carbon::now();
-                    $tanggalKembali = Carbon::parse($item->tanggal_harus_kembali);
-                    $isLate = $today->gt($tanggalKembali);
-                    $daysLate = $isLate ? $today->diffInDays($tanggalKembali) : 0;
-                    
-                    return [
-                        'id' => $item->id,
-                        'nomor_peminjaman' => $item->nomor_peminjaman,
-                        'tanggal_peminjaman' => $item->tanggal_peminjaman->format('d/m/Y'),
-                        'tanggal_harus_kembali' => $item->tanggal_harus_kembali->format('d/m/Y'),
-                        'is_late' => $isLate,
-                        'days_late' => $daysLate,
-                        'catatan' => $item->catatan,
-                        'detail_peminjaman' => $item->detailPeminjaman->map(function($detail) {
-                            return [
-                                'id' => $detail->id,
-                                'buku_id' => $detail->buku_id,
-                                'judul_buku' => $detail->buku->judul_buku,
-                                'penulis' => $detail->buku->pengarang ?? 'N/A',
-                                'kategori' => $detail->buku->kategoriBuku ? $detail->buku->kategoriBuku->nama_kategori : 'N/A',
-                                'jumlah' => $detail->jumlah,
-                                'kondisi_kembali' => $detail->kondisi_kembali
-                            ];
-                        })
-                    ];
-                });
+            // Filter hanya peminjaman aktif
+            $peminjamanAktif = $anggota->peminjaman->filter(function($p) {
+                return $p->status === 'dipinjam';
+            });
+
+            // Jika tidak ada peminjaman aktif
+            if ($peminjamanAktif->count() == 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anggota ditemukan tetapi tidak sedang meminjam buku'
+                ]);
+            }
+
+            // Format data peminjaman aktif
+            $peminjamanFormatted = $peminjamanAktif->map(function($item) {
+                $today = Carbon::now();
+                $tanggalKembali = Carbon::parse($item->tanggal_harus_kembali);
+                $isLate = $today->gt($tanggalKembali);
+                $daysLate = $isLate ? $today->diffInDays($tanggalKembali) : 0;
+                
+                return [
+                    'id' => $item->id,
+                    'nomor_peminjaman' => $item->nomor_peminjaman,
+                    'tanggal_peminjaman' => $item->tanggal_peminjaman->format('d/m/Y'),
+                    'tanggal_harus_kembali' => $item->tanggal_harus_kembali->format('d/m/Y'),
+                    'is_late' => $isLate,
+                    'days_late' => $daysLate,
+                    'jumlah_buku' => $item->detailPeminjaman->sum('jumlah'),
+                    'catatan' => $item->catatan,
+                    'detail_peminjaman' => $item->detailPeminjaman->map(function($detail) {
+                        return [
+                            'id' => $detail->id,
+                            'buku_id' => $detail->buku_id,
+                            'judul_buku' => $detail->buku->judul_buku ?? 'N/A',
+                            'penulis' => $detail->buku->pengarang ?? 'N/A',
+                            'kategori' => $detail->buku->kategoriBuku ? $detail->buku->kategoriBuku->nama_kategori : 'N/A',
+                            'jumlah' => $detail->jumlah,
+                            'kondisi_kembali' => $detail->kondisi_kembali
+                        ];
+                    })
+                ];
+            });
 
             return response()->json([
                 'success' => true,
@@ -325,9 +368,9 @@ class PengembalianController extends Controller
                         'kelas' => $anggota->kelas ? $anggota->kelas->nama_kelas : 'N/A',
                         'jenis_anggota' => $anggota->jenis_anggota
                     ],
-                    'peminjaman' => $peminjaman
+                    'peminjaman' => $peminjamanFormatted
                 ],
-                'message' => $peminjaman->count() > 0 ? 'Peminjaman aktif ditemukan' : 'Tidak ada peminjaman aktif'
+                'message' => 'Peminjaman aktif ditemukan'
             ]);
 
         } catch (\Exception $e) {

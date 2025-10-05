@@ -80,35 +80,39 @@
         <!-- Main Content -->
         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
             <!-- Header Section -->
-            <div class="bg-gradient-to-r flex justify-between items-center from-blue-500 to-indigo-600 px-6 py-4">
+            <div class="bg-gradient-to-r flex flex-col md:flex-row justify-between items-start md:items-center from-blue-500 to-indigo-600 px-6 py-4 gap-4">
                 <div>
                     <h3 class="text-lg font-semibold text-white">Data Pengembalian Hari Ini</h3>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
+                    <div class="flex flex-wrap gap-2">
+                        <a href="{{ route('pengembalian.index', ['view' => 'active']) }}" 
+                           class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-xs">
+                            <i class="fas fa-book-open mr-2"></i>
+                            Peminjaman Aktif
+                        </a>
+                        @if(Auth::user()->hasPermission('riwayat-transaksi.view') || Auth::user()->isAdmin())
+                        <a href="{{ route('riwayat-pengembalian.index') }}" 
+                           class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-xs">
+                            <i class="fas fa-history mr-2 text-xs"></i>Riwayat
+                        </a>
+                        @endif
+                        @if(Auth::user()->hasPermission('pengembalian.create') || Auth::user()->isAdmin())
+                        <a href="{{ route('pengembalian.create') }}" 
+                           class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold text-xs">
+                            <i class="fas fa-plus mr-2"></i>
+                            Tambah
+                        </a>
+                        @endif
+                    </div>
                     <!-- Search Input for Active Loans -->
-                    <div class="relative">
+                    <div class="relative w-full md:w-auto">
                         <input type="text" id="searchInput" placeholder="Cari peminjaman aktif..." 
-                               class="w-64 px-4 py-2 pl-10 text-sm border border-white/20 bg-white/10 text-white placeholder-white/70 rounded-lg focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200">
+                               class="w-full md:w-64 px-4 py-2 pl-10 text-sm border border-white/20 bg-white/10 text-white placeholder-white/70 rounded-lg focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-search text-white/70"></i>
                         </div>
                     </div>
-                    
-                    @if(Auth::user()->hasPermission('riwayat-transaksi.view') || Auth::user()->isAdmin())
-                    <a href="{{ route('riwayat-pengembalian.index') }}" 
-                       class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-xs">
-                        <i class="fas fa-history mr-2 text-xs"></i>Riwayat
-                    </a>
-                    @endif
-                    @if(Auth::user()->hasPermission('pengembalian.create') || Auth::user()->isAdmin())
-                    <a href="{{ route('pengembalian.create') }}" 
-                       class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold text-xs">
-                        <i class="fas fa-plus "></i>
-                        <span>
-                        Tambah
-                        </span>
-                    </a>
-                    @endif
                 </div>
             </div>
             
@@ -249,12 +253,9 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
-    const searchResultsSection = document.getElementById('searchResultsSection');
-    const searchResults = document.getElementById('searchResults');
     let searchTimeout;
-    let currentSearchType = 'loans'; // 'loans' for active loans, 'returns' for completed returns
     
-    // Auto-reload search functionality for active loans
+    // Auto-reload search functionality for returns (today's returns)
     if (searchInput) {
         searchInput.addEventListener('input', function() {
             clearTimeout(searchTimeout);
@@ -262,9 +263,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             searchTimeout = setTimeout(() => {
                 if (searchValue.length >= 2) {
-                    searchActiveLoan(searchValue);
+                    // Search for returns when on return view
+                    searchReturns(searchValue);
                 } else if (searchValue.length === 0) {
-                    hideSearchResults();
                     // If empty, reload page to show all today's returns
                     if (new URLSearchParams(window.location.search).get('search')) {
                         window.location.href = window.location.pathname;
@@ -287,41 +288,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Search for active loans (real-time search)
-    function searchActiveLoan(query) {
-        showLoadingOverlay();
-        currentSearchType = 'loans';
-        
-        fetch(`{{ route('pengembalian.search-anggota') }}?query=${encodeURIComponent(query)}`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        })
-        .then(response => {
-            hideLoadingOverlay();
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                displayActiveLoanResults(data.data, query);
-            } else {
-                showSearchError(data.message || 'Pencarian gagal');
-            }
-        })
-        .catch(error => {
-            hideLoadingOverlay();
-            console.error('Search error:', error);
-            showSearchError('Terjadi kesalahan saat mencari data: ' + error.message);
-        });
-    }
     
-    // Search for completed returns (page reload with search parameter)
+    
+    
+    
+    // Function to search for returns (page reload with search parameter)
     function searchReturns(query) {
         showLoadingOverlay();
         const currentUrl = new URL(window.location.href);
@@ -334,99 +305,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         window.location.href = currentUrl.pathname + '?' + params.toString();
-    }
-    
-    // Display active loan search results
-    function displayActiveLoanResults(data, query) {
-        if (!data || data.length === 0) {
-            searchResults.innerHTML = `
-                <div class="text-center py-8">
-                    <div class="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                        <i class="fas fa-search text-gray-400"></i>
-                    </div>
-                    <p class="text-gray-500 text-sm">Tidak ada peminjaman aktif ditemukan untuk "${query}"</p>
-                    <p class="text-gray-400 text-xs mt-1">Tekan Enter untuk mencari data pengembalian</p>
-                </div>
-            `;
-        } else {
-            searchResults.innerHTML = data.map(anggota => `
-                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-blue-300 transition-colors">
-                    <div class="flex items-center justify-between mb-3">
-                        <div>
-                            <h5 class="font-medium text-gray-900">${anggota.nama_lengkap}</h5>
-                            <div class="flex items-center gap-2 text-xs text-gray-500">
-                                <span>${anggota.nomor_anggota}</span>
-                                <span>•</span>
-                                <span>${anggota.kelas}</span>
-                                <span>•</span>
-                                <span class="font-medium text-blue-600">${anggota.jumlah_peminjaman_aktif} peminjaman aktif</span>
-                            </div>
-                        </div>
-                        <a href="{{ route('pengembalian.create') }}?anggota_id=${anggota.id}" 
-                           class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-medium transition-colors">
-                            <i class="fas fa-plus mr-1"></i>Kembalikan
-                        </a>
-                    </div>
-                    
-                    ${anggota.detail_peminjaman && anggota.detail_peminjaman.length > 0 ? `
-                        <div class="space-y-2">
-                            ${anggota.detail_peminjaman.map(peminjaman => `
-                                <div class="bg-white rounded p-3 border border-gray-100">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-xs font-medium text-blue-600">${peminjaman.nomor_peminjaman}</span>
-                                        <span class="text-xs text-gray-500">${peminjaman.tanggal_harus_kembali}</span>
-                                    </div>
-                                    <div class="space-y-1">
-                                        ${peminjaman.buku && peminjaman.buku.length > 0 ? peminjaman.buku.map(buku => `
-                                            <div class="text-xs text-gray-700">
-                                                <span class="font-medium">${buku.judul}</span>
-                                                ${buku.pengarang ? ` - ${buku.pengarang}` : ''}
-                                                ${buku.jumlah > 1 ? ` (${buku.jumlah} eks)` : ''}
-                                            </div>
-                                        `).join('') : '<div class="text-xs text-gray-500 italic">Detail buku tidak tersedia</div>'}
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : '<div class="text-xs text-gray-500 italic">Detail peminjaman tidak tersedia</div>'}
-                </div>
-            `).join('');
-        }
-        
-        // Add instruction for searching returns
-        const instructionDiv = document.createElement('div');
-        instructionDiv.className = 'text-center py-3 border-t border-gray-200 mt-4';
-        instructionDiv.innerHTML = `
-            <p class="text-xs text-gray-500">
-                <i class="fas fa-info-circle mr-1"></i>
-                Menampilkan peminjaman aktif. Tekan <kbd class="px-1 py-0.5 bg-gray-200 rounded text-xs">Enter</kbd> untuk mencari data pengembalian hari ini.
-            </p>
-        `;
-        searchResults.appendChild(instructionDiv);
-        
-        showSearchResults();
-    }
-    
-    // Show search error
-    function showSearchError(message) {
-        searchResults.innerHTML = `
-            <div class="text-center py-8">
-                <div class="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-3">
-                    <i class="fas fa-exclamation-triangle text-red-500"></i>
-                </div>
-                <p class="text-red-600 text-sm">${message}</p>
-            </div>
-        `;
-        showSearchResults();
-    }
-    
-    // Show/hide search results
-    function showSearchResults() {
-        searchResultsSection.classList.remove('hidden');
-    }
-    
-    function hideSearchResults() {
-        searchResultsSection.classList.add('hidden');
     }
     
     // Show/hide loading overlay
