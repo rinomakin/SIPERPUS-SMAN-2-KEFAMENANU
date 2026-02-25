@@ -3,9 +3,9 @@
 @section('title', 'Detail Kunjungan Tamu')
 
 @section('content')
-<div class="max-w-4xl mx-auto">
+<div class="max-w-12xl mx-auto">
     <!-- Page Header -->
-    <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl shadow-lg p-6 mb-6 text-white">
+    <!-- <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl shadow-lg p-6 mb-6 text-white">
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold">👤 Detail Kunjungan Tamu</h1>
@@ -24,7 +24,7 @@
                 </a>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Main Content -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -131,7 +131,7 @@
     </div>
 
     <!-- Action Buttons -->
-    <div class="flex justify-center space-x-4 mt-6">
+    <!-- <div class="flex justify-center space-x-4 mt-6">
         <a href="{{ route('admin.buku-tamu.index') }}" 
            class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200">
             <i class="fas fa-arrow-left mr-2"></i>
@@ -154,6 +154,6 @@
                 Hapus Data
             </button>
         </form>
-    </div>
+    </div> -->
 </div>
 @endsection

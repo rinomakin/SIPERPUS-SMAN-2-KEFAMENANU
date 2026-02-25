@@ -13,6 +13,7 @@ use App\Models\DetailPengembalian;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Yajra\DataTables\Facades\DataTables;
 
 class PengembalianController extends Controller
 {
@@ -26,13 +27,13 @@ class PengembalianController extends Controller
     {
         // Check if user wants to see active loans to return or completed returns
         $viewType = $request->get('view', 'returns'); // 'returns' for completed returns, 'active' for active loans to return
-        
+
         if ($viewType === 'active') {
             // Show active borrowings that haven't been returned yet
             $query = Peminjaman::with(['anggota', 'user', 'detailPeminjaman.buku'])
                 ->where('status', 'dipinjam')
                 ->orderBy('tanggal_harus_kembali', 'asc');
-            
+
             // Add search functionality for active borrowings
             if ($request->filled('search')) {
                 $search = $request->search;
@@ -40,51 +41,146 @@ class PengembalianController extends Controller
                     $q->where('nomor_peminjaman', 'like', "%{$search}%")
                       ->orWhereHas('anggota', function($q2) use ($search) {
                           $q2->where('nama_lengkap', 'like', "%{$search}%")
-                             ->orWhere('nama', 'like', "%{$search}%")
                              ->orWhere('nomor_anggota', 'like', "%{$search}%")
-                             ->orWhere('nis', 'like', "%{$search}%")
                              ->orWhere('barcode_anggota', 'like', "%{$search}%");
                       });
                 });
             }
-            
+
             $peminjaman = $query->paginate(10);
             return view('admin.pengembalian.index_active', compact('peminjaman'));
-        } else {
-            // Show completed returns for today (original functionality)
-            $query = Pengembalian::with([
-                'anggota.kelas', 
-                'user', 
-                'detailPengembalian.buku.kategoriBuku',
-                'peminjaman.detailPeminjaman.buku'
-            ])
-            ->whereDate('tanggal_pengembalian', today())
-            ->orderBy('created_at', 'desc');
-            
-            // Add search functionality for returns
-            if ($request->filled('search')) {
-                $search = $request->search;
-                $query->where(function($q) use ($search) {
-                    $q->where('nomor_pengembalian', 'like', "%{$search}%")
-                      ->orWhereHas('anggota', function($q2) use ($search) {
-                          $q2->where('nama_lengkap', 'like', "%{$search}%")
-                             ->orWhere('nama', 'like', "%{$search}%")
-                             ->orWhere('nomor_anggota', 'like', "%{$search}%")
-                             ->orWhere('nis', 'like', "%{$search}%")
-                             ->orWhere('barcode_anggota', 'like', "%{$search}%");
-                      })
-                      ->orWhereHas('detailPengembalian.buku', function($q3) use ($search) {
-                          $q3->where('judul_buku', 'like', "%{$search}%")
-                             ->orWhere('isbn', 'like', "%{$search}%")
-                             ->orWhere('barcode', 'like', "%{$search}%");
-                      });
-                });
-            }
-            
-            $pengembalian = $query->paginate(10);
-                
-            return view('admin.pengembalian.index', compact('pengembalian'));
         }
+
+        // Pass summary data directly to the view (no extra AJAX call needed)
+        $summaryData = $this->getTodaySummaryData();
+        return view('admin.pengembalian.index', compact('summaryData'));
+    }
+
+    /**
+     * Dedicated DataTables JSON endpoint — always returns JSON, no AJAX detection needed.
+     */
+    public function getData(Request $request)
+    {
+        $query = Pengembalian::with([
+            'anggota',
+            'user',
+            'detailPengembalian'
+        ]);
+
+        // Default: hanya tampilkan data pengembalian hari ini
+        $query->whereDate('tanggal_pengembalian', Carbon::today());
+
+        // Apply filters from request
+        if ($request->filled('filter_status')) {
+            if ($request->filter_status === 'tepat_waktu') {
+                $query->where('jumlah_hari_terlambat', '<=', 0);
+            } elseif ($request->filter_status === 'terlambat') {
+                $query->where('jumlah_hari_terlambat', '>', 0);
+            }
+        }
+
+        if ($request->filled('filter_status_denda')) {
+            $query->where('status_denda', $request->filter_status_denda);
+        }
+
+        // Pencarian custom (nomor pengembalian atau nama anggota)
+        if ($request->filled('search_keyword')) {
+            $keyword = $request->search_keyword;
+            $query->where(function($q) use ($keyword) {
+                $q->where('nomor_pengembalian', 'like', "%{$keyword}%")
+                  ->orWhereHas('anggota', function($q2) use ($keyword) {
+                      $q2->where('nama_lengkap', 'like', "%{$keyword}%")
+                         ->orWhere('nomor_anggota', 'like', "%{$keyword}%");
+                  });
+            });
+        }
+
+        $summaryData = $this->getTodaySummaryData();
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->addColumn('nomor_badge', function($row) {
+                return '<span class="nomor-badge"><i class="fas fa-hashtag" style="font-size:9px;opacity:.6"></i>' . e($row->nomor_pengembalian) . '</span>';
+            })
+            ->addColumn('anggota_info', function($row) {
+                if ($row->anggota) {
+                    return '<div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">' . strtoupper(substr($row->anggota->nama_lengkap, 0, 1)) . '</div>
+                                <div>
+                                    <div class="text-xs font-semibold text-gray-900">' . e($row->anggota->nama_lengkap) . '</div>
+                                    <div class="text-[11px] text-gray-400">' . e($row->anggota->nomor_anggota) . '</div>
+                                </div>
+                            </div>';
+                }
+                return '<span class="text-gray-300 text-xs">N/A</span>';
+            })
+            ->addColumn('jumlah_badge', function($row) {
+                $count = $row->detailPengembalian ? $row->detailPengembalian->count() : 0;
+                return '<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#ede9fe,#ddd6fe);color:#7c3aed;font-size:12px;font-weight:700;">' . $count . '</span>';
+            })
+            ->addColumn('tanggal_info', function($row) {
+                $html = '<div class="text-xs font-medium text-gray-900">';
+                if ($row->tanggal_pengembalian) {
+                    $html .= '<i class="far fa-calendar-alt mr-1 text-gray-400"></i>' . $row->tanggal_pengembalian->format('d M Y');
+                } else {
+                    $html .= 'N/A';
+                }
+                $html .= '</div>';
+                if ($row->jam_pengembalian) {
+                    $jam = $row->jam_pengembalian instanceof \Carbon\Carbon
+                        ? $row->jam_pengembalian->format('H:i')
+                        : substr((string) $row->jam_pengembalian, 0, 5);
+                    $html .= '<div class="text-[11px] text-gray-400 mt-0.5"><i class="far fa-clock mr-1"></i>' . e($jam) . '</div>';
+                }
+                return $html;
+            })
+            ->addColumn('status_badge', function($row) {
+                if ($row->jumlah_hari_terlambat > 0) {
+                    return '<span class="badge-status badge-terlambat"><span class="badge-dot red"></span>Terlambat ' . $row->jumlah_hari_terlambat . ' hari</span>';
+                }
+                return '<span class="badge-status badge-tepat"><span class="badge-dot green"></span>Tepat Waktu</span>';
+            })
+            ->addColumn('denda_info', function($row) {
+                if ($row->total_denda > 0) {
+                    $isPaid = $row->status_denda === 'sudah_dibayar';
+                    $cardClass = $isPaid ? 'denda-card paid' : 'denda-card has-denda';
+                    $amountClass = $isPaid ? 'denda-amount green' : 'denda-amount red';
+                    $chipClass = $isPaid ? 'denda-status-chip lunas' : 'denda-status-chip belum';
+                    $chipIcon = $isPaid ? 'fa-check-double' : 'fa-clock';
+                    $chipText = $isPaid ? 'Lunas' : 'Belum Bayar';
+
+                    return '<div class="' . $cardClass . '">'
+                         . '<div class="' . $amountClass . '"><i class="fas fa-coins" style="font-size:11px;opacity:.7;margin-right:3px"></i>Rp ' . number_format($row->total_denda, 0, ',', '.') . '</div>'
+                         . '<span class="' . $chipClass . '"><i class="fas ' . $chipIcon . '" style="font-size:8px"></i>' . $chipText . '</span>'
+                         . '</div>';
+                }
+                return '<span class="denda-badge no-denda"><i class="fas fa-check-circle" style="font-size:11px"></i>Tidak ada denda</span>';
+            })
+            ->addColumn('action', function($row) {
+                $actions = '<div class="flex items-center justify-center gap-1.5">';
+
+                if (auth()->user()->hasPermission('pengembalian.show') || auth()->user()->isAdmin()) {
+                    $actions .= '<a href="' . route('pengembalian.show', $row->id) . '" class="action-btn view" title="Detail"><i class="fas fa-eye"></i></a>';
+                }
+
+                if (auth()->user()->hasPermission('pengembalian.edit') || auth()->user()->isAdmin()) {
+                    $actions .= '<a href="' . route('pengembalian.edit', $row->id) . '" class="action-btn edit" title="Edit"><i class="fas fa-edit"></i></a>';
+                }
+
+                if (auth()->user()->hasPermission('pengembalian.delete') || auth()->user()->isAdmin()) {
+                    $actions .= '<button onclick="confirmDelete(' . $row->id . ')" class="action-btn delete" title="Hapus"><i class="fas fa-trash"></i></button>';
+                }
+
+                $actions .= '</div>';
+                return $actions;
+            })
+            ->addColumn('petugas_info', function($row) {
+                $name = e($row->user->name ?? '-');
+                return '<span class="text-xs font-medium text-gray-700">' . $name . '</span>';
+            })
+            ->rawColumns(['nomor_badge', 'anggota_info', 'jumlah_badge', 'tanggal_info', 'status_badge', 'denda_info', 'petugas_info', 'action'])
+            ->with('summary', $summaryData)
+            ->make(true);
     }
 
     public function create()
@@ -137,9 +233,7 @@ class PengembalianController extends Controller
             // Add search filter if query is provided
             if (strlen($query) >= 2) {
                 $anggotaQuery->where(function($q) use ($query) {
-                    $q->where('nama', 'LIKE', "%{$query}%")
-                      ->orWhere('nama_lengkap', 'LIKE', "%{$query}%")
-                      ->orWhere('nis', 'LIKE', "%{$query}%")
+                    $q->where('nama_lengkap', 'LIKE', "%{$query}%")
                       ->orWhere('nomor_anggota', 'LIKE', "%{$query}%")
                       ->orWhere('barcode_anggota', 'LIKE', "%{$query}%");
                 });
@@ -157,8 +251,8 @@ class PengembalianController extends Controller
                 return [
                     'id' => $anggota->id,
                     'nama_lengkap' => $anggota->nama_lengkap ?: $anggota->nama,
-                    'nis' => $anggota->nis,
-                    'nomor_anggota' => $anggota->nomor_anggota ?: $anggota->nis,
+                    'nis' => $anggota->nik ?? 'N/A',
+                    'nomor_anggota' => $anggota->nomor_anggota,
                     'barcode_anggota' => $anggota->barcode_anggota,
                     'kelas' => $anggota->kelas ? $anggota->kelas->nama_kelas : 'N/A',
                     'jurusan' => $anggota->jurusan ? $anggota->jurusan->nama_jurusan : 'N/A',
@@ -166,11 +260,18 @@ class PengembalianController extends Controller
                     'jumlah_peminjaman_aktif' => $peminjamanAktif->count(),
                     'memiliki_peminjaman_aktif' => $peminjamanAktif->count() > 0,
                     'detail_peminjaman' => $peminjamanAktif->map(function($peminjaman) {
+                        $today = Carbon::now();
+                        $tanggalKembali = Carbon::parse($peminjaman->tanggal_harus_kembali);
+                        $isLate = $today->gt($tanggalKembali);
+                        $daysLate = $isLate ? $today->diffInDays($tanggalKembali) : 0;
+
                         return [
                             'id' => $peminjaman->id,
                             'nomor_peminjaman' => $peminjaman->nomor_peminjaman,
                             'tanggal_peminjaman' => $peminjaman->tanggal_peminjaman,
                             'tanggal_harus_kembali' => $peminjaman->tanggal_harus_kembali,
+                            'is_late' => $isLate,
+                            'days_late' => $daysLate,
                             'jumlah_buku' => $peminjaman->detailPeminjaman->sum('jumlah'),
                             'buku' => $peminjaman->detailPeminjaman->map(function($detail) {
                                 return [
@@ -264,8 +365,6 @@ class PengembalianController extends Controller
                                 'id' => $detail->id,
                                 'buku_id' => $detail->buku_id,
                                 'judul_buku' => $detail->buku ? $detail->buku->judul_buku : 'N/A',
-                                'pengarang' => $detail->buku ? $detail->buku->pengarang : 'N/A',
-                                'kategori' => $detail->buku && $detail->buku->kategoriBuku ? $detail->buku->kategoriBuku->nama_kategori : 'N/A',
                                 'jumlah' => $detail->jumlah ?? 1,
                                 'kondisi_kembali' => $detail->kondisi_kembali ?? 'baik'
                             ];
@@ -348,8 +447,6 @@ class PengembalianController extends Controller
                             'id' => $detail->id,
                             'buku_id' => $detail->buku_id,
                             'judul_buku' => $detail->buku->judul_buku ?? 'N/A',
-                            'penulis' => $detail->buku->pengarang ?? 'N/A',
-                            'kategori' => $detail->buku->kategoriBuku ? $detail->buku->kategoriBuku->nama_kategori : 'N/A',
                             'jumlah' => $detail->jumlah,
                             'kondisi_kembali' => $detail->kondisi_kembali
                         ];
@@ -394,6 +491,7 @@ class PengembalianController extends Controller
             'catatan_pengembalian' => 'nullable|string',
             'kondisi_kembali' => 'required|array',
             'kondisi_kembali.*' => 'required|in:baik,sedikit_rusak,rusak,hilang',
+            'selected_detail_ids' => 'nullable|string',
             'status_pembayaran_denda' => 'nullable|in:belum_dibayar,sudah_dibayar',
             'tanggal_pembayaran_denda' => 'nullable|date',
             'catatan_pembayaran_denda' => 'nullable|string',
@@ -405,24 +503,46 @@ class PengembalianController extends Controller
             if ($request->status_pembayaran_denda === 'sudah_dibayar' && !$request->tanggal_pembayaran_denda) {
                 throw new \Exception('Tanggal pembayaran harus diisi jika status sudah dibayar.');
             }
-            
+
             $peminjaman = Peminjaman::with('detailPeminjaman.buku')->findOrFail($request->peminjaman_id);
-            
+
             // Check if already returned
             if ($peminjaman->status === 'dikembalikan') {
                 throw new \Exception('Peminjaman ini sudah dikembalikan sebelumnya.');
             }
+
+            // Determine which detail_peminjaman to process (partial or all)
+            $selectedDetailIds = null;
+            if ($request->filled('selected_detail_ids')) {
+                $selectedDetailIds = json_decode($request->selected_detail_ids, true);
+            }
+
+            // Filter detail peminjaman based on selection
+            $detailsToProcess = $peminjaman->detailPeminjaman;
+            if ($selectedDetailIds && is_array($selectedDetailIds) && count($selectedDetailIds) > 0) {
+                $detailsToProcess = $detailsToProcess->filter(function($detail) use ($selectedDetailIds) {
+                    return in_array($detail->id, $selectedDetailIds);
+                });
+            }
+
+            if ($detailsToProcess->isEmpty()) {
+                throw new \Exception('Tidak ada buku yang dipilih untuk dikembalikan.');
+            }
+
+            // Check if this is a partial return
+            $totalDetailsInPeminjaman = $peminjaman->detailPeminjaman->count();
+            $isPartialReturn = $detailsToProcess->count() < $totalDetailsInPeminjaman;
 
             // Calculate late fee if any
             $tanggalKembali = Carbon::parse($request->tanggal_kembali);
             $tanggalHarusKembali = Carbon::parse($peminjaman->tanggal_harus_kembali);
             $isLate = $tanggalKembali->gt($tanggalHarusKembali);
             $daysLate = $isLate ? $tanggalKembali->diffInDays($tanggalHarusKembali) : 0;
-            
+
             // Calculate total denda
             $dendaPerHari = 1000; // Rp 1000 per hari
             $totalDenda = $daysLate * $dendaPerHari;
-            
+
             // Create pengembalian record
             $pengembalian = Pengembalian::create([
                 'nomor_pengembalian' => Pengembalian::generateNomorPengembalian(),
@@ -434,15 +554,15 @@ class PengembalianController extends Controller
                 'jumlah_hari_terlambat' => $daysLate,
                 'total_denda' => $totalDenda,
                 'status_denda' => $totalDenda > 0 ? 'belum_dibayar' : 'tidak_ada',
-                'catatan' => $request->catatan_pengembalian,
+                'catatan' => $request->catatan_pengembalian . ($isPartialReturn ? ' [Pengembalian sebagian]' : ''),
                 'status' => 'selesai'
             ]);
 
-            // Create detail pengembalian and update book stock
+            // Create detail pengembalian and update book stock (only for selected books)
             $totalDendaBuku = 0;
-            foreach ($peminjaman->detailPeminjaman as $detail) {
+            foreach ($detailsToProcess as $detail) {
                 $kondisi = $request->kondisi_kembali[$detail->id] ?? 'baik';
-                
+
                 // Calculate denda buku berdasarkan kondisi
                 $dendaBuku = 0;
                 switch ($kondisi) {
@@ -457,7 +577,7 @@ class PengembalianController extends Controller
                         break;
                 }
                 $totalDendaBuku += $dendaBuku;
-                
+
                 DetailPengembalian::create([
                     'pengembalian_id' => $pengembalian->id,
                     'buku_id' => $detail->buku_id,
@@ -486,13 +606,21 @@ class PengembalianController extends Controller
                 ]);
             }
 
-            // Update peminjaman status
-            $peminjaman->update([
-                'tanggal_kembali' => $tanggalKembali,
-                'jam_kembali' => $request->jam_kembali ?? now()->format('H:i'),
-                'status' => 'dikembalikan',
-                'catatan' => $peminjaman->catatan . ($request->catatan_pengembalian ? "\n\nCatatan Pengembalian: " . $request->catatan_pengembalian : '')
-            ]);
+            // Update peminjaman status based on partial or full return
+            if ($isPartialReturn) {
+                // Partial return: keep peminjaman as 'dipinjam', just add note
+                $peminjaman->update([
+                    'catatan' => $peminjaman->catatan . ($request->catatan_pengembalian ? "\n\nCatatan Pengembalian Sebagian: " . $request->catatan_pengembalian : '')
+                ]);
+            } else {
+                // Full return: mark peminjaman as 'dikembalikan'
+                $peminjaman->update([
+                    'tanggal_kembali' => $tanggalKembali,
+                    'jam_kembali' => $request->jam_kembali ?? now()->format('H:i'),
+                    'status' => 'dikembalikan',
+                    'catatan' => $peminjaman->catatan . ($request->catatan_pengembalian ? "\n\nCatatan Pengembalian: " . $request->catatan_pengembalian : '')
+                ]);
+            }
 
             // Create denda record if late
             if ($isLate && $totalDenda > 0) {
@@ -506,7 +634,7 @@ class PengembalianController extends Controller
                     'tanggal_pembayaran' => $request->tanggal_pembayaran_denda,
                     'catatan' => $request->catatan_pembayaran_denda ?? "Keterlambatan pengembalian {$daysLate} hari"
                 ]);
-                
+
                 // Update status denda di pengembalian berdasarkan input form
                 $pengembalian->update([
                     'status_denda' => $request->status_pembayaran_denda ?? 'belum_dibayar',
@@ -515,12 +643,16 @@ class PengembalianController extends Controller
             }
 
             DB::commit();
-            
+
             $message = 'Pengembalian berhasil diproses.';
+            if ($isPartialReturn) {
+                $remaining = $totalDetailsInPeminjaman - $detailsToProcess->count();
+                $message = "Pengembalian sebagian berhasil ({$detailsToProcess->count()} buku dikembalikan, {$remaining} buku masih dipinjam).";
+            }
             if ($isLate) {
                 $message .= " Anggota terlambat {$daysLate} hari dan dikenakan denda Rp " . number_format($totalDenda + $totalDendaBuku, 0, ',', '.');
             }
-            
+
             return redirect()->route('pengembalian.index')
                 ->with('success', $message);
 
@@ -528,6 +660,33 @@ class PengembalianController extends Controller
             DB::rollback();
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Get summary data for stat cards (all time)
+     */
+    private function getSummaryData()
+    {
+        return [
+            'total' => Pengembalian::count(),
+            'terlambat' => Pengembalian::where('jumlah_hari_terlambat', '>', 0)->count(),
+            'tepat_waktu' => Pengembalian::where('jumlah_hari_terlambat', '<=', 0)->count(),
+            'total_denda' => Pengembalian::sum('total_denda'),
+        ];
+    }
+
+    /**
+     * Get summary data for today only
+     */
+    private function getTodaySummaryData()
+    {
+        $today = Carbon::today();
+        return [
+            'total' => Pengembalian::whereDate('tanggal_pengembalian', $today)->count(),
+            'terlambat' => Pengembalian::whereDate('tanggal_pengembalian', $today)->where('jumlah_hari_terlambat', '>', 0)->count(),
+            'tepat_waktu' => Pengembalian::whereDate('tanggal_pengembalian', $today)->where('jumlah_hari_terlambat', '<=', 0)->count(),
+            'total_denda' => Pengembalian::whereDate('tanggal_pengembalian', $today)->sum('total_denda'),
+        ];
     }
 
     /**
@@ -563,17 +722,24 @@ class PengembalianController extends Controller
             $pengembalian->save();
 
             // Update atau buat record denda
-            $denda = Denda::where('peminjaman_id', $pengembalian->peminjaman_id)->first();
-            
+            $denda = Denda::where('pengembalian_id', $pengembalian->id)
+                ->orWhere('peminjaman_id', $pengembalian->peminjaman_id)
+                ->first();
+
             if ($denda) {
                 // Update denda yang sudah ada
                 $denda->status_pembayaran = $request->status_pembayaran;
                 $denda->tanggal_pembayaran = $request->tanggal_pembayaran;
+                // Pastikan pengembalian_id terisi
+                if (!$denda->pengembalian_id) {
+                    $denda->pengembalian_id = $pengembalian->id;
+                }
                 $denda->save();
             } else {
                 // Buat denda baru jika belum ada
                 Denda::create([
                     'peminjaman_id' => $pengembalian->peminjaman_id,
+                    'pengembalian_id' => $pengembalian->id,
                     'anggota_id' => $pengembalian->anggota_id,
                     'jumlah_hari_terlambat' => $pengembalian->jumlah_hari_terlambat,
                     'jumlah_denda' => $pengembalian->total_denda,

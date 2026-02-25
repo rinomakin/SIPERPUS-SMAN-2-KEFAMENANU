@@ -1,356 +1,556 @@
 @extends('layouts.admin')
 
-@section('title', 'Data Pengembalian')
-@section('page-title', 'Data Pengembalian')
+@section('title', 'Pengembalian Hari Ini')
+@section('page-title', 'Pengembalian Hari Ini')
+
+@push('styles')
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+    @keyframes pulse-ring {
+        0%   { transform: scale(1); opacity: .8; }
+        100% { transform: scale(1.9); opacity: 0; }
+    }
+    @keyframes pulse-dot {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50%       { transform: scale(1.8); opacity: .4; }
+    }
+    @keyframes pulse-belum {
+        0%, 100% { opacity: 1; }
+        50%       { opacity: .7; }
+    }
+    .anim-up    { animation: fadeInUp .45s ease both; }
+    .anim-up.d1 { animation-delay: .04s; }
+    .anim-up.d2 { animation-delay: .09s; }
+    .anim-up.d3 { animation-delay: .14s; }
+    .anim-up.d4 { animation-delay: .19s; }
+    .anim-up.d5 { animation-delay: .24s; }
+
+    /* ── Stat Cards ───────────────────────────────── */
+    .stat-card {
+        background: white; border-radius: 18px; padding: 20px;
+        border: 1px solid #f1f5f9; transition: all .3s ease;
+        position: relative; overflow: hidden;
+    }
+    .stat-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0;
+        height: 3px; border-radius: 18px 18px 0 0;
+    }
+    .stat-card::after {
+        content: ''; position: absolute; bottom: -20px; right: -20px;
+        width: 80px; height: 80px; border-radius: 50%;
+        opacity: .04;
+    }
+    .stat-card:hover { transform: translateY(-4px); }
+    .stat-card.emerald::before { background: linear-gradient(90deg,#10b981,#34d399); }
+    .stat-card.emerald::after  { background: #10b981; }
+    .stat-card.emerald:hover   { box-shadow: 0 12px 28px -8px rgba(16,185,129,.22); }
+    .stat-card.rose::before    { background: linear-gradient(90deg,#f43f5e,#fb7185); }
+    .stat-card.rose::after     { background: #f43f5e; }
+    .stat-card.rose:hover      { box-shadow: 0 12px 28px -8px rgba(244,63,94,.22); }
+    .stat-card.amber::before   { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+    .stat-card.amber::after    { background: #f59e0b; }
+    .stat-card.amber:hover     { box-shadow: 0 12px 28px -8px rgba(245,158,11,.22); }
+    .stat-card.violet::before  { background: linear-gradient(90deg,#8b5cf6,#a78bfa); }
+    .stat-card.violet::after   { background: #8b5cf6; }
+    .stat-card.violet:hover    { box-shadow: 0 12px 28px -8px rgba(139,92,246,.22); }
+    .stat-icon {
+        width: 46px; height: 46px; border-radius: 13px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px; color: white; flex-shrink: 0;
+    }
+    .stat-icon.emerald { background: linear-gradient(135deg,#10b981,#059669); box-shadow: 0 4px 12px rgba(16,185,129,.3); }
+    .stat-icon.rose    { background: linear-gradient(135deg,#f43f5e,#e11d48); box-shadow: 0 4px 12px rgba(244,63,94,.3); }
+    .stat-icon.amber   { background: linear-gradient(135deg,#f59e0b,#d97706); box-shadow: 0 4px 12px rgba(245,158,11,.3); }
+    .stat-icon.violet  { background: linear-gradient(135deg,#8b5cf6,#7c3aed); box-shadow: 0 4px 12px rgba(139,92,246,.3); }
+
+    /* ── Live indicator ───────────────────────────── */
+    .live-dot {
+        position: relative; display: inline-flex; align-items: center;
+        justify-content: center; width: 10px; height: 10px;
+    }
+    .live-dot::before {
+        content: ''; position: absolute; inset: 0; border-radius: 50%;
+        background: #10b981; animation: pulse-ring 1.4s ease-out infinite;
+    }
+    .live-dot::after {
+        content: ''; width: 8px; height: 8px; border-radius: 50%; background: #10b981;
+    }
+
+    /* ── Filter chips ─────────────────────────────── */
+    .filter-chip {
+        padding: 6px 18px; border-radius: 20px; font-size: 12px; font-weight: 600;
+        cursor: pointer; transition: all .22s ease; border: 1.5px solid #e2e8f0;
+        background: white; color: #64748b; white-space: nowrap;
+    }
+    .filter-chip:hover { border-color: #94a3b8; color: #334155; background: #f8fafc; }
+    .filter-chip.active       { background: linear-gradient(135deg,#64748b,#475569); color: white; border-color: transparent; box-shadow: 0 3px 10px -2px rgba(71,85,105,.35); }
+    .filter-chip.active-green { background: linear-gradient(135deg,#10b981,#059669); color: white; border-color: transparent; box-shadow: 0 3px 10px -2px rgba(16,185,129,.4); }
+    .filter-chip.active-red   { background: linear-gradient(135deg,#f43f5e,#e11d48); color: white; border-color: transparent; box-shadow: 0 3px 10px -2px rgba(244,63,94,.4); }
+
+    /* ── DataTables ───────────────────────────────── */
+    #pengembalian-table_wrapper .dataTables_filter { display: none; }
+    #pengembalian-table_wrapper .dataTables_length select {
+        padding: 6px 28px 6px 12px; border-radius: 8px;
+        border: 1px solid #e2e8f0; font-size: 13px; background: #f8fafc;
+        outline: none; cursor: pointer;
+    }
+    #pengembalian-table_wrapper .dataTables_length,
+    #pengembalian-table_wrapper .dataTables_info { font-size: 13px; color: #64748b; padding: 10px 0; }
+    #pengembalian-table thead th {
+        background: linear-gradient(135deg,#f8fafc 0%,#f1f5f9 100%);
+        font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .06em; color: #64748b; padding: 13px 16px;
+        border-bottom: 2px solid #e2e8f0; white-space: nowrap;
+    }
+    #pengembalian-table tbody td {
+        padding: 13px 16px; font-size: 13px;
+        vertical-align: middle; border-bottom: 1px solid #f1f5f9;
+    }
+    #pengembalian-table tbody tr { transition: background .12s ease; }
+    #pengembalian-table tbody tr:hover { background: #f0fdf4 !important; }
+    #pengembalian-table tbody tr:nth-child(even) { background: #fafafa; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        padding: 6px 13px !important; margin: 0 2px !important;
+        border-radius: 9px !important; border: 1px solid #e2e8f0 !important;
+        font-size: 13px !important; transition: all .2s !important;
+        color: #475569 !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: linear-gradient(135deg,#10b981,#059669) !important;
+        color: white !important; border-color: transparent !important;
+        box-shadow: 0 2px 8px rgba(16,185,129,.35) !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
+        background: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #1e293b !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+        color: #cbd5e1 !important; cursor: default !important;
+    }
+
+    /* ── Action Buttons ───────────────────────────── */
+    .action-btn {
+        width: 32px; height: 32px;
+        display: inline-flex; align-items: center; justify-content: center;
+        border-radius: 9px; font-size: 13px; transition: all .18s ease; color: white;
+    }
+    .action-btn:hover { transform: translateY(-2px); }
+    .action-btn.view   { background: linear-gradient(135deg,#3b82f6,#2563eb); }
+    .action-btn.view:hover  { box-shadow: 0 4px 12px rgba(59,130,246,.45); }
+    .action-btn.edit   { background: linear-gradient(135deg,#f59e0b,#d97706); }
+    .action-btn.edit:hover  { box-shadow: 0 4px 12px rgba(245,158,11,.45); }
+    .action-btn.delete { background: linear-gradient(135deg,#f43f5e,#e11d48); }
+    .action-btn.delete:hover { box-shadow: 0 4px 12px rgba(244,63,94,.45); }
+
+    /* ── Badges ───────────────────────────────────── */
+    .badge-status {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 4px 11px; border-radius: 20px; font-size: 11px;
+        font-weight: 600; border: 1px solid; white-space: nowrap;
+    }
+    .badge-tepat    { background: #ecfdf5; color: #059669; border-color: #a7f3d0; }
+    .badge-terlambat { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .badge-dot.green { background: #10b981; }
+    .badge-dot.red   { background: #ef4444; animation: pulse-dot 2s infinite; }
+
+    .nomor-badge {
+        display: inline-flex; align-items: center; gap: 4px;
+        background: #ecfdf5; color: #059669;
+        padding: 3px 9px; border-radius: 7px; font-size: 11px; font-weight: 600;
+        border: 1px solid #a7f3d0; white-space: nowrap;
+    }
+
+    /* ── Denda ────────────────────────────────────── */
+    .denda-card { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 5px; padding: 7px 11px; border-radius: 11px; min-width: 110px; }
+    .denda-card.has-denda { background: linear-gradient(135deg,#fef2f2,#fff1f2); border: 1px solid #fecdd3; }
+    .denda-card.paid      { background: linear-gradient(135deg,#ecfdf5,#f0fdf4); border: 1px solid #bbf7d0; }
+    .denda-amount { font-size: 13px; font-weight: 700; }
+    .denda-amount.red   { color: #dc2626; }
+    .denda-amount.green { color: #059669; }
+    .denda-status-chip {
+        display: inline-flex; align-items: center; gap: 3px;
+        padding: 2px 7px; border-radius: 20px; font-size: 10px;
+        font-weight: 700; text-transform: uppercase;
+    }
+    .denda-status-chip.lunas { background: #d1fae5; color: #065f46; }
+    .denda-status-chip.belum { background: #fee2e2; color: #991b1b; animation: pulse-belum 2.5s infinite; }
+    .denda-badge.no-denda {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 5px 12px; border-radius: 9px; font-size: 12px; font-weight: 600;
+        background: linear-gradient(135deg,#f0fdf4,#ecfdf5);
+        color: #059669; border: 1px solid #bbf7d0;
+    }
+
+    /* ── Modal ────────────────────────────────────── */
+    .modal-backdrop { backdrop-filter: blur(4px); background: rgba(15,23,42,.42); }
+    .modal-content  { animation: scaleIn .28s ease both; }
+</style>
+@endpush
 
 @section('content')
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<style>
-    .line-clamp-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-</style>
-<div class="min-h-screen bg-gradient-to-br py-8">
-    <div class="px-4 sm:px-6 lg:px-8">
-       
+<div class="space-y-5">
 
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            @php
-                $totalPengembalianHariIni = $pengembalian->count();
-                $totalTerlambatHariIni = $pengembalian->where('jumlah_hari_terlambat', '>', 0)->count();
-                $totalDendaHariIni = $pengembalian->sum('total_denda');
-                $totalBukuDikembalikan = $pengembalian->sum(function($item) {
-                    return $item->detailPengembalian->count();
-                });
-            @endphp
-            
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                <div class="flex items-center">
-                    <div class="w-12 h-12 flex items-center justify-center bg-green-100 rounded-full">
-                        <i class="fas fa-check-circle  text-green-600 text-xs"></i>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Total Dikembalikan</p>
-                        <p class="text-xs font-bold text-gray-900">{{ $totalPengembalianHariIni }}</p>
-                    </div>
-                </div>
+    <!-- Date + Live Banner -->
+    <div class="flex items-center justify-between anim-up d1">
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2.5 px-4 py-2.5 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <i class="fas fa-calendar-day text-emerald-500 text-sm"></i>
+                <span class="text-sm font-semibold text-gray-700">{{ \Carbon\Carbon::today()->translatedFormat('l, d F Y') }}</span>
             </div>
-
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                <div class="flex items-center">
-                    <div class="w-12 h-12 flex items-center justify-center bg-red-100 rounded-full">
-                        <i class="fas fa-clock text-red-600 text-xs"></i>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Terlambat</p>
-                        <p class="text-xs font-bold text-gray-900">{{ $totalTerlambatHariIni }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                <div class="flex items-center">
-                    <div class="w-12 h-12 flex items-center justify-center bg-yellow-100 rounded-full">
-                        <i class="fas fa-money-bill-wave text-yellow-600 text-xs"></i>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Total Denda</p>
-                        <p class="text-xs font-bold text-gray-900">Rp {{ number_format($totalDendaHariIni, 0, ',', '.') }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                <div class="flex items-center">
-                    <div class="w-12 h-12 flex items-center justify-center bg-blue-100 rounded-full">
-                        <i class="fas fa-book text-blue-600 text-xs"></i>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Total Buku</p>
-                        <p class="text-xs font-bold text-gray-900">{{ $totalBukuDikembalikan }}</p>
-                    </div>
-                </div>
+            <div class="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl">
+                <span class="live-dot"></span>
+                <span class="text-xs font-bold text-emerald-700 uppercase tracking-wider">Live</span>
             </div>
         </div>
+    </div>
 
-        <!-- Main Content -->
-        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-            <!-- Header Section -->
-            <div class="bg-gradient-to-r flex flex-col md:flex-row justify-between items-start md:items-center from-blue-500 to-indigo-600 px-6 py-4 gap-4">
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="stat-card emerald anim-up d1">
+            <div class="flex items-start justify-between">
                 <div>
-                    <h3 class="text-lg font-semibold text-white">Data Pengembalian Hari Ini</h3>
+                    <p class="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Pengembalian</p>
+                    <p class="text-2xl font-bold text-gray-900 leading-none" id="stat-total">
+                        <span class="inline-block w-5 h-5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
+                    </p>
+                    <p class="text-[11px] text-emerald-600 font-medium mt-1.5">Hari ini</p>
                 </div>
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
+                <div class="stat-icon emerald"><i class="fas fa-undo-alt"></i></div>
+            </div>
+        </div>
+        <div class="stat-card rose anim-up d2">
+            <div class="flex items-start justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Terlambat</p>
+                    <p class="text-2xl font-bold text-gray-900 leading-none" id="stat-terlambat">
+                        <span class="inline-block w-5 h-5 border-2 border-rose-400 border-t-transparent rounded-full animate-spin"></span>
+                    </p>
+                    <p class="text-[11px] text-rose-500 font-medium mt-1.5">Hari ini</p>
+                </div>
+                <div class="stat-icon rose"><i class="fas fa-exclamation-triangle"></i></div>
+            </div>
+        </div>
+        <div class="stat-card amber anim-up d3">
+            <div class="flex items-start justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Total Denda</p>
+                    <p class="text-lg font-bold text-gray-900 leading-none" id="stat-denda">
+                        <span class="inline-block w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></span>
+                    </p>
+                    <p class="text-[11px] text-amber-600 font-medium mt-1.5">Hari ini</p>
+                </div>
+                <div class="stat-icon amber"><i class="fas fa-coins"></i></div>
+            </div>
+        </div>
+        <div class="stat-card violet anim-up d4">
+            <div class="flex items-start justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Tepat Waktu</p>
+                    <p class="text-2xl font-bold text-gray-900 leading-none" id="stat-tepat">
+                        <span class="inline-block w-5 h-5 border-2 border-violet-400 border-t-transparent rounded-full animate-spin"></span>
+                    </p>
+                    <p class="text-[11px] text-violet-500 font-medium mt-1.5">Hari ini</p>
+                </div>
+                <div class="stat-icon violet"><i class="fas fa-check-circle"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Table Card -->
+    <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden anim-up d5">
+
+        <!-- Gradient Header -->
+        <div class="bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-5">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-undo-alt text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white">Pengembalian Hari Ini</h3>
+                        <p class="text-emerald-100 text-xs mt-0.5">Data real-time pengembalian buku</p>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full lg:w-auto">
+                    <!-- Search -->
+                    <div class="relative w-full sm:w-auto">
+                        <input type="text" id="searchInput" placeholder="Cari nama, nomor pengembalian..."
+                               class="w-full sm:w-72 px-4 py-2.5 pl-10 text-sm bg-white/15 backdrop-blur-sm text-white placeholder-emerald-200 rounded-xl border border-white/20 focus:bg-white/25 focus:ring-2 focus:ring-white/30 focus:outline-none transition-all">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-emerald-200 text-sm"></i>
+                        </div>
+                    </div>
+                    <!-- Action Buttons -->
                     <div class="flex flex-wrap gap-2">
-                        <a href="{{ route('pengembalian.index', ['view' => 'active']) }}" 
-                           class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-xs">
-                            <i class="fas fa-book-open mr-2"></i>
-                            Peminjaman Aktif
-                        </a>
+                        <button onclick="openFilterModal()"
+                                class="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white px-3.5 py-2.5 rounded-xl font-semibold text-xs border border-white/25 transition-all">
+                            <i class="fas fa-sliders-h"></i><span>Filter</span>
+                        </button>
                         @if(Auth::user()->hasPermission('riwayat-transaksi.view') || Auth::user()->isAdmin())
-                        <a href="{{ route('riwayat-pengembalian.index') }}" 
-                           class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-xs">
-                            <i class="fas fa-history mr-2 text-xs"></i>Riwayat
+                        <a href="{{ route('riwayat-pengembalian.index') }}"
+                           class="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white px-3.5 py-2.5 rounded-xl font-semibold text-xs border border-white/25 transition-all">
+                            <i class="fas fa-history"></i><span>Riwayat</span>
                         </a>
                         @endif
                         @if(Auth::user()->hasPermission('pengembalian.create') || Auth::user()->isAdmin())
-                        <a href="{{ route('pengembalian.create') }}" 
-                           class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold text-xs">
-                            <i class="fas fa-plus mr-2"></i>
-                            Tambah
+                        <a href="{{ route('pengembalian.create') }}"
+                           class="flex items-center gap-1.5 bg-white hover:bg-emerald-50 text-emerald-700 px-3.5 py-2.5 rounded-xl font-semibold text-xs transition-all shadow-md">
+                            <i class="fas fa-plus"></i><span>Tambah</span>
                         </a>
                         @endif
                     </div>
-                    <!-- Search Input for Active Loans -->
-                    <div class="relative w-full md:w-auto">
-                        <input type="text" id="searchInput" placeholder="Cari peminjaman aktif..." 
-                               class="w-full md:w-64 px-4 py-2 pl-10 text-sm border border-white/20 bg-white/10 text-white placeholder-white/70 rounded-lg focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-search text-white/70"></i>
-                        </div>
-                    </div>
                 </div>
             </div>
-            
-            <!-- Search Results Section for Active Loans -->
-            <div id="searchResultsSection" class="hidden border-b border-gray-200">
-                <div class="p-6">
-                    <h4 class="text-sm font-medium text-gray-900 mb-4">Hasil Pencarian Peminjaman Aktif</h4>
-                    <div id="searchResults" class="space-y-3">
-                        <!-- Search results will be populated here -->
-                    </div>
-                </div>
-            </div>
-             
-            
-            <div class="p-6">
-                @if($pengembalian->count() > 0)
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No. Pengembalian</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Anggota</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah Buku</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Kembali</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Denda</th>
-                                    @if(Auth::user()->hasPermission('pengembalian.show') || Auth::user()->isAdmin() || Auth::user()->hasPermission('pengembalian.edit') || Auth::user()->isAdmin() || Auth::user()->hasPermission('pengembalian.delete') || Auth::user()->isAdmin())
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                                    @endif
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($pengembalian as $index => $item)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                                            {{ $item->nomor_pengembalian }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-xs font-medium text-gray-900">{{ $item->anggota->nama_lengkap }}</div>
-                                        <div class="text-xs text-gray-500">{{ $item->anggota->nomor_anggota }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                                            {{ $item->detailPengembalian->count() }} Buku
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-xs text-gray-900">{{ $item->tanggal_pengembalian ? $item->tanggal_pengembalian->format('d/m/Y') : 'N/A' }}</div>
-                                        <div class="text-xs text-gray-500">{{ $item->jam_pengembalian ?? 'N/A' }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($item->jumlah_hari_terlambat > 0)
-                                            <span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">Terlambat {{ $item->jumlah_hari_terlambat }} hari</span>
-                                        @else
-                                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Tepat Waktu</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($item->total_denda > 0)
-                                            <span class="text-red-600 font-medium">Rp {{ number_format($item->total_denda, 0, ',', '.') }}</span>
-                                        @else
-                                            <span class="text-green-600 font-medium">Rp 0</span>
-                                        @endif
-                                    </td>
-                                    @if(Auth::user()->hasPermission('pengembalian.show') || Auth::user()->isAdmin() || Auth::user()->hasPermission('pengembalian.edit') || Auth::user()->isAdmin() || Auth::user()->hasPermission('pengembalian.delete') || Auth::user()->isAdmin())
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex space-x-2">
-                                            @if(Auth::user()->hasPermission('pengembalian.show') || Auth::user()->isAdmin())
-                                            <a href="{{ route('pengembalian.show', $item->id) }}" 
-                                               class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs">
-                                                <i class="fas fa-eye mr-1"></i>Detail
-                                            </a>
-                                            @endif
-                                            @if(Auth::user()->hasPermission('pengembalian.edit') || Auth::user()->isAdmin())
-                                            <a href="{{ route('pengembalian.edit', $item->id) }}" 
-                                               class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs">
-                                                <i class="fas fa-edit mr-1"></i>Edit
-                                            </a>
-                                            @endif
-                                            @if(Auth::user()->hasPermission('pengembalian.delete') || Auth::user()->isAdmin())
-                                            <button type="button" onclick="confirmDelete({{ $item->id }})" 
-                                                    class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs">
-                                                <i class="fas fa-trash mr-1"></i>Hapus
-                                            </button>
-                                            @endif
-                                        </div>
-                                    </td>
-                                    @endif
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Pagination -->
-                    @if($pengembalian->hasPages())
-                    <div class="mt-6 flex items-center justify-between">
-                        <div class="text-sm text-gray-700">
-                            Menampilkan {{ $pengembalian->firstItem() ?? 0 }} - {{ $pengembalian->lastItem() ?? 0 }} dari {{ $pengembalian->total() }} pengembalian
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            {{ $pengembalian->appends(request()->query())->links() }}
-                        </div>
-                    </div>
-                    @endif
-                @else
-                    <div class="text-center py-12">
-                        <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                            <i class="fas fa-undo-alt text-xl text-gray-400"></i>
-                        </div>
-                        @if(request('search'))
-                            <h3 class="text-xs font-medium text-gray-900 mb-2">Tidak ada data pengembalian ditemukan</h3>
-                            <p class="text-gray-600 text-xs mb-4">Tidak ada pengembalian yang sesuai dengan pencarian "{{ request('search') }}".</p>
-                            <a href="{{ route('pengembalian.index') }}" class="text-blue-600 hover:text-blue-700 text-xs font-medium">
-                                <i class="fas fa-arrow-left mr-1"></i>Kembali ke semua data
-                            </a>
-                        @else
-                            <h3 class="text-xs font-medium text-gray-900 mb-2">Tidak ada data pengembalian hari ini</h3>
-                            <p class="text-gray-600 text-xs">Belum ada buku yang dikembalikan hari ini.</p>
-                        @endif
-                    </div>
-                @endif
+        </div>
+
+        <!-- Quick Filter Bar -->
+        <div class="px-6 py-3 bg-gray-50/60 border-b border-gray-100 flex items-center gap-2 overflow-x-auto">
+            <span class="text-[11px] text-gray-400 font-semibold uppercase tracking-wider mr-1 whitespace-nowrap">Filter:</span>
+            <button class="filter-chip active" onclick="setQuickFilter('all', this)" data-filter="all">
+                <i class="fas fa-layer-group mr-1 text-[10px]"></i>Semua
+            </button>
+            <button class="filter-chip" onclick="setQuickFilter('tepat_waktu', this)" data-filter="tepat_waktu">
+                <i class="fas fa-check-circle mr-1 text-[10px]"></i>Tepat Waktu
+            </button>
+            <button class="filter-chip" onclick="setQuickFilter('terlambat', this)" data-filter="terlambat">
+                <i class="fas fa-exclamation-circle mr-1 text-[10px]"></i>Terlambat
+            </button>
+        </div>
+
+        <!-- Table -->
+        <div class="p-6">
+            <div class="overflow-x-auto">
+                <table id="pengembalian-table" class="min-w-full" style="min-width:860px;">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width:48px;">No</th>
+                            <th class="text-left">No. Pengembalian</th>
+                            <th class="text-left">Anggota</th>
+                            <th class="text-center">Buku</th>
+                            <th class="text-left">Tanggal Kembali</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-right">Denda</th>
+                            <th class="text-left">Petugas</th>
+                            @if(Auth::user()->hasPermission('pengembalian.show') || Auth::user()->isAdmin() || Auth::user()->hasPermission('pengembalian.edit') || Auth::user()->isAdmin() || Auth::user()->hasPermission('pengembalian.delete') || Auth::user()->isAdmin())
+                            <th class="text-center" style="width:108px;">Aksi</th>
+                            @endif
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Loading Overlay -->
-<div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg p-6 flex items-center space-x-3">
-        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-        <span class="text-gray-700">Memproses...</span>
+<!-- Filter Modal -->
+<div id="filterModal" class="fixed inset-0 z-50 hidden">
+    <div class="modal-backdrop absolute inset-0" onclick="closeFilterModal()"></div>
+    <div class="flex items-center justify-center min-h-screen p-4 relative z-10">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+            <div class="bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-sliders-h text-white"></i>
+                        </div>
+                        <h3 class="text-base font-bold text-white">Filter Pengembalian</h3>
+                    </div>
+                    <button onclick="closeFilterModal()" class="w-8 h-8 bg-white/15 hover:bg-white/25 rounded-lg flex items-center justify-center text-white transition-all">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <form id="filterForm" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                        <i class="fas fa-flag mr-1 text-emerald-500"></i>Status Pengembalian
+                    </label>
+                    <select id="filter_status" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all">
+                        <option value="">Semua Status</option>
+                        <option value="tepat_waktu">Tepat Waktu</option>
+                        <option value="terlambat">Terlambat</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                        <i class="fas fa-coins mr-1 text-amber-500"></i>Status Denda
+                    </label>
+                    <select id="filter_status_denda" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all">
+                        <option value="">Semua Status Denda</option>
+                        <option value="tidak_ada">Tidak Ada Denda</option>
+                        <option value="belum_dibayar">Belum Dibayar</option>
+                        <option value="sudah_dibayar">Sudah Dibayar</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                    <i class="fas fa-info-circle text-emerald-500 text-sm flex-shrink-0"></i>
+                    <p class="text-xs text-emerald-700">Halaman ini hanya menampilkan data pengembalian <strong>hari ini</strong>. Lihat <strong>Riwayat</strong> untuk data lengkap.</p>
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+                    <button type="button" onclick="resetFilters()" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold transition-all">
+                        <i class="fas fa-undo mr-1.5"></i>Reset
+                    </button>
+                    <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl text-sm font-semibold shadow-md transition-all">
+                        <i class="fas fa-check mr-1.5"></i>Terapkan
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('searchInput');
-    let searchTimeout;
-    
-    // Auto-reload search functionality for returns (today's returns)
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            const searchValue = this.value.trim();
-            
-            searchTimeout = setTimeout(() => {
-                if (searchValue.length >= 2) {
-                    // Search for returns when on return view
-                    searchReturns(searchValue);
-                } else if (searchValue.length === 0) {
-                    // If empty, reload page to show all today's returns
-                    if (new URLSearchParams(window.location.search).get('search')) {
-                        window.location.href = window.location.pathname;
-                    }
-                } else {
-                    hideSearchResults();
-                }
-            }, 500); // 500ms debounce
-        });
-        
-        // Handle Enter key to search returns
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const searchValue = this.value.trim();
-                if (searchValue.length >= 2) {
-                    searchReturns(searchValue);
-                }
+let pengembalianTable;
+let currentQuickFilter = 'all';
+
+updateSummaryCards(@json($summaryData));
+
+$(document).ready(function () {
+    const hasAction = {{ (Auth::user()->hasPermission('pengembalian.show') || Auth::user()->isAdmin() || Auth::user()->hasPermission('pengembalian.edit') || Auth::user()->isAdmin() || Auth::user()->hasPermission('pengembalian.delete') || Auth::user()->isAdmin()) ? 'true' : 'false' }};
+
+    let columns = [
+        { data: 'DT_RowIndex',  name: 'DT_RowIndex',  orderable: false, searchable: false, className: 'text-center' },
+        { data: 'nomor_badge',  name: 'nomor_pengembalian', orderable: false, searchable: false },
+        { data: 'anggota_info', name: 'anggota_id',   orderable: false, searchable: false },
+        { data: 'jumlah_badge', name: 'jumlah_badge', orderable: false, searchable: false, className: 'text-center' },
+        { data: 'tanggal_info', name: 'tanggal_pengembalian', orderable: false, searchable: false },
+        { data: 'status_badge', name: 'status',       orderable: false, searchable: false, className: 'text-center' },
+        { data: 'denda_info',   name: 'total_denda',  orderable: false, searchable: false, className: 'text-right' },
+        { data: 'petugas_info', name: 'user_id',      orderable: false, searchable: false },
+    ];
+    if (hasAction) {
+        columns.push({ data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-center' });
+    }
+
+    pengembalianTable = $('#pengembalian-table').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url : '{{ route("pengembalian.data") }}',
+            type: 'GET',
+            data: function (d) {
+                d.filter_status       = currentQuickFilter !== 'all' ? currentQuickFilter : ($('#filter_status').val() || '');
+                d.filter_status_denda = $('#filter_status_denda').val();
+                d.search_keyword      = $('#searchInput').val() || '';
+            },
+            dataSrc: function (json) {
+                if (json && json.summary) updateSummaryCards(json.summary);
+                return json.data || [];
+            },
+            error: function (xhr) {
+                console.error('DataTables error', xhr.status, xhr.responseText?.substring(0, 300));
             }
-        });
-    }
-    
-    
-    
-    
-    
-    // Function to search for returns (page reload with search parameter)
-    function searchReturns(query) {
-        showLoadingOverlay();
-        const currentUrl = new URL(window.location.href);
-        const params = new URLSearchParams(currentUrl.search);
-        
-        if (query.trim()) {
-            params.set('search', query);
-        } else {
-            params.delete('search');
+        },
+        columns: columns,
+        language: {
+            processing  : '<div class="flex items-center justify-center py-8"><div class="animate-spin rounded-full h-8 w-8 border-[3px] border-emerald-200 border-t-emerald-500 mr-3"></div><span class="text-gray-500 text-sm">Memuat data...</span></div>',
+            lengthMenu  : 'Tampilkan _MENU_ data',
+            zeroRecords : '<div class="text-center py-14"><div class="mx-auto w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mb-4"><i class="fas fa-undo-alt text-2xl text-emerald-300"></i></div><p class="text-sm font-semibold text-gray-700 mb-1">Belum ada pengembalian hari ini</p><p class="text-xs text-gray-400">Coba ubah filter atau cari data lain</p></div>',
+            info        : 'Menampilkan _START_–_END_ dari _TOTAL_ data',
+            infoEmpty   : 'Tidak ada data',
+            infoFiltered: '(filter dari _MAX_ total)',
+            paginate: { first: '«', last: '»', next: '›', previous: '‹' },
+        },
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+        order: [],
+        drawCallback: function () {
+            $('#pengembalian-table tbody tr').each(function (i) {
+                $(this).css({ animation: 'fadeInUp .3s ease both', animationDelay: (i * 0.025) + 's' });
+            });
         }
-        
-        window.location.href = currentUrl.pathname + '?' + params.toString();
-    }
-    
-    // Show/hide loading overlay
-    function showLoadingOverlay() {
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) {
-            overlay.classList.remove('hidden');
-        }
-    }
-    
-    function hideLoadingOverlay() {
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) {
-            overlay.classList.add('hidden');
-        }
-    }
-    
-    // Initialize search if there's a search parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const searchParam = urlParams.get('search');
-    if (searchParam && searchInput) {
-        searchInput.value = searchParam;
-    }
+    });
+
+    let searchTimeout;
+    $('#searchInput').on('input', function () {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => pengembalianTable.draw(), 380);
+    });
 });
 
-function confirmDelete(pengembalianId) {
-    if (confirm('Apakah Anda yakin ingin menghapus data pengembalian ini?')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/admin/pengembalian/${pengembalianId}`;
-        
-        const csrfToken = document.createElement('input');
-        csrfToken.type = 'hidden';
-        csrfToken.name = '_token';
-        csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        
-        const methodField = document.createElement('input');
-        methodField.type = 'hidden';
-        methodField.name = '_method';
-        methodField.value = 'DELETE';
-        
-        form.appendChild(csrfToken);
-        form.appendChild(methodField);
-        document.body.appendChild(form);
-        form.submit();
+function updateSummaryCards(s) {
+    animateCount('stat-total',    s.total    || 0);
+    animateCount('stat-terlambat',s.terlambat|| 0);
+    animateCount('stat-tepat',    s.tepat_waktu || 0);
+    const el = document.getElementById('stat-denda');
+    if (el) el.innerHTML = 'Rp&nbsp;' + new Intl.NumberFormat('id-ID').format(s.total_denda || 0);
+}
+
+function animateCount(id, target) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const dur = 550, start = performance.now();
+    (function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        const e = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(target * e).toLocaleString('id-ID');
+        if (p < 1) requestAnimationFrame(tick);
+    })(start);
+}
+
+function setQuickFilter(filter, btn) {
+    currentQuickFilter = filter;
+    document.querySelectorAll('.filter-chip').forEach(c => c.className = 'filter-chip');
+    btn.classList.add(filter === 'all' ? 'active' : filter === 'tepat_waktu' ? 'active-green' : 'active-red');
+    $('#filter_status').val('');
+    pengembalianTable.draw();
+}
+
+function openFilterModal()  { document.getElementById('filterModal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+function closeFilterModal() { document.getElementById('filterModal').classList.add('hidden'); document.body.style.overflow = ''; }
+
+function resetFilters() {
+    $('#filter_status, #filter_status_denda').val('');
+    currentQuickFilter = 'all';
+    document.querySelectorAll('.filter-chip').forEach(c => c.className = 'filter-chip');
+    document.querySelector('[data-filter="all"]').classList.add('active');
+    pengembalianTable.draw();
+    closeFilterModal();
+}
+
+document.getElementById('filterForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    currentQuickFilter = 'all';
+    document.querySelectorAll('.filter-chip').forEach(c => c.className = 'filter-chip');
+    document.querySelector('[data-filter="all"]').classList.add('active');
+    pengembalianTable.draw();
+    closeFilterModal();
+});
+
+function confirmDelete(id) {
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'Hapus Pengembalian?', text: 'Data tidak dapat dikembalikan.',
+            icon: 'warning', showCancelButton: true,
+            confirmButtonColor: '#ef4444', cancelButtonColor: '#6b7280',
+            confirmButtonText: '<i class="fas fa-trash mr-1"></i>Ya, Hapus',
+            cancelButtonText: 'Batal', reverseButtons: true
+        }).then(r => { if (r.isConfirmed) doDelete(id); });
+    } else {
+        if (confirm('Hapus data pengembalian ini?')) doDelete(id);
     }
 }
+
+function doDelete(id) {
+    const f = document.createElement('form');
+    f.method = 'POST'; f.action = `/admin/pengembalian/${id}`;
+    f.innerHTML = `<input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
+                   <input type="hidden" name="_method" value="DELETE">`;
+    document.body.appendChild(f); f.submit();
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFilterModal(); });
 </script>
 @endsection

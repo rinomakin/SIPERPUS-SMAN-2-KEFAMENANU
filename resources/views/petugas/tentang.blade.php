@@ -1,4 +1,6 @@
-@extends('layouts.petugas')
+@extends('layouts.admin')
+
+@section('page-title', 'Tentang')
 
 @section('content')
 <div class="space-y-8 animate-stagger">

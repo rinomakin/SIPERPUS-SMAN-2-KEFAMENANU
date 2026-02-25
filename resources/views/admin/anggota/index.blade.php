@@ -12,350 +12,411 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
-</style>
-<div class="space-y-6">
 
-    <!-- Header Section with Actions -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <!-- Left side - Import/Export and Bulk Actions -->
-            <div class="flex items-center gap-3">
-                <!-- Import/Export Buttons -->
-                <div class="flex items-center gap-2">
-                    @if(Auth::user()->hasPermission('anggota.export') || Auth::user()->isAdmin())
-                    <a href="{{ route('anggota.export', request()->query()) }}" 
-                       class="inline-flex items-center px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
-                        <i class="fas fa-file-excel mr-2"></i>
-                        Export
+    /* Stat card animations */
+    .stat-card {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: slideUp 0.5s ease forwards;
+    }
+    .stat-card:nth-child(1) { animation-delay: 0.05s; }
+    .stat-card:nth-child(2) { animation-delay: 0.1s; }
+    .stat-card:nth-child(3) { animation-delay: 0.15s; }
+    .stat-card:nth-child(4) { animation-delay: 0.2s; }
+
+    @keyframes slideUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Glass card */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+
+    /* Custom DataTables styling */
+    #anggota-table_wrapper .dataTables_length,
+    #anggota-table_wrapper .dataTables_info,
+    #anggota-table_wrapper .dataTables_paginate {
+        padding: 12px 16px;
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+    #anggota-table_wrapper .dataTables_filter {
+        display: none;
+    }
+    #anggota-table_wrapper .dataTables_length select {
+        padding: 6px 32px 6px 12px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        background-color: #f9fafb;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    #anggota-table_wrapper .dataTables_length select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        outline: none;
+    }
+    #anggota-table thead th {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    #anggota-table tbody tr {
+        transition: all 0.15s ease;
+    }
+    #anggota-table tbody tr:hover {
+        background-color: #f0f9ff !important;
+    }
+    #anggota-table tbody tr.selected-row {
+        background-color: #eff6ff !important;
+        border-left: 3px solid #3b82f6;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        padding: 6px 12px !important;
+        margin: 0 2px !important;
+        border-radius: 8px !important;
+        border: 1px solid #e5e7eb !important;
+        font-size: 0.8rem !important;
+        transition: all 0.2s !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: 0 2px 8px rgba(59,130,246,0.3) !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
+        background: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+        color: #1e293b !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+        opacity: 0.4 !important;
+        cursor: not-allowed !important;
+    }
+
+    /* Action button styles */
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        transition: all 0.2s;
+        font-size: 0.8rem;
+    }
+    .action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .action-btn-view { background: #eff6ff; color: #3b82f6; }
+    .action-btn-view:hover { background: #3b82f6; color: white; }
+    .action-btn-edit { background: #fefce8; color: #ca8a04; }
+    .action-btn-edit:hover { background: #ca8a04; color: white; }
+    .action-btn-print { background: #f0fdf4; color: #16a34a; }
+    .action-btn-print:hover { background: #16a34a; color: white; }
+    .action-btn-delete { background: #fef2f2; color: #ef4444; }
+    .action-btn-delete:hover { background: #ef4444; color: white; }
+
+    /* Avatar styles */
+    .avatar-container {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    .avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .avatar-initial {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    /* Toolbar button */
+    .toolbar-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 14px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        border-radius: 10px;
+        transition: all 0.2s;
+        gap: 6px;
+        white-space: nowrap;
+    }
+    .toolbar-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* Bulk action bar */
+    .bulk-bar {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+    }
+    .bulk-bar.active {
+        max-height: 60px;
+        opacity: 1;
+    }
+
+    /* Filter chip */
+    .filter-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        border-radius: 9999px;
+        background: #eff6ff;
+        color: #3b82f6;
+        gap: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .filter-chip:hover {
+        background: #dbeafe;
+    }
+    .filter-chip .remove {
+        width: 14px;
+        height: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(59,130,246,0.2);
+        font-size: 0.6rem;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+        .toolbar-btn span.btn-text {
+            display: none;
+        }
+        .toolbar-btn {
+            padding: 8px 10px;
+        }
+        #searchInput {
+            width: 100% !important;
+        }
+    }
+</style>
+
+<div class="space-y-5">
+    <!-- Header Toolbar -->
+    <div class="glass-card rounded-2xl shadow-sm border border-gray-100 p-4">
+        <div class="flex flex-col gap-3">
+            <!-- Top row: Actions & Search -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <!-- Left: Action buttons -->
+                <div class="flex items-center flex-wrap gap-2">
+                    @if(Auth::user()->hasPermission('anggota.create') || Auth::user()->isAdmin())
+                    <a href="{{ route('anggota.create') }}" class="toolbar-btn bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md">
+                        <i class="fas fa-plus"></i>
+                        <span class="btn-text">Tambah Anggota</span>
                     </a>
                     @endif
-                    
-                    @if(Auth::user()->hasPermission('anggota.import') || Auth::user()->isAdmin())
-                    <a href="{{ route('anggota.download-template') }}" 
-                       class="inline-flex items-center px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
-                        <i class="fas fa-download mr-2"></i>
-                        Template
+
+                    @if(Auth::user()->hasPermission('anggota.export') || Auth::user()->isAdmin())
+                    <a href="{{ route('anggota.export', request()->query()) }}" class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-file-excel text-emerald-500"></i>
+                        <span class="btn-text">Export</span>
                     </a>
-                    <button onclick="showImportModal()" 
-                            class="inline-flex items-center px-3 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-xs font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
-                        <i class="fas fa-upload mr-2"></i>
-                        Import
+                    @endif
+
+                    @if(Auth::user()->hasPermission('anggota.import') || Auth::user()->isAdmin())
+                    <a href="{{ route('anggota.download-template') }}" class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-download text-blue-500"></i>
+                        <span class="btn-text">Template</span>
+                    </a>
+                    <button onclick="showImportModal()" class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-upload text-amber-500"></i>
+                        <span class="btn-text">Import</span>
                     </button>
                     @endif
                 </div>
-                
-                @if(Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
-                <!-- Bulk Action Buttons (Hidden by default) -->
-                <div id="bulkActionButtons" class="flex items-center gap-2 opacity-0 transition-all duration-300 ease-in-out">
-                    <div class="flex items-center gap-2">
-                        @if(Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
-                        <button onclick="bulkPrintKartu()" 
-                                class="inline-flex items-center px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                            <i class="fas fa-print mr-2"></i>
-                            Cetak
-                        </button>
-                        @endif
-                        @if(Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin())
-                        <button onclick="bulkDelete()" 
-                                class="inline-flex  items-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                            <i class="fas fa-trash mr-2"></i>
-                            Hapus 
-                        </button>
-                        @endif
-                    </div>
-                    <span id="selectedCount" class=" text-gray-500 transition-all duration-200 mr-2 text-[10px] font-medium bg-gray-100 px-2 py-1 rounded-full">0 anggota dipilih</span>
-                </div>
-                @endif
-            </div>
-            
-            <!-- Right side - Search, Filter and Add Button -->
-            <div class="flex items-center gap-3">
-                <!-- Search Input -->
+
+                <!-- Right: Search & Filter -->
                 <div class="flex items-center gap-2">
-                    <div class="relative">
-                        <input type="text" id="searchInput" placeholder="Cari anggota..." 
-                               value="{{ request('search') }}"
-                               class="w-64 px-4 py-2 pl-10 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-search text-gray-400"></i>
+                    <div class="relative flex-1 sm:flex-none">
+                        <input type="text" id="searchInput" placeholder="Cari nama, NIK, email..."
+                               class="w-full sm:w-72 px-4 py-2.5 pl-10 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all duration-200">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400 text-sm"></i>
                         </div>
                     </div>
-                    
-                    <!-- Filter Button -->
-                    <button onclick="openFilterModal()" 
-                            class="inline-flex items-center px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
-                        <i class="fas fa-filter mr-2"></i>
-                        Filter
+                    <button onclick="openFilterModal()" id="filterBtn"
+                            class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 relative">
+                        <i class="fas fa-sliders-h"></i>
+                        <span class="btn-text">Filter</span>
+                        <span id="filterBadge" class="hidden absolute -top-1.5 -right-1.5 w-5 h-5 bg-blue-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
                     </button>
                 </div>
-                
-                @if(Auth::user()->hasPermission('anggota.create') || Auth::user()->isAdmin())
-                <a href="{{ route('anggota.create') }}" 
-                   class="inline-flex items-center text-xs px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                    <i class="fas fa-plus mr-2"></i>
-                    Tambah
-                </a>
+            </div>
+
+            <!-- Active filters row -->
+            <div id="activeFilters" class="hidden flex items-center flex-wrap gap-2">
+                <span class="text-xs text-gray-500 font-medium">Filter aktif:</span>
+                <div id="filterChips" class="flex flex-wrap gap-1.5"></div>
+                <button onclick="resetFilters()" class="text-xs text-red-500 hover:text-red-700 font-medium ml-1">
+                    <i class="fas fa-times-circle mr-1"></i>Hapus semua
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Action Bar -->
+    @if(Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
+    <div id="bulkActionBar" class="bulk-bar">
+        <div class="glass-card rounded-xl border border-blue-200 bg-blue-50/50 px-4 py-2.5 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <i class="fas fa-check-double text-blue-600 text-sm"></i>
+                </div>
+                <span id="selectedCount" class="text-sm font-medium text-blue-700">0 anggota dipilih</span>
+            </div>
+            <div class="flex items-center gap-2">
+                @if(Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
+                <button onclick="bulkPrintKartu()" class="toolbar-btn bg-white border border-purple-200 text-purple-700 hover:bg-purple-50 text-xs">
+                    <i class="fas fa-print"></i>
+                    <span class="btn-text">Cetak Kartu</span>
+                </button>
                 @endif
-            </div>
-        </div>
-    </div>
-    
-
-    <!-- Members Table -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="overflow-x-auto ">
-            <table class="w-full divide-y  divide-gray-950" style="min-width: 900px;">
-                <thead class="">
-                    <tr class="border-b border-gray-200">
-                        @if(Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            <div class="flex items-center">
-                                <input type="checkbox" id="selectAll" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 transition-all duration-200">
-                                <span class="ml-2 text-xs text-gray-500 transition-all duration-200">Pilih</span>
-                            </div>
-                        </th>
-                        @endif
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            No
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Nama Lengkap
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Jenis Kelamin
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            NIK
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Kelas/Jurusan
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Jenis Anggota
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
-                        </th>
-                        @if(Auth::user()->hasPermission('anggota.update') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Aksi
-                        </th>
-                        @endif
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200 w-full ">
-                    @forelse($anggota as $index => $item)
-                    <tr class="hover:bg-gray-50 transition-colors duration-200">
-                        @if(Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <input type="checkbox" class="member-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 transition-all duration-200" value="{{ $item->id }}">
-                        </td>
-                        @endif
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $index + $anggota->firstItem() }}
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center">
-                                @if($item->foto)
-                                    <img src="{{ asset('storage/anggota/' . $item->foto) }}" 
-                                         alt="Foto" class="w-8 h-8 rounded-full mr-3 object-cover">
-                                @else
-                                    <div class="w-8 h-8 bg-gray-300 rounded-full mr-3 flex items-center justify-center">
-                                        <i class="fas fa-user text-gray-600 text-xs"></i>
-                                    </div>
-                                @endif
-                                <div>
-                                    <div class="text-sm font-medium text-gray-900">{{ $item->nama_lengkap }}</div>
-                                    <div class="text-xs text-gray-500">{{ $item->email ?: '-' }}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                {{ $item->jenis_kelamin == 'Laki-laki' ? 'bg-blue-100 text-blue-800' : 'bg-pink-100 text-pink-800' }}">
-                                <i class="fas {{ $item->jenis_kelamin == 'Laki-laki' ? 'fa-mars' : 'fa-venus' }} mr-1"></i>
-                                {{ $item->jenis_kelamin ?: '-' }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $item->nik }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @if($item->kelas)
-                                <div class="text-sm text-gray-900">
-                                    <div class="font-medium">{{ $item->kelas->nama_kelas }}</div>
-                                    <div class="text-xs text-gray-500">{{ $item->kelas->jurusan->nama_jurusan }}</div>
-                                </div>
-                            @else
-                                <span class="text-sm text-gray-400 italic">Tidak ada kelas</span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                {{ $item->jenis_anggota == 'siswa' ? 'bg-blue-100 text-blue-800' : 
-                                   ($item->jenis_anggota == 'guru' ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800') }}">
-                                {{ ucfirst($item->jenis_anggota) }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                {{ $item->status == 'aktif' ? 'bg-green-100 text-green-800' : 
-                                   ($item->status == 'nonaktif' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                <span class="w-2 h-2 rounded-full mr-1.5
-                                    {{ $item->status == 'aktif' ? 'bg-green-400' : 
-                                       ($item->status == 'nonaktif' ? 'bg-red-400' : 'bg-yellow-400') }}"></span>
-                                {{ ucfirst($item->status) }}
-                            </span>
-                        </td>
-                        @if(Auth::user()->hasPermission('anggota.update') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex items-center space-x-2">
-                                @if(Auth::user()->hasPermission('anggota.view') || Auth::user()->isAdmin())
-                                <a href="{{ route('anggota.show', $item->id) }}" 
-                                   class="text-blue-600 hover:text-blue-900 transition-colors duration-200" title="Lihat Detail">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                @endif
-                                @if(Auth::user()->hasPermission('anggota.update') || Auth::user()->isAdmin())
-                                <a href="{{ route('anggota.edit', $item->id) }}" 
-                                   class="text-yellow-600 hover:text-yellow-900 transition-colors duration-200" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                @endif
-                                @if(Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
-                                <a href="{{ route('anggota.cetak-kartu', $item->id) }}" 
-                                   class="text-green-600 hover:text-green-900 transition-colors duration-200" title="Cetak Kartu" target="_blank">
-                                    <i class="fas fa-print"></i>
-                                </a>
-                                @endif
-                                @if(Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin())
-                                <button onclick="confirmDeleteAnggota({{ $item->id }})" 
-                                        class="text-red-600 hover:text-red-900 transition-colors duration-200" title="Hapus">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                                @endif
-                            </div>
-                        </td>
-                        @endif
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="{{ 
-                            8 + 
-                            (Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin() ? 1 : 0) + 
-                            (Auth::user()->hasPermission('anggota.update') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin() ? 1 : 0) 
-                        }}" class="px-6 py-12 text-center">
-                            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                                <i class="fas fa-users text-3xl text-gray-400"></i>
-                            </div>
-                            <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada anggota ditemukan</h3>
-                            <p class="text-gray-600 mb-6">Belum ada data anggota yang ditambahkan atau tidak ada anggota yang sesuai dengan filter.</p>
-                            @if(Auth::user()->hasPermission('anggota.create') || Auth::user()->isAdmin())
-                            <a href="{{ route('anggota.create') }}" 
-                               class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200">
-                                <i class="fas fa-plus mr-2"></i>
-                                Tambah Anggota Pertama
-                            </a>
-                            @else
-                            <p class="text-gray-500">Tidak ada data anggota tersedia.</p>
-                            @endif
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Pagination -->
-    @if($anggota->hasPages())
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div class="flex items-center justify-between">
-            <div class="text-sm text-gray-700">
-                Menampilkan {{ $anggota->firstItem() ?? 0 }} - {{ $anggota->lastItem() ?? 0 }} dari {{ $anggota->total() }} anggota
-            </div>
-            <div class="flex items-center space-x-2">
-                {{ $anggota->appends(request()->query())->links() }}
+                @if(Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin())
+                <button onclick="bulkDelete()" class="toolbar-btn bg-white border border-red-200 text-red-700 hover:bg-red-50 text-xs">
+                    <i class="fas fa-trash-alt"></i>
+                    <span class="btn-text">Hapus</span>
+                </button>
+                @endif
+                <button onclick="clearSelection()" class="toolbar-btn bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 text-xs">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
         </div>
     </div>
     @endif
+
+    <!-- Table Card -->
+    <div class="glass-card rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table id="anggota-table" class="w-full" style="min-width: 850px;">
+                <thead>
+                    <tr>
+                        @if(Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
+                        <th class="px-4 py-3.5 text-left w-12">
+                            <div class="flex items-center justify-center">
+                                <input type="checkbox" id="selectAll" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer transition-all duration-200">
+                            </div>
+                        </th>
+                        @endif
+                        <th class="px-4 py-3.5 text-left w-14">No</th>
+                        <th class="px-4 py-3.5 text-left">Anggota</th>
+                        <th class="px-4 py-3.5 text-left">Gender</th>
+                        <th class="px-4 py-3.5 text-left">NIK</th>
+                        <th class="px-4 py-3.5 text-left">Kelas</th>
+                        <th class="px-4 py-3.5 text-left">Jenis</th>
+                        <th class="px-4 py-3.5 text-left">Status</th>
+                        @if(Auth::user()->hasPermission('anggota.update') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
+                        <th class="px-4 py-3.5 text-center w-40">Aksi</th>
+                        @endif
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <!-- Filter Modal -->
-<div id="filterModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+<div id="filterModal" class="fixed inset-0 z-50 hidden" style="background:rgba(15,23,42,0.5);backdrop-filter:blur(4px);">
     <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4 rounded-t-xl">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full transform transition-all duration-300 scale-95 opacity-0" id="filterModalContent">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 rounded-t-2xl">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-white">Filter Anggota</h3>
-                    <button onclick="closeFilterModal()" class="text-white hover:text-gray-200 transition-colors">
-                        <i class="fas fa-times text-xl"></i>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                            <i class="fas fa-filter text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-white">Filter Anggota</h3>
+                            <p class="text-blue-100 text-xs">Saring data berdasarkan kriteria</p>
+                        </div>
+                    </div>
+                    <button onclick="closeFilterModal()" class="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors">
+                        <i class="fas fa-times"></i>
                     </button>
                 </div>
             </div>
-            
+
             <form id="filterForm" class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Kelas Filter -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
-                        <select name="kelas_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                        <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Kelas</label>
+                        <select name="kelas_id" id="filter_kelas_id" class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all">
                             <option value="">Semua Kelas</option>
                             @foreach($kelas as $k)
-                                <option value="{{ $k->id }}" {{ request('kelas_id') == $k->id ? 'selected' : '' }}>
-                                    {{ $k->nama_kelas }} - {{ $k->jurusan->nama_jurusan }}
-                                </option>
+                                <option value="{{ $k->id }}">{{ $k->nama_kelas }} - {{ $k->jurusan->nama_jurusan }}</option>
                             @endforeach
                         </select>
                     </div>
-
-                    <!-- Jurusan Filter -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Jurusan</label>
-                        <select name="jurusan_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                        <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Jurusan</label>
+                        <select name="jurusan_id" id="filter_jurusan_id" class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all">
                             <option value="">Semua Jurusan</option>
                             @foreach($jurusan as $j)
-                                <option value="{{ $j->id }}" {{ request('jurusan_id') == $j->id ? 'selected' : '' }}>
-                                    {{ $j->nama_jurusan }}
-                                </option>
+                                <option value="{{ $j->id }}">{{ $j->nama_jurusan }}</option>
                             @endforeach
                         </select>
                     </div>
-
-                    <!-- Jenis Anggota Filter -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Anggota</label>
-                        <select name="jenis_anggota" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                        <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Jenis Anggota</label>
+                        <select name="jenis_anggota" id="filter_jenis_anggota" class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all">
                             <option value="">Semua Jenis</option>
-                            <option value="siswa" {{ request('jenis_anggota') == 'siswa' ? 'selected' : '' }}>Siswa</option>
-                            <option value="guru" {{ request('jenis_anggota') == 'guru' ? 'selected' : '' }}>Guru</option>
-                            <option value="staff" {{ request('jenis_anggota') == 'staff' ? 'selected' : '' }}>Staff</option>
+                            <option value="siswa">Siswa</option>
+                            <option value="guru">Guru</option>
+                            <option value="staff">Staff</option>
                         </select>
                     </div>
-
-                    <!-- Status Filter -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                        <select name="status" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                        <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Status</label>
+                        <select name="status" id="filter_status" class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all">
                             <option value="">Semua Status</option>
-                            <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                            <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
-                            <option value="ditangguhkan" {{ request('status') == 'ditangguhkan' ? 'selected' : '' }}>Ditangguhkan</option>
+                            <option value="aktif">Aktif</option>
+                            <option value="nonaktif">Nonaktif</option>
+                            <option value="ditangguhkan">Ditangguhkan</option>
                         </select>
                     </div>
                 </div>
-                
-                <div class="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
-                    <button type="button" onclick="resetFilters()" 
-                            class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors">
-                        <i class="fas fa-undo mr-2"></i>
-                        Reset
+
+                <div class="flex items-center justify-end gap-2 mt-6 pt-5 border-t border-gray-100">
+                    <button type="button" onclick="resetFilters()" class="toolbar-btn bg-gray-100 text-gray-600 hover:bg-gray-200">
+                        <i class="fas fa-undo"></i>
+                        <span>Reset</span>
                     </button>
-                    <button type="submit" 
-                            class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
-                        <i class="fas fa-filter mr-2"></i>
-                        Terapkan Filter
+                    <button type="submit" class="toolbar-btn bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md">
+                        <i class="fas fa-check"></i>
+                        <span>Terapkan</span>
                     </button>
                 </div>
             </form>
@@ -364,48 +425,60 @@
 </div>
 
 @if(Auth::user()->hasPermission('anggota.import') || Auth::user()->isAdmin())
-<!-- Modal Import Data -->
-<div id="importModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+<!-- Import Modal -->
+<div id="importModal" class="fixed inset-0 z-50 hidden" style="background:rgba(15,23,42,0.5);backdrop-filter:blur(4px);">
     <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full">
-            <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4 rounded-t-xl">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full transform transition-all duration-300">
+            <div class="bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-4 rounded-t-2xl">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-white">Import Data Anggota</h3>
-                    <button onclick="closeImportModal()" class="text-white hover:text-gray-200 transition-colors">
-                        <i class="fas fa-times text-xl"></i>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                            <i class="fas fa-file-import text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-white">Import Data Anggota</h3>
+                            <p class="text-emerald-100 text-xs">Upload file Excel/CSV</p>
+                        </div>
+                    </div>
+                    <button onclick="closeImportModal()" class="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors">
+                        <i class="fas fa-times"></i>
                     </button>
                 </div>
             </div>
-            
+
             <form method="POST" action="{{ route('anggota.import') }}" enctype="multipart/form-data" class="p-6">
                 @csrf
                 <div class="mb-4">
-                    <label for="file" class="block text-sm font-medium text-gray-700 mb-2">File Excel/CSV <span class="text-red-500">*</span></label>
-                    <input type="file" name="file" id="file" accept=".xlsx,.xls,.csv" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <p class="mt-1 text-xs text-gray-500">Format: Excel (.xlsx, .xls) atau CSV. Maksimal 2MB</p>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">
+                        File Excel/CSV <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="file" name="file" id="file" accept=".xlsx,.xls,.csv" required
+                               class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
+                    </div>
+                    <p class="mt-1.5 text-[11px] text-gray-400">Format: Excel (.xlsx, .xls) atau CSV. Maksimal 2MB</p>
                 </div>
-                
-                <div class="mb-4 p-3 bg-blue-50 rounded-md">
-                    <p class="text-sm text-blue-800">
-                        <strong>Catatan:</strong><br>
-                        • Download template terlebih dahulu<br>
-                        • Format file: Excel (.xlsx, .xls) atau CSV<br>
-                        • Pastikan format data sesuai template<br>
-                        • NIK harus unik dan tidak boleh duplikat<br>
-                        • Nomor anggota dan barcode akan digenerate otomatis<br>
-                        • Template sudah berisi daftar kelas untuk referensi
-                    </p>
+
+                <div class="p-3 bg-blue-50 rounded-xl border border-blue-100">
+                    <div class="flex gap-2">
+                        <i class="fas fa-info-circle text-blue-500 mt-0.5 text-sm"></i>
+                        <div class="text-xs text-blue-700 space-y-0.5">
+                            <p class="font-medium">Catatan Penting:</p>
+                            <p>- Download template terlebih dahulu</p>
+                            <p>- Pastikan format data sesuai template</p>
+                            <p>- NIK harus unik dan tidak boleh duplikat</p>
+                            <p>- Nomor anggota & barcode akan digenerate otomatis</p>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="flex justify-end space-x-3">
-                    <button type="button" onclick="closeImportModal()"
-                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+
+                <div class="flex justify-end gap-2 mt-5 pt-4 border-t border-gray-100">
+                    <button type="button" onclick="closeImportModal()" class="toolbar-btn bg-gray-100 text-gray-600 hover:bg-gray-200">
                         Batal
                     </button>
-                    <button type="submit"
-                            class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
-                        Import
+                    <button type="submit" class="toolbar-btn bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-md">
+                        <i class="fas fa-upload"></i>
+                        <span>Import Data</span>
                     </button>
                 </div>
             </form>
@@ -415,130 +488,277 @@
 @endif
 
 <!-- Loading Overlay -->
-<div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg p-6 flex items-center space-x-3">
-        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-        <span class="text-gray-700">Memproses...</span>
+<div id="loadingOverlay" class="fixed inset-0 flex items-center justify-center z-[60] hidden" style="background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);">
+    <div class="bg-white rounded-2xl p-6 flex flex-col items-center gap-3 shadow-2xl">
+        <div class="w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin"></div>
+        <span class="text-sm font-medium text-gray-700">Memproses...</span>
     </div>
 </div>
 
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const selectAll = document.getElementById('selectAll');
-    const memberCheckboxes = document.querySelectorAll('.member-checkbox');
-    const selectedCount = document.getElementById('selectedCount');
-    const bulkActionButtons = document.getElementById('bulkActionButtons');
-    const searchInput = document.getElementById('searchInput');
-    let searchTimeout;
-    
-    // Initialize bulk action buttons as hidden
-    if (bulkActionButtons) {
-        bulkActionButtons.style.opacity = '0';
-        bulkActionButtons.style.pointerEvents = 'none';
-    }
+let anggotaTable;
+let selectedIds = [];
 
-    // Auto-reload search functionality
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            const searchValue = this.value;
-            
-            searchTimeout = setTimeout(() => {
-                showLoadingOverlay();
-                const currentUrl = new URL(window.location.href);
-                const params = new URLSearchParams(currentUrl.search);
-                
-                if (searchValue.trim()) {
-                    params.set('search', searchValue);
-                } else {
-                    params.delete('search');
-                }
-                
-                window.location.href = currentUrl.pathname + '?' + params.toString();
-            }, 500);
-        });
-    }
-
-    // Select all functionality
-    if (selectAll) {
-        selectAll.addEventListener('change', function() {
-            memberCheckboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
-                const row = checkbox.closest('tr');
-                if (this.checked) {
-                    row.classList.add('bg-blue-50', 'border-l-4', 'border-l-blue-500');
-                } else {
-                    row.classList.remove('bg-blue-50', 'border-l-4', 'border-l-blue-500');
-                }
-            });
-            updateSelectedCount();
-        });
-    }
-
-    // Individual checkbox change
-    memberCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            updateSelectedCount();
-            updateSelectAllState();
-            const row = this.closest('tr');
-            if (this.checked) {
-                row.classList.add('bg-blue-50', 'border-l-4', 'border-l-blue-500');
-            } else {
-                row.classList.remove('bg-blue-50', 'border-l-4', 'border-l-blue-500');
-            }
-        });
-    });
-
-    function updateSelectedCount() {
-        const checkedBoxes = document.querySelectorAll('.member-checkbox:checked');
-        if (selectedCount) {
-            selectedCount.textContent = `${checkedBoxes.length} anggota dipilih`;
-        }
-        
-        if (bulkActionButtons) {
-            if (checkedBoxes.length > 0) {
-                bulkActionButtons.style.opacity = '1';
-                bulkActionButtons.style.pointerEvents = 'auto';
-                if (selectedCount) {
-                    selectedCount.classList.add('text-blue-600', 'font-medium', 'bg-blue-100');
-                }
-            } else {
-                bulkActionButtons.style.opacity = '0';
-                bulkActionButtons.style.pointerEvents = 'none';
-                if (selectedCount) {
-                    selectedCount.classList.remove('text-blue-600', 'font-medium', 'bg-blue-100');
-                }
-            }
-        }
-    }
-
-    function updateSelectAllState() {
-        const checkedBoxes = document.querySelectorAll('.member-checkbox:checked');
-        const totalBoxes = memberCheckboxes.length;
-        
-        if (selectAll) {
-            selectAll.checked = checkedBoxes.length === totalBoxes;
-            selectAll.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < totalBoxes;
-        }
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
     }
 });
 
-// Filter Modal Functions
+$(document).ready(function() {
+    const hasCheckboxColumn = {{ (Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin()) ? 'true' : 'false' }};
+    const hasActionColumn = {{ (Auth::user()->hasPermission('anggota.update') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin()) ? 'true' : 'false' }};
+
+    let columns = [];
+
+    if (hasCheckboxColumn) {
+        columns.push({
+            data: 'checkbox', name: 'checkbox', orderable: false, searchable: false,
+            className: 'px-4 py-3 whitespace-nowrap text-center'
+        });
+    }
+
+    columns = columns.concat([
+        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, className: 'px-4 py-3 whitespace-nowrap text-sm text-gray-500 font-medium' },
+        { data: 'nama_info', name: 'nama_lengkap', className: 'px-4 py-3' },
+        { data: 'jenis_kelamin_badge', name: 'jenis_kelamin', className: 'px-4 py-3 whitespace-nowrap' },
+        { data: 'nik', name: 'nik', className: 'px-4 py-3 whitespace-nowrap text-sm text-gray-600 font-mono' },
+        { data: 'kelas_info', name: 'kelas', orderable: false, className: 'px-4 py-3 whitespace-nowrap' },
+        { data: 'jenis_badge', name: 'jenis_anggota', className: 'px-4 py-3 whitespace-nowrap' },
+        { data: 'status_badge', name: 'status', className: 'px-4 py-3 whitespace-nowrap' }
+    ]);
+
+    if (hasActionColumn) {
+        columns.push({
+            data: 'action', name: 'action', orderable: false, searchable: false,
+            className: 'px-4 py-3 whitespace-nowrap text-center'
+        });
+    }
+
+    anggotaTable = $('#anggota-table').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '{{ route("anggota.index") }}',
+            data: function(d) {
+                d.filter_kelas_id = $('#filter_kelas_id').val();
+                d.filter_jurusan_id = $('#filter_jurusan_id').val();
+                d.filter_jenis_anggota = $('#filter_jenis_anggota').val();
+                d.filter_status = $('#filter_status').val();
+            }
+        },
+        columns: columns,
+        language: {
+            processing: '<div class="flex items-center justify-center py-6"><div class="w-8 h-8 rounded-full border-3 border-blue-200 border-t-blue-600 animate-spin"></div><span class="ml-3 text-sm text-gray-600">Memuat data...</span></div>',
+            lengthMenu: "Tampilkan _MENU_ data",
+            zeroRecords: '<div class="text-center py-12"><div class="mx-auto w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mb-4"><i class="fas fa-users text-2xl text-gray-400"></i></div><h3 class="text-base font-semibold text-gray-800 mb-1">Tidak ada data ditemukan</h3><p class="text-sm text-gray-500">Coba ubah kata kunci atau filter pencarian</p></div>',
+            info: "Menampilkan _START_-_END_ dari _TOTAL_ anggota",
+            infoEmpty: "Tidak ada data",
+            infoFiltered: "(dari _MAX_ total)",
+            search: "Cari:",
+            paginate: {
+                first: '<i class="fas fa-angle-double-left"></i>',
+                last: '<i class="fas fa-angle-double-right"></i>',
+                next: '<i class="fas fa-angle-right"></i>',
+                previous: '<i class="fas fa-angle-left"></i>'
+            }
+        },
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+        order: [[hasCheckboxColumn ? 1 : 0, 'asc']],
+        drawCallback: function() {
+            attachCheckboxListeners();
+            updateSelectedCount();
+        }
+    });
+
+    // Custom search with debounce
+    let searchTimeout;
+    $('#searchInput').on('input', function() {
+        clearTimeout(searchTimeout);
+        const val = this.value;
+        searchTimeout = setTimeout(() => {
+            anggotaTable.search(val).draw();
+        }, 400);
+    });
+
+    // Select all
+    $('#selectAll').on('change', function() {
+        const isChecked = $(this).is(':checked');
+        $('.member-checkbox').each(function() {
+            $(this).prop('checked', isChecked);
+            const row = $(this).closest('tr');
+            if (isChecked) {
+                row.addClass('selected-row');
+                if (!selectedIds.includes($(this).val())) {
+                    selectedIds.push($(this).val());
+                }
+            } else {
+                row.removeClass('selected-row');
+                selectedIds = [];
+            }
+        });
+        updateSelectedCount();
+    });
+});
+
+function attachCheckboxListeners() {
+    $('.member-checkbox').off('change').on('change', function() {
+        const id = $(this).val();
+        const row = $(this).closest('tr');
+
+        if ($(this).is(':checked')) {
+            row.addClass('selected-row');
+            if (!selectedIds.includes(id)) selectedIds.push(id);
+        } else {
+            row.removeClass('selected-row');
+            selectedIds = selectedIds.filter(item => item !== id);
+        }
+
+        updateSelectedCount();
+        updateSelectAllState();
+    });
+}
+
+function updateSelectedCount() {
+    const count = $('.member-checkbox:checked').length;
+    const selectedCountEl = document.getElementById('selectedCount');
+    const bulkBar = document.getElementById('bulkActionBar');
+
+    if (selectedCountEl) {
+        selectedCountEl.textContent = `${count} anggota dipilih`;
+    }
+
+    if (bulkBar) {
+        if (count > 0) {
+            bulkBar.classList.add('active');
+        } else {
+            bulkBar.classList.remove('active');
+        }
+    }
+}
+
+function updateSelectAllState() {
+    const checked = $('.member-checkbox:checked').length;
+    const total = $('.member-checkbox').length;
+    const selectAll = $('#selectAll');
+    if (total > 0) {
+        selectAll.prop('checked', checked === total);
+        selectAll.prop('indeterminate', checked > 0 && checked < total);
+    }
+}
+
+function clearSelection() {
+    $('.member-checkbox').prop('checked', false);
+    $('#selectAll').prop('checked', false).prop('indeterminate', false);
+    $('tr').removeClass('selected-row');
+    selectedIds = [];
+    updateSelectedCount();
+}
+
+// Filter modal
 function openFilterModal() {
-    document.getElementById('filterModal').classList.remove('hidden');
+    const modal = document.getElementById('filterModal');
+    const content = document.getElementById('filterModalContent');
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        content.style.transform = 'scale(1)';
+        content.style.opacity = '1';
+    }, 10);
 }
 
 function closeFilterModal() {
-    document.getElementById('filterModal').classList.add('hidden');
+    const modal = document.getElementById('filterModal');
+    const content = document.getElementById('filterModalContent');
+    content.style.transform = 'scale(0.95)';
+    content.style.opacity = '0';
+    setTimeout(() => modal.classList.add('hidden'), 200);
 }
 
 function resetFilters() {
-    const form = document.getElementById('filterForm');
-    form.reset();
-    window.location.href = '{{ route("anggota.index") }}';
+    $('#filter_kelas_id').val('');
+    $('#filter_jurusan_id').val('');
+    $('#filter_jenis_anggota').val('');
+    $('#filter_status').val('');
+    anggotaTable.draw();
+    closeFilterModal();
+    updateFilterChips();
 }
 
-// Import Modal Functions
+function updateFilterChips() {
+    const chipsContainer = document.getElementById('filterChips');
+    const activeFilters = document.getElementById('activeFilters');
+    const filterBadge = document.getElementById('filterBadge');
+    chipsContainer.innerHTML = '';
+    let count = 0;
+
+    const filters = [
+        { id: 'filter_kelas_id', label: 'Kelas' },
+        { id: 'filter_jurusan_id', label: 'Jurusan' },
+        { id: 'filter_jenis_anggota', label: 'Jenis' },
+        { id: 'filter_status', label: 'Status' }
+    ];
+
+    filters.forEach(f => {
+        const el = document.getElementById(f.id);
+        if (el && el.value) {
+            count++;
+            const text = el.options[el.selectedIndex].text;
+            const chip = document.createElement('span');
+            chip.className = 'filter-chip';
+            chip.innerHTML = `${f.label}: ${text} <span class="remove" onclick="removeFilter('${f.id}')">&times;</span>`;
+            chipsContainer.appendChild(chip);
+        }
+    });
+
+    if (count > 0) {
+        activeFilters.classList.remove('hidden');
+        filterBadge.classList.remove('hidden');
+        filterBadge.textContent = count;
+    } else {
+        activeFilters.classList.add('hidden');
+        filterBadge.classList.add('hidden');
+    }
+}
+
+function removeFilter(id) {
+    document.getElementById(id).value = '';
+    anggotaTable.draw();
+    updateFilterChips();
+}
+
+// Filter form submit
+document.getElementById('filterForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    anggotaTable.draw();
+    closeFilterModal();
+    updateFilterChips();
+});
+
+// Close modal on backdrop click
+document.getElementById('filterModal').addEventListener('click', function(e) {
+    if (e.target === this) closeFilterModal();
+});
+
+// Import modal
 function showImportModal() {
     document.getElementById('importModal').classList.remove('hidden');
 }
@@ -547,114 +767,118 @@ function closeImportModal() {
     document.getElementById('importModal').classList.add('hidden');
 }
 
-// Handle filter form submission
-document.getElementById('filterForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    showLoadingOverlay();
-    
-    const formData = new FormData(this);
-    const params = new URLSearchParams();
-    
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput && searchInput.value.trim()) {
-        params.set('search', searchInput.value.trim());
-    }
-    
-    for (let [key, value] of formData.entries()) {
-        if (value.trim()) {
-            params.set(key, value);
-        }
-    }
-    
-    window.location.href = '{{ route("anggota.index") }}' + '?' + params.toString();
-});
-
-// Close modal when clicking outside
-document.getElementById('filterModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeFilterModal();
-    }
-});
+const importModal = document.getElementById('importModal');
+if (importModal) {
+    importModal.addEventListener('click', function(e) {
+        if (e.target === this) closeImportModal();
+    });
+}
 
 // Bulk operations
 function bulkDelete() {
-    const checkedBoxes = document.querySelectorAll('.member-checkbox:checked');
-    const ids = Array.from(checkedBoxes).map(cb => cb.value);
-    
+    const ids = Array.from(document.querySelectorAll('.member-checkbox:checked')).map(cb => cb.value);
+
     if (ids.length === 0) {
-        alert('Pilih data yang akan dihapus');
+        Toast.fire({ icon: 'warning', title: 'Pilih data yang akan dihapus' });
         return;
     }
-    
-    if (confirm(`Apakah Anda yakin ingin menghapus ${ids.length} data anggota?`)) {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                         '{{ csrf_token() }}';
-        
-        fetch('{{ route("anggota.bulk-delete") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            body: JSON.stringify({ ids: ids })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                location.reload();
-            } else {
-                alert('Error: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat menghapus data');
-        });
-    }
+
+    Swal.fire({
+        title: 'Hapus Data Anggota?',
+        html: `<p class="text-gray-600">Anda akan menghapus <strong class="text-red-600">${ids.length}</strong> data anggota. Tindakan ini tidak dapat dibatalkan.</p>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i>Ya, Hapus',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            showLoadingOverlay();
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+
+            fetch('{{ route("anggota.bulk-delete") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({ ids: ids })
+            })
+            .then(r => r.json())
+            .then(data => {
+                hideLoadingOverlay();
+                if (data.success) {
+                    Toast.fire({ icon: 'success', title: data.message });
+                    selectedIds = [];
+                    clearSelection();
+                    anggotaTable.draw();
+                } else {
+                    Swal.fire('Error', data.error, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoadingOverlay();
+                Swal.fire('Error', 'Terjadi kesalahan saat menghapus data', 'error');
+            });
+        }
+    });
 }
 
 function bulkPrintKartu() {
-    const checkedBoxes = document.querySelectorAll('.member-checkbox:checked');
-    const ids = Array.from(checkedBoxes).map(cb => cb.value);
-    
+    const ids = Array.from(document.querySelectorAll('.member-checkbox:checked')).map(cb => cb.value);
+
     if (ids.length === 0) {
-        alert('Pilih data yang akan dicetak kartunya');
+        Toast.fire({ icon: 'warning', title: 'Pilih data yang akan dicetak kartunya' });
         return;
     }
-    
+
     const url = '{{ route("anggota.bulk-print-kartu") }}?ids=' + ids.join(',');
     window.open(url, '_blank');
 }
 
 function confirmDeleteAnggota(id) {
-    if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '{{ route("anggota.index") }}/' + id;
-        
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = '_token';
-        csrfInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        
-        const methodInput = document.createElement('input');
-        methodInput.type = 'hidden';
-        methodInput.name = '_method';
-        methodInput.value = 'DELETE';
-        
-        form.appendChild(csrfInput);
-        form.appendChild(methodInput);
-        document.body.appendChild(form);
-        form.submit();
-    }
+    Swal.fire({
+        title: 'Hapus Anggota?',
+        text: 'Data anggota ini akan dihapus permanen.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i>Hapus',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route("anggota.index") }}/' + id;
+
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'DELETE';
+
+            form.appendChild(csrfInput);
+            form.appendChild(methodInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
 }
 
 function showLoadingOverlay() {
-    const overlay = document.getElementById('loadingOverlay');
-    if (overlay) {
-        overlay.classList.remove('hidden');
-    }
+    document.getElementById('loadingOverlay').classList.remove('hidden');
+}
+
+function hideLoadingOverlay() {
+    document.getElementById('loadingOverlay').classList.add('hidden');
 }
 </script>
 @endsection

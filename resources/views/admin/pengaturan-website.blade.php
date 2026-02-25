@@ -3,250 +3,372 @@
 @section('title', 'Pengaturan Website')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+<div class="min-h-screen py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header Section -->
+
+        {{-- Header --}}
         <div class="mb-8">
-            <div class="flex items-center space-x-4">
-                <div class="flex-shrink-0">
-                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-cog text-white text-xl"></i>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('admin.dashboard') }}"
+                       class="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-105"
+                       style="background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                        <i class="fas fa-arrow-left text-violet-600"></i>
+                    </a>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">Pengaturan Website</h1>
+                        <p class="text-sm text-gray-500 mt-0.5">Kelola informasi dan tampilan website perpustakaan</p>
                     </div>
                 </div>
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Pengaturan Website</h1>
-                    <p class="text-gray-600 mt-1">Kelola informasi dan tampilan website perpustakaan</p>
+                <div class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl text-sm"
+                     style="background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3);">
+                    <i class="fas fa-cog text-violet-500"></i>
+                    <span class="text-gray-600">Pengaturan</span>
                 </div>
             </div>
         </div>
 
-        <form action="{{ route('admin.pengaturan.update') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.pengaturan.update') }}" method="POST" enctype="multipart/form-data" id="formPengaturan">
             @csrf
-            
+
+            {{-- Branding Section: Logo & Favicon --}}
+            <div class="mb-8 rounded-2xl overflow-hidden"
+                 style="background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 8px 32px rgba(124,58,237,0.08);">
+                <div class="px-6 py-4" style="background: linear-gradient(135deg, #7c3aed, #a855f7);">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: rgba(255,255,255,0.2);">
+                            <i class="fas fa-palette text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-white font-semibold">Branding & Identitas</h3>
+                            <p class="text-violet-200 text-xs">Logo dan favicon website perpustakaan</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {{-- Logo Upload --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                <i class="fas fa-image text-violet-500 mr-1.5"></i>Logo Website
+                            </label>
+                            <div class="flex flex-col items-center gap-4">
+                                {{-- Logo Preview --}}
+                                <div class="relative group">
+                                    <div id="logoPreviewContainer"
+                                         class="w-40 h-40 rounded-2xl flex items-center justify-center overflow-hidden transition-all duration-300"
+                                         style="background: rgba(124,58,237,0.05); border: 2px dashed rgba(124,58,237,0.2);">
+                                        @if($pengaturan->logo)
+                                            <img id="logoPreview" src="{{ asset($pengaturan->logo) }}" alt="Logo"
+                                                 class="w-full h-full object-contain p-2"
+                                                 onerror="this.style.display='none'; document.getElementById('logoPlaceholder').style.display='flex';">
+                                            <div id="logoPlaceholder" class="hidden flex-col items-center gap-2 text-violet-300">
+                                                <i class="fas fa-image text-3xl"></i>
+                                                <span class="text-xs">Tidak ditemukan</span>
+                                            </div>
+                                        @else
+                                            <img id="logoPreview" src="" alt="Logo" class="w-full h-full object-contain p-2 hidden">
+                                            <div id="logoPlaceholder" class="flex flex-col items-center gap-2 text-violet-300">
+                                                <i class="fas fa-image text-3xl"></i>
+                                                <span class="text-xs">Belum ada logo</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    {{-- Hover overlay --}}
+                                    <label for="logo"
+                                           class="absolute inset-0 rounded-2xl flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer">
+                                        <div class="text-white text-center">
+                                            <i class="fas fa-camera text-xl mb-1"></i>
+                                            <p class="text-xs font-medium">Ganti Logo</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <input type="file" name="logo" id="logo" accept="image/*" class="hidden" onchange="previewImage(this, 'logoPreview', 'logoPlaceholder')">
+                                <button type="button" onclick="document.getElementById('logo').click()"
+                                        class="px-4 py-2 rounded-xl text-sm font-medium text-violet-600 transition-all duration-200 hover:scale-105"
+                                        style="background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.15);">
+                                    <i class="fas fa-upload mr-1.5"></i>Pilih File Logo
+                                </button>
+                                <p class="text-xs text-gray-400">Format: JPG, PNG, GIF, SVG. Maks 2MB</p>
+                            </div>
+                        </div>
+
+                        {{-- Favicon Upload --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                <i class="fas fa-star text-violet-500 mr-1.5"></i>Favicon
+                            </label>
+                            <div class="flex flex-col items-center gap-4">
+                                {{-- Favicon Preview --}}
+                                <div class="relative group">
+                                    <div id="faviconPreviewContainer"
+                                         class="w-40 h-40 rounded-2xl flex items-center justify-center overflow-hidden transition-all duration-300"
+                                         style="background: rgba(124,58,237,0.05); border: 2px dashed rgba(124,58,237,0.2);">
+                                        @if($pengaturan->favicon)
+                                            <img id="faviconPreview" src="{{ asset($pengaturan->favicon) }}" alt="Favicon"
+                                                 class="w-20 h-20 object-contain"
+                                                 onerror="this.style.display='none'; document.getElementById('faviconPlaceholder').style.display='flex';">
+                                            <div id="faviconPlaceholder" class="hidden flex-col items-center gap-2 text-violet-300">
+                                                <i class="fas fa-star text-3xl"></i>
+                                                <span class="text-xs">Tidak ditemukan</span>
+                                            </div>
+                                        @else
+                                            <img id="faviconPreview" src="" alt="Favicon" class="w-20 h-20 object-contain hidden">
+                                            <div id="faviconPlaceholder" class="flex flex-col items-center gap-2 text-violet-300">
+                                                <i class="fas fa-star text-3xl"></i>
+                                                <span class="text-xs">Belum ada favicon</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    {{-- Hover overlay --}}
+                                    <label for="favicon"
+                                           class="absolute inset-0 rounded-2xl flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer">
+                                        <div class="text-white text-center">
+                                            <i class="fas fa-camera text-xl mb-1"></i>
+                                            <p class="text-xs font-medium">Ganti Favicon</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <input type="file" name="favicon" id="favicon" accept="image/*,.ico" class="hidden" onchange="previewImage(this, 'faviconPreview', 'faviconPlaceholder')">
+                                <button type="button" onclick="document.getElementById('favicon').click()"
+                                        class="px-4 py-2 rounded-xl text-sm font-medium text-violet-600 transition-all duration-200 hover:scale-105"
+                                        style="background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.15);">
+                                    <i class="fas fa-upload mr-1.5"></i>Pilih File Favicon
+                                </button>
+                                <p class="text-xs text-gray-400">Format: JPG, PNG, ICO, SVG. Maks 1MB</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Informasi Website Card -->
-                <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-                    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-globe text-white text-xl"></i>
-                            <h3 class="text-lg font-semibold text-white">Informasi Website</h3>
+                {{-- Informasi Website Card --}}
+                <div class="rounded-2xl overflow-hidden"
+                     style="background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 8px 32px rgba(124,58,237,0.08);">
+                    <div class="px-6 py-4" style="background: linear-gradient(135deg, #3b82f6, #6366f1);">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: rgba(255,255,255,0.2);">
+                                <i class="fas fa-globe text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-white font-semibold">Informasi Website</h3>
+                                <p class="text-blue-200 text-xs">Nama dan deskripsi website</p>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="p-6 space-y-6">
-                        <div class="space-y-2">
-                            <label for="nama_website" class="block text-sm font-medium text-gray-700 flex items-center">
-                                <i class="fas fa-tag text-blue-500 mr-2"></i>
-                                Nama Website
+
+                    <div class="p-6 space-y-5">
+                        {{-- Nama Website --}}
+                        <div>
+                            <label for="nama_website" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                                <i class="fas fa-tag text-blue-500 mr-1.5"></i>Nama Website
                             </label>
-                            <input type="text" name="nama_website" id="nama_website" value="{{ $pengaturan->nama_website }}" 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                            <input type="text" name="nama_website" id="nama_website" value="{{ $pengaturan->nama_website }}"
+                                   class="w-full px-4 py-3 rounded-xl text-sm transition-all duration-200 focus:ring-2 focus:ring-violet-400 focus:outline-none"
+                                   style="background: rgba(124,58,237,0.03); border: 1px solid rgba(124,58,237,0.12);"
+                                   placeholder="Masukkan nama website">
                         </div>
-                        
-                        <div class="space-y-2">
-                            <label for="deskripsi_website" class="block text-sm font-medium text-gray-700 flex items-center">
-                                <i class="fas fa-align-left text-blue-500 mr-2"></i>
-                                Deskripsi Website
+
+                        {{-- Deskripsi Website --}}
+                        <div>
+                            <label for="deskripsi_website" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                                <i class="fas fa-align-left text-blue-500 mr-1.5"></i>Deskripsi Website
                             </label>
-                            <textarea name="deskripsi_website" id="deskripsi_website" rows="3" 
-                                      class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">{{ $pengaturan->deskripsi_website }}</textarea>
-                        </div>
-                        
-                        <div class="space-y-2">
-                            <label for="logo" class="block text-sm font-medium text-gray-700 flex items-center">
-                                <i class="fas fa-image text-blue-500 mr-2"></i>
-                                Logo Website
-                            </label>
-                            <div class="relative">
-                                <input type="file" name="logo" id="logo" accept="image/*" 
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                            </div>
-                            @if($pengaturan->logo)
-                                <div class="mt-2 p-3 bg-green-50 rounded-lg border border-green-200">
-                                    <p class="text-sm text-green-700 flex items-center">
-                                        <i class="fas fa-check-circle mr-2"></i>
-                                        Logo saat ini: {{ $pengaturan->logo }}
-                                    </p>
-                                </div>
-                            @endif
-                        </div>
-                        
-                        <div class="space-y-2">
-                            <label for="favicon" class="block text-sm font-medium text-gray-700 flex items-center">
-                                <i class="fas fa-star text-blue-500 mr-2"></i>
-                                Favicon
-                            </label>
-                            <div class="relative">
-                                <input type="file" name="favicon" id="favicon" accept="image/*" 
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                            </div>
-                            @if($pengaturan->favicon)
-                                <div class="mt-2 p-3 bg-green-50 rounded-lg border border-green-200">
-                                    <p class="text-sm text-green-700 flex items-center">
-                                        <i class="fas fa-check-circle mr-2"></i>
-                                        Favicon saat ini: {{ $pengaturan->favicon }}
-                                    </p>
-                                </div>
-                            @endif
+                            <textarea name="deskripsi_website" id="deskripsi_website" rows="4"
+                                      class="w-full px-4 py-3 rounded-xl text-sm transition-all duration-200 focus:ring-2 focus:ring-violet-400 focus:outline-none resize-none"
+                                      style="background: rgba(124,58,237,0.03); border: 1px solid rgba(124,58,237,0.12);"
+                                      placeholder="Masukkan deskripsi website">{{ $pengaturan->deskripsi_website }}</textarea>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Informasi Sekolah Card -->
-                <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-                    <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-school text-white text-xl"></i>
-                            <h3 class="text-lg font-semibold text-white">Informasi Sekolah</h3>
+
+                {{-- Informasi Sekolah Card --}}
+                <div class="rounded-2xl overflow-hidden"
+                     style="background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 8px 32px rgba(124,58,237,0.08);">
+                    <div class="px-6 py-4" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: rgba(255,255,255,0.2);">
+                                <i class="fas fa-school text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-white font-semibold">Informasi Sekolah</h3>
+                                <p class="text-emerald-200 text-xs">Data dan kontak sekolah</p>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="p-6 space-y-6">
-                        <div class="space-y-2">
-                            <label for="alamat_sekolah" class="block text-sm font-medium text-gray-700 flex items-center">
-                                <i class="fas fa-map-marker-alt text-green-500 mr-2"></i>
-                                Alamat Sekolah
+
+                    <div class="p-6 space-y-5">
+                        {{-- Alamat --}}
+                        <div>
+                            <label for="alamat_sekolah" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                                <i class="fas fa-map-marker-alt text-emerald-500 mr-1.5"></i>Alamat Sekolah
                             </label>
-                            <textarea name="alamat_sekolah" id="alamat_sekolah" rows="2" 
-                                      class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200">{{ $pengaturan->alamat_sekolah }}</textarea>
+                            <textarea name="alamat_sekolah" id="alamat_sekolah" rows="2"
+                                      class="w-full px-4 py-3 rounded-xl text-sm transition-all duration-200 focus:ring-2 focus:ring-emerald-400 focus:outline-none resize-none"
+                                      style="background: rgba(16,185,129,0.03); border: 1px solid rgba(16,185,129,0.15);"
+                                      placeholder="Masukkan alamat sekolah">{{ $pengaturan->alamat_sekolah }}</textarea>
                         </div>
-                        
-                        <div class="space-y-2">
-                            <label for="telepon_sekolah" class="block text-sm font-medium text-gray-700 flex items-center">
-                                <i class="fas fa-phone text-green-500 mr-2"></i>
-                                Telepon Sekolah
-                            </label>
-                            <input type="text" name="telepon_sekolah" id="telepon_sekolah" value="{{ $pengaturan->telepon_sekolah }}" 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200">
+
+                        {{-- Telepon & Email --}}
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="telepon_sekolah" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                                    <i class="fas fa-phone text-emerald-500 mr-1.5"></i>Telepon
+                                </label>
+                                <input type="text" name="telepon_sekolah" id="telepon_sekolah" value="{{ $pengaturan->telepon_sekolah }}"
+                                       class="w-full px-4 py-3 rounded-xl text-sm transition-all duration-200 focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                                       style="background: rgba(16,185,129,0.03); border: 1px solid rgba(16,185,129,0.15);"
+                                       placeholder="08xxx">
+                            </div>
+                            <div>
+                                <label for="email_sekolah" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                                    <i class="fas fa-envelope text-emerald-500 mr-1.5"></i>Email
+                                </label>
+                                <input type="email" name="email_sekolah" id="email_sekolah" value="{{ $pengaturan->email_sekolah }}"
+                                       class="w-full px-4 py-3 rounded-xl text-sm transition-all duration-200 focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                                       style="background: rgba(16,185,129,0.03); border: 1px solid rgba(16,185,129,0.15);"
+                                       placeholder="email@sekolah.sch.id">
+                            </div>
                         </div>
-                        
-                        <div class="space-y-2">
-                            <label for="email_sekolah" class="block text-sm font-medium text-gray-700 flex items-center">
-                                <i class="fas fa-envelope text-green-500 mr-2"></i>
-                                Email Sekolah
+
+                        {{-- Kepala Sekolah --}}
+                        <div>
+                            <label for="nama_kepala_sekolah" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                                <i class="fas fa-user-tie text-emerald-500 mr-1.5"></i>Kepala Sekolah
                             </label>
-                            <input type="email" name="email_sekolah" id="email_sekolah" value="{{ $pengaturan->email_sekolah }}" 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200">
+                            <input type="text" name="nama_kepala_sekolah" id="nama_kepala_sekolah" value="{{ $pengaturan->nama_kepala_sekolah }}"
+                                   class="w-full px-4 py-3 rounded-xl text-sm transition-all duration-200 focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                                   style="background: rgba(16,185,129,0.03); border: 1px solid rgba(16,185,129,0.15);"
+                                   placeholder="Nama kepala sekolah">
                         </div>
-                        
-                        <div class="space-y-2">
-                            <label for="nama_kepala_sekolah" class="block text-sm font-medium text-gray-700 flex items-center">
-                                <i class="fas fa-user-tie text-green-500 mr-2"></i>
-                                Nama Kepala Sekolah
+
+                        {{-- Jam Operasional --}}
+                        <div>
+                            <label for="jam_operasional" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                                <i class="fas fa-clock text-emerald-500 mr-1.5"></i>Jam Operasional
                             </label>
-                            <input type="text" name="nama_kepala_sekolah" id="nama_kepala_sekolah" value="{{ $pengaturan->nama_kepala_sekolah }}" 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200">
-                        </div>
-                        
-                        <div class="space-y-2">
-                            <label for="jam_operasional" class="block text-sm font-medium text-gray-700 flex items-center">
-                                <i class="fas fa-clock text-green-500 mr-2"></i>
-                                Jam Operasional
-                            </label>
-                            <input type="text" name="jam_operasional" id="jam_operasional" value="{{ $pengaturan->jam_operasional }}" 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200">
+                            <input type="text" name="jam_operasional" id="jam_operasional" value="{{ $pengaturan->jam_operasional }}"
+                                   class="w-full px-4 py-3 rounded-xl text-sm transition-all duration-200 focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+                                   style="background: rgba(16,185,129,0.03); border: 1px solid rgba(16,185,129,0.15);"
+                                   placeholder="Senin - Jumat, 08:00 - 15:00">
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Visi, Misi, dan Sejarah Section -->
-            <div class="mt-8 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-                <div class="bg-gradient-to-r from-purple-500 to-pink-600 px-6 py-4">
-                    <div class="flex items-center space-x-3">
-                        <i class="fas fa-book-open text-white text-xl"></i>
-                        <h3 class="text-lg font-semibold text-white">Visi, Misi & Informasi Sekolah</h3>
-                    </div>
+
+            {{-- Action Buttons --}}
+            <div class="mt-8 flex items-center justify-between">
+                <p class="text-xs text-gray-400 hidden sm:block">
+                    <i class="fas fa-info-circle mr-1"></i>Perubahan akan langsung diterapkan setelah disimpan
+                </p>
+                <div class="flex items-center gap-3 ml-auto">
+                    <button type="button" onclick="window.history.back()"
+                            class="px-5 py-2.5 rounded-xl text-sm font-medium text-gray-600 transition-all duration-200 hover:scale-105"
+                            style="background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(0,0,0,0.08);">
+                        <i class="fas fa-arrow-left mr-1.5"></i>Kembali
+                    </button>
+                    <button type="submit" id="btnSimpan"
+                            class="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2"
+                            style="background: linear-gradient(135deg, #7c3aed, #a855f7); box-shadow: 0 4px 15px rgba(124,58,237,0.3);">
+                        <i class="fas fa-save"></i>
+                        <span>Simpan Pengaturan</span>
+                    </button>
                 </div>
-                
-                <div class="p-6 space-y-6">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label for="visi_sekolah" class="block text-sm font-medium text-gray-700 flex items-center">
-                                <i class="fas fa-eye text-purple-500 mr-2"></i>
-                                Visi Sekolah
-                            </label>
-                            <textarea name="visi_sekolah" id="visi_sekolah" rows="4" 
-                                      class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200">{{ $pengaturan->visi_sekolah }}</textarea>
-                        </div>
-                        
-                        <div class="space-y-2">
-                            <label for="misi_sekolah" class="block text-sm font-medium text-gray-700 flex items-center">
-                                <i class="fas fa-bullseye text-purple-500 mr-2"></i>
-                                Misi Sekolah
-                            </label>
-                            <textarea name="misi_sekolah" id="misi_sekolah" rows="4" 
-                                      class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200">{{ $pengaturan->misi_sekolah }}</textarea>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-2">
-                        <label for="sejarah_sekolah" class="block text-sm font-medium text-gray-700 flex items-center">
-                            <i class="fas fa-history text-purple-500 mr-2"></i>
-                            Sejarah Sekolah
-                        </label>
-                        <textarea name="sejarah_sekolah" id="sejarah_sekolah" rows="4" 
-                                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200">{{ $pengaturan->sejarah_sekolah }}</textarea>
-                    </div>
-                    
-                    <div class="space-y-2">
-                        <label for="kebijakan_perpustakaan" class="block text-sm font-medium text-gray-700 flex items-center">
-                            <i class="fas fa-gavel text-purple-500 mr-2"></i>
-                            Kebijakan Perpustakaan
-                        </label>
-                        <textarea name="kebijakan_perpustakaan" id="kebijakan_perpustakaan" rows="4" 
-                                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200">{{ $pengaturan->kebijakan_perpustakaan }}</textarea>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Action Buttons -->
-            <div class="mt-8 flex justify-end space-x-4">
-                <button type="button" onclick="window.history.back()" 
-                        class="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200 flex items-center">
-                    <i class="fas fa-arrow-left mr-2"></i>
-                    Kembali
-                </button>
-                <button type="submit" 
-                        class="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 flex items-center shadow-lg hover:shadow-xl">
-                    <i class="fas fa-save mr-2"></i>
-                    Simpan Pengaturan
-                </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Success/Error Messages -->
+{{-- SweetAlert for success/error --}}
 @if(session('success'))
-<div id="success-message" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-50 flex items-center">
-    <i class="fas fa-check-circle mr-2"></i>
-    {{ session('success') }}
-</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: '{{ session("success") }}',
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+        customClass: { popup: 'rounded-2xl' }
+    });
+});
+</script>
 @endif
 
 @if(session('error'))
-<div id="error-message" class="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-xl shadow-lg z-50 flex items-center">
-    <i class="fas fa-exclamation-circle mr-2"></i>
-    {{ session('error') }}
-</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: '{{ session("error") }}',
+        confirmButtonColor: '#7c3aed',
+        customClass: { popup: 'rounded-2xl' }
+    });
+});
+</script>
+@endif
+
+@if($errors->any())
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let errorList = '';
+    @foreach($errors->all() as $error)
+        errorList += '{{ $error }}\n';
+    @endforeach
+    Swal.fire({
+        icon: 'warning',
+        title: 'Validasi Gagal',
+        text: errorList.trim(),
+        confirmButtonColor: '#7c3aed',
+        customClass: { popup: 'rounded-2xl' }
+    });
+});
+</script>
 @endif
 
 <script>
-// Auto hide messages after 5 seconds
-setTimeout(function() {
-    const successMessage = document.getElementById('success-message');
-    const errorMessage = document.getElementById('error-message');
-    
-    if (successMessage) {
-        successMessage.style.opacity = '0';
-        setTimeout(() => successMessage.remove(), 500);
+function previewImage(input, previewId, placeholderId) {
+    const preview = document.getElementById(previewId);
+    const placeholder = document.getElementById(placeholderId);
+
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+
+        // Validate size
+        const maxSize = previewId === 'logoPreview' ? 2 * 1024 * 1024 : 1024 * 1024;
+        if (file.size > maxSize) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'File Terlalu Besar',
+                text: `Ukuran file maksimal ${previewId === 'logoPreview' ? '2MB' : '1MB'}`,
+                confirmButtonColor: '#7c3aed',
+                customClass: { popup: 'rounded-2xl' }
+            });
+            input.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+            preview.style.display = '';
+            placeholder.style.display = 'none';
+            placeholder.classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
     }
-    
-    if (errorMessage) {
-        errorMessage.style.opacity = '0';
-        setTimeout(() => errorMessage.remove(), 500);
-    }
-}, 5000);
+}
+
+// Submit with loading state
+document.getElementById('formPengaturan').addEventListener('submit', function() {
+    const btn = document.getElementById('btnSimpan');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Menyimpan...</span>';
+});
 </script>
-@endsection 
+@endsection

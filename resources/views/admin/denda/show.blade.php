@@ -5,7 +5,7 @@
 @section('content')
 <div class="max-w-4xl mx-auto">
     <!-- Page Header -->
-    <div class="bg-gradient-to-r from-red-600 to-pink-700 rounded-xl shadow-lg p-6 mb-6 text-white">
+    <!-- <div class="bg-gradient-to-r from-red-600 to-pink-700 rounded-xl shadow-lg p-6 mb-6 text-white">
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold">👁️ Detail Denda</h1>
@@ -24,7 +24,7 @@
                 </a>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Detail Information -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -106,9 +106,19 @@
             @if($denda->anggota)
             <div class="flex items-center mb-4">
                 <div class="flex-shrink-0 h-16 w-16">
-                    <img class="h-16 w-16 rounded-full object-cover" 
-                         src="{{ $denda->anggota->foto ? asset('storage/' . $denda->anggota->foto) : 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" fill="#e5e7eb"/><text x="32" y="38" text-anchor="middle" fill="#9ca3af" font-family="Arial" font-size="24">👤</text></svg>') }}" 
-                         alt="Foto Anggota">
+                    @if($denda->anggota->foto)
+                        <img class="h-16 w-16 rounded-xl object-cover border-2 border-gray-100"
+                             src="{{ asset('storage/' . $denda->anggota->foto) }}"
+                             alt="{{ $denda->anggota->nama_lengkap }}"
+                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                        <div class="h-16 w-16 rounded-xl flex items-center justify-center text-white text-xl font-bold" style="display:none;background:linear-gradient(135deg,{{ ['#f97316,#ef4444','#8b5cf6,#6366f1','#10b981,#059669','#3b82f6,#2563eb','#ec4899,#db2777'][($denda->anggota->id ?? 0) % 5] }});">
+                            {{ strtoupper(substr($denda->anggota->nama_lengkap ?? 'N', 0, 1)) }}
+                        </div>
+                    @else
+                        <div class="h-16 w-16 rounded-xl flex items-center justify-center text-white text-xl font-bold" style="background:linear-gradient(135deg,{{ ['#f97316,#ef4444','#8b5cf6,#6366f1','#10b981,#059669','#3b82f6,#2563eb','#ec4899,#db2777'][($denda->anggota->id ?? 0) % 5] }});">
+                            {{ strtoupper(substr($denda->anggota->nama_lengkap ?? 'N', 0, 1)) }}
+                        </div>
+                    @endif
                 </div>
                 <div class="ml-4">
                     <h3 class="text-lg font-semibold text-gray-900">{{ $denda->anggota->nama_lengkap }}</h3>

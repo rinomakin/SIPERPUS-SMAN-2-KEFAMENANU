@@ -3,9 +3,9 @@
 @section('title', 'Tambah Denda')
 
 @section('content')
-<div class="max-w-4xl mx-auto">
+<div class="max-w-6xl mx-auto">
     <!-- Page Header -->
-    <div class="bg-gradient-to-r from-red-600 to-pink-700 rounded-xl shadow-lg p-6 mb-6 text-white">
+    <!-- <div class="bg-gradient-to-r from-red-600 to-pink-700 rounded-xl shadow-lg p-6 mb-6 text-white">
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold">➕ Tambah Denda</h1>
@@ -19,7 +19,7 @@
                 </a>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Create Form -->
     <div class="bg-white rounded-xl shadow-lg p-6">
@@ -186,7 +186,7 @@
     </div>
 
     <!-- Quick Actions -->
-    <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
+    <!-- <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
         <h2 class="text-lg font-semibold text-gray-800 mb-4">
             <i class="fas fa-lightning-bolt mr-2 text-blue-600"></i>
             Aksi Cepat
@@ -210,7 +210,7 @@
                 </div>
             </a>
         </div>
-    </div>
+    </div> -->
 </div>
 
 <script>

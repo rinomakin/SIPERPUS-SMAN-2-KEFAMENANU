@@ -1,207 +1,319 @@
 @extends('layouts.admin')
 
 @section('title', 'Buku Tamu')
+@section('page-title', 'Buku Tamu')
 
 @section('content')
 <meta name="csrf-token" content="{{ csrf_token() }}">
+<style>
+    .glass-card {
+        background: rgba(255,255,255,0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade { animation: fadeIn 0.4s ease forwards; }
+    .visitor-card { transition: all 0.2s ease; }
+    .visitor-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+</style>
 
-<div class="max-w-7xl mx-auto">
-   
+<div class="space-y-5">
+    {{-- Header --}}
+    <div class="glass-card rounded-2xl shadow-lg p-5 animate-fade">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+                <h1 class="text-xl font-bold text-gray-900">Buku Tamu Hari Ini</h1>
+                <p class="text-sm text-gray-500">
+                    <i class="fas fa-calendar-day mr-1"></i>
+                    {{ now()->translatedFormat('l, d F Y') }}
+                </p>
+            </div>
 
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h4 class="text-[12px] font-medium text-gray-600 uppercase">Hari Ini</h4>
-                    <p class="text-[16px] font-bold text-gray-900">{{ $totalTamuHariIni }}</p>
+            <div class="flex flex-wrap items-center gap-2">
+                {{-- Search --}}
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Cari tamu..." value="{{ request('search') }}"
+                           class="w-52 px-4 py-2.5 pl-10 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-white/70 transition-all">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400 text-sm"></i>
+                    </div>
                 </div>
-                <div class="bg-blue-100 h-12 w-12 flex items-center justify-center rounded-full">
-                    <i class="fas fa-users text-blue-600 text-sm"></i>
+
+                {{-- Filter Status --}}
+                <select id="filterStatus" onchange="applyFilter()"
+                        class="px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white/70 focus:ring-2 focus:ring-violet-500">
+                    <option value="">Semua Status</option>
+                    <option value="berkunjung" {{ request('status') == 'berkunjung' ? 'selected' : '' }}>Sedang Berkunjung</option>
+                    <option value="pulang" {{ request('status') == 'pulang' ? 'selected' : '' }}>Sudah Pulang</option>
+                </select>
+
+                {{-- Filter Tipe --}}
+                <select id="filterTipe" onchange="applyFilter()"
+                        class="px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white/70 focus:ring-2 focus:ring-violet-500">
+                    <option value="">Semua Tipe</option>
+                    <option value="anggota" {{ request('tipe_tamu') == 'anggota' ? 'selected' : '' }}>Anggota</option>
+                    <option value="umum" {{ request('tipe_tamu') == 'umum' ? 'selected' : '' }}>Tamu Umum</option>
+                </select>
+
+                {{-- Tambah --}}
+                <a href="{{ route('admin.buku-tamu.create') }}"
+                   class="px-4 py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 text-white text-sm font-medium rounded-xl shadow-md hover:shadow-lg transition-all">
+                    <i class="fas fa-plus mr-1.5"></i> Tambah
+                </a>
+
+                {{-- Riwayat --}}
+                <a href="{{ route('admin.buku-tamu.history') }}"
+                   class="px-4 py-2.5 bg-white border border-gray-200 hover:border-violet-300 hover:bg-violet-50 text-gray-700 text-sm font-medium rounded-xl transition-all">
+                    <i class="fas fa-history mr-1.5"></i> Riwayat
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {{-- Stats Cards --}}
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div class="glass-card rounded-2xl p-4 animate-fade" style="animation-delay:0.05s">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-users text-violet-600"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500">Total Hari Ini</p>
+                    <p class="text-lg font-bold text-gray-900">{{ $totalTamuHariIni }}</p>
                 </div>
             </div>
         </div>
-
-        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-[12px] font-medium text-gray-600 uppercase">Bulan Ini</h3>
-                    <p class="text-[16px] font-bold text-gray-900">{{ $totalTamuBulanIni }}</p>
+        <div class="glass-card rounded-2xl p-4 animate-fade" style="animation-delay:0.1s">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-clock text-emerald-600"></i>
                 </div>
-                <div class="bg-green-100 h-12 w-12 flex items-center justify-center rounded-full">
-                    <i class="fas fa-chart-line text-green-600 text-xl"></i>
+                <div>
+                    <p class="text-xs text-gray-500">Sedang Berkunjung</p>
+                    <p class="text-lg font-bold text-gray-900">{{ $sedangBerkunjung }}</p>
                 </div>
             </div>
         </div>
-
-        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-yellow-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-[12px] font-medium text-gray-600 uppercase">Sedang Berkunjung</h3>
-                    <p class="text-[16px] font-bold text-gray-900">{{ $sedangBerkunjung }}</p>
+        <div class="glass-card rounded-2xl p-4 animate-fade" style="animation-delay:0.15s">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-sign-out-alt text-amber-600"></i>
                 </div>
-                <div class="bg-yellow-100 h-12 w-12 flex items-center justify-center rounded-full">
-                    <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                <div>
+                    <p class="text-xs text-gray-500">Sudah Pulang</p>
+                    <p class="text-lg font-bold text-gray-900">{{ $sudahPulang }}</p>
                 </div>
             </div>
         </div>
-
-        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-[12px] font-medium text-gray-600 uppercase">Total Kunjungan</h3>
-                    <p class="text-[16px] font-bold text-gray-900">{{ $totalKunjungan }}</p>
+        <div class="glass-card rounded-2xl p-4 animate-fade" style="animation-delay:0.2s">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-id-card text-blue-600"></i>
                 </div>
-                <div class="bg-purple-100 h-12 w-12 flex items-center justify-center rounded-full">
-                    <i class="fas fa-history text-purple-600 text-xl"></i>
+                <div>
+                    <p class="text-xs text-gray-500">Anggota</p>
+                    <p class="text-lg font-bold text-gray-900">{{ $tamuAnggota }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="glass-card rounded-2xl p-4 animate-fade" style="animation-delay:0.25s">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-user-friends text-purple-600"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500">Tamu Umum</p>
+                    <p class="text-lg font-bold text-gray-900">{{ $tamuUmum }}</p>
                 </div>
             </div>
         </div>
     </div>
 
-
-    <!-- Today's Visitors -->
-    <div class="bg-white rounded-xl shadow-lg">
-        <div class="flex items-center bg-blue-700 py-4 justify-between mb-6 px-4 rounded-t-xl">
-            <h2 class="text-sm font-semibold text-gray-100 flex space-x-2 items-center">
-                <i class="fas fa-users mr-2 "></i>
-                Tamu Hari Ini
-                <span class="text-xs text-gray-400" >{{ now()->format('d F Y') }}</span>
+    {{-- Visitor List --}}
+    <div class="glass-card rounded-2xl shadow-lg overflow-hidden animate-fade" style="animation-delay:0.15s">
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-list text-violet-500"></i>
+                Daftar Tamu
+                <span class="px-2 py-0.5 bg-violet-100 text-violet-700 text-xs font-bold rounded-lg">{{ $kunjunganHariIni->count() }}</span>
             </h2>
-            <p class="text-xs text-gray-100">
-                
-            </p>
-            <div class="flex space-x-2">
-            <input type="text" id="searchVisitor" placeholder="Cari tamu..." 
-                   class="px-4 py-2 rounded-lg border outline-none border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs">
-
-
-                <a href="{{ route('admin.buku-tamu.create') }}" 
-               class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                <i class="fas fa-plus mr-2"></i>
-                Tambah
-            </a>
-            <a href="{{ route('admin.buku-tamu.history') }}" 
-               class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                <i class="fas fa-history mr-2"></i>
-                Riwayat
-            </a>
-            </div>
-        </div>
-
-        <!-- Visitors List -->
-        <div id="visitors-container" class="space-y-4">
-            @if($kunjunganHariIni->count() === 0)
-                <div class="text-center py-12 text-gray-800 bg-blue-800 rounded-lg">
-                    <i class="fas fa-users text-xl mb-4 text-gray-300"></i>
-                    <h3 class="text-sm font-medium mb-2">Belum ada tamu hari ini</h3>
-                    <p class="text-gray-400">Mulai dengan menambahkan tamu baru</p>
-                </div>
-            @else
-                @foreach($kunjunganHariIni as $kunjungan)
-                    @if($kunjungan->anggota || $kunjungan->nama_tamu)
-                        <div class="visitor-item bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors duration-200" data-id="{{ $kunjungan->id }}">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-4">
-
-                                    <img src="{{ $kunjungan->anggota && $kunjungan->anggota->foto ? asset('storage/' . $kunjungan->anggota->foto) : 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#e5e7eb"/><text x="20" y="24" text-anchor="middle" fill="#9ca3af" font-family="Arial" font-size="14">👤</text></svg>') }}" 
-                                         alt="Foto" class="w-12 h-12 rounded-full object-cover border-2 border-gray-200">
-                                    <div>
-                                        <h4 class="font-semibold text-gray-900">{{ $kunjungan->nama_tamu ?? ($kunjungan->anggota ? $kunjungan->anggota->nama_lengkap : 'Nama Tidak Tersedia') }}</h4>
-                                        <p class="text-sm text-gray-600">
-                                            {{ $kunjungan->anggota ? $kunjungan->anggota->nomor_anggota : 'Tamu Umum' }} | 
-                                            {{ $kunjungan->instansi ?? ($kunjungan->anggota && $kunjungan->anggota->kelas ? $kunjungan->anggota->kelas->nama_kelas : '-') }}
-                                        </p>
-                                        <p class="text-xs text-gray-500">
-                                            Datang: {{ $kunjungan->waktu_datang->format('H:i') }} 
-                                            @if($kunjungan->waktu_pulang)
-                                                | Pulang: {{ $kunjungan->waktu_pulang->format('H:i') }}
-                                            @endif
-                                        </p>
-                                        @if($kunjungan->keperluan)
-                                            <p class="text-xs text-blue-600 font-medium">
-                                                <i class="fas fa-bullseye mr-1"></i>
-                                                {{ $kunjungan->keperluan }}
-                                            </p>
-                                        @endif
-                                    </div>
-                                </div>
-                                
-                                <div class="flex items-center space-x-3">
-                                    <!-- Status Badge -->
-                                    <div class="flex items-center">
-                                        @if($kunjungan->waktu_pulang)
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                <i class="fas fa-sign-out-alt mr-1"></i>
-                                                Sudah Pulang
-                                            </span>
-                                        @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                <i class="fas fa-clock mr-1"></i>
-                                                Sedang Berkunjung
-                                            </span>
-                                        @endif
-                                    </div>
-
-                                    <!-- Action Buttons -->
-                                    <div class="flex items-center space-x-2">
-                                        @if(!$kunjungan->waktu_pulang)
-                                            <button onclick="recordExit({{ $kunjungan->id }})" 
-                                                    class="text-red-700 rounded-lg text-sm font-medium transition-colors duration-200">
-                                                <i class="fas fa-sign-out-alt mr-1"></i>
-                                                Pulang
-                                            </button>
-                                        @endif
-                                        
-                                        <a href="{{ route('admin.buku-tamu.show', $kunjungan->id) }}" 
-                                           class="text-blue-600 hover:text-blue-800 transition-colors duration-200" 
-                                           title="Lihat Detail">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        
-                                        <a href="{{ route('admin.buku-tamu.edit', $kunjungan->id) }}" 
-                                           class="text-yellow-600 hover:text-yellow-800 transition-colors duration-200" 
-                                           title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        
-                                        <form action="{{ route('admin.buku-tamu.destroy', $kunjungan->id) }}" 
-                                              method="POST" 
-                                              class="inline" 
-                                              onsubmit="return confirm('Apakah Anda yakin ingin menghapus data kunjungan ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" 
-                                                    class="text-red-600 hover:text-red-800 transition-colors duration-200" 
-                                                    title="Hapus">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-                @endforeach
+            @if(request()->hasAny(['search', 'status', 'tipe_tamu']))
+                <a href="{{ route('admin.buku-tamu.index') }}" class="text-xs text-violet-600 hover:text-violet-800 font-medium">
+                    <i class="fas fa-times mr-1"></i> Reset Filter
+                </a>
             @endif
         </div>
+
+        @if($kunjunganHariIni->count() === 0)
+            <div class="text-center py-16 px-6">
+                <div class="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-book-open text-3xl text-gray-400"></i>
+                </div>
+                <h3 class="text-base font-semibold text-gray-900 mb-1">Belum ada tamu hari ini</h3>
+                <p class="text-sm text-gray-500 mb-4">Klik tombol "Tambah" untuk mencatat kunjungan baru</p>
+                <a href="{{ route('admin.buku-tamu.create') }}"
+                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white text-sm font-medium rounded-xl shadow-md hover:shadow-lg transition-all">
+                    <i class="fas fa-plus mr-1.5"></i> Tambah Tamu
+                </a>
+            </div>
+        @else
+            <div class="divide-y divide-gray-100">
+                @foreach($kunjunganHariIni as $kunjungan)
+                <div class="visitor-card px-5 py-4 hover:bg-violet-50/30 transition-colors">
+                    <div class="flex items-center justify-between gap-4">
+                        {{-- Left: Avatar + Info --}}
+                        <div class="flex items-center gap-4 min-w-0 flex-1">
+                            <div class="relative flex-shrink-0">
+                                <img src="{{ $kunjungan->anggota && $kunjungan->anggota->foto ? asset('storage/' . $kunjungan->anggota->foto) : asset('images/default-avatar.png') }}"
+                                     alt="Foto" class="w-12 h-12 rounded-xl object-cover border-2 border-gray-200"
+                                     onerror="this.src='{{ asset('images/default-avatar.png') }}'">
+                                @if(!$kunjungan->waktu_pulang)
+                                    <span class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white"></span>
+                                @endif
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h4 class="text-sm font-semibold text-gray-900 truncate">{{ $kunjungan->nama_tamu ?? ($kunjungan->anggota ? $kunjungan->anggota->nama_lengkap : '-') }}</h4>
+                                    @if($kunjungan->anggota_id)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Anggota
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> Umum
+                                        </span>
+                                    @endif
+                                </div>
+                                <p class="text-xs text-gray-500 mt-0.5">
+                                    @if($kunjungan->anggota)
+                                        {{ $kunjungan->anggota->nomor_anggota }}
+                                        @if($kunjungan->anggota->kelas)
+                                            &middot; {{ $kunjungan->anggota->kelas->nama_kelas }}
+                                        @endif
+                                    @else
+                                        {{ $kunjungan->instansi ?: '-' }}
+                                        @if($kunjungan->no_telepon)
+                                            &middot; {{ $kunjungan->no_telepon }}
+                                        @endif
+                                    @endif
+                                </p>
+                                @if($kunjungan->keperluan)
+                                    <p class="text-xs text-violet-600 mt-0.5">
+                                        <i class="fas fa-tag mr-1"></i>{{ $kunjungan->keperluan }}
+                                    </p>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Center: Time Info --}}
+                        <div class="hidden md:flex items-center gap-4 text-center flex-shrink-0">
+                            <div>
+                                <p class="text-xs text-gray-400">Datang</p>
+                                <p class="text-sm font-semibold text-gray-800 font-mono">{{ $kunjungan->waktu_datang->format('H:i') }}</p>
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-300 text-xs"></i>
+                            <div>
+                                <p class="text-xs text-gray-400">Pulang</p>
+                                @if($kunjungan->waktu_pulang)
+                                    <p class="text-sm font-semibold text-gray-800 font-mono">{{ $kunjungan->waktu_pulang->format('H:i') }}</p>
+                                @else
+                                    <p class="text-sm text-gray-400">--:--</p>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Right: Status + Actions --}}
+                        <div class="flex items-center gap-3 flex-shrink-0">
+                            @if($kunjungan->waktu_pulang)
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span> Pulang
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Berkunjung
+                                </span>
+                            @endif
+
+                            <div class="flex items-center gap-1">
+                                @if(!$kunjungan->waktu_pulang)
+                                    <button onclick="recordExit({{ $kunjungan->id }})"
+                                            class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors" title="Catat Pulang">
+                                        <i class="fas fa-sign-out-alt text-xs"></i>
+                                    </button>
+                                @endif
+                                <a href="{{ route('admin.buku-tamu.show', $kunjungan->id) }}"
+                                   class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors" title="Detail">
+                                    <i class="fas fa-eye text-xs"></i>
+                                </a>
+                                <a href="{{ route('admin.buku-tamu.edit', $kunjungan->id) }}"
+                                   class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors" title="Edit">
+                                    <i class="fas fa-edit text-xs"></i>
+                                </a>
+                                <button onclick="hapusData({{ $kunjungan->id }})"
+                                        class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors" title="Hapus">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        @endif
     </div>
 </div>
-
-<!-- Success/Error Messages -->
-<div id="message-container" class="fixed top-4 right-4 z-50"></div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
-// Make functions globally available immediately
-window.recordExit = async function(kunjunganId) {
-    if (!confirm('Apakah Anda yakin ingin mencatat waktu pulang untuk tamu ini?')) {
-        return;
+// Search with debounce
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    let searchTimeout;
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const val = this.value;
+            searchTimeout = setTimeout(() => applyFilter(), 500);
+        });
     }
+});
+
+function applyFilter() {
+    const params = new URLSearchParams();
+    const search = document.getElementById('searchInput').value.trim();
+    const status = document.getElementById('filterStatus').value;
+    const tipe = document.getElementById('filterTipe').value;
+
+    if (search) params.set('search', search);
+    if (status) params.set('status', status);
+    if (tipe) params.set('tipe_tamu', tipe);
+
+    window.location.href = '{{ route("admin.buku-tamu.index") }}' + (params.toString() ? '?' + params.toString() : '');
+}
+
+// Record exit
+window.recordExit = async function(kunjunganId) {
+    const result = await Swal.fire({
+        title: 'Catat Waktu Pulang?',
+        text: 'Tamu ini akan dicatat sudah pulang.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#8b5cf6',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-sign-out-alt mr-1"></i> Ya, Pulangkan',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    });
+
+    if (!result.isConfirmed) return;
+
+    Swal.fire({ title: 'Menyimpan...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
     try {
-        const response = await fetch(`{{ route('admin.buku-tamu.record-exit') }}`, {
+        const response = await fetch('{{ route("admin.buku-tamu.record-exit") }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -210,92 +322,54 @@ window.recordExit = async function(kunjunganId) {
             body: JSON.stringify({ kunjungan_id: kunjunganId })
         });
 
-        const result = await response.json();
+        const data = await response.json();
 
-        if (result.success) {
-            showMessage(result.message, 'success');
-            // Refresh the page to update the display
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
+        if (data.success) {
+            await Swal.fire({ icon: 'success', title: 'Berhasil!', text: data.message, timer: 1500, showConfirmButton: false });
+            location.reload();
         } else {
-            showMessage(result.message, 'error');
+            Swal.fire({ icon: 'error', title: 'Gagal!', text: data.message });
         }
     } catch (error) {
-        console.error('Error recording exit:', error);
-        showMessage('Terjadi kesalahan saat mencatat waktu pulang', 'error');
+        Swal.fire({ icon: 'error', title: 'Error!', text: 'Terjadi kesalahan saat mencatat waktu pulang.' });
     }
 };
 
-// Show message function
-window.showMessage = function(message, type) {
-    const container = document.getElementById('message-container');
-    let alertClass;
-    let icon;
-    
-    switch (type) {
-        case 'success':
-            alertClass = 'bg-green-500';
-            icon = 'fas fa-check-circle';
-            break;
-        case 'info':
-            alertClass = 'bg-blue-500';
-            icon = 'fas fa-info-circle';
-            break;
-        case 'warning':
-            alertClass = 'bg-yellow-500';
-            icon = 'fas fa-exclamation-triangle';
-            break;
-        default:
-            alertClass = 'bg-red-500';
-            icon = 'fas fa-times-circle';
-    }
-    
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `${alertClass} text-white px-4 py-3 rounded-lg shadow-lg mb-2 transform transition-all duration-300 z-50`;
-    messageDiv.innerHTML = `
-        <div class="flex items-center justify-between">
-            <div class="flex items-center">
-                <i class="${icon} mr-2"></i>
-                <span>${message}</span>
-            </div>
-            <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-    `;
-    
-    container.appendChild(messageDiv);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (messageDiv.parentNode) {
-            messageDiv.remove();
-        }
-    }, 5000);
-};
-
-// Wait for DOM to be ready for event listeners
-document.addEventListener('DOMContentLoaded', function() {
-    // Search functionality for visitors
-    const searchInput = document.getElementById('searchVisitor');
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const visitorItems = document.querySelectorAll('.visitor-item');
-            
-            visitorItems.forEach(item => {
-                const visitorName = item.querySelector('h4').textContent.toLowerCase();
-                const visitorInfo = item.querySelector('.text-gray-600').textContent.toLowerCase();
-                
-                if (visitorName.includes(searchTerm) || visitorInfo.includes(searchTerm)) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
+// Delete single
+function hapusData(id) {
+    Swal.fire({
+        title: 'Hapus Data?',
+        text: 'Data kunjungan ini akan dihapus permanen.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-trash mr-1"></i> Ya, Hapus',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/admin/buku-tamu/' + id, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({ icon: 'success', title: 'Berhasil!', text: data.message, timer: 1500, showConfirmButton: false });
+                    location.reload();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Gagal!', text: 'Terjadi kesalahan.' });
+                }
+            })
+            .catch(() => {
+                Swal.fire({ icon: 'error', title: 'Error!', text: 'Terjadi kesalahan saat menghapus data.' });
             });
-        });
-    }
-});
+        }
+    });
+}
 </script>
-@endsection
+@endpush

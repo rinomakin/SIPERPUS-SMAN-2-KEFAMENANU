@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\Denda;
 use App\Models\Peminjaman;
 use App\Models\Anggota;
+use App\Models\Pengembalian;
+use App\Models\Kelas;
+use App\Models\Jurusan;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
@@ -16,19 +19,190 @@ class DendaController extends Controller
         $this->middleware(['auth', 'role:ADMIN,PETUGAS']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $denda = Denda::with(['peminjaman.detailPeminjaman.buku', 'anggota.kelas', 'anggota.jurusan'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+        $query = Denda::with(['peminjaman.detailPeminjaman.buku', 'anggota.kelas.jurusan'])
+            ->where('status_pembayaran', 'belum_dibayar');
+
+        // Filter pencarian nama/nomor anggota
+        if ($request->search) {
+            $search = $request->search;
+            $query->whereHas('anggota', function ($q) use ($search) {
+                $q->where('nama_lengkap', 'like', '%' . $search . '%')
+                  ->orWhere('nomor_anggota', 'like', '%' . $search . '%')
+                  ->orWhere('barcode_anggota', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Filter berdasarkan kelas
+        if ($request->kelas_id) {
+            $query->whereHas('anggota', function ($q) use ($request) {
+                $q->where('kelas_id', $request->kelas_id);
+            });
+        }
+
+        // Filter berdasarkan jurusan (melalui kelas)
+        if ($request->jurusan_id) {
+            $query->whereHas('anggota.kelas', function ($q) use ($request) {
+                $q->where('jurusan_id', $request->jurusan_id);
+            });
+        }
+
+        // Filter berdasarkan jenis anggota
+        if ($request->jenis_anggota) {
+            $query->whereHas('anggota', function ($q) use ($request) {
+                $q->where('jenis_anggota', $request->jenis_anggota);
+            });
+        }
+
+        $denda = $query->orderBy('created_at', 'desc')->get();
 
         // Statistik denda
         $totalDenda = Denda::sum('jumlah_denda');
         $dendaBelumDibayar = Denda::where('status_pembayaran', 'belum_dibayar')->sum('jumlah_denda');
         $dendaSudahDibayar = Denda::where('status_pembayaran', 'sudah_dibayar')->sum('jumlah_denda');
         $totalDendaHariIni = Denda::whereDate('created_at', today())->sum('jumlah_denda');
+        $jumlahBelumBayar = Denda::where('status_pembayaran', 'belum_dibayar')->count();
 
-        return view('admin.denda.index', compact('denda', 'totalDenda', 'dendaBelumDibayar', 'dendaSudahDibayar', 'totalDendaHariIni'));
+        // Data untuk filter dropdown
+        $kelasList = Kelas::orderBy('nama_kelas')->get();
+        $jurusanList = Jurusan::orderBy('nama_jurusan')->get();
+
+        return view('admin.denda.index', compact(
+            'denda', 'totalDenda', 'dendaBelumDibayar', 'dendaSudahDibayar',
+            'totalDendaHariIni', 'jumlahBelumBayar', 'kelasList', 'jurusanList'
+        ));
+    }
+
+    public function riwayat(Request $request)
+    {
+        $query = Denda::with(['peminjaman.detailPeminjaman.buku', 'anggota.kelas', 'anggota.jurusan'])
+            ->where('status_pembayaran', 'sudah_dibayar');
+
+        // Filter pencarian
+        if ($request->search) {
+            $search = $request->search;
+            $query->whereHas('anggota', function ($q) use ($search) {
+                $q->where('nama_lengkap', 'like', '%' . $search . '%')
+                  ->orWhere('nomor_anggota', 'like', '%' . $search . '%');
+            });
+        }
+
+        if ($request->tanggal_mulai) {
+            $query->whereDate('tanggal_pembayaran', '>=', $request->tanggal_mulai);
+        }
+
+        if ($request->tanggal_selesai) {
+            $query->whereDate('tanggal_pembayaran', '<=', $request->tanggal_selesai);
+        }
+
+        // Filter berdasarkan kelas
+        if ($request->kelas_id) {
+            $query->whereHas('anggota', function ($q) use ($request) {
+                $q->where('kelas_id', $request->kelas_id);
+            });
+        }
+
+        // Filter berdasarkan jurusan
+        if ($request->jurusan_id) {
+            $query->whereHas('anggota.kelas', function ($q) use ($request) {
+                $q->where('jurusan_id', $request->jurusan_id);
+            });
+        }
+
+        $riwayat = $query->orderBy('tanggal_pembayaran', 'desc')->get();
+
+        // Statistik
+        $totalDendaDibayar = Denda::where('status_pembayaran', 'sudah_dibayar')->sum('jumlah_denda');
+        $jumlahTransaksi = Denda::where('status_pembayaran', 'sudah_dibayar')->count();
+        $dendaBulanIni = Denda::where('status_pembayaran', 'sudah_dibayar')
+            ->whereMonth('tanggal_pembayaran', now()->month)
+            ->whereYear('tanggal_pembayaran', now()->year)
+            ->sum('jumlah_denda');
+        $rataRataDenda = $jumlahTransaksi > 0 ? round($totalDendaDibayar / $jumlahTransaksi) : 0;
+
+        $kelasList = Kelas::orderBy('nama_kelas')->get();
+        $jurusanList = Jurusan::orderBy('nama_jurusan')->get();
+
+        return view('admin.denda.riwayat', compact(
+            'riwayat', 'totalDendaDibayar', 'jumlahTransaksi', 'dendaBulanIni',
+            'rataRataDenda', 'kelasList', 'jurusanList'
+        ));
+    }
+
+    public function bulkDestroyRiwayat(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada data yang dipilih untuk dihapus.');
+        }
+
+        $deleted = Denda::whereIn('id', $ids)
+            ->where('status_pembayaran', 'sudah_dibayar')
+            ->delete();
+
+        return back()->with('success', $deleted . ' riwayat denda berhasil dihapus.');
+    }
+
+    public function bayarLunas($id)
+    {
+        $denda = Denda::findOrFail($id);
+
+        if ($denda->status_pembayaran === 'sudah_dibayar') {
+            return back()->with('error', 'Denda ini sudah dibayar sebelumnya.');
+        }
+
+        $denda->update([
+            'status_pembayaran' => 'sudah_dibayar',
+            'tanggal_pembayaran' => now(),
+        ]);
+
+        // Update status denda di pengembalian terkait
+        $this->syncPengembalianStatus($denda, 'sudah_dibayar', now());
+
+        return redirect()->route('admin.denda.index')
+            ->with('success', 'Denda berhasil dibayar lunas.');
+    }
+
+    /**
+     * Cari denda berdasarkan scan barcode anggota
+     */
+    public function scanBarcodeDenda(Request $request)
+    {
+        $barcode = $request->barcode;
+
+        if (!$barcode) {
+            return response()->json(['success' => false, 'message' => 'Barcode tidak boleh kosong']);
+        }
+
+        $anggota = Anggota::where('barcode_anggota', $barcode)
+            ->orWhere('nomor_anggota', $barcode)
+            ->first();
+
+        if (!$anggota) {
+            return response()->json(['success' => false, 'message' => 'Anggota tidak ditemukan']);
+        }
+
+        $dendaBelumBayar = Denda::with(['peminjaman.detailPeminjaman.buku'])
+            ->where('anggota_id', $anggota->id)
+            ->where('status_pembayaran', 'belum_dibayar')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'anggota' => [
+                'id' => $anggota->id,
+                'nama_lengkap' => $anggota->nama_lengkap,
+                'nomor_anggota' => $anggota->nomor_anggota,
+                'barcode_anggota' => $anggota->barcode_anggota,
+                'kelas' => $anggota->kelas ? $anggota->kelas->nama_kelas : '-',
+                'foto' => $anggota->foto ? asset('storage/' . $anggota->foto) : null,
+            ],
+            'denda' => $dendaBelumBayar,
+            'total_denda' => $dendaBelumBayar->sum('jumlah_denda'),
+            'jumlah_denda' => $dendaBelumBayar->count(),
+        ]);
     }
 
     public function create()
@@ -124,7 +298,11 @@ class DendaController extends Controller
             'tanggal_pembayaran' => $request->status_pembayaran === 'sudah_dibayar' ? $request->tanggal_pembayaran : null,
             'catatan' => $request->catatan,
         ]);
-        
+
+        // Update status denda di pengembalian terkait
+        $tanggalBayar = $request->status_pembayaran === 'sudah_dibayar' ? $request->tanggal_pembayaran : null;
+        $this->syncPengembalianStatus($denda, $request->status_pembayaran, $tanggalBayar);
+
         return redirect()->route('admin.denda.index')
             ->with('success', 'Data denda berhasil diperbarui.');
     }
@@ -192,11 +370,15 @@ class DendaController extends Controller
         ]);
 
         $denda = Denda::findOrFail($id);
-        
+
         $denda->update([
             'status_pembayaran' => $request->status_pembayaran,
             'tanggal_pembayaran' => $request->status_pembayaran === 'sudah_dibayar' ? $request->tanggal_pembayaran : null,
         ]);
+
+        // Update status denda di pengembalian terkait
+        $tanggalBayar = $request->status_pembayaran === 'sudah_dibayar' ? ($request->tanggal_pembayaran ?? now()) : null;
+        $this->syncPengembalianStatus($denda, $request->status_pembayaran, $tanggalBayar);
 
         return response()->json([
             'success' => true,
@@ -243,4 +425,35 @@ class DendaController extends Controller
             ]
         ]);
     }
-} 
+
+    /**
+     * Sinkronisasi status denda ke pengembalian terkait.
+     * Cari pengembalian via pengembalian_id, fallback ke peminjaman_id.
+     */
+    private function syncPengembalianStatus(Denda $denda, string $statusDenda, $tanggalPembayaran = null)
+    {
+        $pengembalian = null;
+
+        // Cari via pengembalian_id langsung
+        if ($denda->pengembalian_id) {
+            $pengembalian = Pengembalian::find($denda->pengembalian_id);
+        }
+
+        // Fallback: cari via peminjaman_id
+        if (!$pengembalian && $denda->peminjaman_id) {
+            $pengembalian = Pengembalian::where('peminjaman_id', $denda->peminjaman_id)->first();
+
+            // Simpan pengembalian_id ke denda agar next time langsung ketemu
+            if ($pengembalian && !$denda->pengembalian_id) {
+                $denda->update(['pengembalian_id' => $pengembalian->id]);
+            }
+        }
+
+        if ($pengembalian) {
+            $pengembalian->update([
+                'status_denda' => $statusDenda,
+                'tanggal_pembayaran_denda' => $tanggalPembayaran,
+            ]);
+        }
+    }
+}

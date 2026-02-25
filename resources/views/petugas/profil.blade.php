@@ -1,6 +1,6 @@
-@extends('layouts.petugas')
+@extends('layouts.admin')
 
-@section('title', 'Profil')
+@section('page-title', 'Profil')
 
 @section('content')
 <div class="container mx-auto px-4 py-6">

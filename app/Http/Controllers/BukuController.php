@@ -13,77 +13,139 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\BukuExport;
 use App\Exports\BukuTemplateExport;
 use App\Imports\BukuImport;
+use Yajra\DataTables\Facades\DataTables;
 
 class BukuController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH']);
+        $this->middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS']);
     }
 
     public function index(Request $request)
     {
-        $query = Buku::with(['kategoriBuku', 'jenisBuku', 'sumberBuku', 'rakBuku']);
-
-        // Filter berdasarkan pencarian
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('judul_buku', 'LIKE', "%{$search}%")
-                  ->orWhere('isbn', 'LIKE', "%{$search}%")
-                  ->orWhere('barcode', 'LIKE', "%{$search}%")
-                  ->orWhere('lokasi_rak', 'LIKE', "%{$search}%")
-                  ->orWhere('pengarang', 'LIKE', "%{$search}%")
-                  ->orWhere('penerbit', 'LIKE', "%{$search}%")
-                  ->orWhereHas('kategoriBuku', function($q) use ($search) {
-                      $q->where('nama_kategori', 'LIKE', "%{$search}%");
-                  });
-            });
-        }
-
-        // Filter berdasarkan kategori
-        if ($request->filled('kategori_id')) {
-            $query->where('kategori_id', $request->kategori_id);
-        }
-
-        // Filter berdasarkan jenis
-        if ($request->filled('jenis_id')) {
-            $query->where('jenis_id', $request->jenis_id);
-        }
-
-        // Filter berdasarkan status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Filter berdasarkan stok
-        if ($request->filled('stok')) {
-            if ($request->stok === 'tersedia') {
-                $query->where('stok_tersedia', '>', 0);
-            } elseif ($request->stok === 'habis') {
-                $query->where('stok_tersedia', '<=', 0);
+        // Handle DataTables AJAX request
+        if ($request->ajax()) {
+            $query = Buku::with(['kategori', 'jenis', 'rak']);
+            
+            // Apply filters from request
+            if ($request->filled('filter_kategori_id')) {
+                $query->where('kategori_id', $request->filter_kategori_id);
             }
+            
+            if ($request->filled('filter_jenis_id')) {
+                $query->where('jenis_id', $request->filter_jenis_id);
+            }
+            
+            if ($request->filled('filter_status')) {
+                if ($request->filter_status === 'tersedia') {
+                    $query->where('stok_tersedia', '>', 0);
+                } elseif ($request->filter_status === 'habis') {
+                    $query->where('stok_tersedia', '<=', 0);
+                }
+            }
+            
+            if ($request->filled('filter_tahun_terbit')) {
+                $query->where('tahun_terbit', $request->filter_tahun_terbit);
+            }
+            
+            return DataTables::of($query)
+                ->addIndexColumn()
+                ->addColumn('checkbox', function($row) {
+                    return '<input type="checkbox" class="book-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 transition-all duration-200" value="' . $row->id . '">';
+                })
+                ->addColumn('cover', function($row) {
+                    $gradients = ['#6366f1,#8b5cf6','#3b82f6,#2563eb','#10b981,#059669','#f59e0b,#d97706','#ef4444,#dc2626'];
+                    $gradient = $gradients[($row->id ?? 0) % 5];
+                    $initial = strtoupper(substr($row->judul_buku ?? 'B', 0, 1));
+                    if ($row->cover_buku) {
+                        return '<div class="cover-container">'
+                            . '<img src="' . asset('storage/' . $row->cover_buku) . '" alt="Cover" class="cover-img"'
+                            . ' onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">'
+                            . '<div class="cover-placeholder" style="display:none;background:linear-gradient(135deg,' . $gradient . ');color:white;font-weight:700;font-size:1.2rem;">' . $initial . '</div>'
+                            . '</div>';
+                    }
+                    return '<div class="cover-container">'
+                        . '<div class="cover-placeholder" style="background:linear-gradient(135deg,' . $gradient . ');color:white;font-weight:700;font-size:1.2rem;">' . $initial . '</div>'
+                        . '</div>';
+                })
+                ->addColumn('judul_info', function($row) {
+                    $isbn = $row->isbn ? '<span class="font-mono text-gray-500">' . e($row->isbn) . '</span>' : '<span class="italic text-gray-400">Tanpa ISBN</span>';
+                    $penulis = $row->penulis ? '<span class="text-gray-500">' . e($row->penulis) . '</span>' : '';
+                    return '<div class="min-w-[180px]">'
+                        . '<div class="text-sm font-semibold text-gray-900 line-clamp-2">' . e($row->judul_buku) . '</div>'
+                        . ($penulis ? '<div class="text-xs mt-0.5"><i class="fas fa-user-pen text-gray-400 mr-1" style="font-size:0.6rem;"></i>' . $penulis . '</div>' : '')
+                        . '<div class="text-[11px] mt-0.5">' . $isbn . '</div>'
+                        . '</div>';
+                })
+                ->addColumn('rak_info', function($row) {
+                    if ($row->rak) {
+                        return '<div class="flex items-center gap-2">'
+                            . '<div class="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-archive text-amber-500" style="font-size:0.7rem;"></i></div>'
+                            . '<div>'
+                            . '<div class="text-sm font-medium text-gray-900">' . e($row->rak->nama_rak) . '</div>'
+                            . '<div class="text-[11px] text-gray-400">' . e($row->rak->kode_rak) . '</div>'
+                            . '</div></div>';
+                    }
+                    return '<span class="text-xs text-gray-400 italic">Belum ada rak</span>';
+                })
+                ->addColumn('kategori_badge', function($row) {
+                    $kategori = $row->kategori ? $row->kategori->nama_kategori : 'Tidak diketahui';
+                    return '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200">'
+                        . '<i class="fas fa-tag mr-1.5" style="font-size:0.55rem;"></i>' . e($kategori) . '</span>';
+                })
+                ->addColumn('jenis_badge', function($row) {
+                    $jenis = $row->jenis ? $row->jenis->nama_jenis : 'Tidak diketahui';
+                    return '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-violet-50 text-violet-700 border border-violet-200">'
+                        . '<i class="fas fa-bookmark mr-1.5" style="font-size:0.55rem;"></i>' . e($jenis) . '</span>';
+                })
+                ->addColumn('stok_info', function($row) {
+                    $percentage = $row->jumlah_stok > 0 ? round(($row->stok_tersedia / $row->jumlah_stok) * 100) : 0;
+                    $barColor = $percentage > 50 ? '#22c55e' : ($percentage > 20 ? '#f59e0b' : '#ef4444');
+                    return '<div class="min-w-[80px]">'
+                        . '<div class="text-sm font-semibold text-gray-900">' . $row->stok_tersedia . ' <span class="text-gray-400 font-normal">/ ' . $row->jumlah_stok . '</span></div>'
+                        . '<div class="w-full bg-gray-100 rounded-full h-1.5 mt-1"><div class="h-1.5 rounded-full" style="width:' . $percentage . '%;background:' . $barColor . ';"></div></div>'
+                        . '</div>';
+                })
+                ->addColumn('status_badge', function($row) {
+                    if ($row->stok_tersedia > 0) {
+                        return '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">'
+                            . '<span class="w-1.5 h-1.5 rounded-full mr-1.5 bg-emerald-500"></span>Tersedia</span>';
+                    }
+                    return '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-red-50 text-red-700 border border-red-200">'
+                        . '<span class="w-1.5 h-1.5 rounded-full mr-1.5 bg-red-500"></span>Habis</span>';
+                })
+                ->addColumn('action', function($row) {
+                    $actions = '<div class="flex items-center justify-center gap-1">';
+
+                    if (auth()->user()->hasPermission('buku.view') || auth()->user()->isAdmin()) {
+                        $actions .= '<a href="' . route('buku.show', $row->id) . '" class="action-btn action-btn-view" title="Lihat Detail"><i class="fas fa-eye"></i></a>';
+                    }
+
+                    if (auth()->user()->hasPermission('buku.update') || auth()->user()->isAdmin()) {
+                        $actions .= '<a href="' . route('buku.edit', $row->id) . '" class="action-btn action-btn-edit" title="Edit"><i class="fas fa-edit"></i></a>';
+                    }
+
+                    if (auth()->user()->hasPermission('buku.cetak-barcode') || auth()->user()->isAdmin()) {
+                        $actions .= '<a href="' . route('buku.cetak-barcode', $row->id) . '" class="action-btn action-btn-print" title="Cetak Barcode" target="_blank"><i class="fas fa-barcode"></i></a>';
+                    }
+
+                    if (auth()->user()->hasPermission('buku.delete') || auth()->user()->isAdmin()) {
+                        $actions .= '<button onclick="confirmDeleteBuku(' . $row->id . ')" class="action-btn action-btn-delete" title="Hapus"><i class="fas fa-trash-alt"></i></button>';
+                    }
+
+                    $actions .= '</div>';
+                    return $actions;
+                })
+                ->rawColumns(['checkbox', 'cover', 'judul_info', 'rak_info', 'kategori_badge', 'jenis_badge', 'stok_info', 'status_badge', 'action'])
+                ->make(true);
         }
-
-        // Sorting
-        $sortBy = $request->get('sort_by', 'created_at');
-        $sortOrder = $request->get('sort_order', 'desc');
-        $query->orderBy($sortBy, $sortOrder);
-
-        $buku = $query->paginate(10)->withQueryString();
         
-        // Data untuk filter
+        // Regular view request - Data untuk filter
         $kategoris = KategoriBuku::all();
         $jenis = JenisBuku::all();
 
-        // Statistics
-        $totalBuku = Buku::count();
-        $bukuTersedia = Buku::where('stok_tersedia', '>', 0)->count();
-        $bukuDipinjam = Buku::where('stok_tersedia', '<', 'jumlah_stok')->where('stok_tersedia', '>', 0)->count();
-        $bukuRusak = Buku::where('stok_tersedia', 0)->where('jumlah_stok', '>', 0)->count();
-
-        
-        return view('admin.buku.index', compact('buku', 'kategoris', 'jenis', 'totalBuku', 'bukuTersedia', 'bukuDipinjam', 'bukuRusak'));
+        return view('admin.buku.index', compact('kategoris', 'jenis'));
     }
 
     public function create()

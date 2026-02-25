@@ -9,1071 +9,1107 @@
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 <style>
-/* Custom styles */
-.dropdown-item {
-    transition: all 0.15s ease-in-out;
+/* Step Indicator */
+.step-indicator { display: flex; align-items: center; justify-content: center; gap: 0; }
+.step-item { display: flex; align-items: center; gap: 8px; }
+.step-circle {
+    width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; transition: all 0.3s ease;
+    background: #e5e7eb; color: #9ca3af;
 }
+.step-circle.active { background: linear-gradient(135deg, #10b981, #059669); color: white; box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+.step-circle.completed { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+.step-label { font-size: 12px; font-weight: 600; color: #9ca3af; transition: color 0.3s; }
+.step-label.active { color: #065f46; }
+.step-label.completed { color: #059669; }
+.step-line { width: 60px; height: 3px; background: #e5e7eb; margin: 0 8px; border-radius: 2px; transition: background 0.3s; }
+.step-line.active { background: linear-gradient(90deg, #10b981, #059669); }
 
-.dropdown-item:hover {
-    background-color: #eff6ff;
-    transform: translateX(2px);
+/* Glass Card */
+.glass-card {
+    background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);
+    border-radius: 16px; border: 1px solid rgba(255,255,255,0.8);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    overflow: hidden; transition: all 0.3s ease;
 }
+.glass-card:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
-.dropdown-item.selected {
-    background-color: #dbeafe;
-    border-left: 3px solid #3b82f6;
+/* Book checkbox cards */
+.book-check-card {
+    border: 2px solid #e5e7eb; border-radius: 12px; padding: 14px;
+    transition: all 0.25s ease; cursor: pointer; background: white;
 }
+.book-check-card:hover { border-color: #a7f3d0; background: #f0fdf4; transform: translateY(-1px); }
+.book-check-card.selected { border-color: #10b981; background: #ecfdf5; box-shadow: 0 0 0 3px rgba(16,185,129,0.15); }
+.book-check-card.already-returned { border-color: #d1d5db; background: #f9fafb; opacity: 0.6; cursor: not-allowed; }
 
-.spinner {
-    animation: spin 1s linear infinite;
+/* Peminjaman card */
+.peminjaman-card {
+    border: 2px solid #e5e7eb; border-radius: 14px; padding: 16px;
+    transition: all 0.3s ease; background: white;
 }
+.peminjaman-card.active { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.12); }
+.peminjaman-card.late { border-left: 4px solid #ef4444; }
 
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+/* Fullscreen scanner */
+.scanner-fullscreen {
+    position: fixed; inset: 0; z-index: 9999; background: #000;
+    display: none; flex-direction: column;
 }
+.scanner-fullscreen.active { display: flex; }
+.scanner-overlay {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+}
+.scan-region {
+    width: 85%; max-width: 400px; aspect-ratio: 4/3;
+    border: 3px solid rgba(16,185,129,0.7); border-radius: 16px;
+    position: relative; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+}
+.scan-line {
+    position: absolute; left: 5%; right: 5%; height: 3px;
+    background: linear-gradient(90deg, transparent, #10b981, transparent);
+    border-radius: 2px; animation: scanLine 2s ease-in-out infinite;
+}
+@keyframes scanLine { 0%,100% { top: 10%; } 50% { top: 85%; } }
 
-.late-warning {
-    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-    border-left: 4px solid #ef4444;
+/* Summary bar */
+.summary-bar {
+    position: sticky; bottom: 0; z-index: 40;
+    background: linear-gradient(135deg, #065f46, #047857);
+    border-radius: 16px 16px 0 0; padding: 16px 24px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+    display: none;
 }
+.summary-bar.visible { display: flex; }
 
-.book-item {
-    transition: all 0.2s ease-in-out;
-}
+/* Animations */
+@keyframes fadeInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+.fade-in-up { animation: fadeInUp 0.4s ease forwards; }
+.delay-1 { animation-delay: 0.1s; opacity: 0; }
+.delay-2 { animation-delay: 0.2s; opacity: 0; }
+.delay-3 { animation-delay: 0.3s; opacity: 0; }
 
-.book-item:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+/* Select All toggle */
+.select-all-btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
+    border-radius: 8px; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+    border: 1.5px solid #d1d5db; color: #6b7280; background: white;
 }
+.select-all-btn:hover { border-color: #10b981; color: #059669; background: #f0fdf4; }
+.select-all-btn.all-selected { border-color: #10b981; color: white; background: #10b981; }
 </style>
 
-<div class="min-h-screen bg-gradient-to-br py-8">
-    <div class="px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
-            <div>
-                <!-- <h1 class="text-3xl font-bold text-gray-900">Proses Pengembalian</h1> -->
-                <!-- <p class="text-gray-600 mt-2">Scan kartu anggota untuk melihat peminjaman aktif</p> -->
+<div class="min-h-screen py-6">
+    <div class="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+
+        <!-- Step Indicator -->
+        <div class="mb-6 fade-in-up">
+            <div class="step-indicator">
+                <div class="step-item">
+                    <div class="step-circle active" id="step1Circle">1</div>
+                    <span class="step-label active" id="step1Label">Anggota</span>
+                </div>
+                <div class="step-line" id="stepLine1"></div>
+                <div class="step-item">
+                    <div class="step-circle" id="step2Circle">2</div>
+                    <span class="step-label" id="step2Label">Pilih Buku</span>
+                </div>
+                <div class="step-line" id="stepLine2"></div>
+                <div class="step-item">
+                    <div class="step-circle" id="step3Circle">3</div>
+                    <span class="step-label" id="step3Label">Konfirmasi</span>
+                </div>
             </div>
-            <a href="{{ route('pengembalian.index') }}" 
-               class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200">
-                <i class="fas fa-arrow-left mr-2"></i>Kembali
-            </a>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-            <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4">
-                <h3 class="text-[14px] font-semibold text-white">Form Pengembalian Buku</h3>
+        <!-- Section 1: Pilih Anggota -->
+        <div class="glass-card mb-5 fade-in-up delay-1" id="sectionAnggota">
+            <div class="bg-gradient-to-r from-emerald-500 to-green-600 px-5 py-3.5">
+                <h3 class="text-[13px] font-bold text-white flex items-center gap-2">
+                    <i class="fas fa-user-check"></i> Langkah 1: Pilih Anggota
+                </h3>
             </div>
-            
-            <!-- Step 1: Select Anggota -->
-            <div class="p-6 border-b border-gray-200">
-                <h4 class="text-xs font-semibold text-gray-900 mb-4 ">
-                    <i class="fas fa-user-check mr-2"></i>Langkah 1: Pilih Anggota
-                </h4>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-1 gap-6 border ">
-                    <!-- Dropdown Anggota -->
-                    <div class="">
-                        <div class="bg-blue-50 p-4 text-xs rounded-lg border relative">
-                            <h5 class="font-semibold text-blue-900 mb-2">Cari Anggota dengan Peminjaman Aktif</h5>
-                            <p class="text-sm text-blue-700 mb-4">Ketik nama/ID anggota untuk mencari peminjaman aktif</p>
-                            
-                            <div class="flex flex-col md:flex-row gap-4">
-                                <div class="w-full">
-                                    <div class="relative">
-                                        <input type="text" id="searchAnggotaInput" 
-                                               placeholder="Ketik minimal 2 karakter untuk mencari anggota dengan peminjaman aktif..." 
-                                               class="w-full px-4 py-3 border outline-none border-gray-300 rounded-lg focus:ring-1 focus:ring-green-300 focus:border-green-300 transition-all duration-200"
-                                               autocomplete="off">
-                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 hidden" id="searchSpinner">
-                                            <i class="fas fa-spinner fa-spin text-blue-500"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="w-full md:w-auto flex flex-col sm:flex-row gap-2">
-                                    <button type="button" id="refreshAnggotaBtn" 
-                                    class="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-all duration-200 flex-1">
-                                    <i class="fas fa-sync mr-2"></i>Refresh
-                                </button>
-                                
-                                    <button type="button" id="scanAnggotaBtn" 
-                                    class="px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold transition-all duration-200 flex-1">
-                                    <i class="fas fa-qrcode mr-2"></i>Scan
-                                </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Search results container -->
-                            <div id="anggotaSearchResults" class="mt-4 max-h-60 overflow-y-auto border border-gray-200 rounded-lg hidden">
-                                <!-- Search results will be populated here -->
-                            </div>
-                            
-                            <!-- Link to active loans if no active returns available -->
-                            <div class="mt-3 text-center">
-                                <p class="text-xs text-gray-600">Tidak menemukan anggota yang bisa mengembalikan buku?</p>
-                                <a href="{{ route('pengembalian.aktif') }}" 
-                                   class="inline-flex items-center text-xs text-blue-600 hover:text-blue-800 font-medium">
-                                    <i class="fas fa-external-link-alt mr-1"></i>Lihat semua peminjaman aktif
-                                </a>
-                            </div>
+            <div class="p-5">
+                <div class="flex flex-col sm:flex-row gap-3 mb-4">
+                    <div class="flex-1 relative">
+                        <input type="text" id="searchAnggotaInput"
+                               placeholder="Ketik nama / nomor anggota untuk mencari..."
+                               class="w-full px-4 py-3 text-xs border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none transition-all"
+                               autocomplete="off">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 hidden" id="searchSpinner">
+                            <i class="fas fa-spinner fa-spin text-emerald-500"></i>
                         </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" id="refreshAnggotaBtn"
+                                class="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-semibold transition-all">
+                            <i class="fas fa-sync mr-1"></i>Refresh
+                        </button>
+                        <button type="button" id="scanAnggotaBtn"
+                                class="px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold transition-all">
+                            <i class="fas fa-barcode mr-1"></i>Scan
+                        </button>
                     </div>
                 </div>
 
-                <!-- Info Anggota yang Dipilih -->
-                <div id="anggotaInfo" class="mt-6 p-6 bg-green-50 rounded-lg border border-green-200 hidden">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-user text-green-600 text-xl"></i>
+                <!-- Search results -->
+                <div id="anggotaSearchResults" class="max-h-60 overflow-y-auto border border-gray-200 rounded-xl hidden"></div>
+
+                <!-- Selected Anggota Info -->
+                <div id="anggotaInfo" class="mt-4 p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-200 hidden">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center shadow-lg">
+                            <i class="fas fa-user text-white text-lg"></i>
                         </div>
-                        <div class="flex-1">
-                            <h4 id="anggotaNama" class="text-sm font-semibold text-gray-900"></h4>
+                        <div class="flex-1 min-w-0">
+                            <h4 id="anggotaNama" class="text-sm font-bold text-gray-900 truncate"></h4>
                             <p id="anggotaNomor" class="text-xs text-gray-600"></p>
                             <p id="anggotaKelas" class="text-xs text-gray-500"></p>
                         </div>
-                        <button type="button" id="clearAnggota" class="text-red-500 hover:text-red-700 transition-colors duration-150">
-                            <i class="fas fa-times text-sm"></i>
+                        <button type="button" id="clearAnggota"
+                                class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                            <i class="fas fa-times"></i>
                         </button>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Step 2: Peminjaman Aktif -->
-            <div id="peminjamanSection" class="p-6 hidden">
-                <h4 class="text-sm font-semibold text-gray-900 mb-4">
-                    <i class="fas fa-books mr-2"></i>Langkah 2: Peminjaman Aktif
-                </h4>
-                
-                <div id="peminjamanList" class="space-y-4 text-sm">
-                    <!-- Peminjaman aktif akan ditampilkan di sini -->
+        <!-- Section 2: Pilih Buku untuk Dikembalikan -->
+        <div class="glass-card mb-5 fade-in-up delay-2 hidden" id="sectionPilihBuku">
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-5 py-3.5">
+                <h3 class="text-[13px] font-bold text-white flex items-center gap-2">
+                    <i class="fas fa-book-open"></i> Langkah 2: Pilih Buku yang Dikembalikan
+                </h3>
+            </div>
+            <div class="p-5">
+                <div id="peminjamanContainer" class="space-y-5">
+                    <!-- Peminjaman cards will be rendered here -->
                 </div>
-
-                <div id="noPeminjaman" class="text-center text-xs py-8 hidden">
-                    <i class="fas fa-check-circle text-xs text-green-300 mb-4"></i>
-                    <h3 class="text-xs font-medium text-gray-900 mb-2">Tidak Ada Peminjaman Aktif</h3>
-                    <p class="text-gray-600">Anggota ini tidak memiliki peminjaman yang perlu dikembalikan.</p>
+                <div id="noPeminjamanMsg" class="text-center py-8 hidden">
+                    <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
+                    <p class="text-sm text-gray-500">Tidak ada peminjaman aktif untuk anggota ini</p>
                 </div>
             </div>
+        </div>
 
-            <!-- Step 3: Form Pengembalian -->
-            <form id="pengembalianForm" action="{{ route('pengembalian.store') }}" method="POST" class="hidden" onsubmit="return validateForm()">
-                @csrf
-                <input type="hidden" name="peminjaman_id" id="selectedPeminjamanId">
-                <input type="hidden" name="status_pembayaran_denda" id="hiddenStatusPembayaranDenda" value="belum_dibayar">
-                <input type="hidden" name="tanggal_pembayaran_denda" id="hiddenTanggalPembayaranDenda" value="">
-                <input type="hidden" name="catatan_pembayaran_denda" id="hiddenCatatanPembayaranDenda" value="">
-                
-                <div class="p-6 border-t border-gray-200">
-                    <h4 class="text-sm font-semibold text-gray-900 mb-4">
-                        <i class="fas fa-clipboard-check mr-2"></i>Langkah 3: Detail Pengembalian
-                    </h4>
+        <!-- Section 3: Form Pengembalian -->
+        <form id="pengembalianForm" action="{{ route('pengembalian.store') }}" method="POST" class="hidden" onsubmit="return validateAndSubmit(event)">
+            @csrf
+            <input type="hidden" name="peminjaman_id" id="selectedPeminjamanId">
+            <input type="hidden" name="selected_detail_ids" id="selectedDetailIds">
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <!-- Tanggal Pengembalian -->
+            <div class="glass-card mb-5 fade-in-up delay-3" id="sectionKonfirmasi">
+                <div class="bg-gradient-to-r from-purple-500 to-violet-600 px-5 py-3.5">
+                    <h3 class="text-[13px] font-bold text-white flex items-center gap-2">
+                        <i class="fas fa-clipboard-check"></i> Langkah 3: Detail & Konfirmasi Pengembalian
+                    </h3>
+                </div>
+                <div class="p-5">
+                    <!-- Date/Time fields -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
                         <div>
-                            <label for="tanggal_kembali" class="block text-xs font-medium text-gray-700 mb-2">
-                                <i class="fas fa-calendar mr-2"></i>Tanggal Pengembalian
+                            <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                                <i class="fas fa-calendar mr-1 text-purple-400"></i>Tanggal Pengembalian
                             </label>
-                            <input type="date" name="tanggal_kembali" id="tanggal_kembali" 
+                            <input type="date" name="tanggal_kembali" id="tanggal_kembali"
                                    value="{{ date('Y-m-d') }}" required
-                                   class="w-full text-xs px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200">
+                                   class="w-full text-xs px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-purple-400 outline-none">
                         </div>
-
-                        <!-- Jam Pengembalian -->
                         <div>
-                            <label for="jam_kembali" class="block text-xs font-medium text-gray-700 mb-2">
-                                <i class="fas fa-clock mr-2"></i>Jam Pengembalian
+                            <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                                <i class="fas fa-clock mr-1 text-purple-400"></i>Jam Pengembalian
                             </label>
-                            <input type="time" name="jam_kembali" id="jam_kembali" 
+                            <input type="time" name="jam_kembali" id="jam_kembali"
                                    value="{{ date('H:i') }}"
-                                   class="w-full text-xs px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200">
+                                   class="w-full text-xs px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-purple-400 outline-none">
                         </div>
                     </div>
 
-                    <!-- Kondisi Buku -->
-                    <div class="mb-6">
-                        <h5 class="text-xs font-medium text-gray-700 mb-3">
-                            <i class="fas fa-book-open mr-2"></i>Kondisi Buku Saat Dikembalikan
-                        </h5>
-                        <div id="kondisiBukuList" class="space-y-3 text-xs">
-                            <!-- Kondisi buku akan ditampilkan di sini -->
-                        </div>
-                    </div>
-
-                    <!-- Catatan Pengembalian -->
-                    <div class="mb-6">
-                        <label for="catatan_pengembalian" class="block text-xs font-medium text-gray-700 mb-2">
-                            <i class="fas fa-sticky-note mr-2"></i>Catatan Pengembalian
-                        </label>
-                        <textarea name="catatan_pengembalian" id="catatan_pengembalian" rows="3" 
-                                  class="w-full px-4 py-3 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
-                                  placeholder="Catatan tambahan untuk pengembalian ini..."></textarea>
-                    </div>
-
-                    <!-- Informasi Denda -->
-                    <div id="dendaInfo" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg hidden">
-                        <h5 class="font-semibold text-red-900 mb-2">
-                            <i class="fas fa-exclamation-triangle mr-2"></i>Informasi Denda
-                        </h5>
-                        <div id="dendaDetail" class="text-xs text-red-700">
-                            <!-- Detail denda akan ditampilkan di sini -->
-                        </div>
-                    </div>
-
-                    <!-- Form Pembayaran Denda -->
-                    <div id="formPembayaranDenda" class="mb-6 p-6 bg-yellow-50 border border-yellow-200 rounded-lg hidden">
-                        <h5 class="font-semibold text-yellow-900 mb-4">
-                            <i class="fas fa-credit-card mr-2"></i>Form Pembayaran Denda
-                        </h5>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Status Pembayaran -->
+                    <!-- Late info banner -->
+                    <div id="lateInfoBanner" class="mb-5 p-4 bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-400 rounded-r-xl hidden">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-red-500"></i>
+                            </div>
                             <div>
-                                <label for="status_pembayaran_denda" class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-check-circle mr-2"></i>Status Pembayaran
+                                <h5 class="text-sm font-bold text-red-800 mb-1">Terlambat Mengembalikan</h5>
+                                <p id="lateInfoText" class="text-xs text-red-700"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Denda fields (shown when late) -->
+                    <div id="dendaFieldsSection" class="hidden mb-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                                    <i class="fas fa-calendar-times mr-1 text-red-400"></i>Hari Terlambat
                                 </label>
-                                <select name="status_pembayaran_denda" id="status_pembayaran_denda" 
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-200">
+                                <input type="number" name="hari_terlambat" id="hari_terlambat"
+                                       value="0" min="0" readonly
+                                       class="w-full text-xs px-3 py-2.5 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                                    <i class="fas fa-money-bill-wave mr-1 text-yellow-500"></i>Jumlah Denda (Rp)
+                                </label>
+                                <input type="number" name="jumlah_denda" id="jumlah_denda"
+                                       value="0" min="0" step="1000" readonly
+                                       class="w-full text-xs px-3 py-2.5 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                                    <i class="fas fa-check-circle mr-1 text-green-400"></i>Status Pembayaran
+                                </label>
+                                <select name="status_pembayaran_denda" id="status_pembayaran_denda"
+                                        onchange="toggleTanggalPembayaran(this.value)"
+                                        class="w-full text-xs px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-400 outline-none">
                                     <option value="belum_dibayar">Belum Dibayar</option>
                                     <option value="sudah_dibayar">Sudah Dibayar</option>
                                 </select>
                             </div>
-
-                            <!-- Tanggal Pembayaran -->
-                            <div>
-                                <label for="tanggal_pembayaran_denda" class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-calendar mr-2"></i>Tanggal Pembayaran
-                                </label>
-                                                            <input type="date" name="tanggal_pembayaran_denda" id="tanggal_pembayaran_denda" 
-                                   value="{{ date('Y-m-d') }}" disabled
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-200 bg-gray-100">
-                            </div>
                         </div>
 
-                        <!-- Catatan Pembayaran -->
-                        <div class="mt-4">
-                            <label for="catatan_pembayaran_denda" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-sticky-note mr-2"></i>Catatan Pembayaran
-                            </label>
-                            <textarea name="catatan_pembayaran_denda" id="catatan_pembayaran_denda" rows="2" 
-                                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-200"
-                                      placeholder="Catatan tambahan untuk pembayaran denda..."></textarea>
-                        </div>
-
-                        <!-- Informasi Total Denda -->
-                        <div class="mt-4 p-3 bg-white border border-yellow-300 rounded-lg">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-gray-700">Total Denda:</span>
-                                <span id="totalDendaDisplay" class="text-lg font-bold text-red-600">Rp 0</span>
+                        <!-- Tanggal pembayaran — muncul hanya saat "Sudah Dibayar" dipilih -->
+                        <div id="tanggalPembayaranSection" class="hidden mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                                        <i class="fas fa-calendar-check mr-1 text-green-500"></i>Tanggal Pembayaran Denda
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="date" name="tanggal_pembayaran_denda" id="tanggal_pembayaran_denda"
+                                           value="{{ date('Y-m-d') }}"
+                                           class="w-full text-xs px-3 py-2.5 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                                        <i class="fas fa-sticky-note mr-1 text-green-400"></i>Catatan Pembayaran (opsional)
+                                    </label>
+                                    <input type="text" name="catatan_pembayaran_denda" id="catatan_pembayaran_denda"
+                                           placeholder="Keterangan pembayaran denda..."
+                                           class="w-full text-xs px-3 py-2.5 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none bg-white">
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Submit Button -->
-                    <div class="flex justify-end space-x-4">
-                        <button type="button" onclick="resetForm()" 
-                                class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200">
-                            <i class="fas fa-undo mr-2"></i>Reset
+                    <!-- Selected books kondisi -->
+                    <div class="mb-5">
+                        <h5 class="text-xs font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <i class="fas fa-book text-purple-500"></i> Kondisi Buku yang Dikembalikan
+                        </h5>
+                        <div id="kondisiBukuList" class="space-y-2.5">
+                            <p class="text-xs text-gray-400 italic">Pilih buku terlebih dahulu di Langkah 2</p>
+                        </div>
+                    </div>
+
+                    <!-- Catatan -->
+                    <div class="mb-5">
+                        <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                            <i class="fas fa-sticky-note mr-1 text-yellow-400"></i>Catatan Pengembalian
+                        </label>
+                        <textarea name="catatan_pengembalian" id="catatan_pengembalian" rows="2"
+                                  class="w-full text-xs px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none resize-none"
+                                  placeholder="Catatan tambahan (opsional)..."></textarea>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end gap-3 pt-3 border-t border-gray-100">
+                        <button type="button" onclick="resetForm()"
+                                class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-semibold transition-all">
+                            <i class="fas fa-undo mr-1"></i>Reset
                         </button>
                         <button type="submit" id="submitBtn"
-                                class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200">
-                            <i class="fas fa-check mr-2"></i>Proses Pengembalian
+                                class="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-200">
+                            <i class="fas fa-check-circle mr-1"></i>Proses Pengembalian
                         </button>
                     </div>
                 </div>
-            </form>
+            </div>
+        </form>
+
+        <!-- Summary Bar -->
+        <div class="summary-bar" id="summaryBar">
+            <div class="flex items-center justify-between w-full text-white">
+                <div class="flex items-center gap-4">
+                    <div>
+                        <p class="text-[10px] text-emerald-200 uppercase tracking-wider">Buku Dipilih</p>
+                        <p class="text-lg font-bold" id="summaryBookCount">0</p>
+                    </div>
+                    <div class="w-px h-8 bg-emerald-400/30"></div>
+                    <div>
+                        <p class="text-[10px] text-emerald-200 uppercase tracking-wider">Peminjaman</p>
+                        <p class="text-sm font-semibold" id="summaryPeminjamanNo">-</p>
+                    </div>
+                </div>
+                <button type="button" onclick="scrollToForm()"
+                        class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-xs font-semibold transition-all backdrop-blur">
+                    <i class="fas fa-arrow-down mr-1"></i>Ke Form
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Barcode Scanner Modal -->
-<div id="scannerModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full">
-            <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4 rounded-t-2xl">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-white">Scan Kartu Anggota</h3>
-                    <button type="button" id="closeScanner" class="text-white hover:text-gray-200">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="p-6">
-                <div class="mb-4">
-                    <p class="text-gray-600 mb-4">Arahkan kamera ke barcode kartu anggota</p>
-                    <div id="scannerContainer" class="w-full h-80 bg-gray-100 rounded-lg flex items-center justify-center relative overflow-hidden">
-                        <div id="scannerPlaceholder" class="text-center">
-                            <i class="fas fa-camera text-4xl text-gray-400 mb-2"></i>
-                            <p class="text-gray-500">Kamera akan aktif saat modal dibuka</p>
-                        </div>
-                        <div id="scannerVideo" class="w-full h-full hidden">
-                            <div id="reader" class="w-full h-full"></div>
-                        </div>
-                        <div id="scannerLoading" class="absolute inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden">
-                            <div class="text-center text-white">
-                                <i class="fas fa-spinner fa-spin text-3xl mb-2"></i>
-                                <p>Memulai kamera...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex justify-between items-center">
-                    <div class="text-sm text-gray-600">
-                        <span id="scannerStatus">Siap untuk scan</span>
-                    </div>
-                    <div class="flex space-x-3">
-                        <button type="button" id="cancelScan" 
-                                class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-semibold">
-                            Batal
-                        </button>
-                    </div>
-                </div>
+<!-- Fullscreen Barcode Scanner -->
+<div class="scanner-fullscreen" id="scannerFullscreen">
+    <div class="relative flex-1">
+        <video id="scannerVideoEl" class="w-full h-full object-cover" playsinline autoplay muted></video>
+        <div class="scanner-overlay">
+            <div class="scan-region">
+                <div class="scan-line"></div>
             </div>
         </div>
+        <!-- Top bar -->
+        <div class="absolute top-0 left-0 right-0 p-4 flex items-center justify-between" style="pointer-events:auto;">
+            <div class="bg-black/50 backdrop-blur rounded-xl px-4 py-2">
+                <p class="text-white text-xs font-semibold">Scan Kartu Anggota</p>
+                <p class="text-gray-300 text-[10px]" id="scannerStatusText">Menginisialisasi...</p>
+            </div>
+            <button type="button" id="closeScannerBtn"
+                    class="w-10 h-10 bg-black/50 backdrop-blur rounded-full flex items-center justify-center text-white hover:bg-red-500/80 transition-all">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <!-- Torch button -->
+        <div class="absolute bottom-8 left-0 right-0 flex justify-center gap-4" style="pointer-events:auto;">
+            <button type="button" id="torchBtn"
+                    class="px-5 py-2.5 bg-black/50 backdrop-blur rounded-xl text-white text-xs font-semibold hidden">
+                <i class="fas fa-bolt mr-1"></i>Flash
+            </button>
+        </div>
     </div>
+    <!-- Fallback reader (hidden) -->
+    <div id="fallbackReader" class="hidden"></div>
 </div>
 
 <script>
-// Setup CSRF token
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-// Variables
-let html5QrcodeScanner = null;
+// State
 let selectedAnggota = null;
-let selectedPeminjaman = null;
-let anggotaList = []; // Store the list of anggota with active borrowings
+let allPeminjaman = []; // All active peminjaman for selected anggota
+let selectedBooks = {}; // { detailId: { peminjamanId, judul, jumlah, kondisi } }
+let activePeminjamanId = null; // currently active peminjaman in form
 
-// Initialize
+// Scanner state
+let nativeBarcodeDetector = null;
+let nativeScanStream = null;
+let nativeScanInterval = null;
+let html5QrScanner = null;
+let isProcessingBarcode = false;
+let lastScannedBarcode = '';
+let lastScanTime = 0;
+
+// ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     startRealTimeUpdate();
-    loadAnggotaWithActiveBorrowings(); // Load anggota on page load
+    // Check native barcode support
+    if ('BarcodeDetector' in window) {
+        BarcodeDetector.getSupportedFormats().then(formats => {
+            if (formats.includes('code_128') || formats.includes('ean_13')) {
+                nativeBarcodeDetector = new BarcodeDetector({ formats: ['code_128','code_39','ean_13','ean_8','qr_code'] });
+            }
+        }).catch(() => {});
+    }
 });
 
-// Fungsi untuk mengatur tanggal dan jam secara real-time
+function startRealTimeUpdate() {
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+}
+
 function updateDateTime() {
     const now = new Date();
-    
-    // Format tanggal untuk input date (YYYY-MM-DD)
-    const dateString = now.toISOString().split('T')[0];
-    
-    // Format jam untuk input time (HH:MM)
-    const timeString = now.toTimeString().slice(0, 5);
-    
-    // Update field tanggal dan jam
-    const tanggalKembali = document.getElementById('tanggal_kembali');
-    const jamKembali = document.getElementById('jam_kembali');
-    
-    if (tanggalKembali) {
-        tanggalKembali.value = dateString;
+    const d = document.getElementById('tanggal_kembali');
+    const t = document.getElementById('jam_kembali');
+    if (d) d.value = now.toISOString().split('T')[0];
+    if (t) t.value = now.toTimeString().slice(0, 5);
+}
+
+// ==================== STEP INDICATOR ====================
+function updateSteps(step) {
+    for (let i = 1; i <= 3; i++) {
+        const circle = document.getElementById(`step${i}Circle`);
+        const label = document.getElementById(`step${i}Label`);
+        circle.classList.remove('active', 'completed');
+        label.classList.remove('active', 'completed');
+        if (i < step) { circle.classList.add('completed'); label.classList.add('completed'); circle.innerHTML = '<i class="fas fa-check text-xs"></i>'; }
+        else if (i === step) { circle.classList.add('active'); label.classList.add('active'); circle.textContent = i; }
+        else { circle.textContent = i; }
     }
-    
-    if (jamKembali) {
-        jamKembali.value = timeString;
-    }
+    if (document.getElementById('stepLine1')) document.getElementById('stepLine1').classList.toggle('active', step >= 2);
+    if (document.getElementById('stepLine2')) document.getElementById('stepLine2').classList.toggle('active', step >= 3);
 }
 
-// Update waktu setiap detik untuk jam yang real-time
-function startRealTimeUpdate() {
-    updateDateTime(); // Update sekali di awal
-    setInterval(updateDateTime, 1000); // Update setiap detik
-}
-
-// Load anggota with active borrowings
-function loadAnggotaWithActiveBorrowings() {
-    const searchInput = document.getElementById('searchAnggotaInput');
-    const searchResults = document.getElementById('anggotaSearchResults');
-    const searchSpinner = document.getElementById('searchSpinner');
-    
-    // Clear previous results and show loading
-    searchSpinner.classList.remove('hidden');
-    searchResults.classList.remove('hidden');
-    searchResults.innerHTML = '<div class="p-4 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat anggota dengan peminjaman aktif...</div>';
-    
-    fetch('/admin/pengembalian/search-anggota?query=', {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': csrfToken
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        searchSpinner.classList.add('hidden');
-        if (data.success && data.data) {
-            anggotaList = data.data;
-            displayAnggotaSearchResults(data.data);
-            if (data.data.length === 0) {
-                searchResults.innerHTML = '<div class="p-4 text-center text-gray-500">Saat ini tidak ada anggota yang sedang meminjam buku</div>';
-                showNotification('Saat ini tidak ada anggota yang sedang meminjam buku', 'info');
-            }
-        } else {
-            searchResults.innerHTML = '<div class="p-4 text-center text-red-500">' + (data.message || 'Tidak ada anggota dengan peminjaman aktif') + '</div>';
-            showNotification(data.message || 'Tidak ada anggota dengan peminjaman aktif', 'info');
-        }
-    })
-    .catch(error => {
-        searchSpinner.classList.add('hidden');
-        console.error('Error loading anggota:', error);
-        searchResults.innerHTML = '<div class="p-4 text-center text-red-500">Terjadi kesalahan saat memuat data anggota</div>';
-        showNotification('Terjadi kesalahan saat memuat data anggota: ' + error.message, 'error');
-    });
-}
-
-// Display anggota search results
-function displayAnggotaSearchResults(anggotaData) {
-    const searchResults = document.getElementById('anggotaSearchResults');
-    searchResults.classList.remove('hidden');
-    
-    if (anggotaData.length === 0) {
-        searchResults.innerHTML = '<div class="p-4 text-center text-gray-500">Tidak ditemukan anggota dengan peminjaman aktif</div>';
-        return;
-    }
-    
-    let html = '';
-    anggotaData.forEach(anggota => {
-        html += `
-            <div class="p-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer anggota-item" data-anggota='${JSON.stringify(anggota).replace(/'/g, '&apos;')}'>
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-user text-blue-600"></i>
-                        </div>
-                    </div>
-                    <div class="ml-3">
-                        <div class="text-sm font-medium text-gray-900">${anggota.nama_lengkap || 'N/A'}</div>
-                        <div class="flex flex-wrap gap-2 text-xs text-gray-500">
-                            <span>${anggota.nomor_anggota || anggota.nis || 'N/A'}</span>
-                            <span>•</span>
-                            <span>${anggota.kelas}</span>
-                            <span>•</span>
-                            <span class="font-semibold text-blue-600">${anggota.jumlah_peminjaman_aktif} peminjaman aktif</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Show peminjaman details if available -->
-                ${anggota.detail_peminjaman && anggota.detail_peminjaman.length > 0 ? `
-                    <div class="mt-2 ml-13 text-xs">
-                        <div class="space-y-1">
-                            ${anggota.detail_peminjaman.slice(0, 2).map(peminjaman => `
-                                <div class="bg-gray-50 p-2 rounded">
-                                    <div class="font-medium text-gray-800">${peminjaman.nomor_peminjaman}</div>
-                                    <div class="text-gray-600">Kembali: ${peminjaman.tanggal_harus_kembali}</div>
-                                    ${peminjaman.buku && peminjaman.buku.length > 0 ? `
-                                        <div class="mt-1 text-gray-500">
-                                            ${peminjaman.buku.slice(0, 2).map(b => b.judul).join(', ')}
-                                            ${peminjaman.buku.length > 2 ? `+${peminjaman.buku.length - 2} buku lainnya` : ''}
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            `).join('')}
-                            ${anggota.detail_peminjaman.length > 2 ? `
-                                <div class="text-blue-500 font-medium">+${anggota.detail_peminjaman.length - 2} peminjaman lainnya...</div>
-                            ` : ''}
-                        </div>
-                    </div>
-                ` : ''}
-            </div>
-        `;
-    });
-    
-    searchResults.innerHTML = html;
-    
-    // Add click event listeners to anggota items
-    document.querySelectorAll('.anggota-item').forEach(item => {
-        item.addEventListener('click', function() {
-            const anggota = JSON.parse(this.getAttribute('data-anggota'));
-            selectAnggotaFromSearch(anggota);
-        });
-    });
-}
-
+// ==================== EVENT LISTENERS ====================
 function setupEventListeners() {
-    // Scan button
-    document.getElementById('scanAnggotaBtn').addEventListener('click', function() {
-        document.getElementById('scannerModal').classList.remove('hidden');
-        initializeScanner();
-    });
-
-    // Refresh button
-    document.getElementById('refreshAnggotaBtn').addEventListener('click', function() {
-        loadAnggotaWithActiveBorrowings();
-    });
-
-    // Close scanner
-    document.getElementById('closeScanner').addEventListener('click', closeScanner);
-    document.getElementById('cancelScan').addEventListener('click', closeScanner);
-
-    // Clear anggota
+    document.getElementById('scanAnggotaBtn').addEventListener('click', openScanner);
+    document.getElementById('closeScannerBtn').addEventListener('click', closeScanner);
+    document.getElementById('refreshAnggotaBtn').addEventListener('click', loadAllAnggota);
     document.getElementById('clearAnggota').addEventListener('click', clearAnggota);
 
-    // Search input event (for searching all members, not just active ones)
+    // Search input with debounce
+    let searchTimeout;
     document.getElementById('searchAnggotaInput').addEventListener('input', function() {
-        const query = this.value.trim();
-        if (query === '') {
-            // If search is cleared, reload active borrowings
-            loadAnggotaWithActiveBorrowings();
-            return;
+        const q = this.value.trim();
+        clearTimeout(searchTimeout);
+        if (q === '') { document.getElementById('anggotaSearchResults').classList.add('hidden'); return; }
+        if (q.length >= 2) {
+            searchTimeout = setTimeout(() => searchAnggota(q), 300);
         }
-        
-        if (query.length >= 2) {
-            searchAllAnggota(query);
-        }
-    });
-    
-    // Form submit event
-    const form = document.querySelector('form[action*="pengembalian"]');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            // Update waktu terakhir sebelum submit
-            updateDateTime();
-        });
-    }
-    
-    // Status pembayaran denda event listener
-    document.getElementById('status_pembayaran_denda').addEventListener('change', function() {
-        const tanggalPembayaran = document.getElementById('tanggal_pembayaran_denda');
-        if (this.value === 'sudah_dibayar') {
-            tanggalPembayaran.disabled = false;
-            tanggalPembayaran.classList.remove('bg-gray-100');
-        } else {
-            tanggalPembayaran.disabled = true;
-            tanggalPembayaran.classList.add('bg-gray-100');
-            // Clear tanggal pembayaran jika status bukan sudah_dibayar
-            tanggalPembayaran.value = '';
-            document.getElementById('hiddenTanggalPembayaranDenda').value = '';
-        }
-        
-        // Update hidden input
-        document.getElementById('hiddenStatusPembayaranDenda').value = this.value;
-    });
-    
-    // Tanggal pembayaran denda event listener
-    document.getElementById('tanggal_pembayaran_denda').addEventListener('change', function() {
-        document.getElementById('hiddenTanggalPembayaranDenda').value = this.value;
-    });
-    
-    // Catatan pembayaran denda event listener
-    document.getElementById('catatan_pembayaran_denda').addEventListener('input', function() {
-        document.getElementById('hiddenCatatanPembayaranDenda').value = this.value;
     });
 }
 
-// Function to handle when an anggota is selected from search results
-function selectAnggotaFromSearch(anggota) {
-    selectedAnggota = anggota;
-    
-    document.getElementById('anggotaNama').textContent = anggota.nama_lengkap;
-    document.getElementById('anggotaNomor').textContent = anggota.nomor_anggota;
-    document.getElementById('anggotaKelas').textContent = anggota.kelas + ' - ' + anggota.jenis_anggota;
-    document.getElementById('anggotaInfo').classList.remove('hidden');
-    
-    // Check if anggota has active peminjaman
-    if (anggota.memiliki_peminjaman_aktif && anggota.detail_peminjaman && anggota.detail_peminjaman.length > 0) {
-        // Convert detail_peminjaman ke format yang diharapkan loadPeminjamanAktif
-        const formattedPeminjaman = anggota.detail_peminjaman.map(detail => ({
-            id: detail.id,
-            nomor_peminjaman: detail.nomor_peminjaman,
-            tanggal_peminjaman: detail.tanggal_peminjaman,
-            tanggal_harus_kembali: detail.tanggal_harus_kembali,
-            is_late: detail.is_late || false, // Use server-side calculated value
-            days_late: detail.days_late || 0,
-            jumlah_buku: detail.jumlah_buku || (detail.buku ? detail.buku.reduce((sum, item) => sum + (item.jumlah || 1), 0) : 0),
-            detail_peminjaman: detail.buku || []
-        }));
-        loadPeminjamanAktif(formattedPeminjaman);
-    } else {
-        // Show message that anggota doesn't have active peminjaman
-        document.getElementById('peminjamanSection').classList.remove('hidden');
-        document.getElementById('noPeminjaman').classList.remove('hidden');
-        document.getElementById('peminjamanList').innerHTML = '';
-        document.getElementById('noPeminjaman').innerHTML = `
-            <div class="text-center py-8">
-                <i class="fas fa-info-circle text-2xl text-blue-500 mb-4"></i>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak Ada Peminjaman Aktif</h3>
-                <p class="text-gray-600">Anggota ini sedang tidak pinjam buku</p>
-            </div>
-        `;
-        document.getElementById('pengembalianForm').classList.add('hidden');
-        showNotification('Anggota ini sedang tidak pinjam buku', 'info');
-    }
-    
-    // Scroll to anggota info
-    document.getElementById('anggotaInfo').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
+// ==================== SEARCH / SELECT ANGGOTA ====================
+function searchAnggota(query) {
+    const results = document.getElementById('anggotaSearchResults');
+    const spinner = document.getElementById('searchSpinner');
+    spinner.classList.remove('hidden');
+    results.classList.remove('hidden');
+    results.innerHTML = '<div class="p-4 text-center text-gray-400 text-xs"><i class="fas fa-spinner fa-spin mr-2"></i>Mencari...</div>';
 
-// Function to search all active anggota (not just those with active borrowings)
-function searchAllAnggota(query) {
-    const searchResults = document.getElementById('anggotaSearchResults');
-    const searchSpinner = document.getElementById('searchSpinner');
-    
-    searchSpinner.classList.remove('hidden');
-    searchResults.classList.remove('hidden');
-    searchResults.innerHTML = '<div class="p-4 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Mencari anggota...</div>';
-    
-    // Using the same search endpoint but it will filter based on query
     fetch(`/admin/pengembalian/search-anggota?query=${encodeURIComponent(query)}`, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': csrfToken
-        }
+        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrfToken }
     })
-    .then(response => response.json())
+    .then(r => r.json())
     .then(data => {
-        searchSpinner.classList.add('hidden');
-        if (data.success && data.data) {
-            anggotaList = data.data;
-            displayAnggotaSearchResults(data.data);
-            if (data.data.length === 0) {
-                searchResults.innerHTML = '<div class="p-4 text-center text-gray-500">Tidak ditemukan anggota dengan peminjaman aktif</div>';
-                showNotification('Tidak ditemukan anggota dengan peminjaman aktif', 'info');
-            }
+        spinner.classList.add('hidden');
+        if (data.success && data.data && data.data.length > 0) {
+            renderAnggotaList(data.data);
         } else {
-            searchResults.innerHTML = '<div class="p-4 text-center text-red-500">' + (data.message || 'Tidak ditemukan anggota dengan peminjaman aktif') + '</div>';
-            showNotification(data.message || 'Tidak ditemukan anggota dengan peminjaman aktif', 'info');
+            results.innerHTML = '<div class="p-4 text-center text-gray-400 text-xs">Tidak ditemukan anggota dengan peminjaman aktif</div>';
         }
     })
-    .catch(error => {
-        searchSpinner.classList.add('hidden');
-        console.error('Error searching anggota:', error);
-        searchResults.innerHTML = '<div class="p-4 text-center text-red-500">Terjadi kesalahan saat mencari anggota</div>';
-        showNotification('Terjadi kesalahan saat mencari anggota: ' + error.message, 'error');
+    .catch(err => {
+        spinner.classList.add('hidden');
+        results.innerHTML = '<div class="p-4 text-center text-red-400 text-xs">Terjadi kesalahan</div>';
     });
 }
 
-// Scanner functions
-function initializeScanner() {
-    const scannerLoading = document.getElementById('scannerLoading');
-    const scannerVideo = document.getElementById('scannerVideo');
-    const scannerPlaceholder = document.getElementById('scannerPlaceholder');
-    
-    scannerLoading.classList.remove('hidden');
-    scannerPlaceholder.classList.add('hidden');
-    scannerVideo.classList.remove('hidden');
-    
-    try {
-        html5QrcodeScanner = new Html5Qrcode("reader");
-        
-        const config = {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1.0
-        };
-        
-        html5QrcodeScanner.start(
-            { facingMode: "environment" },
-            config,
-            onScanSuccess,
-            onScanFailure
-        ).then(() => {
-            scannerLoading.classList.add('hidden');
-            document.getElementById('scannerStatus').textContent = 'Scanner aktif - arahkan ke barcode';
-        }).catch((err) => {
-            console.error('Scanner initialization error:', err);
-            scannerLoading.classList.add('hidden');
-            scannerPlaceholder.classList.remove('hidden');
-            scannerVideo.classList.add('hidden');
-            showNotification('Gagal menginisialisasi scanner: ' + err.message, 'error');
-        });
-        
-    } catch (error) {
-        console.error('Scanner error:', error);
-        scannerLoading.classList.add('hidden');
-        scannerPlaceholder.classList.remove('hidden');
-        scannerVideo.classList.add('hidden');
-        showNotification('Gagal menginisialisasi scanner', 'error');
-    }
+function loadAllAnggota() {
+    searchAnggota('');
 }
 
-function onScanSuccess(decodedText, decodedResult) {
-    console.log('Barcode scanned:', decodedText);
-    processScannedBarcode(decodedText);
-}
-
-function onScanFailure(error) {
-    // Silent failure handling
-}
-
-function processScannedBarcode(barcode) {
-    document.getElementById('scannerStatus').textContent = 'Memproses barcode...';
-    
-    fetch(`/admin/pengembalian/scan-barcode-anggota`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken,
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({ barcode: barcode })
-    })
-    .then(response => {
-        console.log('📡 Response status:', response.status);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            selectAnggota(data.data.anggota);
-            loadPeminjamanAktif(data.data.peminjaman);
-            closeScanner();
-            showNotification(`Anggota ditemukan: ${data.data.anggota.nama_lengkap}`, 'success');
-        } else {
-            // Handle error messages for barcode scanning
-            const message = data.message || 'Anggota tidak ditemukan';
-            showNotification(message, 'error');
-            document.getElementById('scannerStatus').textContent = 'Scan gagal - coba lagi';
-        }
-    })
-    .catch(error => {
-        console.error('❌ Error scanning:', error);
-        showNotification('Terjadi kesalahan saat scan: ' + error.message, 'error');
-        document.getElementById('scannerStatus').textContent = 'Error - coba lagi';
+function renderAnggotaList(list) {
+    const results = document.getElementById('anggotaSearchResults');
+    let html = '';
+    list.forEach(a => {
+        const safeJson = JSON.stringify(a).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+        html += `
+        <div class="p-3 border-b border-gray-100 hover:bg-emerald-50 cursor-pointer transition-all text-xs" onclick='pickAnggota(${JSON.stringify(a).replace(/'/g, "\\'")})'>
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                    ${(a.nama_lengkap || 'N').charAt(0).toUpperCase()}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-gray-900 truncate">${a.nama_lengkap || 'N/A'}</p>
+                    <p class="text-gray-500">${a.nomor_anggota || ''} &bull; ${a.kelas || ''} &bull; <span class="font-semibold text-blue-600">${a.jumlah_peminjaman_aktif} peminjaman</span></p>
+                </div>
+            </div>
+        </div>`;
     });
+    results.innerHTML = html;
 }
 
-function closeScanner() {
-    if (html5QrcodeScanner) {
-        html5QrcodeScanner.stop().catch(err => console.error('Error stopping scanner:', err));
-    }
-    
-    document.getElementById('scannerModal').classList.add('hidden');
-    document.getElementById('scannerStatus').textContent = 'Siap untuk scan';
-    
-    // Reset scanner container
-    const scannerLoading = document.getElementById('scannerLoading');
-    const scannerPlaceholder = document.getElementById('scannerPlaceholder');
-    const scannerVideo = document.getElementById('scannerVideo');
-    
-    scannerLoading.classList.add('hidden');
-    scannerPlaceholder.classList.remove('hidden');
-    scannerVideo.classList.add('hidden');
-}
-
-function selectAnggota(anggota) {
+function pickAnggota(anggota) {
     selectedAnggota = anggota;
-    
     document.getElementById('anggotaNama').textContent = anggota.nama_lengkap;
-    document.getElementById('anggotaNomor').textContent = anggota.nomor_anggota;
-    document.getElementById('anggotaKelas').textContent = anggota.kelas + ' - ' + anggota.jenis_anggota;
+    document.getElementById('anggotaNomor').textContent = anggota.nomor_anggota || '';
+    document.getElementById('anggotaKelas').textContent = (anggota.kelas || '') + ' - ' + (anggota.jenis_anggota || 'Siswa');
     document.getElementById('anggotaInfo').classList.remove('hidden');
-    
-    // Set dropdown to selected value
-    document.getElementById('anggota_dropdown').value = anggota.id;
+    document.getElementById('anggotaSearchResults').classList.add('hidden');
+    document.getElementById('searchAnggotaInput').value = '';
+
+    // Load peminjaman aktif
+    if (anggota.memiliki_peminjaman_aktif && anggota.detail_peminjaman && anggota.detail_peminjaman.length > 0) {
+        // Format from search result
+        const formatted = anggota.detail_peminjaman.map(p => ({
+            id: p.id,
+            nomor_peminjaman: p.nomor_peminjaman,
+            tanggal_peminjaman: p.tanggal_peminjaman,
+            tanggal_harus_kembali: p.tanggal_harus_kembali,
+            is_late: p.is_late || false,
+            days_late: p.days_late || 0,
+            jumlah_buku: p.jumlah_buku || (p.buku ? p.buku.reduce((s,b) => s + (b.jumlah||1), 0) : 0),
+            detail_peminjaman: p.buku ? p.buku.map(b => ({
+                id: b.id, judul_buku: b.judul || b.judul_buku || 'N/A', jumlah: b.jumlah || 1
+            })) : (p.detail_peminjaman || [])
+        }));
+        loadPeminjamanData(formatted);
+    } else {
+        // Fetch from API
+        fetch(`/admin/pengembalian/get-peminjaman-aktif?anggota_id=${anggota.id}`, {
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success && data.data.length > 0) {
+                loadPeminjamanData(data.data);
+            } else {
+                showNoPeminjaman();
+            }
+        })
+        .catch(() => showNoPeminjaman());
+    }
+
+    updateSteps(2);
+    showNotification(`Anggota dipilih: ${anggota.nama_lengkap}`, 'success');
+}
+
+function showNoPeminjaman() {
+    document.getElementById('sectionPilihBuku').classList.remove('hidden');
+    document.getElementById('peminjamanContainer').innerHTML = '';
+    document.getElementById('noPeminjamanMsg').classList.remove('hidden');
+    showNotification('Anggota ini tidak memiliki peminjaman aktif', 'info');
 }
 
 function clearAnggota() {
     selectedAnggota = null;
-    selectedPeminjaman = null;
-    
+    allPeminjaman = [];
+    selectedBooks = {};
+    activePeminjamanId = null;
     document.getElementById('anggotaInfo').classList.add('hidden');
-    document.getElementById('peminjamanSection').classList.add('hidden');
+    document.getElementById('sectionPilihBuku').classList.add('hidden');
     document.getElementById('pengembalianForm').classList.add('hidden');
-    document.getElementById('anggota_dropdown').value = '';
-    document.getElementById('selectedPeminjamanId').value = '';
+    document.getElementById('summaryBar').classList.remove('visible');
+    updateSteps(1);
 }
 
-function getPeminjamanAktif(anggotaId) {
-    fetch(`/admin/pengembalian/get-peminjaman-aktif?anggota_id=${anggotaId}`, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            loadPeminjamanAktif(data.data);
-        } else {
-            showNotification(data.message, 'warning');
-            document.getElementById('peminjamanSection').classList.remove('hidden');
-            document.getElementById('noPeminjaman').classList.remove('hidden');
-            document.getElementById('noPeminjaman').innerHTML = `
-                <div class="text-center py-8">
-                    <i class="fas fa-info-circle text-2xl text-blue-500 mb-4"></i>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak Ada Peminjaman Aktif</h3>
-                    <p class="text-gray-600">Anggota ini sedang tidak pinjam buku</p>
-                </div>
-            `;
-        }
-    })
-    .catch(error => {
-        console.error('Error getting peminjaman aktif:', error);
-        showNotification('Terjadi kesalahan saat mengambil data peminjaman', 'error');
-    });
-}
+// ==================== PEMINJAMAN & BOOK SELECTION ====================
+function loadPeminjamanData(peminjamanList) {
+    allPeminjaman = peminjamanList;
+    selectedBooks = {};
+    activePeminjamanId = null;
 
-function loadPeminjamanAktif(peminjamanData) {
-    const peminjamanList = document.getElementById('peminjamanList');
-    const noPeminjaman = document.getElementById('noPeminjaman');
-    const peminjamanSection = document.getElementById('peminjamanSection');
-    
-    peminjamanSection.classList.remove('hidden');
-    
-    if (peminjamanData.length === 0) {
-        noPeminjaman.classList.remove('hidden');
-        peminjamanList.innerHTML = '';
-        showNotification('Tidak ada peminjaman aktif untuk anggota ini', 'info');
-        return;
-    }
-    
-    noPeminjaman.classList.add('hidden');
-    peminjamanList.innerHTML = '';
-    
-    peminjamanData.forEach(peminjaman => {
-        const peminjamanItem = createPeminjamanItem(peminjaman);
-        peminjamanList.appendChild(peminjamanItem);
-    });
-    
-    // Auto-select first peminjaman if only one
-    if (peminjamanData.length === 1) {
-        selectPeminjaman(peminjamanData[0]);
-    }
-    
-    // Show success message with peminjaman count
-    showNotification(`Ditemukan ${peminjamanData.length} peminjaman aktif untuk anggota ini`, 'success');
-}
+    const container = document.getElementById('peminjamanContainer');
+    document.getElementById('noPeminjamanMsg').classList.add('hidden');
+    document.getElementById('sectionPilihBuku').classList.remove('hidden');
 
-function createPeminjamanItem(peminjaman) {
-    const div = document.createElement('div');
-    div.className = `p-4 border text-xs rounded-lg transition-all duration-200 ${peminjaman.is_late ? 'late-warning border-red-300' : 'border-gray-200'}`;
-    div.setAttribute('data-peminjaman-id', peminjaman.id);
-    
-    let lateWarning = '';
-    let dendaInfo = '';
-    if (peminjaman.is_late) {
-        const dendaAmount = peminjaman.days_late * 1000; // Assuming 1000 per day
-        lateWarning = `
-            <div class="flex items-center text-red-600 mb-2">
-                <i class="fas fa-exclamation-triangle mr-2"></i>
-                <span class="text-xs font-semibold">Terlambat ${peminjaman.days_late} hari</span>
-            </div>
-        `;
-        dendaInfo = `
-            <div class="bg-red-50 p-3 rounded mb-3 border border-red-200">
-                <div class="flex justify-between items-center">
-                    <span class="text-xs font-medium text-red-700">Denda Keterlambatan:</span>
-                    <span class="text-sm font-bold text-red-800">Rp ${dendaAmount.toLocaleString()}</span>
-                </div>
-            </div>
-        `;
-    }
-    
-    // Add button to process return for this specific peminjaman
-    const kembalikanButton = `
-        <div class="mt-4 flex justify-end">
-            <button type="button" 
-                    onclick="selectAndProcessPeminjaman(${JSON.stringify(peminjaman).replace(/"/g, '&quot;')})"
-                    class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-semibold transition-colors duration-200 flex items-center">
-                <i class="fas fa-undo mr-2"></i>Proses Pengembalian
-            </button>
-        </div>
-    `;
-    
-    div.innerHTML = `
-        ${lateWarning}
-        ${dendaInfo}
-        <div class="flex justify-between items-start mb-3">
-            <div>
-                <h6 class="font-semibold text-gray-900">${peminjaman.nomor_peminjaman}</h6>
-                <p class="text-xs text-gray-600">Dipinjam: ${peminjaman.tanggal_peminjaman}</p>
-                <p class="text-xs text-gray-600">Harus kembali: ${peminjaman.tanggal_harus_kembali}</p>
-            </div>
-            <span class="px-3 py-1 text-xs font-medium rounded-full ${peminjaman.is_late ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}">
-                ${peminjaman.jumlah_buku || (peminjaman.detail_peminjaman ? peminjaman.detail_peminjaman.reduce((sum, item) => sum + (item.jumlah || 1), 0) : (peminjaman.buku ? peminjaman.buku.reduce((sum, item) => sum + (item.jumlah || 1), 0) : 0))} buku
-            </span>
-        </div>
-        <div class="space-y-2">
-            ${peminjaman.detail_peminjaman.map(detail => `
-                <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
-                    <div class="flex-1">
-                        <p class="text-xs font-medium text-gray-900">${detail.judul_buku}</p>
-                        <p class="text-xs text-gray-600">${detail.penulis} - ${detail.kategori}</p>
+    let html = '';
+    peminjamanList.forEach((p, idx) => {
+        const lateClass = p.is_late ? 'late' : '';
+        const lateBadge = p.is_late
+            ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-bold"><i class="fas fa-exclamation-triangle"></i>Terlambat ${p.days_late} hari</span>`
+            : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold"><i class="fas fa-check-circle"></i>Tepat waktu</span>`;
+
+        let booksHtml = '';
+        if (p.detail_peminjaman && p.detail_peminjaman.length > 0) {
+            p.detail_peminjaman.forEach(d => {
+                const bookKey = `${p.id}_${d.id}`;
+                booksHtml += `
+                <div class="book-check-card" id="bookCard_${bookKey}" onclick="toggleBook('${bookKey}', ${p.id}, ${d.id}, '${(d.judul_buku||'').replace(/'/g,"\\'")}', ${d.jumlah||1})">
+                    <div class="flex items-center gap-3">
+                        <div class="flex-shrink-0">
+                            <div class="w-5 h-5 border-2 border-gray-300 rounded flex items-center justify-center transition-all" id="checkIcon_${bookKey}">
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-semibold text-gray-900 truncate">${d.judul_buku || 'N/A'}</p>
+                            <p class="text-[10px] text-gray-500">Jumlah: ${d.jumlah || 1} buku</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-book text-gray-300 text-lg"></i>
+                        </div>
                     </div>
-                    <span class="text-xs text-gray-500">Qty: ${detail.jumlah}</span>
+                </div>`;
+            });
+        }
+
+        html += `
+        <div class="peminjaman-card ${lateClass}" id="peminjamanCard_${p.id}">
+            <div class="flex items-start justify-between mb-3">
+                <div>
+                    <h4 class="text-xs font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-file-alt text-blue-500"></i>${p.nomor_peminjaman}
+                    </h4>
+                    <div class="flex flex-wrap items-center gap-2 mt-1 text-[10px] text-gray-500">
+                        <span><i class="fas fa-calendar mr-1"></i>Pinjam: ${p.tanggal_peminjaman}</span>
+                        <span>&bull;</span>
+                        <span><i class="fas fa-calendar-check mr-1"></i>Batas: ${p.tanggal_harus_kembali}</span>
+                    </div>
                 </div>
-            `).join('')}
-        </div>
-        ${kembalikanButton}
-    `;
-    
-    return div;
-}
-
-function selectPeminjaman(peminjaman) {
-    selectedPeminjaman = peminjaman;
-    
-    // Update form
-    document.getElementById('selectedPeminjamanId').value = peminjaman.id;
-    
-    // Show form
-    document.getElementById('pengembalianForm').classList.remove('hidden');
-    
-    // Load kondisi buku
-    loadKondisiBuku(peminjaman.detail_peminjaman);
-    
-    // Show denda info if late
-    if (peminjaman.is_late) {
-        showDendaInfo(peminjaman.days_late);
-    } else {
-        document.getElementById('dendaInfo').classList.add('hidden');
-        hideFormPembayaranDenda();
-    }
-    
-    // Highlight selected
-    document.querySelectorAll('#peminjamanList > div').forEach(item => {
-        item.classList.remove('ring-2', 'ring-green-500');
-    });
-    // Find the clicked element and add highlight
-    const clickedElement = document.querySelector(`[data-peminjaman-id="${peminjaman.id}"]`);
-    if (clickedElement) {
-        clickedElement.classList.add('ring-2', 'ring-green-500');
-    }
-    
-    showNotification(`Peminjaman ${peminjaman.nomor_peminjaman} dipilih`, 'success');
-}
-
-// Function to be called by the "Proses Pengembalian" button
-function selectAndProcessPeminjaman(peminjaman) {
-    // Select this peminjaman and show the return form
-    selectPeminjaman(peminjaman);
-    
-    // Scroll to the return form
-    document.getElementById('pengembalianForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    
-    showNotification(`Memproses pengembalian untuk ${peminjaman.nomor_peminjaman}`, 'success');
-}
-
-function loadKondisiBuku(detailPeminjaman) {
-    const kondisiList = document.getElementById('kondisiBukuList');
-    kondisiList.innerHTML = '';
-    
-    detailPeminjaman.forEach(detail => {
-        const div = document.createElement('div');
-        div.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg';
-        div.innerHTML = `
-            <div class="flex-1">
-                <p class="font-medium text-gray-900">${detail.judul_buku}</p>
-                <p class="text-xs text-gray-600">${detail.penulis} (Qty: ${detail.jumlah})</p>
+                <div class="flex items-center gap-2">
+                    ${lateBadge}
+                </div>
             </div>
-            <select name="kondisi_kembali[${detail.id}]" required 
-                    class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500">
+
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">Daftar Buku</p>
+                <button type="button" class="select-all-btn" id="selectAllBtn_${p.id}" onclick="toggleSelectAll(${p.id}, event)">
+                    <i class="fas fa-check-double text-[10px]"></i> Pilih Semua
+                </button>
+            </div>
+
+            <div class="space-y-2" id="booksList_${p.id}">
+                ${booksHtml}
+            </div>
+        </div>`;
+    });
+
+    container.innerHTML = html;
+
+    if (peminjamanList.length === 1) {
+        showNotification('1 peminjaman aktif ditemukan. Pilih buku yang ingin dikembalikan.', 'success');
+    } else {
+        showNotification(`${peminjamanList.length} peminjaman aktif ditemukan. Pilih buku yang ingin dikembalikan.`, 'success');
+    }
+}
+
+function toggleBook(bookKey, peminjamanId, detailId, judul, jumlah) {
+    const card = document.getElementById(`bookCard_${bookKey}`);
+    const checkIcon = document.getElementById(`checkIcon_${bookKey}`);
+
+    if (selectedBooks[bookKey]) {
+        // Deselect
+        delete selectedBooks[bookKey];
+        card.classList.remove('selected');
+        checkIcon.innerHTML = '';
+        checkIcon.style.borderColor = '#d1d5db';
+        checkIcon.style.background = 'transparent';
+    } else {
+        // Select
+        selectedBooks[bookKey] = { peminjamanId, detailId, judul, jumlah, kondisi: 'baik' };
+        card.classList.add('selected');
+        checkIcon.innerHTML = '<i class="fas fa-check text-white text-[9px]"></i>';
+        checkIcon.style.borderColor = '#10b981';
+        checkIcon.style.background = '#10b981';
+    }
+
+    updateSelectAllState(peminjamanId);
+    updateFormState();
+}
+
+function toggleSelectAll(peminjamanId, event) {
+    event.stopPropagation();
+    const peminjaman = allPeminjaman.find(p => p.id === peminjamanId);
+    if (!peminjaman || !peminjaman.detail_peminjaman) return;
+
+    // Check if all are currently selected
+    const allSelected = peminjaman.detail_peminjaman.every(d => {
+        return selectedBooks[`${peminjamanId}_${d.id}`];
+    });
+
+    if (allSelected) {
+        // Deselect all
+        peminjaman.detail_peminjaman.forEach(d => {
+            const key = `${peminjamanId}_${d.id}`;
+            delete selectedBooks[key];
+            const card = document.getElementById(`bookCard_${key}`);
+            const check = document.getElementById(`checkIcon_${key}`);
+            if (card) card.classList.remove('selected');
+            if (check) { check.innerHTML = ''; check.style.borderColor = '#d1d5db'; check.style.background = 'transparent'; }
+        });
+    } else {
+        // Select all
+        peminjaman.detail_peminjaman.forEach(d => {
+            const key = `${peminjamanId}_${d.id}`;
+            selectedBooks[key] = { peminjamanId, detailId: d.id, judul: d.judul_buku || 'N/A', jumlah: d.jumlah || 1, kondisi: 'baik' };
+            const card = document.getElementById(`bookCard_${key}`);
+            const check = document.getElementById(`checkIcon_${key}`);
+            if (card) card.classList.add('selected');
+            if (check) { check.innerHTML = '<i class="fas fa-check text-white text-[9px]"></i>'; check.style.borderColor = '#10b981'; check.style.background = '#10b981'; }
+        });
+    }
+
+    updateSelectAllState(peminjamanId);
+    updateFormState();
+}
+
+function updateSelectAllState(peminjamanId) {
+    const peminjaman = allPeminjaman.find(p => p.id === peminjamanId);
+    if (!peminjaman) return;
+    const btn = document.getElementById(`selectAllBtn_${peminjamanId}`);
+    if (!btn) return;
+    const allSelected = peminjaman.detail_peminjaman.every(d => selectedBooks[`${peminjamanId}_${d.id}`]);
+    btn.classList.toggle('all-selected', allSelected);
+}
+
+function updateFormState() {
+    const selected = Object.values(selectedBooks);
+    const count = selected.length;
+
+    // Summary bar
+    const bar = document.getElementById('summaryBar');
+    if (count > 0) {
+        bar.classList.add('visible');
+        document.getElementById('summaryBookCount').textContent = count;
+        // Get unique peminjaman IDs
+        const pIds = [...new Set(selected.map(s => s.peminjamanId))];
+        // We only support 1 peminjaman at a time for the store endpoint
+        if (pIds.length === 1) {
+            const p = allPeminjaman.find(pm => pm.id === pIds[0]);
+            document.getElementById('summaryPeminjamanNo').textContent = p ? p.nomor_peminjaman : '-';
+        } else {
+            document.getElementById('summaryPeminjamanNo').textContent = `${pIds.length} peminjaman`;
+        }
+    } else {
+        bar.classList.remove('visible');
+    }
+
+    // Show/hide form
+    if (count > 0) {
+        // Determine the peminjaman(s) involved
+        const pIds = [...new Set(selected.map(s => s.peminjamanId))];
+
+        if (pIds.length > 1) {
+            showNotification('Saat ini hanya dapat memproses pengembalian dari 1 peminjaman per transaksi. Silakan pilih buku dari satu peminjaman saja.', 'warning');
+            return;
+        }
+
+        activePeminjamanId = pIds[0];
+        const peminjaman = allPeminjaman.find(p => p.id === activePeminjamanId);
+
+        document.getElementById('selectedPeminjamanId').value = activePeminjamanId;
+        document.getElementById('selectedDetailIds').value = JSON.stringify(selected.map(s => s.detailId));
+
+        // Show form
+        document.getElementById('pengembalianForm').classList.remove('hidden');
+        updateSteps(3);
+
+        // Late info
+        if (peminjaman && peminjaman.is_late) {
+            const denda = peminjaman.days_late * 1000;
+            document.getElementById('lateInfoBanner').classList.remove('hidden');
+            document.getElementById('lateInfoText').textContent = `Terlambat ${peminjaman.days_late} hari. Estimasi denda keterlambatan: Rp ${denda.toLocaleString('id-ID')}`;
+            document.getElementById('dendaFieldsSection').classList.remove('hidden');
+            document.getElementById('hari_terlambat').value = peminjaman.days_late;
+            document.getElementById('jumlah_denda').value = denda;
+            // Reset status pembayaran ke default
+            const statusSelect = document.getElementById('status_pembayaran_denda');
+            statusSelect.value = 'belum_dibayar';
+            toggleTanggalPembayaran('belum_dibayar');
+        } else {
+            document.getElementById('lateInfoBanner').classList.add('hidden');
+            document.getElementById('dendaFieldsSection').classList.add('hidden');
+            document.getElementById('tanggalPembayaranSection').classList.add('hidden');
+            document.getElementById('hari_terlambat').value = 0;
+            document.getElementById('jumlah_denda').value = 0;
+        }
+
+        // Kondisi buku
+        renderKondisiBuku(selected);
+    } else {
+        document.getElementById('pengembalianForm').classList.add('hidden');
+        activePeminjamanId = null;
+        updateSteps(2);
+    }
+}
+
+function renderKondisiBuku(selected) {
+    const list = document.getElementById('kondisiBukuList');
+    let html = '';
+    selected.forEach(s => {
+        const key = `${s.peminjamanId}_${s.detailId}`;
+        html += `
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+                <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-book text-purple-500 text-xs"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-xs font-semibold text-gray-900 truncate">${s.judul}</p>
+                    <p class="text-[10px] text-gray-500">Qty: ${s.jumlah}</p>
+                </div>
+            </div>
+            <select name="kondisi_kembali[${s.detailId}]" required onchange="updateBookKondisi('${key}', this.value)"
+                    class="text-xs px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none bg-white">
                 <option value="baik">Baik</option>
                 <option value="sedikit_rusak">Sedikit Rusak</option>
                 <option value="rusak">Rusak</option>
                 <option value="hilang">Hilang</option>
             </select>
-        `;
-        kondisiList.appendChild(div);
+        </div>`;
     });
+    list.innerHTML = html;
 }
 
-function showDendaInfo(daysLate) {
-    const dendaAmount = daysLate * 1000; // Assuming 1000 per day
-    document.getElementById('dendaDetail').innerHTML = `
-        <div class="flex flex-wrap items-center justify-between gap-2">
-            <div>
-                <p><strong>Keterlambatan:</strong> ${daysLate} hari</p>
-                <p><strong>Denda per hari:</strong> Rp 1.000</p>
-            </div>
-            <div class="text-lg font-bold text-red-600">
-                Total: Rp ${dendaAmount.toLocaleString()}
-            </div>
-        </div>
-        <p class="mt-2 text-xs text-gray-700">Denda akan otomatis ditambahkan ke sistem saat pengembalian diproses</p>
-    `;
-    document.getElementById('dendaInfo').classList.remove('hidden');
-    
-    // Tampilkan form pembayaran denda jika ada keterlambatan
-    if (daysLate > 0) {
-        showFormPembayaranDenda(dendaAmount);
-    } else {
-        hideFormPembayaranDenda();
+function updateBookKondisi(key, kondisi) {
+    if (selectedBooks[key]) selectedBooks[key].kondisi = kondisi;
+}
+
+function scrollToForm() {
+    document.getElementById('sectionKonfirmasi').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ==================== FORM VALIDATION & SUBMIT ====================
+function validateAndSubmit(event) {
+    event.preventDefault();
+
+    const selected = Object.values(selectedBooks);
+    if (selected.length === 0) {
+        showNotification('Pilih minimal 1 buku untuk dikembalikan!', 'error');
+        return false;
     }
+
+    // Check all from same peminjaman
+    const pIds = [...new Set(selected.map(s => s.peminjamanId))];
+    if (pIds.length > 1) {
+        showNotification('Hanya bisa memproses 1 peminjaman per transaksi!', 'error');
+        return false;
+    }
+
+    // Validate kondisi
+    const kondisiInputs = document.querySelectorAll('select[name^="kondisi_kembali"]');
+    let allValid = true;
+    kondisiInputs.forEach(i => { if (!i.value) allValid = false; });
+    if (!allValid) {
+        showNotification('Pilih kondisi untuk semua buku!', 'error');
+        return false;
+    }
+
+    // Validate tanggal pembayaran denda jika status sudah_dibayar
+    const statusDenda = document.getElementById('status_pembayaran_denda');
+    const tanggalPembayaran = document.getElementById('tanggal_pembayaran_denda');
+    if (statusDenda && statusDenda.value === 'sudah_dibayar' && tanggalPembayaran && !tanggalPembayaran.value) {
+        showNotification('Tanggal pembayaran denda harus diisi jika status sudah dibayar!', 'error');
+        tanggalPembayaran.focus();
+        return false;
+    }
+
+    // Update hidden field
+    document.getElementById('selectedDetailIds').value = JSON.stringify(selected.map(s => s.detailId));
+
+    // Confirm via SweetAlert
+    const peminjaman = allPeminjaman.find(p => p.id === pIds[0]);
+    const totalBooksInPeminjaman = peminjaman ? peminjaman.detail_peminjaman.length : 0;
+    const isPartial = selected.length < totalBooksInPeminjaman;
+
+    let confirmMsg = `Mengembalikan <b>${selected.length} buku</b> dari peminjaman <b>${peminjaman ? peminjaman.nomor_peminjaman : ''}</b>.`;
+    if (isPartial) {
+        confirmMsg += `<br><br><span class="text-orange-600 text-xs"><i class="fas fa-info-circle mr-1"></i>Pengembalian sebagian: ${totalBooksInPeminjaman - selected.length} buku lainnya belum dikembalikan.</span>`;
+    }
+
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'Konfirmasi Pengembalian',
+            html: confirmMsg,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: '<i class="fas fa-check mr-1"></i>Ya, Proses',
+            cancelButtonText: 'Batal',
+        }).then(result => {
+            if (result.isConfirmed) {
+                document.getElementById('pengembalianForm').submit();
+            }
+        });
+    } else {
+        if (confirm('Proses pengembalian buku?')) {
+            document.getElementById('pengembalianForm').submit();
+        }
+    }
+    return false;
 }
 
-function showFormPembayaranDenda(totalDenda) {
-    document.getElementById('formPembayaranDenda').classList.remove('hidden');
-    document.getElementById('totalDendaDisplay').textContent = `Rp ${totalDenda.toLocaleString()}`;
-    
-    // Set tanggal pembayaran ke hari ini
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('tanggal_pembayaran_denda').value = today;
-    
-    // Set status pembayaran default ke "belum_dibayar"
-    document.getElementById('status_pembayaran_denda').value = 'belum_dibayar';
-    
-    // Update hidden inputs
-    document.getElementById('hiddenStatusPembayaranDenda').value = 'belum_dibayar';
-    document.getElementById('hiddenTanggalPembayaranDenda').value = today;
-    document.getElementById('hiddenCatatanPembayaranDenda').value = '';
-}
-
-function hideFormPembayaranDenda() {
-    document.getElementById('formPembayaranDenda').classList.add('hidden');
+// ==================== DENDA PAYMENT TOGGLE ====================
+function toggleTanggalPembayaran(value) {
+    const section = document.getElementById('tanggalPembayaranSection');
+    const tanggalInput = document.getElementById('tanggal_pembayaran_denda');
+    if (value === 'sudah_dibayar') {
+        section.classList.remove('hidden');
+        tanggalInput.setAttribute('required', 'required');
+    } else {
+        section.classList.add('hidden');
+        tanggalInput.removeAttribute('required');
+        tanggalInput.value = '';
+    }
 }
 
 function resetForm() {
     clearAnggota();
 }
 
-// Form validation
-function validateForm() {
-    const selectedPeminjamanId = document.getElementById('selectedPeminjamanId').value;
-    
-    if (!selectedPeminjamanId) {
-        showNotification('Pilih peminjaman terlebih dahulu!', 'error');
-        return false;
+// ==================== BARCODE SCANNER ====================
+function openScanner() {
+    const modal = document.getElementById('scannerFullscreen');
+    modal.classList.add('active');
+    isProcessingBarcode = false;
+    lastScannedBarcode = '';
+
+    if (nativeBarcodeDetector) {
+        startNativeScanner();
+    } else {
+        startFallbackScanner();
     }
-    
-    // Validate kondisi buku
-    const kondisiInputs = document.querySelectorAll('select[name^="kondisi_kembali"]');
-    let isValid = true;
-    
-    kondisiInputs.forEach(input => {
-        if (!input.value) {
-            isValid = false;
-        }
-    });
-    
-    if (!isValid) {
-        showNotification('Pilih kondisi untuk semua buku!', 'error');
-        return false;
-    }
-    
-    // Validate pembayaran denda
-    const statusPembayaran = document.getElementById('status_pembayaran_denda');
-    const tanggalPembayaran = document.getElementById('tanggal_pembayaran_denda');
-    const formPembayaranDenda = document.getElementById('formPembayaranDenda');
-    
-    // Jika form pembayaran denda ditampilkan dan status sudah_dibayar, tanggal harus diisi
-    if (!formPembayaranDenda.classList.contains('hidden') && 
-        statusPembayaran.value === 'sudah_dibayar' && 
-        !tanggalPembayaran.value) {
-        showNotification('Tanggal pembayaran harus diisi jika status sudah dibayar!', 'error');
-        return false;
-    }
-    
-    return true;
 }
 
-// Notification function
+async function startNativeScanner() {
+    const videoEl = document.getElementById('scannerVideoEl');
+    const statusText = document.getElementById('scannerStatusText');
+    statusText.textContent = 'Memulai kamera HD...';
+
+    try {
+        nativeScanStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: { ideal: 'environment' },
+                width: { ideal: 1920, min: 1280 },
+                height: { ideal: 1080, min: 720 },
+                frameRate: { ideal: 30, min: 15 },
+                focusMode: { ideal: 'continuous' }
+            }
+        });
+        videoEl.srcObject = nativeScanStream;
+        await videoEl.play();
+
+        // Try torch
+        const track = nativeScanStream.getVideoTracks()[0];
+        const caps = track.getCapabilities ? track.getCapabilities() : {};
+        if (caps.torch) {
+            document.getElementById('torchBtn').classList.remove('hidden');
+            document.getElementById('torchBtn').onclick = async () => {
+                const settings = track.getSettings();
+                await track.applyConstraints({ advanced: [{ torch: !settings.torch }] });
+            };
+        }
+
+        statusText.textContent = 'Scanner aktif - arahkan ke barcode';
+
+        // Start scanning at 20fps
+        nativeScanInterval = setInterval(async () => {
+            if (isProcessingBarcode) return;
+            try {
+                const barcodes = await nativeBarcodeDetector.detect(videoEl);
+                if (barcodes.length > 0) {
+                    const code = barcodes[0].rawValue;
+                    const now = Date.now();
+                    if (code && (code !== lastScannedBarcode || now - lastScanTime > 3000)) {
+                        lastScannedBarcode = code;
+                        lastScanTime = now;
+                        if (navigator.vibrate) navigator.vibrate(100);
+                        processScannedBarcode(code);
+                    }
+                }
+            } catch(e) {}
+        }, 50);
+
+    } catch(err) {
+        console.error('Native scanner error:', err);
+        statusText.textContent = 'Gagal akses kamera, coba fallback...';
+        startFallbackScanner();
+    }
+}
+
+function startFallbackScanner() {
+    const statusText = document.getElementById('scannerStatusText');
+    statusText.textContent = 'Menggunakan scanner alternatif...';
+    // Hide main video, use fallback reader
+    document.getElementById('scannerVideoEl').style.display = 'none';
+    const fallback = document.getElementById('fallbackReader');
+    fallback.classList.remove('hidden');
+    fallback.style.cssText = 'position:absolute;inset:0;';
+
+    try {
+        html5QrScanner = new Html5Qrcode('fallbackReader');
+        html5QrScanner.start(
+            { facingMode: 'environment' },
+            { fps: 30, qrbox: { width: 300, height: 200 }, aspectRatio: 1.333, formatsToSupport: [Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39, Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.QR_CODE] },
+            (text) => {
+                if (isProcessingBarcode) return;
+                const now = Date.now();
+                if (text && (text !== lastScannedBarcode || now - lastScanTime > 3000)) {
+                    lastScannedBarcode = text;
+                    lastScanTime = now;
+                    if (navigator.vibrate) navigator.vibrate(100);
+                    processScannedBarcode(text);
+                }
+            },
+            () => {}
+        ).then(() => {
+            statusText.textContent = 'Scanner aktif - arahkan ke barcode';
+        }).catch(err => {
+            statusText.textContent = 'Gagal memulai scanner';
+        });
+    } catch(e) {
+        statusText.textContent = 'Scanner tidak tersedia';
+    }
+}
+
+function processScannedBarcode(barcode) {
+    if (isProcessingBarcode) return;
+    isProcessingBarcode = true;
+    document.getElementById('scannerStatusText').textContent = 'Memproses barcode...';
+
+    fetch('/admin/pengembalian/scan-barcode-anggota', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+        body: JSON.stringify({ barcode })
+    })
+    .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+    .then(data => {
+        isProcessingBarcode = false;
+        if (data.success) {
+            closeScanner();
+            // Set anggota from scan data
+            const a = data.data.anggota;
+            selectedAnggota = a;
+            document.getElementById('anggotaNama').textContent = a.nama_lengkap;
+            document.getElementById('anggotaNomor').textContent = a.nomor_anggota || '';
+
+            const kelasName = (typeof a.kelas === 'object' && a.kelas !== null)
+                ? (a.kelas.nama_kelas || 'N/A')
+                : (a.kelas || 'N/A');
+            document.getElementById('anggotaKelas').textContent = kelasName + ' - ' + (a.jenis_anggota || 'Siswa');
+            document.getElementById('anggotaInfo').classList.remove('hidden');
+
+            // Load peminjaman
+            if (data.data.peminjaman && data.data.peminjaman.length > 0) {
+                loadPeminjamanData(data.data.peminjaman);
+            } else {
+                showNoPeminjaman();
+            }
+            updateSteps(2);
+            showNotification(`Anggota ditemukan: ${a.nama_lengkap}`, 'success');
+        } else {
+            showNotification(data.message || 'Anggota tidak ditemukan', 'error');
+            document.getElementById('scannerStatusText').textContent = 'Scan gagal - coba lagi';
+        }
+    })
+    .catch(err => {
+        isProcessingBarcode = false;
+        showNotification('Error: ' + err.message, 'error');
+        document.getElementById('scannerStatusText').textContent = 'Error - coba lagi';
+    });
+}
+
+function closeScanner() {
+    isProcessingBarcode = false;
+    lastScannedBarcode = '';
+
+    // Stop native
+    if (nativeScanInterval) { clearInterval(nativeScanInterval); nativeScanInterval = null; }
+    if (nativeScanStream) { nativeScanStream.getTracks().forEach(t => t.stop()); nativeScanStream = null; }
+
+    // Stop fallback
+    if (html5QrScanner) { html5QrScanner.stop().catch(() => {}); html5QrScanner = null; }
+
+    // Reset UI
+    const videoEl = document.getElementById('scannerVideoEl');
+    videoEl.srcObject = null;
+    videoEl.style.display = '';
+    document.getElementById('fallbackReader').classList.add('hidden');
+    document.getElementById('torchBtn').classList.add('hidden');
+    document.getElementById('scannerFullscreen').classList.remove('active');
+}
+
+// ==================== NOTIFICATION ====================
 function showNotification(message, type = 'info') {
-    // You can integrate with your existing notification system
-    console.log(`${type.toUpperCase()}: ${message}`);
-    
-    // Simple alert for now
-    if (type === 'error') {
-        alert('Error: ' + message);
+    if (typeof Swal !== 'undefined') {
+        const iconMap = { success: 'success', error: 'error', warning: 'warning', info: 'info' };
+        const Toast = Swal.mixin({
+            toast: true, position: 'top-end', showConfirmButton: false,
+            timer: 3000, timerProgressBar: true,
+            didOpen: (t) => { t.addEventListener('mouseenter', Swal.stopTimer); t.addEventListener('mouseleave', Swal.resumeTimer); }
+        });
+        Toast.fire({ icon: iconMap[type] || 'info', title: message });
+    } else {
+        console.log(`[${type.toUpperCase()}] ${message}`);
     }
 }
 </script>

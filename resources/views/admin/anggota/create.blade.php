@@ -1,1024 +1,783 @@
 @extends('layouts.admin')
 
 @section('title', 'Tambah Anggota')
+@section('page-title', 'Tambah Anggota Baru')
 
 @push('styles')
 <style>
-    .barcode-container {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        padding: 15px;
-        border-radius: 8px;
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+    .fade-in {
+        opacity: 0;
+        transform: translateY(16px);
+        animation: slideUp 0.5s ease forwards;
+    }
+    .fade-in:nth-child(1) { animation-delay: 0.05s; }
+    .fade-in:nth-child(2) { animation-delay: 0.1s; }
+    .fade-in:nth-child(3) { animation-delay: 0.15s; }
+    .fade-in:nth-child(4) { animation-delay: 0.2s; }
+    .fade-in:nth-child(5) { animation-delay: 0.25s; }
+    @keyframes slideUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 0.875rem;
+        color: #1e293b;
+        background: #f8fafc;
+        transition: all 0.2s ease;
+    }
+    .form-input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .form-input.is-invalid {
+        border-color: #ef4444;
+        background: #fef2f2;
+    }
+    .form-input.is-invalid:focus {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+    .form-label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 6px;
+        letter-spacing: 0.01em;
+    }
+    .form-label .required {
+        color: #ef4444;
+        margin-left: 2px;
+    }
+    .form-hint {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-top: 4px;
+    }
+    .form-error {
+        font-size: 0.75rem;
+        color: #ef4444;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #1e293b;
         margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #f1f5f9;
     }
-    
-    .barcode-display {
-        text-align: center;
-        font-family: 'Courier New', monospace;
-        font-size: 18px;
-        font-weight: bold;
-        color: #333;
-        background: white;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        margin: 10px 0;
+    .section-title .icon-box {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        color: white;
+        flex-shrink: 0;
     }
-    
-    .camera-container {
+
+    .photo-upload-area {
+        width: 140px;
+        height: 140px;
+        border: 2px dashed #cbd5e1;
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #f8fafc;
+        overflow: hidden;
         position: relative;
-        width: 100%;
-        max-width: 400px;
-        margin: 0 auto;
     }
-    
-    #video {
-        width: 100%;
-        height: 300px;
-        background: #000;
-        border-radius: 8px;
+    .photo-upload-area:hover {
+        border-color: #3b82f6;
+        background: #eff6ff;
     }
-    
-    .camera-overlay {
+    .photo-upload-area img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .photo-upload-area .upload-placeholder {
+        text-align: center;
+        color: #94a3b8;
+    }
+    .photo-upload-area .upload-placeholder i {
+        font-size: 1.8rem;
+        margin-bottom: 6px;
+        display: block;
+    }
+    .photo-upload-area .upload-placeholder span {
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    .photo-upload-area .remove-photo {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 200px;
-        height: 100px;
-        border: 2px solid #fff;
-        border-radius: 8px;
+        top: 6px;
+        right: 6px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: rgba(239, 68, 68, 0.9);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    .photo-upload-area:hover .remove-photo {
+        opacity: 1;
+    }
+
+    .barcode-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border: 1px solid #bae6fd;
+        border-radius: 10px;
+        padding: 8px 14px;
+        font-family: 'Courier New', monospace;
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #0369a1;
+        letter-spacing: 0.05em;
+    }
+
+    .jenis-anggota-option {
+        flex: 1;
+        padding: 12px 16px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #f8fafc;
+    }
+    .jenis-anggota-option:hover {
+        border-color: #93c5fd;
+        background: #eff6ff;
+    }
+    .jenis-anggota-option.active {
+        border-color: #3b82f6;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .jenis-anggota-option .option-icon {
+        font-size: 1.3rem;
+        margin-bottom: 4px;
+        display: block;
+    }
+    .jenis-anggota-option .option-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .gender-option {
+        flex: 1;
+        padding: 10px 16px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #f8fafc;
+    }
+    .gender-option:hover {
+        border-color: #93c5fd;
+        background: #eff6ff;
+    }
+    .gender-option.active {
+        border-color: #3b82f6;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .gender-option .option-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+    .gender-option .option-text {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .status-option {
+        flex: 1;
+        padding: 10px 14px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #f8fafc;
+    }
+    .status-option:hover {
+        border-color: #93c5fd;
+    }
+    .status-option.active-aktif {
+        border-color: #22c55e;
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    }
+    .status-option.active-nonaktif {
+        border-color: #ef4444;
+        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+    .status-option.active-ditangguhkan {
+        border-color: #f59e0b;
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+    }
+    .status-option .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 6px;
+    }
+    .status-option .status-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #334155;
     }
 </style>
 @endpush
 
 @section('content')
-<div class="container px-6 mx-auto grid">
-    <p class="my-6 ">
-    <a href="{{ route('anggota.index') }}"
-                   class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
-                    <i class="fas fa-arrow-left mr-1"></i>Kembali
-                </a>
-    </p>
+<div class="max-w-5xl mx-auto">
 
-    <!-- Alert Sukses -->
+    {{-- Alert Sukses --}}
     @if(session('success'))
-    <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
-        {{ session('success') }}
+    <div class="mb-5 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 fade-in">
+        <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-check text-green-600 text-sm"></i>
+        </div>
+        <p class="text-sm text-green-800 font-medium">{{ session('success') }}</p>
     </div>
     @endif
 
-    <!-- Alert Error -->
+    {{-- Alert Error --}}
     @if(session('error'))
-    <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
-        {{ session('error') }}
+    <div class="mb-5 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 fade-in">
+        <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-exclamation-triangle text-red-600 text-sm"></i>
+        </div>
+        <p class="text-sm text-red-800 font-medium">{{ session('error') }}</p>
     </div>
     @endif
 
-    <!-- Alert Validasi Error -->
+    {{-- Validation Errors --}}
     @if($errors->any())
-    <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
-        <ul>
-            @foreach($errors->all() as $error)
-            <li>{{ $error }}</li>
-            @endforeach
-        </ul>
+    <div class="mb-5 p-4 bg-red-50 border border-red-200 rounded-xl fade-in">
+        <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i class="fas fa-exclamation-triangle text-red-600 text-sm"></i>
+            </div>
+            <div>
+                <h4 class="text-sm font-semibold text-red-800 mb-1">Terdapat kesalahan pada form</h4>
+                <ul class="text-sm text-red-700 space-y-0.5">
+                    @foreach($errors->all() as $error)
+                    <li class="flex items-center gap-1.5">
+                        <i class="fas fa-circle text-red-400" style="font-size: 4px;"></i>
+                        {{ $error }}
+                    </li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
     </div>
     @endif
 
-    <div class="bg-white rounded-lg shadow-md p-6">
-        <form method="POST" action="{{ route('anggota.store') }}" enctype="multipart/form-data">
-            @csrf
-            
-            <!-- Barcode Section -->
-            <div class="barcode-container p-2">
-                <!-- <h3 class="text-lg font-semibold mb-3">Barcode Anggota</h3> -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="flex flex-col">
-                        <label for="barcode_anggota" class="block text-sm font-medium text-gray-700 mb-2">Barcode <span class="text-red-500">*</span></label>
-                        <div class="flex space-x-2">
-                            <input type="text" name="barcode_anggota" id="barcode_anggota" required
-                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                   placeholder="Masukkan atau scan barcode">
+    <form method="POST" action="{{ route('anggota.store') }}" enctype="multipart/form-data" id="createForm">
+        @csrf
+
+        {{-- Section 1: Identitas & Foto --}}
+        <div class="glass-card rounded-xl shadow-sm border border-gray-200 p-6 mb-5 fade-in">
+            <div class="section-title">
+                <div class="icon-box" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                    <i class="fas fa-id-card"></i>
+                </div>
+                Identitas Anggota
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-6">
+                {{-- Photo Upload --}}
+                <div class="flex flex-col items-center gap-2">
+                    <div class="photo-upload-area" id="photoArea" onclick="document.getElementById('foto').click()">
+                        <div class="upload-placeholder" id="uploadPlaceholder">
+                            <i class="fas fa-camera"></i>
+                            <span>Upload Foto</span>
+                        </div>
+                        <img id="photoPreview" src="" alt="Preview" style="display: none;">
+                        <div class="remove-photo" id="removePhoto" onclick="event.stopPropagation(); removePhotoPreview();">
+                            <i class="fas fa-times"></i>
+                        </div>
+                    </div>
+                    <input type="file" name="foto" id="foto" accept="image/jpeg,image/png,image/jpg" class="hidden" onchange="previewPhoto(this)">
+                    <span class="text-xs text-gray-400">JPG/PNG, maks 2MB</span>
+                    @error('foto')
+                        <span class="form-error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
+                    @enderror
+                </div>
+
+                {{-- Identity Fields --}}
+                <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {{-- Barcode --}}
+                    <div>
+                        <label class="form-label">Barcode Anggota <span class="required">*</span></label>
+                        <div class="flex gap-2">
+                            <input type="text" name="barcode_anggota" id="barcode_anggota"
+                                   class="form-input flex-1 @error('barcode_anggota') is-invalid @enderror"
+                                   value="{{ old('barcode_anggota') }}"
+                                   placeholder="Otomatis di-generate" readonly required>
                             <button type="button" onclick="generateBarcode()"
-                                    class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                                <i class="fas fa-sync-alt mr-1"></i>Generate
+                                    class="px-3.5 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-1.5 text-sm font-medium whitespace-nowrap">
+                                <i class="fas fa-sync-alt text-xs"></i> Generate
                             </button>
                         </div>
-                        <!-- <div id="barcodeDisplay" class="barcode-display mt-2 hidden">
-                            <div class="text-center">
-                                <img id="barcodeImage" src="" alt="Barcode" class="mx-auto mb-2" style="max-width: 200px; height: auto;">
-                                <div id="barcodeText" class="font-mono text-sm"></div>
-                            </div>
-                        </div> -->
+                        @error('barcode_anggota')
+                            <span class="form-error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
+                        @enderror
                     </div>
+
+                    {{-- Nama Lengkap --}}
                     <div>
-                        <!-- nama lengkap form -->
-                        <label for="nama_lengkap" class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap <span class="text-red-500">*</span></label>
-                        <input type="text" name="nama_lengkap" id="nama_lengkap" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                               placeholder="Masukkan nama lengkap">
+                        <label for="nama_lengkap" class="form-label">Nama Lengkap <span class="required">*</span></label>
+                        <input type="text" name="nama_lengkap" id="nama_lengkap"
+                               class="form-input @error('nama_lengkap') is-invalid @enderror"
+                               value="{{ old('nama_lengkap') }}"
+                               placeholder="Masukkan nama lengkap" required>
+                        @error('nama_lengkap')
+                            <span class="form-error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    {{-- NIK --}}
+                    <div>
+                        <label for="nik" class="form-label">NIK <span class="required">*</span></label>
+                        <input type="text" name="nik" id="nik"
+                               class="form-input @error('nik') is-invalid @enderror"
+                               value="{{ old('nik') }}"
+                               placeholder="Masukkan NIK (16 digit)" maxlength="16" required
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        <span class="form-hint" id="nikCount">0/16 digit</span>
+                        @error('nik')
+                            <span class="form-error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    {{-- Tanggal Lahir --}}
+                    <div>
+                        <label for="tanggal_lahir" class="form-label">Tanggal Lahir</label>
+                        <input type="date" name="tanggal_lahir" id="tanggal_lahir"
+                               class="form-input @error('tanggal_lahir') is-invalid @enderror"
+                               value="{{ old('tanggal_lahir') }}">
+                        @error('tanggal_lahir')
+                            <span class="form-error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
+                        @enderror
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Personal Information -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <!-- <div>
-                    <label for="nama_lengkap" class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap <span class="text-red-500">*</span></label>
-                    <input type="text" name="nama_lengkap" id="nama_lengkap" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           placeholder="Masukkan nama lengkap">
-                </div> -->
-                
-                <div>
-                    <label for="jenis_kelamin" class="block text-sm font-medium text-gray-700 mb-2">Jenis Kelamin <span class="text-red-500">*</span></label>
-                    <select name="jenis_kelamin" id="jenis_kelamin" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">Pilih Jenis Kelamin</option>
-                        <option value="Laki-laki">Laki-laki</option>
-                        <option value="Perempuan">Perempuan</option>
-                    </select>
+        {{-- Section 2: Jenis Kelamin & Jenis Anggota --}}
+        <div class="glass-card rounded-xl shadow-sm border border-gray-200 p-6 mb-5 fade-in">
+            <div class="section-title">
+                <div class="icon-box" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                    <i class="fas fa-users"></i>
                 </div>
-                
+                Kategori Anggota
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {{-- Jenis Kelamin --}}
                 <div>
-                    <label for="nik" class="block text-sm font-medium text-gray-700 mb-2">NIK <span class="text-red-500">*</span></label>
-                    <input type="text" name="nik" id="nik" required maxlength="16"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           placeholder="Masukkan NIK (16 digit)">
+                    <label class="form-label">Jenis Kelamin <span class="required">*</span></label>
+                    <input type="hidden" name="jenis_kelamin" id="jenis_kelamin" value="{{ old('jenis_kelamin') }}" required>
+                    <div class="flex gap-3">
+                        <div class="gender-option {{ old('jenis_kelamin') == 'Laki-laki' ? 'active' : '' }}" onclick="selectGender('Laki-laki', this)">
+                            <div class="option-icon" style="background: #eff6ff; color: #3b82f6;">
+                                <i class="fas fa-mars"></i>
+                            </div>
+                            <span class="option-text">Laki-laki</span>
+                        </div>
+                        <div class="gender-option {{ old('jenis_kelamin') == 'Perempuan' ? 'active' : '' }}" onclick="selectGender('Perempuan', this)">
+                            <div class="option-icon" style="background: #fdf2f8; color: #ec4899;">
+                                <i class="fas fa-venus"></i>
+                            </div>
+                            <span class="option-text">Perempuan</span>
+                        </div>
+                    </div>
+                    @error('jenis_kelamin')
+                        <span class="form-error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
+                    @enderror
                 </div>
-                
+
+                {{-- Jenis Anggota --}}
                 <div>
-                    <label for="nomor_telepon" class="block text-sm font-medium text-gray-700 mb-2">Nomor Telepon <span class="text-red-500">*</span></label>
-                    <input type="text" name="nomor_telepon" id="nomor_telepon" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           placeholder="Masukkan nomor telepon">
+                    <label class="form-label">Jenis Anggota <span class="required">*</span></label>
+                    <input type="hidden" name="jenis_anggota" id="jenis_anggota" value="{{ old('jenis_anggota') }}" required>
+                    <div class="flex gap-3">
+                        <div class="jenis-anggota-option {{ old('jenis_anggota') == 'siswa' ? 'active' : '' }}" onclick="selectJenisAnggota('siswa', this)">
+                            <span class="option-icon"><i class="fas fa-user-graduate"></i></span>
+                            <span class="option-label">Siswa</span>
+                        </div>
+                        <div class="jenis-anggota-option {{ old('jenis_anggota') == 'guru' ? 'active' : '' }}" onclick="selectJenisAnggota('guru', this)">
+                            <span class="option-icon"><i class="fas fa-chalkboard-teacher"></i></span>
+                            <span class="option-label">Guru</span>
+                        </div>
+                        <div class="jenis-anggota-option {{ old('jenis_anggota') == 'staff' ? 'active' : '' }}" onclick="selectJenisAnggota('staff', this)">
+                            <span class="option-icon"><i class="fas fa-user-tie"></i></span>
+                            <span class="option-label">Staff</span>
+                        </div>
+                    </div>
+                    @error('jenis_anggota')
+                        <span class="form-error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
+                    @enderror
                 </div>
-                
+            </div>
+        </div>
+
+        {{-- Section 3: Kontak & Alamat --}}
+        <div class="glass-card rounded-xl shadow-sm border border-gray-200 p-6 mb-5 fade-in">
+            <div class="section-title">
+                <div class="icon-box" style="background: linear-gradient(135deg, #10b981, #059669);">
+                    <i class="fas fa-address-book"></i>
+                </div>
+                Kontak & Alamat
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                {{-- Nomor Telepon --}}
                 <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <input type="email" name="email" id="email"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           placeholder="Masukkan email (opsional)">
+                    <label for="nomor_telepon" class="form-label">Nomor Telepon <span class="required">*</span></label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"><i class="fas fa-phone"></i></span>
+                        <input type="text" name="nomor_telepon" id="nomor_telepon"
+                               class="form-input pl-9 @error('nomor_telepon') is-invalid @enderror"
+                               value="{{ old('nomor_telepon') }}"
+                               placeholder="08xxxxxxxxxx" required
+                               oninput="this.value = this.value.replace(/[^0-9+\-\s]/g, '')">
+                    </div>
+                    @error('nomor_telepon')
+                        <span class="form-error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
+                    @enderror
+                </div>
+
+                {{-- Email --}}
+                <div>
+                    <label for="email" class="form-label">Email</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"><i class="fas fa-envelope"></i></span>
+                        <input type="email" name="email" id="email"
+                               class="form-input pl-9 @error('email') is-invalid @enderror"
+                               value="{{ old('email') }}"
+                               placeholder="contoh@email.com">
+                    </div>
+                    @error('email')
+                        <span class="form-error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
+                    @enderror
                 </div>
             </div>
 
-            <!-- Address -->
-            <div class="mb-6">
-                <label for="alamat" class="block text-sm font-medium text-gray-700 mb-2">Alamat <span class="text-red-500">*</span></label>
-                <textarea name="alamat" id="alamat" rows="3" required
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="Masukkan alamat lengkap"></textarea>
+            {{-- Alamat --}}
+            <div>
+                <label for="alamat" class="form-label">Alamat <span class="required">*</span></label>
+                <textarea name="alamat" id="alamat" rows="3"
+                          class="form-input @error('alamat') is-invalid @enderror"
+                          placeholder="Masukkan alamat lengkap" required>{{ old('alamat') }}</textarea>
+                @error('alamat')
+                    <span class="form-error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
+                @enderror
+            </div>
+        </div>
+
+        {{-- Section 4: Informasi Sekolah --}}
+        <div class="glass-card rounded-xl shadow-sm border border-gray-200 p-6 mb-5 fade-in">
+            <div class="section-title">
+                <div class="icon-box" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                    <i class="fas fa-school"></i>
+                </div>
+                Informasi Sekolah
             </div>
 
-            <!-- School Information -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {{-- Kelas --}}
                 <div>
-                    <label for="kelas_id" class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+                    <label for="kelas_id" class="form-label">Kelas</label>
                     <select name="kelas_id" id="kelas_id"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">Pilih Kelas</option>
+                            class="form-input @error('kelas_id') is-invalid @enderror">
+                        <option value="">-- Pilih Kelas --</option>
                         @foreach($kelas as $k)
-                            <option value="{{ $k->id }}">{{ $k->nama_kelas }} - {{ $k->jurusan->nama_jurusan }}</option>
+                            <option value="{{ $k->id }}" {{ old('kelas_id') == $k->id ? 'selected' : '' }}>
+                                {{ $k->nama_kelas }} - {{ $k->jurusan->nama_jurusan }}
+                            </option>
                         @endforeach
                     </select>
+                    <span class="form-hint">Wajib diisi jika jenis anggota adalah Siswa</span>
+                    @error('kelas_id')
+                        <span class="form-error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
+                    @enderror
                 </div>
-                
+
+                {{-- Jabatan --}}
                 <div>
-                    <label for="jenis_anggota" class="block text-sm font-medium text-gray-700 mb-2">Jenis Anggota <span class="text-red-500">*</span></label>
-                    <select name="jenis_anggota" id="jenis_anggota" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">Pilih Jenis Anggota</option>
-                        <option value="siswa">Siswa</option>
-                        <option value="guru">Guru</option>
-                        <option value="staff">Staff</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="jabatan" class="block text-sm font-medium text-gray-700 mb-2">Jabatan</label>
+                    <label for="jabatan" class="form-label">Jabatan</label>
                     <input type="text" name="jabatan" id="jabatan"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           class="form-input @error('jabatan') is-invalid @enderror"
+                           value="{{ old('jabatan') }}"
                            placeholder="Masukkan jabatan (opsional)">
-                </div>
-            </div>
-
-            <!-- Status and Date -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status <span class="text-red-500">*</span></label>
-                    <select name="status" id="status" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">Pilih Status</option>
-                        <option value="aktif">Aktif</option>
-                        <option value="nonaktif">Nonaktif</option>
-                        <option value="ditangguhkan">Ditangguhkan</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="tanggal_bergabung" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Bergabung <span class="text-red-500">*</span></label>
-                    <input type="date" name="tanggal_bergabung" id="tanggal_bergabung" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-            </div>
-
-            <!-- Photo Upload -->
-            <div class="mb-10   ">
-                <label for="foto" class="block text-sm font-medium text-gray-700 mb-2">Foto</label>
-                <input type="file" name="foto" id="foto" accept="image/*"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <p class="mt-1 text-xs text-gray-500">Format: JPG, PNG. Maksimal 2MB</p>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex justify-end space-x-3">
-               
-                <button type="submit"
-                        class="px-4 py-2 bg-blue-500 w-full text-white rounded-md hover:bg-blue-600 transition-colors">
-                    <i class="fas fa-save mr-1"></i>Simpan
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Barcode Scanner Modal -->
-<!-- <div id="scannerModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full">
-            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4 rounded-t-2xl">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-white">Scan Barcode Anggota</h3>
-                    <button type="button" id="closeScannerBtn" class="text-white hover:text-gray-200">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="p-6">
-                <div class="mb-4">
-                    <p class="text-gray-600 mb-4">Arahkan kamera ke barcode anggota untuk scan</p>
-                    <div id="scannerContainer" class="w-full h-80 bg-gray-100 rounded-lg flex items-center justify-center relative overflow-hidden">
-                        <div id="scannerPlaceholder" class="text-center">
-                            <i class="fas fa-camera text-4xl text-gray-400 mb-2"></i>
-                            <p class="text-gray-500">Kamera akan aktif saat modal dibuka</p>
-                        </div>
-                        <div id="scannerVideo" class="w-full h-full hidden">
-                            <video id="scannerVideoElement" class="w-full h-full object-cover"></video>
-                            <div id="scannerOverlay" class="absolute inset-0 flex items-center justify-center">
-                                <div class="border-2 border-white border-dashed w-64 h-32 rounded-lg flex items-center justify-center">
-                                    <div class="text-white text-center">
-                                        <i class="fas fa-barcode text-2xl mb-2"></i>
-                                        <p class="text-sm">Arahkan barcode ke dalam kotak</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="scannerLoading" class="absolute inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden">
-                            <div class="text-center text-white">
-                                <i class="fas fa-spinner fa-spin text-3xl mb-2"></i>
-                                <p>Memulai kamera...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex justify-between items-center">
-                    <div class="text-sm text-gray-600">
-                        <span id="scannerStatus">Siap untuk scan</span>
-                    </div>
-                    <div class="flex space-x-3" id="scannerControls">
-                        <button type="button" id="startScanBtn" 
-                                class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold">
-                            <i class="fas fa-play mr-2"></i>Mulai Scan
-                        </button>
-                        <button type="button" id="stopScanBtn" 
-                                class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold hidden">
-                            <i class="fas fa-stop mr-2"></i>Stop Scan
-                        </button>
-                        <button type="button" id="cancelScan" 
-                                class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-semibold">
-                            Batal
-                        </button>
-                    </div>
+                    <span class="form-hint">Contoh: Wali Kelas, Kepala Lab, dsb.</span>
+                    @error('jabatan')
+                        <span class="form-error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
+                    @enderror
                 </div>
             </div>
         </div>
-    </div>
-</div> -->
 
-<script>
-let stream = null;
+        {{-- Section 5: Status & Tanggal --}}
+        <div class="glass-card rounded-xl shadow-sm border border-gray-200 p-6 mb-5 fade-in">
+            <div class="section-title">
+                <div class="icon-box" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                    <i class="fas fa-cog"></i>
+                </div>
+                Status Keanggotaan
+            </div>
 
-function generateBarcode() {
-    const prefix = 'BC';
-    const timestamp = Date.now().toString().slice(-6);
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    const barcode = prefix + timestamp + random;
-    
-    document.getElementById('barcode_anggota').value = barcode;
-    document.getElementById('barcodeText').textContent = barcode;
-    
-    // Generate barcode image using AJAX
-    fetch('{{ route("anggota.generate-barcode") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({ code: barcode })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('barcodeImage').src = 'data:image/png;base64,' + data.barcode;
-            document.getElementById('barcodeDisplay').classList.remove('hidden');
-        }
-    })
-    .catch(error => {
-        console.error('Error generating barcode:', error);
-        document.getElementById('barcodeDisplay').classList.remove('hidden');
-    });
-}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {{-- Status --}}
+                <div>
+                    <label class="form-label">Status <span class="required">*</span></label>
+                    <input type="hidden" name="status" id="status" value="{{ old('status', 'aktif') }}" required>
+                    <div class="flex gap-3">
+                        <div class="status-option {{ old('status', 'aktif') == 'aktif' ? 'active-aktif' : '' }}" onclick="selectStatus('aktif', this)">
+                            <span class="status-dot" style="background: #22c55e;"></span>
+                            <span class="status-label">Aktif</span>
+                        </div>
+                        <div class="status-option {{ old('status') == 'nonaktif' ? 'active-nonaktif' : '' }}" onclick="selectStatus('nonaktif', this)">
+                            <span class="status-dot" style="background: #ef4444;"></span>
+                            <span class="status-label">Nonaktif</span>
+                        </div>
+                        <div class="status-option {{ old('status') == 'ditangguhkan' ? 'active-ditangguhkan' : '' }}" onclick="selectStatus('ditangguhkan', this)">
+                            <span class="status-dot" style="background: #f59e0b;"></span>
+                            <span class="status-label">Ditangguhkan</span>
+                        </div>
+                    </div>
+                    @error('status')
+                        <span class="form-error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
+                    @enderror
+                </div>
 
-    // Scanner functionality
-    let quaggaInitialized = false;
+                {{-- Tanggal Bergabung --}}
+                <div>
+                    <label for="tanggal_bergabung" class="form-label">Tanggal Bergabung <span class="required">*</span></label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"><i class="fas fa-calendar-alt"></i></span>
+                        <input type="date" name="tanggal_bergabung" id="tanggal_bergabung"
+                               class="form-input pl-9 @error('tanggal_bergabung') is-invalid @enderror"
+                               value="{{ old('tanggal_bergabung') }}" required>
+                    </div>
+                    @error('tanggal_bergabung')
+                        <span class="form-error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
+                    @enderror
+                </div>
+            </div>
+        </div>
 
-    // Scan barcode button
-    document.getElementById('scanBarcodeBtn').addEventListener('click', function() {
-        document.getElementById('scannerModal').classList.remove('hidden');
-        initializeScanner();
-    });
-
-    // Close scanner modal
-    document.getElementById('closeScannerBtn').addEventListener('click', function() {
-        closeScanner();
-    });
-
-    // Start scanning
-    document.getElementById('startScanBtn').addEventListener('click', function() {
-        startScanning();
-    });
-
-    // Stop scanning
-    document.getElementById('stopScanBtn').addEventListener('click', function() {
-        stopScanning();
-    });
-
-    // Cancel scan
-    document.getElementById('cancelScan').addEventListener('click', function() {
-        closeScanner();
-    });
-
-    // Close modal when clicking outside
-    document.getElementById('scannerModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeScanner();
-        }
-    });
-
-// Load ZXing library for better barcode detection
-function loadZXingLibrary() {
-    return new Promise((resolve, reject) => {
-        if (window.ZXing) {
-            resolve(window.ZXing);
-            return;
-        }
-        
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/@zxing/library@latest/umd/index.min.js';
-        script.onload = () => {
-            console.log('ZXing library loaded successfully');
-            resolve(window.ZXing);
-        };
-        script.onerror = () => {
-            console.error('Failed to load ZXing library');
-            reject(new Error('Failed to load ZXing library'));
-        };
-        document.head.appendChild(script);
-    });
-}
-
-// Modern barcode scanner using ZXing
-async function setupModernScanner() {
-    const videoElement = document.getElementById('scannerVideoElement');
-    const scannerLoading = document.getElementById('scannerLoading');
-    const scannerVideo = document.getElementById('scannerVideo');
-    const scannerPlaceholder = document.getElementById('scannerPlaceholder');
-    
-    console.log('Setting up modern camera scanner...');
-    
-    try {
-        // Load ZXing library
-        const ZXing = await loadZXingLibrary();
-        
-        // Show loading
-        scannerLoading.classList.remove('hidden');
-        scannerPlaceholder.classList.add('hidden');
-        scannerVideo.classList.remove('hidden');
-        
-        // Request camera access
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                width: { ideal: 1280 },
-                height: { ideal: 720 },
-                facingMode: "environment"
-            }
-        });
-        
-        console.log('Camera access granted for modern scanner!');
-        
-        // Set the video stream
-        videoElement.srcObject = stream;
-        await videoElement.play();
-        
-        // Hide loading and show video
-        scannerLoading.classList.add('hidden');
-        scannerVideo.classList.remove('hidden');
-        
-        // Initialize ZXing reader
-        const codeReader = new ZXing.BrowserMultiFormatReader();
-        
-        // Configure ZXing for better barcode detection
-        const hints = new Map();
-        hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
-        hints.set(ZXing.DecodeHintType.PURE_BARCODE, true);
-        hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-            ZXing.BarcodeFormat.CODE_128,
-            ZXing.BarcodeFormat.CODE_39,
-            ZXing.BarcodeFormat.EAN_13,
-            ZXing.BarcodeFormat.EAN_8,
-            ZXing.BarcodeFormat.UPC_A,
-            ZXing.BarcodeFormat.UPC_E,
-            ZXing.BarcodeFormat.QR_CODE,
-            ZXing.BarcodeFormat.CODABAR,
-            ZXing.BarcodeFormat.ITF,
-            ZXing.BarcodeFormat.PDF_417,
-            ZXing.BarcodeFormat.AZTEC
-        ]);
-        
-        // Set additional hints for better detection
-        hints.set(ZXing.DecodeHintType.NEED_RESULT_POINT_CALLBACK, true);
-        hints.set(ZXing.DecodeHintType.CHARACTER_SET, 'UTF-8');
-        
-        // Start continuous scanning with better configuration
-        await codeReader.decodeFromVideoDevice(null, videoElement, (result, error) => {
-            if (result) {
-                console.log('🎉 Barcode detected successfully!');
-                console.log('📋 Barcode text:', result.text);
-                console.log('📊 Barcode format:', result.format);
-                console.log('📍 Barcode bounds:', result.resultPoints);
-                
-                // Validate barcode format
-                const barcodeText = result.text.trim();
-                if (barcodeText && barcodeText.length > 0) {
-                    console.log('✅ Valid barcode detected, processing...');
-                    stopModernScanner();
-                    processScannedBarcode(barcodeText);
-                } else {
-                    console.log('❌ Invalid barcode detected, ignoring...');
-                }
-            }
-            if (error) {
-                if (error.name !== 'NotFoundException') {
-                    console.log('⚠️ Scanning error:', error.name, error.message);
-                }
-            }
-        });
-        
-        // Store reference for stopping
-        window.currentCodeReader = codeReader;
-        
-        showNotification('Scanner modern siap. Arahkan kamera ke barcode.', 'success');
-        
-        // Add test barcode button for debugging
-        addTestBarcodeButton();
-        
-    } catch (error) {
-        console.error('Modern scanner setup error:', error);
-        scannerLoading.classList.add('hidden');
-        scannerPlaceholder.classList.remove('hidden');
-        scannerVideo.classList.add('hidden');
-        
-        if (error.name === 'NotAllowedError') {
-            showNotification('Akses kamera ditolak. Silakan izinkan akses kamera di browser.', 'error');
-        } else if (error.name === 'NotFoundError') {
-            showNotification('Tidak ada kamera yang ditemukan.', 'error');
-        } else {
-            showNotification('Gagal mengakses kamera: ' + error.message, 'error');
-        }
-    }
-}
-
-function stopModernScanner() {
-    if (window.currentCodeReader) {
-        try {
-            window.currentCodeReader.reset();
-        } catch (error) {
-            console.error('Error stopping modern scanner:', error);
-        }
-    }
-}
-
-// Alternative simple barcode scanner
-function setupSimpleScanner() {
-    const videoElement = document.getElementById('scannerVideoElement');
-    const scannerLoading = document.getElementById('scannerLoading');
-    const scannerVideo = document.getElementById('scannerVideo');
-    const scannerPlaceholder = document.getElementById('scannerPlaceholder');
-    
-    console.log('Setting up simple camera scanner...');
-    
-    // Show loading
-    scannerLoading.classList.remove('hidden');
-    scannerPlaceholder.classList.add('hidden');
-    scannerVideo.classList.remove('hidden');
-    
-    // Request camera access
-    navigator.mediaDevices.getUserMedia({
-        video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            facingMode: "environment"
-        }
-    })
-    .then(stream => {
-        console.log('Camera access granted for simple scanner!');
-        
-        // Set the video stream
-        videoElement.srcObject = stream;
-        videoElement.play();
-        
-        // Hide loading and show video
-        scannerLoading.classList.add('hidden');
-        scannerVideo.classList.remove('hidden');
-        
-        // Add manual scan button
-        const manualScanBtn = document.createElement('button');
-        manualScanBtn.textContent = 'Scan Manual';
-        manualScanBtn.className = 'bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2';
-        manualScanBtn.onclick = () => captureAndProcess();
-        
-        const scannerControls = document.getElementById('scannerControls');
-        if (scannerControls) {
-            scannerControls.appendChild(manualScanBtn);
-        }
-        
-        showNotification('Kamera siap. Gunakan tombol "Scan Manual" untuk mengambil gambar dan mendeteksi barcode.', 'info');
-    })
-    .catch(error => {
-        console.error('Camera access error:', error);
-        scannerLoading.classList.add('hidden');
-        scannerPlaceholder.classList.remove('hidden');
-        scannerVideo.classList.add('hidden');
-        
-        if (error.name === 'NotAllowedError') {
-            showNotification('Akses kamera ditolak. Silakan izinkan akses kamera di browser.', 'error');
-        } else if (error.name === 'NotFoundError') {
-            showNotification('Tidak ada kamera yang ditemukan.', 'error');
-        } else {
-            showNotification('Gagal mengakses kamera: ' + error.message, 'error');
-        }
-    });
-}
-
-function captureAndProcess() {
-    const videoElement = document.getElementById('scannerVideoElement');
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    
-    // Set canvas size to video size
-    canvas.width = videoElement.videoWidth;
-    canvas.height = videoElement.videoHeight;
-    
-    // Draw video frame to canvas
-    context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-    
-    // Get image data
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    
-    // For now, we'll simulate barcode detection
-    // In a real implementation, you would use a barcode detection library
-    console.log('Captured image for barcode detection');
-    
-    // Simulate barcode detection (replace with actual barcode detection)
-    const simulatedBarcode = prompt('Masukkan kode barcode secara manual:');
-    if (simulatedBarcode) {
-        processScannedBarcode(simulatedBarcode);
-    }
-}
-
-// Simple and reliable camera scanner
-function setupReliableScanner() {
-    const videoElement = document.getElementById('scannerVideoElement');
-    const scannerLoading = document.getElementById('scannerLoading');
-    const scannerVideo = document.getElementById('scannerVideo');
-    const scannerPlaceholder = document.getElementById('scannerPlaceholder');
-    
-    console.log('Setting up reliable camera scanner...');
-    
-    // Show loading
-    scannerLoading.classList.remove('hidden');
-    scannerPlaceholder.classList.add('hidden');
-    scannerVideo.classList.remove('hidden');
-    
-    // Check if getUserMedia is supported
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        console.error('getUserMedia not supported');
-        showNotification('Browser tidak mendukung akses kamera', 'error');
-        setupManualInput();
-        return;
-    }
-    
-    // Request camera access with multiple fallback options
-    const constraints = {
-        video: {
-            width: { ideal: 1280, min: 640 },
-            height: { ideal: 720, min: 480 },
-            facingMode: "environment"
-        }
-    };
-    
-    navigator.mediaDevices.getUserMedia(constraints)
-    .then(stream => {
-        console.log('Camera access granted!');
-        
-        // Set the video stream
-        videoElement.srcObject = stream;
-        videoElement.play();
-        
-        // Hide loading and show video
-        scannerLoading.classList.add('hidden');
-        scannerVideo.classList.remove('hidden');
-        
-        // Add manual input option
-        addManualInputOption();
-        
-        showNotification('Kamera siap. Gunakan tombol "Input Manual" untuk memasukkan kode barcode.', 'success');
-        
-        // Start periodic capture for barcode detection
-        startPeriodicCapture();
-    })
-    .catch(error => {
-        console.error('Camera access error:', error);
-        scannerLoading.classList.add('hidden');
-        scannerPlaceholder.classList.remove('hidden');
-        scannerVideo.classList.add('hidden');
-        
-        if (error.name === 'NotAllowedError') {
-            showNotification('Akses kamera ditolak. Silakan izinkan akses kamera di browser.', 'error');
-        } else if (error.name === 'NotFoundError') {
-            showNotification('Tidak ada kamera yang ditemukan.', 'error');
-        } else {
-            showNotification('Gagal mengakses kamera: ' + error.message, 'error');
-        }
-        
-        // Fallback to manual input
-        setupManualInput();
-    });
-}
-
-function addManualInputOption() {
-    const scannerControls = document.getElementById('scannerControls');
-    if (scannerControls) {
-        // Remove existing manual input button if any
-        const existingBtn = scannerControls.querySelector('#manualInputBtn');
-        if (existingBtn) {
-            existingBtn.remove();
-        }
-        
-        // Add manual input button
-        const manualInputBtn = document.createElement('button');
-        manualInputBtn.id = 'manualInputBtn';
-        manualInputBtn.textContent = 'Input Manual';
-        manualInputBtn.className = 'px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold';
-        manualInputBtn.onclick = () => showManualInputDialog();
-        
-        scannerControls.appendChild(manualInputBtn);
-    }
-}
-
-function showManualInputDialog() {
-    const barcodeInput = prompt('Masukkan kode barcode:');
-    if (barcodeInput && barcodeInput.trim()) {
-        processScannedBarcode(barcodeInput.trim());
-    }
-}
-
-function setupManualInput() {
-    console.log('Setting up manual input fallback...');
-    
-    const scannerContainer = document.getElementById('scannerContainer');
-    const scannerPlaceholder = document.getElementById('scannerPlaceholder');
-    const scannerVideo = document.getElementById('scannerVideo');
-    const scannerLoading = document.getElementById('scannerLoading');
-    
-    // Hide video and show manual input
-    scannerVideo.classList.add('hidden');
-    scannerLoading.classList.add('hidden');
-    scannerPlaceholder.classList.remove('hidden');
-    
-    // Update placeholder content
-    scannerPlaceholder.innerHTML = `
-        <div class="text-center">
-            <i class="fas fa-keyboard text-4xl text-gray-400 mb-2"></i>
-            <p class="text-gray-500 mb-4">Kamera tidak tersedia</p>
-            <button type="button" onclick="showManualInputDialog()" 
-                    class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold">
-                Input Manual
+        {{-- Action Buttons --}}
+        <div class="flex items-center justify-between gap-3 mb-8">
+            <a href="{{ route('anggota.index') }}"
+               class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium flex items-center gap-2">
+                <i class="fas fa-arrow-left text-xs"></i> Kembali
+            </a>
+            <button type="submit" id="submitBtn"
+                    class="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors text-sm font-semibold flex items-center gap-2 shadow-sm shadow-blue-200">
+                <i class="fas fa-save text-xs"></i> Simpan Anggota
             </button>
         </div>
-    `;
-    
-    showNotification('Gunakan tombol "Input Manual" untuk memasukkan kode barcode.', 'info');
+    </form>
+</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto generate barcode on load
+    generateBarcode();
+
+    // Set default tanggal bergabung to today
+    const tglInput = document.getElementById('tanggal_bergabung');
+    if (!tglInput.value) {
+        tglInput.value = new Date().toISOString().split('T')[0];
+    }
+
+    // NIK character counter
+    const nikInput = document.getElementById('nik');
+    const nikCount = document.getElementById('nikCount');
+    function updateNikCount() {
+        const len = nikInput.value.length;
+        nikCount.textContent = len + '/16 digit';
+        nikCount.style.color = len === 16 ? '#22c55e' : '#94a3b8';
+    }
+    nikInput.addEventListener('input', updateNikCount);
+    updateNikCount();
+
+    // Toggle kelas/jabatan visibility based on jenis anggota
+    updateJenisAnggotaFields();
+});
+
+// Generate Barcode
+function generateBarcode() {
+    const prefix = 'BC';
+    const timestamp = Date.now().toString().slice(-8);
+    const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
+    const barcode = prefix + timestamp + random;
+    document.getElementById('barcode_anggota').value = barcode;
 }
 
-function startPeriodicCapture() {
-    const videoElement = document.getElementById('scannerVideoElement');
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    
-    // Set up periodic capture for potential barcode detection
-    const captureInterval = setInterval(() => {
-        if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
-            try {
-                canvas.width = videoElement.videoWidth;
-                canvas.height = videoElement.videoHeight;
-                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                
-                // Here you could add actual barcode detection logic
-                // For now, we'll just capture the image data
-                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                
-                // You could send this to a barcode detection service or use a library
-                // For now, we'll just log that we're capturing
-                console.log('Capturing frame for potential barcode detection');
-                
-            } catch (error) {
-                console.log('Frame capture error (non-critical):', error);
-            }
-        }
-    }, 1000); // Capture every second
-    
-    // Store interval for cleanup
-    window.captureInterval = captureInterval;
+// Gender Selection
+function selectGender(value, el) {
+    document.getElementById('jenis_kelamin').value = value;
+    document.querySelectorAll('.gender-option').forEach(opt => opt.classList.remove('active'));
+    el.classList.add('active');
 }
 
-function stopPeriodicCapture() {
-    if (window.captureInterval) {
-        clearInterval(window.captureInterval);
-        window.captureInterval = null;
+// Jenis Anggota Selection
+function selectJenisAnggota(value, el) {
+    document.getElementById('jenis_anggota').value = value;
+    document.querySelectorAll('.jenis-anggota-option').forEach(opt => opt.classList.remove('active'));
+    el.classList.add('active');
+    updateJenisAnggotaFields();
+}
+
+// Update field visibility based on jenis anggota
+function updateJenisAnggotaFields() {
+    const jenis = document.getElementById('jenis_anggota').value;
+    const kelasField = document.getElementById('kelas_id').closest('div');
+    const jabatanField = document.getElementById('jabatan').closest('div');
+
+    if (jenis === 'siswa') {
+        kelasField.style.opacity = '1';
+        jabatanField.style.opacity = '0.5';
+    } else if (jenis === 'guru' || jenis === 'staff') {
+        kelasField.style.opacity = '0.5';
+        jabatanField.style.opacity = '1';
+    } else {
+        kelasField.style.opacity = '1';
+        jabatanField.style.opacity = '1';
     }
 }
 
-// Try multiple scanner methods with reliable fallback
-async function initializeScanner() {
-    console.log('Initializing scanner with reliable method...');
-    
-    try {
-        // First try reliable scanner (most stable)
-        console.log('Trying reliable scanner...');
-        setupReliableScanner();
-    } catch (error) {
-        console.log('Reliable scanner failed, trying ZXing...');
-        
-        try {
-            await setupModernScanner();
-        } catch (zxingError) {
-            console.log('ZXing failed, trying QuaggaJS...');
-            
-            // Fallback to QuaggaJS
-            if (typeof Quagga !== 'undefined') {
-                try {
-                    setupQuagga();
-                } catch (quaggaError) {
-                    console.log('All scanners failed, using manual input...');
-                    setupManualInput();
-                }
-            } else {
-                console.log('QuaggaJS not available, using manual input...');
-                setupManualInput();
-            }
-        }
-    }
+// Status Selection
+function selectStatus(value, el) {
+    document.getElementById('status').value = value;
+    document.querySelectorAll('.status-option').forEach(opt => {
+        opt.classList.remove('active-aktif', 'active-nonaktif', 'active-ditangguhkan');
+    });
+    el.classList.add('active-' + value);
 }
 
-    function startScanning() {
-        if (!quaggaInitialized) {
-            showNotification('Scanner belum siap. Silakan tunggu.', 'warning');
+// Photo Preview
+function previewPhoto(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+
+        // Validate size
+        if (file.size > 2 * 1024 * 1024) {
+            showNotification('Ukuran foto maksimal 2MB', 'error');
+            input.value = '';
             return;
         }
-        
-        try {
-            Quagga.start();
-            document.getElementById('startScanBtn').classList.add('hidden');
-            document.getElementById('stopScanBtn').classList.remove('hidden');
-            document.getElementById('scannerStatus').textContent = 'Scanning...';
-            
-            // Listen for scan events
-            Quagga.onDetected(function(result) {
-                const code = result.codeResult.code;
-                console.log('Barcode detected:', code);
-                
-                // Stop scanning
-                stopScanning();
-                
-                // Process the scanned barcode
-                processScannedBarcode(code);
-            });
-            
-            // Listen for processing events
-            Quagga.onProcessed(function(result) {
-                try {
-                    const drawingCanvas = Quagga.canvas.ctx.overlay;
-                    if (drawingCanvas && drawingCanvas.getContext) {
-                        const drawingCtx = drawingCanvas.getContext('2d');
-                        
-                        if (result) {
-                            if (result.boxes) {
-                                drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.style.width), parseInt(drawingCanvas.style.height));
-                                result.boxes.filter(function(box) {
-                                    return box !== result.box;
-                                }).forEach(function(box) {
-                                    Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, drawingCtx, { color: "green", lineWidth: 2 });
-                                });
-                            }
-                            
-                            if (result.box) {
-                                Quagga.ImageDebug.drawPath(result.box, { x: 0, y: 1 }, drawingCtx, { color: "blue", lineWidth: 2 });
-                            }
-                            
-                            if (result.codeResult && result.codeResult.code) {
-                                Quagga.ImageDebug.drawPath(result.line, { x: 'x', y: 'y' }, drawingCtx, { color: 'red', lineWidth: 3 });
-                            }
-                        }
-                    }
-                } catch (error) {
-                    console.log('Canvas processing error (non-critical):', error);
-                }
-            });
-            
-        } catch (error) {
-            console.error('Error starting scanner:', error);
-            showNotification('Gagal memulai scanner. Silakan coba lagi.', 'error');
-        }
-    }
 
-    function stopScanning() {
-        try {
-            Quagga.stop();
-            document.getElementById('startScanBtn').classList.remove('hidden');
-            document.getElementById('stopScanBtn').classList.add('hidden');
-            document.getElementById('scannerStatus').textContent = 'Scanner dihentikan';
-        } catch (error) {
-            console.error('Error stopping scanner:', error);
+        // Validate type
+        if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+            showNotification('Format foto harus JPG atau PNG', 'error');
+            input.value = '';
+            return;
         }
-    }
 
-    function closeScanner() {
-        try {
-            // Stop Quagga if running
-            if (typeof Quagga !== 'undefined') {
-                Quagga.stop();
-            }
-            
-            // Stop modern scanner if running
-            if (window.currentCodeReader) {
-                window.currentCodeReader.reset();
-            }
-            
-            // Stop periodic capture
-            stopPeriodicCapture();
-            
-            // Stop video stream
-            const videoElement = document.getElementById('scannerVideoElement');
-            if (videoElement.srcObject) {
-                const tracks = videoElement.srcObject.getTracks();
-                tracks.forEach(track => track.stop());
-                videoElement.srcObject = null;
-            }
-            
-        } catch (error) {
-            console.error('Error stopping scanner:', error);
-        }
-        
-        document.getElementById('scannerModal').classList.add('hidden');
-        document.getElementById('startScanBtn').classList.remove('hidden');
-        document.getElementById('stopScanBtn').classList.add('hidden');
-        document.getElementById('scannerStatus').textContent = 'Siap untuk scan';
-        
-        // Reset scanner container
-        const scannerContainer = document.getElementById('scannerContainer');
-        const scannerPlaceholder = document.getElementById('scannerPlaceholder');
-        const scannerVideo = document.getElementById('scannerVideo');
-        const scannerLoading = document.getElementById('scannerLoading');
-        
-        scannerLoading.classList.add('hidden');
-        scannerPlaceholder.classList.remove('hidden');
-        scannerVideo.classList.add('hidden');
-        
-        // Remove manual input button if exists
-        const manualInputBtn = document.getElementById('manualInputBtn');
-        if (manualInputBtn) {
-            manualInputBtn.remove();
-        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('photoPreview').src = e.target.result;
+            document.getElementById('photoPreview').style.display = 'block';
+            document.getElementById('uploadPlaceholder').style.display = 'none';
+            document.getElementById('removePhoto').style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
     }
+}
 
-    // Function to add test barcode button for debugging
-    function addTestBarcodeButton() {
-        const scannerControls = document.getElementById('scannerControls');
-        if (scannerControls) {
-            const testBtn = document.createElement('button');
-            testBtn.textContent = 'Test Barcode';
-            testBtn.className = 'bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded ml-2';
-            testBtn.onclick = () => {
-                const testBarcode = prompt('Masukkan kode barcode untuk testing:');
-                if (testBarcode) {
-                    console.log('🧪 Testing with barcode:', testBarcode);
-                    processScannedBarcode(testBarcode);
-                }
-            };
-            scannerControls.appendChild(testBtn);
-            
-            // Add debug info button
-            const debugBtn = document.createElement('button');
-            debugBtn.textContent = 'Debug Info';
-            debugBtn.className = 'bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded ml-2';
-            debugBtn.onclick = () => {
-                console.log('🔍 Debug Info:');
-                console.log('📱 User Agent:', navigator.userAgent);
-                console.log('📹 Media Devices:', navigator.mediaDevices);
-                console.log('🎥 Video Element:', document.getElementById('scannerVideoElement'));
-                console.log('🔧 ZXing Library:', typeof window.ZXing);
-                console.log('📊 Current Scanner:', window.currentCodeReader);
-            };
-            scannerControls.appendChild(debugBtn);
-        }
-    }
+function removePhotoPreview() {
+    document.getElementById('foto').value = '';
+    document.getElementById('photoPreview').style.display = 'none';
+    document.getElementById('photoPreview').src = '';
+    document.getElementById('uploadPlaceholder').style.display = 'block';
+    document.getElementById('removePhoto').style.display = 'none';
+}
 
-    function processScannedBarcode(barcode) {
-        console.log('🔍 Processing scanned barcode:', barcode);
-        
-        // Clean the barcode text (remove any whitespace or special characters)
-        const cleanBarcode = barcode.trim();
-        console.log('🧹 Cleaned barcode:', cleanBarcode);
-        
-        // Show loading in status
-        document.getElementById('scannerStatus').textContent = 'Memproses barcode...';
-        
-        // Set the barcode value to the input field
-        document.getElementById('barcode_anggota').value = cleanBarcode;
-        
-        // Close scanner
-        closeScanner();
-        
-        // Show success notification
-        showNotification('Barcode berhasil di-scan: ' + cleanBarcode, 'success');
-    }
+// Toast Notification
+function showNotification(message, type = 'info') {
+    const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        warning: 'bg-yellow-500',
+        info: 'bg-blue-500'
+    };
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
 
-    function showNotification(message, type = 'info') {
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
-        
-        if (type === 'success') {
-            notification.className += ' bg-green-500 text-white';
-        } else if (type === 'error') {
-            notification.className += ' bg-red-500 text-white';
-        } else if (type === 'warning') {
-            notification.className += ' bg-yellow-500 text-white';
-        } else {
-            notification.className += ' bg-blue-500 text-white';
-        }
-        
-        notification.innerHTML = `
-            <div class="flex items-center">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} mr-2"></i>
-                <span>${message}</span>
-            </div>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        // Animate in
-        setTimeout(() => {
-            notification.classList.remove('translate-x-full');
-        }, 100);
-        
-        // Remove after 3 seconds
-        setTimeout(() => {
-            notification.classList.add('translate-x-full');
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 300);
-        }, 3000);
-    }
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg ${colors[type]} text-white text-sm font-medium flex items-center gap-2 transition-all duration-300 transform translate-x-full`;
+    notification.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
+    document.body.appendChild(notification);
 
-// Auto generate barcode on page load
-document.addEventListener('DOMContentLoaded', function() {
-    generateBarcode();
-    
-    // Set default date to today
-    document.getElementById('tanggal_bergabung').value = new Date().toISOString().split('T')[0];
-});
+    requestAnimationFrame(() => {
+        notification.classList.remove('translate-x-full');
+    });
+
+    setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
 </script>
-@endsection 
+@endpush
+@endsection

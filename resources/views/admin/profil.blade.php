@@ -5,7 +5,7 @@
 @section('content')
 <div class="container mx-auto px-4 py-6">
     <!-- Single Modern Card -->
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-12xl mx-auto">
         <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
             <!-- Header dengan Gradient -->
             <div class="bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-6">

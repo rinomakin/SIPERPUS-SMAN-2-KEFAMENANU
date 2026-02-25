@@ -4,199 +4,165 @@
 @section('page-title', 'Laporan Peminjaman')
 
 @section('content')
-<meta name="csrf-token" content="{{ csrf_token() }}">
 <style>
-    @media print {
-        body * { visibility: hidden; }
-        .print-area, .print-area * { visibility: visible; }
-        .print-area { position: absolute; left: 0; top: 0; width: 100%; }
-        .no-print { display: none !important; }
+    .glass-card {
+        background: rgba(255,255,255,0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.3);
     }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade { animation: fadeIn 0.4s ease forwards; }
 </style>
 
-<div class="space-y-6">
-    <!-- Header Section with Filters -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 no-print">
+<div class="space-y-5">
+    {{-- Header & Filter --}}
+    <div class="glass-card rounded-2xl shadow-lg p-5">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Laporan Peminjaman</h1>
-                <p class="text-gray-600 mt-1">Total: {{ $peminjaman->count() }} transaksi</p>
-            </div>
-            
-            <!-- Filter Form -->
-            <form method="GET" class="flex items-center gap-3">
-                <div class="flex items-center gap-2">
-                    <label class="text-sm font-medium text-gray-700">Periode:</label>
-                    <input type="date" name="tanggal_mulai" value="{{ request('tanggal_mulai') }}" 
-                           class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <span class="text-gray-500">s/d</span>
-                    <input type="date" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}" 
-                           class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <div class="flex items-center gap-3">
+                <a href="{{ route('laporan.index') }}" class="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-colors">
+                    <i class="fas fa-arrow-left text-gray-600"></i>
+                </a>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-900">Laporan Peminjaman</h1>
+                    <p class="text-sm text-gray-500">Total: <span class="font-semibold text-sky-600">{{ $peminjaman->count() }}</span> transaksi</p>
                 </div>
-                
-                <select name="status" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+
+            <form method="GET" class="flex flex-wrap items-center gap-2">
+                <input type="date" name="tanggal_mulai" value="{{ request('tanggal_mulai') }}"
+                       class="px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-sky-500 bg-white/70">
+                <span class="text-gray-400 text-xs">s/d</span>
+                <input type="date" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}"
+                       class="px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-sky-500 bg-white/70">
+
+                <select name="status" class="px-3 py-2 text-sm border border-gray-200 rounded-xl bg-white/70">
                     <option value="">Semua Status</option>
                     <option value="dipinjam" {{ request('status') == 'dipinjam' ? 'selected' : '' }}>Sedang Dipinjam</option>
                     <option value="dikembalikan" {{ request('status') == 'dikembalikan' ? 'selected' : '' }}>Sudah Dikembalikan</option>
                     <option value="terlambat" {{ request('status') == 'terlambat' ? 'selected' : '' }}>Terlambat</option>
                 </select>
-                
-                <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-                    <i class="fas fa-filter mr-2"></i>Filter
+
+                <button type="submit" class="px-4 py-2 bg-gradient-to-r from-sky-500 to-blue-600 text-white text-sm font-medium rounded-xl shadow-md hover:shadow-lg transition-all">
+                    <i class="fas fa-filter mr-1"></i> Filter
                 </button>
-                
-                <a href="{{ route('admin.laporan.peminjaman', array_merge(request()->query(), ['export' => 'excel'])) }}" 
-                   class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
-                    <i class="fas fa-download mr-2"></i>Excel
+
+                <a href="{{ route('admin.laporan.peminjaman', array_merge(request()->query(), ['export' => 'excel'])) }}"
+                   class="px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-medium rounded-xl shadow-md hover:shadow-lg transition-all">
+                    <i class="fas fa-file-excel mr-1"></i> Excel
                 </a>
-                
-                <button onclick="window.print()" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">
-                    <i class="fas fa-print mr-2"></i>Cetak
-                </button>
-                
-                <a href="{{ route('laporan.index') }}" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-colors">
-                    <i class="fas fa-arrow-left mr-2"></i>Kembali
+
+                <a href="{{ route('admin.laporan.peminjaman', array_merge(request()->query(), ['export' => 'pdf'])) }}"
+                   class="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-medium rounded-xl shadow-md hover:shadow-lg transition-all">
+                    <i class="fas fa-file-pdf mr-1"></i> PDF
                 </a>
             </form>
         </div>
     </div>
 
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 no-print">
+    {{-- Stats Cards --}}
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         @php
             $totalPeminjaman = $peminjaman->count();
             $sedangDipinjam = $peminjaman->where('status', 'dipinjam')->count();
             $sudahDikembalikan = $peminjaman->where('status', 'dikembalikan')->count();
             $terlambat = $peminjaman->where('status', 'terlambat')->count();
         @endphp
-        
-        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div class="flex items-center">
-                <div class="w-12 h-12 flex items-center justify-center bg-blue-100 rounded-full">
-                    <i class="fas fa-book-reader text-blue-600 text-xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Total Peminjaman</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $totalPeminjaman }}</p>
-                </div>
+        <div class="glass-card rounded-2xl p-4 animate-fade" style="animation-delay:0.05s">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-sky-100 rounded-xl flex items-center justify-center"><i class="fas fa-book-reader text-sky-600"></i></div>
+                <div><p class="text-xs text-gray-500">Total</p><p class="text-lg font-bold text-gray-900">{{ $totalPeminjaman }}</p></div>
             </div>
         </div>
-
-        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div class="flex items-center">
-                <div class="w-12 h-12 flex items-center justify-center bg-yellow-100 rounded-full">
-                    <i class="fas fa-clock text-yellow-600 text-xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Sedang Dipinjam</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $sedangDipinjam }}</p>
-                </div>
+        <div class="glass-card rounded-2xl p-4 animate-fade" style="animation-delay:0.1s">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center"><i class="fas fa-clock text-amber-600"></i></div>
+                <div><p class="text-xs text-gray-500">Dipinjam</p><p class="text-lg font-bold text-gray-900">{{ $sedangDipinjam }}</p></div>
             </div>
         </div>
-
-        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div class="flex items-center">
-                <div class="w-12 h-12 flex items-center justify-center bg-green-100 rounded-full">
-                    <i class="fas fa-check-circle text-green-600 text-xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Sudah Dikembalikan</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $sudahDikembalikan }}</p>
-                </div>
+        <div class="glass-card rounded-2xl p-4 animate-fade" style="animation-delay:0.15s">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center"><i class="fas fa-check-circle text-emerald-600"></i></div>
+                <div><p class="text-xs text-gray-500">Dikembalikan</p><p class="text-lg font-bold text-gray-900">{{ $sudahDikembalikan }}</p></div>
             </div>
         </div>
-
-        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div class="flex items-center">
-                <div class="w-12 h-12 flex items-center justify-center bg-red-100 rounded-full">
-                    <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Terlambat</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $terlambat }}</p>
-                </div>
+        <div class="glass-card rounded-2xl p-4 animate-fade" style="animation-delay:0.2s">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center"><i class="fas fa-exclamation-triangle text-red-600"></i></div>
+                <div><p class="text-xs text-gray-500">Terlambat</p><p class="text-lg font-bold text-gray-900">{{ $terlambat }}</p></div>
             </div>
         </div>
     </div>
 
-    <!-- Report Content -->
-    <div class="print-area">
-        <!-- Print Header -->
-        <div class="hidden print:block mb-6 text-center">
-            <h1 class="text-xl font-bold">LAPORAN DATA PEMINJAMAN</h1>
-            <h2 class="text-lg">PERPUSTAKAAN SMAN 2 KEFAMENANU</h2>
-            @if(request('tanggal_mulai') && request('tanggal_akhir'))
-                <p class="text-sm mt-2">Periode: {{ \Carbon\Carbon::parse(request('tanggal_mulai'))->format('d/m/Y') }} - {{ \Carbon\Carbon::parse(request('tanggal_akhir'))->format('d/m/Y') }}</p>
-            @endif
-            <hr class="mt-4 mb-6">
-        </div>
-
-        <!-- Data Table -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    {{-- Report Content --}}
+    <div>
+        <div class="glass-card rounded-2xl shadow-lg overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor Peminjaman</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Anggota</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Pinjam</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Kembali</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah Buku</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Petugas</th>
+                    <thead>
+                        <tr class="bg-gradient-to-r from-sky-50 to-blue-50">
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-sky-700 uppercase">No</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-sky-700 uppercase">No. Peminjaman</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-sky-700 uppercase">Anggota</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-sky-700 uppercase">Tgl Pinjam</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-sky-700 uppercase">Tgl Kembali</th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold text-sky-700 uppercase">Jml Buku</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-sky-700 uppercase">Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-sky-700 uppercase">Petugas</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="divide-y divide-gray-100">
                         @forelse($peminjaman as $index => $item)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $index + 1 }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                        <tr class="hover:bg-sky-50/30 transition-colors">
+                            <td class="px-4 py-3 text-sm text-gray-600">{{ $index + 1 }}</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-mono font-medium bg-sky-50 text-sky-700 border border-sky-200">
                                     {{ $item->nomor_peminjaman }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-4 py-3">
                                 <div class="text-sm font-medium text-gray-900">{{ $item->anggota->nama_lengkap }}</div>
                                 <div class="text-xs text-gray-500">{{ $item->anggota->nomor_anggota }}</div>
                                 @if($item->anggota->kelas)
-                                    <div class="text-xs text-gray-500">{{ $item->anggota->kelas->nama_kelas }}</div>
+                                    <div class="text-xs text-gray-400">{{ $item->anggota->kelas->nama_kelas }}</div>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $item->tanggal_pinjam ? $item->tanggal_pinjam->format('d/m/Y') : '-' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $item->tanggal_kembali ? $item->tanggal_kembali->format('d/m/Y') : '-' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                                    {{ $item->detailPeminjaman->count() }} Buku
+                            <td class="px-4 py-3 text-sm text-gray-600">{{ $item->tanggal_peminjaman ? $item->tanggal_peminjaman->format('d/m/Y') : '-' }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-600">{{ $item->tanggal_kembali ? $item->tanggal_kembali->format('d/m/Y') : '-' }}</td>
+                            <td class="px-4 py-3 text-center">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                                    {{ $item->detailPeminjaman->count() }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-4 py-3">
                                 @if($item->status == 'dipinjam')
-                                    <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Sedang Dipinjam</span>
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Dipinjam
+                                    </span>
                                 @elseif($item->status == 'dikembalikan')
-                                    <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Sudah Dikembalikan</span>
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Dikembalikan
+                                    </span>
                                 @elseif($item->status == 'terlambat')
-                                    <span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">Terlambat</span>
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium bg-red-50 text-red-700 border border-red-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Terlambat
+                                    </span>
                                 @else
-                                    <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">{{ ucfirst($item->status) }}</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">
+                                        {{ ucfirst($item->status) }}
+                                    </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $item->user->name ?? '-' }}
-                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-600">{{ $item->user->name ?? '-' }}</td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="px-6 py-12 text-center">
-                                <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                                    <i class="fas fa-book-reader text-3xl text-gray-400"></i>
+                            <td colspan="8" class="px-6 py-16 text-center">
+                                <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-book-reader text-2xl text-gray-400"></i>
                                 </div>
-                                <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada data peminjaman</h3>
-                                <p class="text-gray-600">Tidak ada peminjaman yang sesuai dengan filter yang dipilih.</p>
+                                <h3 class="text-base font-semibold text-gray-900 mb-1">Tidak ada data</h3>
+                                <p class="text-sm text-gray-500">Tidak ada peminjaman yang sesuai dengan filter</p>
                             </td>
                         </tr>
                         @endforelse
@@ -205,223 +171,6 @@
             </div>
         </div>
 
-        <!-- Print Footer -->
-        <div class="hidden print:block mt-6 text-center">
-            <p class="text-sm">Dicetak pada: {{ now()->format('d/m/Y H:i:s') }}</p>
-        </div>
-    </div>
-</div>
-@endsection@extends('layouts.admin')
-
-@section('title', 'Laporan Peminjaman')
-@section('page-title', 'Laporan Peminjaman')
-
-@section('content')
-<meta name="csrf-token" content="{{ csrf_token() }}">
-<style>
-    @media print {
-        body * { visibility: hidden; }
-        .print-area, .print-area * { visibility: visible; }
-        .print-area { position: absolute; left: 0; top: 0; width: 100%; }
-        .no-print { display: none !important; }
-    }
-</style>
-
-<div class="space-y-6">
-    <!-- Header Section with Filters -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 no-print">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Laporan Peminjaman</h1>
-                <p class="text-gray-600 mt-1">Total: {{ $peminjaman->count() }} transaksi</p>
-            </div>
-            
-            <!-- Filter Form -->
-            <form method="GET" class="flex items-center gap-3">
-                <div class="flex items-center gap-2">
-                    <label class="text-sm font-medium text-gray-700">Periode:</label>
-                    <input type="date" name="tanggal_mulai" value="{{ request('tanggal_mulai') }}" 
-                           class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <span class="text-gray-500">s/d</span>
-                    <input type="date" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}" 
-                           class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-                
-                <select name="status" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">Semua Status</option>
-                    <option value="dipinjam" {{ request('status') == 'dipinjam' ? 'selected' : '' }}>Sedang Dipinjam</option>
-                    <option value="dikembalikan" {{ request('status') == 'dikembalikan' ? 'selected' : '' }}>Sudah Dikembalikan</option>
-                    <option value="terlambat" {{ request('status') == 'terlambat' ? 'selected' : '' }}>Terlambat</option>
-                </select>
-                
-                <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-                    <i class="fas fa-filter mr-2"></i>Filter
-                </button>
-                
-                <a href="{{ route('admin.laporan.peminjaman', array_merge(request()->query(), ['export' => 'excel'])) }}" 
-                   class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
-                    <i class="fas fa-download mr-2"></i>Excel
-                </a>
-                
-                <button onclick="window.print()" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">
-                    <i class="fas fa-print mr-2"></i>Cetak
-                </button>
-                
-                <a href="{{ route('laporan.index') }}" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-colors">
-                    <i class="fas fa-arrow-left mr-2"></i>Kembali
-                </a>
-            </form>
-        </div>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 no-print">
-        @php
-            $totalPeminjaman = $peminjaman->count();
-            $sedangDipinjam = $peminjaman->where('status', 'dipinjam')->count();
-            $sudahDikembalikan = $peminjaman->where('status', 'dikembalikan')->count();
-            $terlambat = $peminjaman->where('status', 'terlambat')->count();
-        @endphp
-        
-        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div class="flex items-center">
-                <div class="w-12 h-12 flex items-center justify-center bg-blue-100 rounded-full">
-                    <i class="fas fa-book-reader text-blue-600 text-xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Total Peminjaman</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $totalPeminjaman }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div class="flex items-center">
-                <div class="w-12 h-12 flex items-center justify-center bg-yellow-100 rounded-full">
-                    <i class="fas fa-clock text-yellow-600 text-xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Sedang Dipinjam</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $sedangDipinjam }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div class="flex items-center">
-                <div class="w-12 h-12 flex items-center justify-center bg-green-100 rounded-full">
-                    <i class="fas fa-check-circle text-green-600 text-xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Sudah Dikembalikan</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $sudahDikembalikan }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div class="flex items-center">
-                <div class="w-12 h-12 flex items-center justify-center bg-red-100 rounded-full">
-                    <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Terlambat</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $terlambat }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Report Content -->
-    <div class="print-area">
-        <!-- Print Header -->
-        <div class="hidden print:block mb-6 text-center">
-            <h1 class="text-xl font-bold">LAPORAN DATA PEMINJAMAN</h1>
-            <h2 class="text-lg">PERPUSTAKAAN SMAN 2 KEFAMENANU</h2>
-            @if(request('tanggal_mulai') && request('tanggal_akhir'))
-                <p class="text-sm mt-2">Periode: {{ \Carbon\Carbon::parse(request('tanggal_mulai'))->format('d/m/Y') }} - {{ \Carbon\Carbon::parse(request('tanggal_akhir'))->format('d/m/Y') }}</p>
-            @endif
-            <hr class="mt-4 mb-6">
-        </div>
-
-        <!-- Data Table -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor Peminjaman</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Anggota</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Pinjam</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Kembali</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah Buku</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Petugas</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse($peminjaman as $index => $item)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $index + 1 }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                                    {{ $item->nomor_peminjaman }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ $item->anggota->nama_lengkap }}</div>
-                                <div class="text-xs text-gray-500">{{ $item->anggota->nomor_anggota }}</div>
-                                @if($item->anggota->kelas)
-                                    <div class="text-xs text-gray-500">{{ $item->anggota->kelas->nama_kelas }}</div>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $item->tanggal_pinjam ? $item->tanggal_pinjam->format('d/m/Y') : '-' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $item->tanggal_kembali ? $item->tanggal_kembali->format('d/m/Y') : '-' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                                    {{ $item->detailPeminjaman->count() }} Buku
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @if($item->status == 'dipinjam')
-                                    <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Sedang Dipinjam</span>
-                                @elseif($item->status == 'dikembalikan')
-                                    <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Sudah Dikembalikan</span>
-                                @elseif($item->status == 'terlambat')
-                                    <span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">Terlambat</span>
-                                @else
-                                    <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">{{ ucfirst($item->status) }}</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ $item->user->name ?? '-' }}
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="8" class="px-6 py-12 text-center">
-                                <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                                    <i class="fas fa-book-reader text-3xl text-gray-400"></i>
-                                </div>
-                                <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada data peminjaman</h3>
-                                <p class="text-gray-600">Tidak ada peminjaman yang sesuai dengan filter yang dipilih.</p>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Print Footer -->
-        <div class="hidden print:block mt-6 text-center">
-            <p class="text-sm">Dicetak pada: {{ now()->format('d/m/Y H:i:s') }}</p>
-        </div>
     </div>
 </div>
 @endsection

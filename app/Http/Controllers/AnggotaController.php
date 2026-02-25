@@ -13,62 +13,135 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AnggotaExport;
 use App\Exports\AnggotaTemplateExport;
 use App\Imports\AnggotaImport;
+use Yajra\DataTables\Facades\DataTables;
 
 class AnggotaController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH']);
+        $this->middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS']);
     }
 
     public function index(Request $request)
     {
-        $query = Anggota::with(['kelas.jurusan']);
+        // Handle DataTables AJAX request
+        if ($request->ajax()) {
+            $query = Anggota::with(['kelas.jurusan']);
+            
+            // Apply filters from request
+            if ($request->filled('filter_kelas_id')) {
+                $query->where('kelas_id', $request->filter_kelas_id);
+            }
+            
+            if ($request->filled('filter_jurusan_id')) {
+                $query->whereHas('kelas', function($q) use ($request) {
+                    $q->where('jurusan_id', $request->filter_jurusan_id);
+                });
+            }
+            
+            if ($request->filled('filter_jenis_anggota')) {
+                $query->where('jenis_anggota', $request->filter_jenis_anggota);
+            }
+            
+            if ($request->filled('filter_status')) {
+                $query->where('status', $request->filter_status);
+            }
+            
+            return DataTables::of($query)
+                ->addIndexColumn()
+                ->addColumn('checkbox', function($row) {
+                    return '<input type="checkbox" class="member-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 transition-all duration-200" value="' . $row->id . '">';
+                })
+                ->addColumn('nama_info', function($row) {
+                    $gradients = ['#f97316,#ef4444','#8b5cf6,#6366f1','#10b981,#059669','#3b82f6,#2563eb','#ec4899,#db2777'];
+                    $gradient = $gradients[($row->id ?? 0) % 5];
+                    $initial = strtoupper(substr($row->nama_lengkap ?? 'N', 0, 1));
 
-        // Search functionality
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('nama_lengkap', 'like', "%{$search}%")
-                  ->orWhere('nomor_anggota', 'like', "%{$search}%")
-                  ->orWhere('barcode_anggota', 'like', "%{$search}%")
-                  ->orWhere('nik', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
+                    if ($row->foto) {
+                        $foto = '<div class="avatar-container">'
+                            . '<img src="' . asset('storage/anggota/' . $row->foto) . '" alt="Foto" class="avatar-img"'
+                            . ' onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">'
+                            . '<div class="avatar-initial" style="display:none;background:linear-gradient(135deg,' . $gradient . ');">' . $initial . '</div>'
+                            . '</div>';
+                    } else {
+                        $foto = '<div class="avatar-container">'
+                            . '<div class="avatar-initial" style="background:linear-gradient(135deg,' . $gradient . ');">' . $initial . '</div>'
+                            . '</div>';
+                    }
+
+                    return '<div class="flex items-center gap-3">' . $foto . '
+                        <div>
+                            <div class="text-sm font-semibold text-gray-900">' . e($row->nama_lengkap) . '</div>
+                            <div class="text-xs text-gray-400">' . ($row->email ?: '-') . '</div>
+                        </div>
+                    </div>';
+                })
+                ->addColumn('jenis_kelamin_badge', function($row) {
+                    if ($row->jenis_kelamin == 'Laki-laki') {
+                        return '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                            <i class="fas fa-mars"></i>Laki-laki</span>';
+                    }
+                    return '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-pink-50 text-pink-700 border border-pink-100">
+                        <i class="fas fa-venus"></i>' . ($row->jenis_kelamin ?: '-') . '</span>';
+                })
+                ->addColumn('kelas_info', function($row) {
+                    if ($row->kelas) {
+                        return '<div>
+                            <div class="text-sm font-medium text-gray-800">' . e($row->kelas->nama_kelas) . '</div>
+                            <div class="text-[11px] text-gray-400">' . e($row->kelas->jurusan->nama_jurusan ?? '-') . '</div>
+                        </div>';
+                    }
+                    return '<span class="text-xs text-gray-400">-</span>';
+                })
+                ->addColumn('jenis_badge', function($row) {
+                    $config = match($row->jenis_anggota) {
+                        'siswa' => ['bg-blue-50 text-blue-700 border-blue-100', 'fa-user-graduate'],
+                        'guru' => ['bg-emerald-50 text-emerald-700 border-emerald-100', 'fa-chalkboard-teacher'],
+                        default => ['bg-purple-50 text-purple-700 border-purple-100', 'fa-user-tie']
+                    };
+                    return '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium ' . $config[0] . ' border">
+                        <i class="fas ' . $config[1] . ' text-[10px]"></i>' . ucfirst($row->jenis_anggota) . '</span>';
+                })
+                ->addColumn('status_badge', function($row) {
+                    $config = match($row->status) {
+                        'aktif' => ['bg-emerald-50 text-emerald-700 border-emerald-200', 'bg-emerald-500'],
+                        'nonaktif' => ['bg-red-50 text-red-700 border-red-200', 'bg-red-500'],
+                        default => ['bg-amber-50 text-amber-700 border-amber-200', 'bg-amber-500']
+                    };
+                    return '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium ' . $config[0] . ' border">
+                        <span class="w-1.5 h-1.5 rounded-full ' . $config[1] . '"></span>' . ucfirst($row->status) . '</span>';
+                })
+                ->addColumn('action', function($row) {
+                    $actions = '<div class="flex items-center justify-center gap-1.5">';
+
+                    if (auth()->user()->hasPermission('anggota.view') || auth()->user()->isAdmin()) {
+                        $actions .= '<a href="' . route('anggota.show', $row->id) . '" class="action-btn action-btn-view" title="Lihat Detail"><i class="fas fa-eye"></i></a>';
+                    }
+
+                    if (auth()->user()->hasPermission('anggota.update') || auth()->user()->isAdmin()) {
+                        $actions .= '<a href="' . route('anggota.edit', $row->id) . '" class="action-btn action-btn-edit" title="Edit"><i class="fas fa-edit"></i></a>';
+                    }
+
+                    if (auth()->user()->hasPermission('anggota.cetak-kartu') || auth()->user()->isAdmin()) {
+                        $actions .= '<a href="' . route('anggota.cetak-kartu', $row->id) . '" class="action-btn action-btn-print" title="Cetak Kartu" target="_blank"><i class="fas fa-print"></i></a>';
+                    }
+
+                    if (auth()->user()->hasPermission('anggota.delete') || auth()->user()->isAdmin()) {
+                        $actions .= '<button onclick="confirmDeleteAnggota(' . $row->id . ')" class="action-btn action-btn-delete" title="Hapus"><i class="fas fa-trash-alt"></i></button>';
+                    }
+
+                    $actions .= '</div>';
+                    return $actions;
+                })
+                ->rawColumns(['checkbox', 'nama_info', 'jenis_kelamin_badge', 'kelas_info', 'jenis_badge', 'status_badge', 'action'])
+                ->make(true);
         }
-
-        // Filter by kelas
-        if ($request->filled('kelas_id')) {
-            $query->where('kelas_id', $request->kelas_id);
-        }
-
-        // Filter by jurusan
-        if ($request->filled('jurusan_id')) {
-            $query->whereHas('kelas', function($q) use ($request) {
-                $q->where('jurusan_id', $request->jurusan_id);
-            });
-        }
-
-        // Filter by jenis anggota
-        if ($request->filled('jenis_anggota')) {
-            $query->where('jenis_anggota', $request->jenis_anggota);
-        }
-
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Sorting
-        $sortBy = $request->get('sort_by', 'created_at');
-        $sortOrder = $request->get('sort_order', 'desc');
-        $query->orderBy($sortBy, $sortOrder);
-
-        $anggota = $query->paginate(10)->withQueryString();
+        
+        // Regular view request
         $kelas = Kelas::with('jurusan')->get();
         $jurusan = Jurusan::all();
 
-        return view('admin.anggota.index', compact('anggota', 'kelas', 'jurusan'));
+        return view('admin.anggota.index', compact('kelas', 'jurusan'));
     }
 
     public function create()
@@ -126,7 +199,7 @@ class AnggotaController extends Controller
 
     public function show($id)
     {
-        $anggota = Anggota::with(['kelas.jurusan'])->findOrFail($id);
+        $anggota = Anggota::with(['kelas.jurusan', 'peminjaman', 'denda'])->findOrFail($id);
         return view('admin.anggota.show', compact('anggota'));
     }
 

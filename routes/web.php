@@ -98,11 +98,11 @@ Route::get('/kepsek-panel', [KepsekController::class, 'dashboard'])
 
 
 
-// Admin Routes (Admin dan Kepala Sekolah bisa akses)
-Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH'])->prefix('admin')->group(function () {
+// Admin Routes (Admin, Kepala Sekolah, dan Petugas bisa akses sesuai permission)
+Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    Route::get('/pengaturan-website', [AdminController::class, 'pengaturanWebsite'])->name('admin.pengaturan');
-    Route::post('/pengaturan-website', [AdminController::class, 'updatePengaturanWebsite'])->name('admin.pengaturan.update');
+    Route::get('/pengaturan-website', [AdminController::class, 'pengaturanWebsite'])->middleware('permission:pengaturan.view')->name('admin.pengaturan');
+    Route::post('/pengaturan-website', [AdminController::class, 'updatePengaturanWebsite'])->middleware('permission:pengaturan.manage')->name('admin.pengaturan.update');
     
     // Profil untuk semua role (Admin, Kepala Sekolah, Petugas)
     Route::get('/profil', [AdminController::class, 'profil'])->name('admin.profil');
@@ -113,6 +113,7 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH'])->prefix('admin')->group
     // API Routes untuk AJAX pencarian
     Route::get('/peminjaman/search-anggota', [PeminjamanController::class, 'searchAnggota'])->name('peminjaman.search-anggota');
     Route::get('/peminjaman/search-buku', [PeminjamanController::class, 'searchBuku'])->name('peminjaman.search-buku');
+    Route::post('/peminjaman/check-active-loan', [PeminjamanController::class, 'checkActiveLoan'])->name('peminjaman.check-active-loan');
     
 
     
@@ -173,21 +174,27 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH'])->prefix('admin')->group
     Route::resource('rak-buku', \App\Http\Controllers\Admin\RakBukuController::class);
     Route::get('/rak-buku/get-rak', [\App\Http\Controllers\Admin\RakBukuController::class, 'getRakBuku'])->name('rak-buku.get-rak');
     
-    // CRUD Role
-    Route::resource('role', RoleController::class);
-    
-    // Permission Management
-    Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
-    Route::get('/permissions/role/{roleId}', [PermissionController::class, 'getRolePermissions'])->name('permissions.role.get');
-    Route::post('/permissions/role/{roleId}/update', [PermissionController::class, 'updateRolePermissions'])->name('permissions.role.update');
-    Route::post('/permissions/role/{roleId}/reset', [PermissionController::class, 'resetRolePermissions'])->name('permissions.role.reset');
-    Route::post('/permissions/copy', [PermissionController::class, 'copyPermissions'])->name('permissions.copy');
-    Route::post('/permissions/bulk-assign', [PermissionController::class, 'bulkAssignPermissions'])->name('permissions.bulk-assign');
-    Route::post('/role/generate-kode', [RoleController::class, 'generateKode'])->name('role.generate-kode');
-    
-    // CRUD User
-    Route::resource('user', UserController::class);
-    Route::post('/user/{user}/reset-password', [UserController::class, 'resetPassword'])->name('user.reset-password');
+    // CRUD Role — hanya admin/yang punya permission role.view
+    Route::middleware('permission:role.view')->group(function () {
+        Route::resource('role', RoleController::class);
+        Route::post('/role/generate-kode', [RoleController::class, 'generateKode'])->name('role.generate-kode');
+    });
+
+    // Permission Management — hanya admin/yang punya permission permission.view
+    Route::middleware('permission:permission.view')->group(function () {
+        Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
+        Route::get('/permissions/role/{roleId}', [PermissionController::class, 'getRolePermissions'])->name('permissions.role.get');
+        Route::post('/permissions/role/{roleId}/update', [PermissionController::class, 'updateRolePermissions'])->name('permissions.role.update');
+        Route::post('/permissions/role/{roleId}/reset', [PermissionController::class, 'resetRolePermissions'])->name('permissions.role.reset');
+        Route::post('/permissions/copy', [PermissionController::class, 'copyPermissions'])->name('permissions.copy');
+        Route::post('/permissions/bulk-assign', [PermissionController::class, 'bulkAssignPermissions'])->name('permissions.bulk-assign');
+    });
+
+    // CRUD User — hanya admin/yang punya permission user.view
+    Route::middleware('permission:user.view')->group(function () {
+        Route::resource('user', UserController::class);
+        Route::post('/user/{user}/reset-password', [UserController::class, 'resetPassword'])->name('user.reset-password');
+    });
     
     // CRUD Peminjaman
     Route::resource('peminjaman', PeminjamanController::class);
@@ -204,7 +211,10 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH'])->prefix('admin')->group
     Route::post('/pengembalian/scan-barcode-anggota', [PengembalianController::class, 'scanBarcodeAnggota'])->name('pengembalian.scan-barcode-anggota');
     Route::post('/pengembalian/{id}/update-status-pembayaran-denda', [PengembalianController::class, 'updateStatusPembayaranDenda'])->name('pengembalian.update-status-pembayaran-denda');
     Route::get('/pengembalian/{id}/denda-info', [PengembalianController::class, 'getDendaInfo'])->name('pengembalian.denda-info');
-    
+
+    // Dedicated DataTables JSON endpoint (must be before resource route)
+    Route::get('/pengembalian/data', [PengembalianController::class, 'getData'])->name('pengembalian.data');
+
     // Add a specific route for active borrowings
     Route::get('/pengembalian/aktif', function () {
         request()->merge(['view' => 'active']);
@@ -216,9 +226,19 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH'])->prefix('admin')->group
 
     // Riwayat Pengembalian
     Route::get('/riwayat-pengembalian', [RiwayatPengembalianController::class, 'index'])->name('riwayat-pengembalian.index');
+    Route::get('/riwayat-pengembalian/data', [RiwayatPengembalianController::class, 'getData'])->name('riwayat-pengembalian.data');
     Route::get('/riwayat-pengembalian/export', [RiwayatPengembalianController::class, 'export'])->name('riwayat-pengembalian.export');
+    Route::delete('/riwayat-pengembalian/bulk', [RiwayatPengembalianController::class, 'bulkDestroy'])->name('riwayat-pengembalian.bulk-destroy');
+    Route::delete('/riwayat-pengembalian/{id}', [RiwayatPengembalianController::class, 'destroy'])->name('riwayat-pengembalian.destroy');
     
-    // CRUD Denda
+    // CRUD Denda - Custom routes MUST come before resource route
+    Route::get('/denda/scan-barcode', [DendaController::class, 'scanBarcodeDenda'])->name('admin.denda.scan-barcode');
+    Route::get('/denda/riwayat', [DendaController::class, 'riwayat'])->name('admin.denda.riwayat');
+    Route::post('/denda/riwayat/bulk-destroy', [DendaController::class, 'bulkDestroyRiwayat'])->name('admin.denda.riwayat.bulk-destroy');
+    Route::post('/denda/{id}/bayar-lunas', [DendaController::class, 'bayarLunas'])->name('admin.denda.bayar-lunas');
+    Route::post('/denda/hitung-denda', [DendaController::class, 'hitungDenda'])->name('admin.denda.hitung');
+    Route::post('/denda/{id}/update-status', [DendaController::class, 'updateStatusPembayaran'])->name('admin.denda.update-status');
+    Route::post('/denda/search', [DendaController::class, 'searchDenda'])->name('admin.denda.search');
     Route::resource('denda', DendaController::class)->names([
         'index' => 'admin.denda.index',
         'create' => 'admin.denda.create',
@@ -228,12 +248,21 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH'])->prefix('admin')->group
         'update' => 'admin.denda.update',
         'destroy' => 'admin.denda.destroy',
     ]);
-    Route::post('/denda/hitung-denda', [DendaController::class, 'hitungDenda'])->name('admin.denda.hitung');
-    Route::post('/denda/{id}/update-status', [DendaController::class, 'updateStatusPembayaran'])->name('admin.denda.update-status');
-    Route::post('/denda/search', [DendaController::class, 'searchDenda'])->name('admin.denda.search');
     
     // CRUD Buku Tamu
-    // Buku Tamu
+    // Buku Tamu - Custom routes MUST come before resource route
+    Route::post('/buku-tamu/scan-barcode', [BukuTamuController::class, 'scanBarcode'])->name('admin.buku-tamu.scan-barcode');
+    Route::get('/buku-tamu/search-members', [BukuTamuController::class, 'searchMembers'])->name('admin.buku-tamu.search-members');
+    Route::post('/buku-tamu/store-ajax', [BukuTamuController::class, 'storeAjax'])->name('admin.buku-tamu.store-ajax');
+    Route::post('/buku-tamu/record-exit', [BukuTamuController::class, 'recordExit'])->name('admin.buku-tamu.record-exit');
+    Route::get('/buku-tamu/history', [BukuTamuController::class, 'history'])->name('admin.buku-tamu.history');
+    Route::get('/buku-tamu/history/search', [BukuTamuController::class, 'historySearch'])->name('admin.buku-tamu.history.search');
+    Route::get('/buku-tamu/export-excel', [BukuTamuController::class, 'exportExcel'])->name('admin.buku-tamu.export-excel');
+    Route::get('/buku-tamu/export-pdf', [BukuTamuController::class, 'exportPdf'])->name('admin.buku-tamu.export-pdf');
+    Route::get('/buku-tamu/today', [BukuTamuController::class, 'todayVisitors'])->name('admin.buku-tamu.today');
+    Route::post('/buku-tamu/bulk-delete', [BukuTamuController::class, 'bulkDelete'])->name('admin.buku-tamu.bulk-delete');
+
+    // Resource route must come AFTER custom routes
     Route::resource('buku-tamu', BukuTamuController::class)->names([
         'index' => 'admin.buku-tamu.index',
         'create' => 'admin.buku-tamu.create',
@@ -243,15 +272,7 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH'])->prefix('admin')->group
         'update' => 'admin.buku-tamu.update',
         'destroy' => 'admin.buku-tamu.destroy',
     ]);
-    Route::post('/buku-tamu/scan-barcode', [BukuTamuController::class, 'scanBarcode'])->name('admin.buku-tamu.scan-barcode');
-    Route::get('/buku-tamu/search-members', [BukuTamuController::class, 'searchMembers'])->name('admin.buku-tamu.search-members');
-    Route::post('/buku-tamu/store-ajax', [BukuTamuController::class, 'storeAjax'])->name('admin.buku-tamu.store-ajax');
-    Route::post('/buku-tamu/record-exit', [BukuTamuController::class, 'recordExit'])->name('admin.buku-tamu.record-exit');
-    Route::get('/buku-tamu/history', [BukuTamuController::class, 'history'])->name('admin.buku-tamu.history');
-    Route::get('/buku-tamu/history/search', [BukuTamuController::class, 'searchHistory'])->name('admin.buku-tamu.history.search');
-    Route::get('/buku-tamu/export-excel', [BukuTamuController::class, 'exportExcel'])->name('admin.buku-tamu.export-excel');
-    Route::get('/buku-tamu/export-pdf', [BukuTamuController::class, 'exportPdf'])->name('admin.buku-tamu.export-pdf');
-    Route::get('/buku-tamu/today', [BukuTamuController::class, 'todayVisitors'])->name('admin.buku-tamu.today');
+    
     
     // Riwayat Peminjaman
     Route::get('/riwayat-peminjaman', [RiwayatPeminjamanController::class, 'index'])->name('riwayat-peminjaman.index');
@@ -266,7 +287,7 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH'])->prefix('admin')->group
     Route::get('/laporan/peminjaman', [LaporanController::class, 'peminjaman'])->name('admin.laporan.peminjaman');
     Route::get('/laporan/pengembalian', [LaporanController::class, 'pengembalian'])->name('admin.laporan.pengembalian');
     Route::get('/laporan/denda', [LaporanController::class, 'denda'])->name('admin.laporan.denda');
-    Route::get('/laporan/absensi', [LaporanController::class, 'absensi'])->name('admin.laporan.absensi');
+    Route::get('/laporan/buku-tamu', [LaporanController::class, 'bukuTamu'])->name('admin.laporan.buku-tamu');
     Route::get('/laporan/kas', [LaporanController::class, 'kas'])->name('admin.laporan.kas');
     
     // Cetak

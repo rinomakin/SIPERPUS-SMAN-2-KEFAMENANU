@@ -9,21 +9,143 @@ use App\Models\Anggota;
 use App\Models\Buku;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use Yajra\DataTables\Facades\DataTables;
 
 class PeminjamanController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH']);
+        $this->middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        // Filter out returned books (status = 'dikembalikan') from active list
-        $peminjaman = Peminjaman::with(['anggota', 'user', 'detailPeminjaman.buku'])
-            ->where('status', '!=', 'dikembalikan')
-            ->paginate(10);
-        return view('admin.peminjaman.index', compact('peminjaman'));
+        // Handle DataTables AJAX request
+        if ($request->ajax()) {
+            // Summary-only request for stat cards
+            if ($request->filled('ajax_summary')) {
+                $totalAktif = Peminjaman::where('status', '!=', 'dikembalikan')->count();
+                $dipinjam = Peminjaman::where('status', 'dipinjam')->count();
+                $terlambat = Peminjaman::where('status', 'terlambat')->count();
+                $totalBuku = Peminjaman::where('status', '!=', 'dikembalikan')
+                    ->sum('jumlah_buku');
+
+                return response()->json([
+                    'summary' => [
+                        'total_aktif' => $totalAktif,
+                        'dipinjam' => $dipinjam,
+                        'terlambat' => $terlambat,
+                        'total_buku' => (int) $totalBuku,
+                    ]
+                ]);
+            }
+
+            $query = Peminjaman::with(['anggota', 'user'])
+                ->where('status', '!=', 'dikembalikan');
+
+            // Apply filters from request
+            if ($request->filled('filter_status')) {
+                $query->where('status', $request->filter_status);
+            }
+
+            if ($request->filled('filter_tanggal_dari')) {
+                $query->whereDate('tanggal_peminjaman', '>=', $request->filter_tanggal_dari);
+            }
+
+            if ($request->filled('filter_tanggal_sampai')) {
+                $query->whereDate('tanggal_peminjaman', '<=', $request->filter_tanggal_sampai);
+            }
+
+            // Summary counts for stat cards
+            $summaryData = [
+                'total_aktif' => Peminjaman::where('status', '!=', 'dikembalikan')->count(),
+                'dipinjam' => Peminjaman::where('status', 'dipinjam')->count(),
+                'terlambat' => Peminjaman::where('status', 'terlambat')->count(),
+                'total_buku' => (int) Peminjaman::where('status', '!=', 'dikembalikan')->sum('jumlah_buku'),
+            ];
+
+            return DataTables::of($query)
+                ->addIndexColumn()
+                ->addColumn('nomor_badge', function($row) {
+                    return '<div class="flex items-center">
+                                <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center mr-2.5 flex-shrink-0">
+                                    <i class="fas fa-hashtag text-blue-400 text-xs"></i>
+                                </div>
+                                <span class="font-semibold text-gray-800 text-xs">' . e($row->nomor_peminjaman) . '</span>
+                            </div>';
+                })
+                ->addColumn('anggota_info', function($row) {
+                    $nama = $row->anggota ? e($row->anggota->nama_lengkap) : 'N/A';
+                    $nomor = $row->anggota ? e($row->anggota->nomor_anggota ?? '') : '';
+                    return '<div>
+                                <p class="font-semibold text-gray-900 text-sm leading-tight">' . $nama . '</p>
+                                ' . ($nomor ? '<p class="text-xs text-gray-400 mt-0.5">' . $nomor . '</p>' : '') . '
+                            </div>';
+                })
+                ->addColumn('jumlah_badge', function($row) {
+                    $count = $row->jumlah_buku ?? 0;
+                    return '<span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-violet-50 text-violet-700 font-bold text-sm">' . $count . '</span>';
+                })
+                ->addColumn('tanggal_pinjam_info', function($row) {
+                    if (!$row->tanggal_peminjaman) return '<span class="text-gray-400 text-xs">-</span>';
+                    $tgl = \Carbon\Carbon::parse($row->tanggal_peminjaman);
+                    $html = '<div>
+                                <p class="text-sm font-medium text-gray-800">' . $tgl->format('d M Y') . '</p>';
+                    if ($row->jam_peminjaman) {
+                        $html .= '<p class="text-xs text-gray-400 mt-0.5"><i class="far fa-clock mr-1"></i>' . \Carbon\Carbon::parse($row->jam_peminjaman)->format('H:i') . '</p>';
+                    }
+                    $html .= '</div>';
+                    return $html;
+                })
+                ->addColumn('batas_kembali_info', function($row) {
+                    if (!$row->tanggal_harus_kembali) return '<span class="text-gray-400 text-xs">-</span>';
+                    $tgl = \Carbon\Carbon::parse($row->tanggal_harus_kembali);
+                    $now = \Carbon\Carbon::now();
+                    $isOverdue = $now->gt($tgl) && $row->status !== 'dikembalikan';
+                    $daysLeft = $now->diffInDays($tgl, false);
+
+                    $html = '<div>
+                                <p class="text-sm font-medium ' . ($isOverdue ? 'text-rose-600' : 'text-gray-800') . '">' . $tgl->format('d M Y') . '</p>';
+                    if ($isOverdue) {
+                        $html .= '<p class="text-xs text-rose-500 mt-0.5 font-medium"><i class="fas fa-exclamation-circle mr-1"></i>Terlambat ' . abs($daysLeft) . ' hari</p>';
+                    } elseif ($row->status === 'dipinjam') {
+                        $html .= '<p class="text-xs text-gray-400 mt-0.5">' . $daysLeft . ' hari lagi</p>';
+                    }
+                    $html .= '</div>';
+                    return $html;
+                })
+                ->addColumn('status_badge', function($row) {
+                    $badges = [
+                        'dipinjam' => '<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200/60"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5"></span>Dipinjam</span>',
+                        'dikembalikan' => '<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5"></span>Dikembalikan</span>',
+                        'terlambat' => '<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200/60"><span class="w-1.5 h-1.5 rounded-full bg-rose-400 mr-1.5 animate-pulse"></span>Terlambat</span>',
+                    ];
+                    return $badges[$row->status] ?? '<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-50 text-gray-600 border border-gray-200/60">' . ucfirst($row->status) . '</span>';
+                })
+                ->addColumn('action', function($row) {
+                    $actions = '<div class="flex items-center justify-center gap-1">';
+
+                    if (auth()->user()->hasPermission('peminjaman.show') || auth()->user()->isAdmin()) {
+                        $actions .= '<a href="' . route('peminjaman.show', $row->id) . '" class="action-btn bg-blue-50 text-blue-600 hover:bg-blue-100" title="Detail"><i class="fas fa-eye"></i></a>';
+                    }
+
+                    if (auth()->user()->hasPermission('peminjaman.edit') || auth()->user()->isAdmin()) {
+                        $actions .= '<a href="' . route('peminjaman.edit', $row->id) . '" class="action-btn bg-amber-50 text-amber-600 hover:bg-amber-100" title="Edit"><i class="fas fa-pen"></i></a>';
+                    }
+
+                    if (auth()->user()->hasPermission('peminjaman.delete') || auth()->user()->isAdmin()) {
+                        $actions .= '<button onclick="confirmDelete(' . $row->id . ')" class="action-btn bg-rose-50 text-rose-600 hover:bg-rose-100" title="Hapus"><i class="fas fa-trash-alt"></i></button>';
+                    }
+
+                    $actions .= '</div>';
+                    return $actions;
+                })
+                ->rawColumns(['nomor_badge', 'anggota_info', 'jumlah_badge', 'tanggal_pinjam_info', 'batas_kembali_info', 'status_badge', 'action'])
+                ->with('summary', $summaryData)
+                ->make(true);
+        }
+
+        return view('admin.peminjaman.index');
     }
 
     public function create()
@@ -624,6 +746,71 @@ class PeminjamanController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat mencari buku: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API untuk check apakah anggota masih memiliki pinjaman aktif untuk buku tertentu
+     */
+    public function checkActiveLoan(Request $request)
+    {
+        try {
+            $request->validate([
+                'anggota_id' => 'required|exists:anggota,id',
+                'buku_id' => 'required|exists:buku,id'
+            ]);
+
+            $anggotaId = $request->get('anggota_id');
+            $bukuId = $request->get('buku_id');
+
+            // Check if anggota has active loan for this specific book
+            $activeLoan = Peminjaman::where('anggota_id', $anggotaId)
+                ->where('status', '!=', 'dikembalikan') // Only check non-returned loans
+                ->whereHas('detailPeminjaman', function($query) use ($bukuId) {
+                    $query->where('buku_id', $bukuId);
+                })
+                ->with(['detailPeminjaman' => function($query) use ($bukuId) {
+                    $query->where('buku_id', $bukuId);
+                }])
+                ->first();
+
+            if ($activeLoan) {
+                // Get book details
+                $buku = Buku::find($bukuId);
+                $detailPeminjaman = $activeLoan->detailPeminjaman->first();
+                
+                return response()->json([
+                    'success' => true,
+                    'has_active_loan' => true,
+                    'message' => "Anggota masih meminjam buku \"{$buku->judul_buku}\" dan belum mengembalikannya",
+                    'data' => [
+                        'peminjaman' => [
+                            'nomor_peminjaman' => $activeLoan->nomor_peminjaman,
+                            'tanggal_peminjaman' => $activeLoan->tanggal_peminjaman,
+                            'tanggal_harus_kembali' => $activeLoan->tanggal_harus_kembali,
+                            'status' => $activeLoan->status
+                        ],
+                        'buku' => [
+                            'id' => $buku->id,
+                            'judul_buku' => $buku->judul_buku,
+                            'jumlah_dipinjam' => $detailPeminjaman->jumlah ?? 1
+                        ]
+                    ]
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'has_active_loan' => false,
+                'message' => 'Tidak ada pinjaman aktif untuk buku ini'
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error in checkActiveLoan: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memeriksa pinjaman aktif: ' . $e->getMessage()
             ], 500);
         }
     }
