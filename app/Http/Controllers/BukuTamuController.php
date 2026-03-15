@@ -283,7 +283,7 @@ class BukuTamuController extends Controller
                 ->addIndexColumn()
                 ->addColumn('tamu_info', function($row) {
                     $foto = $row->anggota && $row->anggota->foto 
-                        ? asset('storage/' . $row->anggota->foto) 
+                        ? asset('storage/anggota/' . $row->anggota->foto) 
                         : asset('images/default-avatar.png');
                     $nomor = $row->anggota ? $row->anggota->nomor_anggota : '-';
                     
@@ -421,7 +421,7 @@ class BukuTamuController extends Controller
                 'id' => $item->id,
                 'nama_tamu' => $item->nama_tamu,
                 'foto' => $isMember && $item->anggota && $item->anggota->foto 
-                    ? asset('storage/' . $item->anggota->foto) 
+                    ? asset('storage/anggota/' . $item->anggota->foto)
                     : asset('images/default-avatar.png'),
                 'tipe' => $isMember ? 'Anggota' : 'Tamu Umum',
                 'nomor_anggota' => $isMember && $item->anggota ? $item->anggota->nomor_anggota : '-',
@@ -497,7 +497,7 @@ class BukuTamuController extends Controller
                     'kelas' => $member->kelas ? $member->kelas->nama_kelas : '-',
                     'jurusan' => $member->jurusan ? $member->jurusan->nama_jurusan : '-',
                     'status' => $member->status,
-                    'foto' => $member->foto ? asset('storage/' . $member->foto) : null
+                    'foto' => $member->foto ? asset('storage/anggota/' . $member->foto) : null
                 ];
             });
 
@@ -535,7 +535,7 @@ class BukuTamuController extends Controller
             'kelas' => $member->kelas ? $member->kelas->nama_kelas : '-',
             'jurusan' => $member->jurusan ? $member->jurusan->nama_jurusan : '-',
             'status' => $member->status,
-            'foto' => $member->foto ? asset('storage/' . $member->foto) : null
+            'foto' => $member->foto ? asset('storage/anggota/' . $member->foto) : null
         ];
 
         return response()->json(['success' => true, 'data' => $memberData, 'message' => 'Anggota ditemukan']);
@@ -576,7 +576,7 @@ class BukuTamuController extends Controller
                              'anggota' => [
                                  'nama_lengkap' => $item->anggota->nama_lengkap ?? $item->nama_tamu,
                                  'nomor_anggota' => $item->anggota->nomor_anggota ?? '-',
-                                 'foto' => $item->anggota->foto ? asset('storage/' . $item->anggota->foto) : null,
+                                 'foto' => $item->anggota->foto ? asset('storage/anggota/' . $item->anggota->foto) : null,
                                  'kelas' => $item->anggota->kelas->nama_kelas ?? '-',
                              ],
                              'waktu_masuk' => $item->waktu_datang->format('d/m/Y H:i'),

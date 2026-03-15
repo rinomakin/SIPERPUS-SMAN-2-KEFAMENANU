@@ -583,7 +583,7 @@ $(document).ready(function() {
         },
         pageLength: 10,
         lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-        order: [[hasCheckboxColumn ? 1 : 0, 'asc']],
+        order: [[hasCheckboxColumn ? 2 : 1, 'asc']],
         drawCallback: function() {
             attachCheckboxListeners();
             updateSelectedCount();

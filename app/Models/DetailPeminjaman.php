@@ -15,6 +15,8 @@ class DetailPeminjaman extends Model
         'peminjaman_id',
         'buku_id',
         'jumlah',
+        'tanggal_harus_kembali',
+        'jam_kembali',
         'kondisi_kembali',
         'catatan',
     ];
@@ -27,5 +29,10 @@ class DetailPeminjaman extends Model
     public function buku()
     {
         return $this->belongsTo(Buku::class);
+    }
+
+    public function detailPengembalian()
+    {
+        return $this->hasMany(DetailPengembalian::class, 'detail_peminjaman_id');
     }
 } 

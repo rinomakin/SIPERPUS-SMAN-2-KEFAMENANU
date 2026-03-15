@@ -114,6 +114,7 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS'])->prefix('admin'
     Route::get('/peminjaman/search-anggota', [PeminjamanController::class, 'searchAnggota'])->name('peminjaman.search-anggota');
     Route::get('/peminjaman/search-buku', [PeminjamanController::class, 'searchBuku'])->name('peminjaman.search-buku');
     Route::post('/peminjaman/check-active-loan', [PeminjamanController::class, 'checkActiveLoan'])->name('peminjaman.check-active-loan');
+    Route::get('/peminjaman/check-overdue-loan', [PeminjamanController::class, 'checkOverdueLoan'])->name('peminjaman.check-overdue-loan');
     
 
     
@@ -276,7 +277,10 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS'])->prefix('admin'
     
     // Riwayat Peminjaman
     Route::get('/riwayat-peminjaman', [RiwayatPeminjamanController::class, 'index'])->name('riwayat-peminjaman.index');
+    Route::get('/riwayat-peminjaman/data', [RiwayatPeminjamanController::class, 'getData'])->name('riwayat-peminjaman.data');
     Route::get('/riwayat-peminjaman/export', [RiwayatPeminjamanController::class, 'export'])->name('riwayat-peminjaman.export');
+    Route::delete('/riwayat-peminjaman/bulk', [RiwayatPeminjamanController::class, 'bulkDestroy'])->name('riwayat-peminjaman.bulk-destroy');
+    Route::delete('/riwayat-peminjaman/{id}', [RiwayatPeminjamanController::class, 'destroy'])->name('riwayat-peminjaman.destroy');
     
 
     

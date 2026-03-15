@@ -218,11 +218,11 @@ class PengembalianController extends Controller
 
             // Build the base query for anggota with active borrowings
             $anggotaQuery = Anggota::with([
-                'kelas', 
+                'kelas',
                 'jurusan',
                 'peminjaman' => function($q) {
                     $q->where('status', 'dipinjam')
-                      ->with(['detailPeminjaman.buku']);
+                      ->with(['detailPeminjaman.buku', 'detailPeminjaman.detailPengembalian']);
                 }
             ])
             ->where('status', 'aktif')
@@ -265,24 +265,34 @@ class PengembalianController extends Controller
                         $isLate = $today->gt($tanggalKembali);
                         $daysLate = $isLate ? $today->diffInDays($tanggalKembali) : 0;
 
+                        // Hanya buku yang belum dikembalikan
+                        $detailBelumKembali = $peminjaman->detailPeminjaman->filter(fn($d) => $d->detailPengembalian->isEmpty());
+
                         return [
                             'id' => $peminjaman->id,
                             'nomor_peminjaman' => $peminjaman->nomor_peminjaman,
                             'tanggal_peminjaman' => $peminjaman->tanggal_peminjaman,
                             'tanggal_harus_kembali' => $peminjaman->tanggal_harus_kembali,
+                            'tanggal_harus_kembali_raw' => $peminjaman->tanggal_harus_kembali,
                             'is_late' => $isLate,
                             'days_late' => $daysLate,
-                            'jumlah_buku' => $peminjaman->detailPeminjaman->sum('jumlah'),
-                            'buku' => $peminjaman->detailPeminjaman->map(function($detail) {
+                            'jumlah_buku' => $detailBelumKembali->sum('jumlah'),
+                            'buku' => $detailBelumKembali->map(function($detail) use ($peminjaman) {
                                 return [
                                     'id' => $detail->id,
                                     'judul' => $detail->buku ? $detail->buku->judul_buku : 'N/A',
                                     'pengarang' => $detail->buku ? $detail->buku->pengarang : 'N/A',
-                                    'jumlah' => $detail->jumlah ?: 1
+                                    'jumlah' => $detail->jumlah ?: 1,
+                                    'tanggal_harus_kembali' => $detail->tanggal_harus_kembali
+                                        ? Carbon::parse($detail->tanggal_harus_kembali)->format('d/m/Y')
+                                        : Carbon::parse($peminjaman->tanggal_harus_kembali)->format('d/m/Y'),
+                                    'tanggal_harus_kembali_raw' => $detail->tanggal_harus_kembali
+                                        ?? $peminjaman->tanggal_harus_kembali,
+                                    'jam_kembali' => $detail->jam_kembali ?? $peminjaman->jam_kembali,
                                 ];
-                            })
+                            })->values()
                         ];
-                    })
+                    })->filter(fn($p) => count($p['buku']) > 0)->values()
                 ];
             });
             
@@ -341,7 +351,7 @@ class PengembalianController extends Controller
         try {
             Log::info('Get Peminjaman Aktif', ['anggota_id' => $anggotaId]);
 
-            $peminjaman = Peminjaman::with(['detailPeminjaman.buku.kategoriBuku', 'anggota'])
+            $peminjaman = Peminjaman::with(['detailPeminjaman.buku.kategoriBuku', 'detailPeminjaman.detailPengembalian', 'anggota'])
                 ->where('anggota_id', $anggotaId)
                 ->where('status', 'dipinjam')
                 ->get()
@@ -350,27 +360,38 @@ class PengembalianController extends Controller
                     $tanggalKembali = Carbon::parse($item->tanggal_harus_kembali);
                     $isLate = $today->gt($tanggalKembali);
                     $daysLate = $isLate ? $today->diffInDays($tanggalKembali) : 0;
-                    
+
+                    // Hanya tampilkan buku yang belum dikembalikan
+                    $detailBelumKembali = $item->detailPeminjaman->filter(fn($d) => $d->detailPengembalian->isEmpty());
+
                     return [
                         'id' => $item->id,
                         'nomor_peminjaman' => $item->nomor_peminjaman,
                         'tanggal_peminjaman' => $item->tanggal_peminjaman->format('d/m/Y'),
                         'tanggal_harus_kembali' => $item->tanggal_harus_kembali->format('d/m/Y'),
+                        'tanggal_harus_kembali_raw' => $item->tanggal_harus_kembali,
                         'is_late' => $isLate,
                         'days_late' => $daysLate,
                         'catatan' => $item->catatan ?? '',
-                        'jumlah_buku' => $item->detailPeminjaman->sum('jumlah'),
-                        'detail_peminjaman' => $item->detailPeminjaman->map(function($detail) {
+                        'jumlah_buku' => $detailBelumKembali->sum('jumlah'),
+                        'detail_peminjaman' => $detailBelumKembali->map(function($detail) use ($item) {
                             return [
                                 'id' => $detail->id,
                                 'buku_id' => $detail->buku_id,
                                 'judul_buku' => $detail->buku ? $detail->buku->judul_buku : 'N/A',
                                 'jumlah' => $detail->jumlah ?? 1,
-                                'kondisi_kembali' => $detail->kondisi_kembali ?? 'baik'
+                                'kondisi_kembali' => $detail->kondisi_kembali ?? 'baik',
+                                'tanggal_harus_kembali' => $detail->tanggal_harus_kembali
+                                    ? Carbon::parse($detail->tanggal_harus_kembali)->format('d/m/Y')
+                                    : Carbon::parse($item->tanggal_harus_kembali)->format('d/m/Y'),
+                                'tanggal_harus_kembali_raw' => $detail->tanggal_harus_kembali
+                                    ?? $item->tanggal_harus_kembali,
+                                'jam_kembali' => $detail->jam_kembali ?? $item->jam_kembali,
                             ];
-                        })
+                        })->values()
                     ];
-                });
+                })
+                ->filter(fn($p) => count($p['detail_peminjaman']) > 0); // sembunyikan peminjaman yang semua bukunya sudah kembali
 
             return response()->json([
                 'success' => true,
@@ -426,33 +447,46 @@ class PengembalianController extends Controller
                 ]);
             }
 
+            // Reload with detailPengembalian to filter returned books
+            $peminjamanAktif->load('detailPeminjaman.detailPengembalian');
+
             // Format data peminjaman aktif
             $peminjamanFormatted = $peminjamanAktif->map(function($item) {
                 $today = Carbon::now();
                 $tanggalKembali = Carbon::parse($item->tanggal_harus_kembali);
                 $isLate = $today->gt($tanggalKembali);
                 $daysLate = $isLate ? $today->diffInDays($tanggalKembali) : 0;
-                
+
+                // Hanya tampilkan buku yang belum dikembalikan
+                $detailBelumKembali = $item->detailPeminjaman->filter(fn($d) => $d->detailPengembalian->isEmpty());
+
                 return [
                     'id' => $item->id,
                     'nomor_peminjaman' => $item->nomor_peminjaman,
                     'tanggal_peminjaman' => $item->tanggal_peminjaman->format('d/m/Y'),
                     'tanggal_harus_kembali' => $item->tanggal_harus_kembali->format('d/m/Y'),
+                    'tanggal_harus_kembali_raw' => $item->tanggal_harus_kembali,
                     'is_late' => $isLate,
                     'days_late' => $daysLate,
-                    'jumlah_buku' => $item->detailPeminjaman->sum('jumlah'),
+                    'jumlah_buku' => $detailBelumKembali->sum('jumlah'),
                     'catatan' => $item->catatan,
-                    'detail_peminjaman' => $item->detailPeminjaman->map(function($detail) {
+                    'detail_peminjaman' => $detailBelumKembali->map(function($detail) use ($item) {
                         return [
                             'id' => $detail->id,
                             'buku_id' => $detail->buku_id,
                             'judul_buku' => $detail->buku->judul_buku ?? 'N/A',
                             'jumlah' => $detail->jumlah,
-                            'kondisi_kembali' => $detail->kondisi_kembali
+                            'kondisi_kembali' => $detail->kondisi_kembali,
+                            'tanggal_harus_kembali' => $detail->tanggal_harus_kembali
+                                ? Carbon::parse($detail->tanggal_harus_kembali)->format('d/m/Y')
+                                : Carbon::parse($item->tanggal_harus_kembali)->format('d/m/Y'),
+                            'tanggal_harus_kembali_raw' => $detail->tanggal_harus_kembali
+                                ?? $item->tanggal_harus_kembali,
+                            'jam_kembali' => $detail->jam_kembali ?? $item->jam_kembali,
                         ];
-                    })
+                    })->values()
                 ];
-            });
+            })->filter(fn($p) => count($p['detail_peminjaman']) > 0)->values();
 
             return response()->json([
                 'success' => true,
@@ -533,85 +567,108 @@ class PengembalianController extends Controller
             $totalDetailsInPeminjaman = $peminjaman->detailPeminjaman->count();
             $isPartialReturn = $detailsToProcess->count() < $totalDetailsInPeminjaman;
 
-            // Calculate late fee if any
             $tanggalKembali = Carbon::parse($request->tanggal_kembali);
-            $tanggalHarusKembali = Carbon::parse($peminjaman->tanggal_harus_kembali);
-            $isLate = $tanggalKembali->gt($tanggalHarusKembali);
-            $daysLate = $isLate ? $tanggalKembali->diffInDays($tanggalHarusKembali) : 0;
+            $dendaPerHari   = 1000; // Rp 1.000/hari
 
-            // Calculate total denda
-            $dendaPerHari = 1000; // Rp 1000 per hari
-            $totalDenda = $daysLate * $dendaPerHari;
+            // Hitung denda per buku
+            $totalDendaTerlambat = 0;
+            $totalDendaBuku      = 0;
+            $maxDaysLate         = 0;
+            $perBookDenda        = []; // [detail_id => ['days_late'=>X, 'denda_late'=>Y, 'denda_kondisi'=>Z, 'total'=>W]]
 
-            // Create pengembalian record
-            $pengembalian = Pengembalian::create([
-                'nomor_pengembalian' => Pengembalian::generateNomorPengembalian(),
-                'peminjaman_id' => $peminjaman->id,
-                'anggota_id' => $peminjaman->anggota_id,
-                'user_id' => auth()->id(),
-                'tanggal_pengembalian' => $tanggalKembali,
-                'jam_pengembalian' => $request->jam_kembali ?? now()->format('H:i'),
-                'jumlah_hari_terlambat' => $daysLate,
-                'total_denda' => $totalDenda,
-                'status_denda' => $totalDenda > 0 ? 'belum_dibayar' : 'tidak_ada',
-                'catatan' => $request->catatan_pengembalian . ($isPartialReturn ? ' [Pengembalian sebagian]' : ''),
-                'status' => 'selesai'
-            ]);
-
-            // Create detail pengembalian and update book stock (only for selected books)
-            $totalDendaBuku = 0;
             foreach ($detailsToProcess as $detail) {
                 $kondisi = $request->kondisi_kembali[$detail->id] ?? 'baik';
 
-                // Calculate denda buku berdasarkan kondisi
-                $dendaBuku = 0;
-                switch ($kondisi) {
-                    case 'sedikit_rusak':
-                        $dendaBuku = 5000;
-                        break;
-                    case 'rusak':
-                        $dendaBuku = 25000;
-                        break;
-                    case 'hilang':
-                        $dendaBuku = 100000;
-                        break;
-                }
-                $totalDendaBuku += $dendaBuku;
+                // Per-book due date — fallback ke peminjaman-level
+                $dueDateBook = $detail->tanggal_harus_kembali
+                    ? Carbon::parse($detail->tanggal_harus_kembali)
+                    : Carbon::parse($peminjaman->tanggal_harus_kembali);
+
+                $isLateBook   = $tanggalKembali->gt($dueDateBook);
+                $daysLateBook = $isLateBook ? (int) $tanggalKembali->diffInDays($dueDateBook) : 0;
+                $dendaLateBook = $daysLateBook * $dendaPerHari;
+
+                $dendaKondisi = match ($kondisi) {
+                    'sedikit_rusak' => 5000,
+                    'rusak'         => 25000,
+                    'hilang'        => 100000,
+                    default         => 0,
+                };
+
+                $totalBook = $dendaLateBook + $dendaKondisi;
+                $perBookDenda[$detail->id] = [
+                    'days_late'     => $daysLateBook,
+                    'denda_late'    => $dendaLateBook,
+                    'denda_kondisi' => $dendaKondisi,
+                    'total'         => $totalBook,
+                ];
+
+                $totalDendaTerlambat += $dendaLateBook;
+                $totalDendaBuku      += $dendaKondisi;
+                if ($daysLateBook > $maxDaysLate) $maxDaysLate = $daysLateBook;
+            }
+
+            $finalTotalDenda = $totalDendaTerlambat + $totalDendaBuku;
+            $isLate = $maxDaysLate > 0;
+
+            // Create pengembalian record
+            $pengembalian = Pengembalian::create([
+                'nomor_pengembalian'    => Pengembalian::generateNomorPengembalian(),
+                'peminjaman_id'         => $peminjaman->id,
+                'anggota_id'            => $peminjaman->anggota_id,
+                'user_id'               => auth()->id(),
+                'tanggal_pengembalian'  => $tanggalKembali,
+                'jam_pengembalian'      => $request->jam_kembali ?? now()->format('H:i'),
+                'jumlah_hari_terlambat' => $maxDaysLate,
+                'total_denda'           => $finalTotalDenda,
+                'status_denda'          => $finalTotalDenda > 0 ? 'belum_dibayar' : 'tidak_ada',
+                'catatan'               => $request->catatan_pengembalian . ($isPartialReturn ? ' [Pengembalian sebagian]' : ''),
+                'status'                => 'selesai'
+            ]);
+
+            // Create detail pengembalian per buku
+            foreach ($detailsToProcess as $detail) {
+                $kondisi    = $request->kondisi_kembali[$detail->id] ?? 'baik';
+                $bookDenda  = $perBookDenda[$detail->id] ?? ['total' => 0];
 
                 DetailPengembalian::create([
-                    'pengembalian_id' => $pengembalian->id,
-                    'buku_id' => $detail->buku_id,
+                    'pengembalian_id'      => $pengembalian->id,
+                    'buku_id'              => $detail->buku_id,
                     'detail_peminjaman_id' => $detail->id,
-                    'kondisi_kembali' => $kondisi,
-                    'jumlah_dikembalikan' => $detail->jumlah ?? 1,
-                    'denda_buku' => $dendaBuku,
-                    'catatan_buku' => $this->getCatatanBuku($kondisi)
+                    'kondisi_kembali'      => $kondisi,
+                    'jumlah_dikembalikan'  => $detail->jumlah ?? 1,
+                    'denda_buku'           => $bookDenda['total'],
+                    'catatan_buku'         => $this->getCatatanBuku($kondisi)
                 ]);
 
-                // Update detail peminjaman
-                $detail->update([
-                    'kondisi_kembali' => $kondisi
-                ]);
+                $detail->update(['kondisi_kembali' => $kondisi]);
 
-                // Return book stock if condition is good or damaged (not lost)
                 if ($kondisi !== 'hilang') {
                     $detail->buku->increment('stok_tersedia', $detail->jumlah ?? 1);
                 }
             }
 
-            // Update total denda jika ada denda buku
-            if ($totalDendaBuku > 0) {
-                $pengembalian->update([
-                    'total_denda' => $totalDenda + $totalDendaBuku
-                ]);
-            }
-
             // Update peminjaman status based on partial or full return
             if ($isPartialReturn) {
-                // Partial return: keep peminjaman as 'dipinjam', just add note
-                $peminjaman->update([
-                    'catatan' => $peminjaman->catatan . ($request->catatan_pengembalian ? "\n\nCatatan Pengembalian Sebagian: " . $request->catatan_pengembalian : '')
-                ]);
+                // Cek apakah semua buku sekarang sudah dikembalikan (termasuk transaksi sebelumnya)
+                $totalReturnedNow = DetailPengembalian::whereIn('detail_peminjaman_id', $peminjaman->detailPeminjaman->pluck('id'))
+                    ->distinct('detail_peminjaman_id')
+                    ->count('detail_peminjaman_id');
+
+                if ($totalReturnedNow >= $peminjaman->detailPeminjaman->count()) {
+                    // Semua buku sudah kembali, tandai peminjaman selesai
+                    $peminjaman->update([
+                        'tanggal_kembali' => $tanggalKembali,
+                        'jam_kembali' => $request->jam_kembali ?? now()->format('H:i'),
+                        'status' => 'dikembalikan',
+                        'catatan' => $peminjaman->catatan . ($request->catatan_pengembalian ? "\n\nCatatan Pengembalian: " . $request->catatan_pengembalian : '')
+                    ]);
+                } else {
+                    // Masih ada buku yang belum kembali
+                    $peminjaman->update([
+                        'catatan' => $peminjaman->catatan . ($request->catatan_pengembalian ? "\n\nCatatan Pengembalian Sebagian: " . $request->catatan_pengembalian : '')
+                    ]);
+                }
             } else {
                 // Full return: mark peminjaman as 'dikembalikan'
                 $peminjaman->update([
@@ -622,23 +679,36 @@ class PengembalianController extends Controller
                 ]);
             }
 
-            // Create denda record if late
-            if ($isLate && $totalDenda > 0) {
-                $denda = Denda::create([
-                    'peminjaman_id' => $peminjaman->id,
-                    'pengembalian_id' => $pengembalian->id,
-                    'anggota_id' => $peminjaman->anggota_id,
-                    'jumlah_hari_terlambat' => $daysLate,
-                    'jumlah_denda' => $totalDenda + $totalDendaBuku,
-                    'status_pembayaran' => $request->status_pembayaran_denda ?? 'belum_dibayar',
-                    'tanggal_pembayaran' => $request->tanggal_pembayaran_denda,
-                    'catatan' => $request->catatan_pembayaran_denda ?? "Keterlambatan pengembalian {$daysLate} hari"
+            // Buat record denda dan sinkronkan status jika ada denda (terlambat ATAU buku rusak/hilang)
+            if ($finalTotalDenda > 0) {
+                $statusPembayaran = $request->status_pembayaran_denda ?? 'belum_dibayar';
+                $tanggalPembayaran = ($statusPembayaran === 'sudah_dibayar')
+                    ? ($request->tanggal_pembayaran_denda ?? now()->format('Y-m-d'))
+                    : null;
+
+                $catatanDenda = $request->catatan_pembayaran_denda;
+                if (!$catatanDenda) {
+                    $catatanDenda = $maxDaysLate > 0
+                        ? "Keterlambatan pengembalian {$maxDaysLate} hari"
+                        : "Denda kerusakan/kehilangan buku";
+                }
+
+                Denda::create([
+                    'peminjaman_id'        => $peminjaman->id,
+                    'pengembalian_id'      => $pengembalian->id,
+                    'anggota_id'           => $peminjaman->anggota_id,
+                    'jumlah_hari_terlambat'=> $maxDaysLate,
+                    'jumlah_denda'         => $finalTotalDenda,
+                    'status_pembayaran'    => $statusPembayaran,
+                    'tanggal_pembayaran'   => $tanggalPembayaran,
+                    'catatan'              => $catatanDenda,
                 ]);
 
-                // Update status denda di pengembalian berdasarkan input form
+                // Sinkronkan status_denda di pengembalian dengan input form
                 $pengembalian->update([
-                    'status_denda' => $request->status_pembayaran_denda ?? 'belum_dibayar',
-                    'tanggal_pembayaran_denda' => $request->tanggal_pembayaran_denda
+                    'total_denda'             => $finalTotalDenda,
+                    'status_denda'            => $statusPembayaran,
+                    'tanggal_pembayaran_denda'=> $tanggalPembayaran,
                 ]);
             }
 
@@ -650,7 +720,7 @@ class PengembalianController extends Controller
                 $message = "Pengembalian sebagian berhasil ({$detailsToProcess->count()} buku dikembalikan, {$remaining} buku masih dipinjam).";
             }
             if ($isLate) {
-                $message .= " Anggota terlambat {$daysLate} hari dan dikenakan denda Rp " . number_format($totalDenda + $totalDendaBuku, 0, ',', '.');
+                $message .= " Anggota terlambat {$maxDaysLate} hari dan dikenakan denda Rp " . number_format($finalTotalDenda, 0, ',', '.');
             }
 
             return redirect()->route('pengembalian.index')

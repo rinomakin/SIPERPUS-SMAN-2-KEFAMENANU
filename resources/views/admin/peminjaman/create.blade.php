@@ -52,6 +52,32 @@
 @media (max-width: 1023px) {
     .col-divider { border-top: 1px solid #f1f5f9; border-left: none !important; }
 }
+
+/* ── Scanner Modal Box ── */
+.scanner-modal-backdrop {
+    position: fixed; inset: 0; z-index: 50;
+    background: rgba(0,0,0,0.78); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.scanner-modal-backdrop.hidden { display: none; }
+.scanner-pinjam-box {
+    background: #111827; border-radius: 20px; width: 100%; max-width: 480px;
+    overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.65);
+    display: flex; flex-direction: column; max-height: 90vh;
+}
+.scanner-pinjam-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 16px; background: rgba(0,0,0,0.45);
+    border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
+}
+.scanner-pinjam-video {
+    position: relative; width: 100%; aspect-ratio: 4/3;
+    background: #000; overflow: hidden; flex-shrink: 0;
+}
+.scanner-pinjam-footer {
+    padding: 12px 14px; background: rgba(0,0,0,0.45);
+    border-top: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
+}
 </style>
 
 <div class="py-4 sm:py-6">
@@ -150,6 +176,22 @@
                     </div>
                     <div class="absolute -top-2 -right-2 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center shadow">
                         <i class="fas fa-check text-white text-[9px]"></i>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Banner Peringatan Keterlambatan --}}
+            <div id="overdueBanner" class="mt-3 hidden animate-fade-in">
+                <div class="bg-red-50 border border-red-300 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <i class="fas fa-ban text-red-600 text-sm"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h5 class="font-bold text-sm text-red-800">Tidak Dapat Meminjam Buku Baru!</h5>
+                            <p class="text-xs text-red-700 mt-0.5 mb-2">Anggota ini memiliki buku yang melewati batas waktu pengembalian. Kembalikan buku berikut terlebih dahulu:</p>
+                            <ul id="overdueBookList" class="space-y-1.5"></ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -290,29 +332,43 @@
                 @enderror
             </div>
 
-            {{-- Tanggal Harus Kembali --}}
-            <div>
+            {{-- Tanggal Harus Kembali (Default) --}}
+            <div id="defaultTglCol">
                 <label class="flex items-center gap-1.5 text-[10px] font-semibold text-gray-600 uppercase tracking-wide mb-1.5">
-                    <i class="fas fa-calendar-check text-amber-500"></i> Tgl. Kembali <span class="text-red-500">*</span>
+                    <i class="fas fa-calendar-check text-amber-500"></i> Tgl. Kembali Default <span class="text-red-500">*</span>
                 </label>
                 <input type="date" name="tanggal_harus_kembali" id="tanggal_harus_kembali"
                        value="{{ old('tanggal_harus_kembali', date('Y-m-d')) }}" required
+                       onchange="applyDefaultDateToAll()"
                        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all hover:border-gray-400">
-                <p class="text-[10px] text-gray-400 mt-1">Min. sama dgn tgl. pinjam</p>
+                <p class="text-[10px] text-gray-400 mt-1 flex items-center justify-between">
+                    <span>Diterapkan ke semua buku otomatis</span>
+                    <button type="button" onclick="applyDefaultDateToAll()"
+                            class="text-amber-600 hover:text-amber-700 font-semibold flex items-center gap-1">
+                        <i class="fas fa-magic text-[9px]"></i>Terapkan ulang
+                    </button>
+                </p>
                 @error('tanggal_harus_kembali')
                 <p class="text-red-500 text-[11px] mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
-            {{-- Jam Kembali --}}
-            <div>
+            {{-- Jam Kembali (Default) --}}
+            <div id="defaultJamCol">
                 <label class="flex items-center gap-1.5 text-[10px] font-semibold text-gray-600 uppercase tracking-wide mb-1.5">
-                    <i class="fas fa-clock text-amber-500"></i> Jam Kembali <span class="text-red-500">*</span>
+                    <i class="fas fa-clock text-amber-500"></i> Jam Kembali Default <span class="text-red-500">*</span>
                 </label>
                 <input type="time" name="jam_kembali" id="jam_kembali"
                        value="{{ old('jam_kembali') }}" required
+                       onchange="applyDefaultTimeToAll()"
                        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all hover:border-gray-400">
-                <p class="text-[10px] text-gray-400 mt-1">Wajib diisi</p>
+                <p class="text-[10px] text-gray-400 mt-1 flex items-center justify-between">
+                    <span>Diterapkan ke semua buku otomatis</span>
+                    <button type="button" onclick="applyDefaultTimeToAll()"
+                            class="text-amber-600 hover:text-amber-700 font-semibold flex items-center gap-1">
+                        <i class="fas fa-magic text-[9px]"></i>Terapkan ulang
+                    </button>
+                </p>
                 @error('jam_kembali')
                 <p class="text-red-500 text-[11px] mt-1">{{ $message }}</p>
                 @enderror
@@ -373,98 +429,102 @@
 </div>
 
 {{-- ══════════════════════════════════════════════════════
-     BARCODE SCANNER MODAL (fullscreen)
+     BARCODE SCANNER MODAL (modal box)
 ══════════════════════════════════════════════════════ --}}
-<div id="scannerModal" class="fixed inset-0 bg-black hidden z-50 transition-all duration-300">
-    <div class="relative w-full h-full flex flex-col">
+<div id="scannerModal" class="scanner-modal-backdrop hidden">
+    <div class="scanner-pinjam-box">
 
-        <div class="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/80 via-black/40 to-transparent px-4 pt-4 pb-10">
-            <div class="flex items-center justify-between max-w-2xl mx-auto">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center">
-                        <i class="fas fa-barcode text-white text-sm"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-bold text-white" id="scannerTitle">Scan Barcode</h3>
-                        <p class="text-[10px] text-white/70" id="scannerDescription">Arahkan kamera ke barcode</p>
-                    </div>
+        {{-- Header --}}
+        <div class="scanner-pinjam-header">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-white/15 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-barcode text-white text-xs"></i>
                 </div>
-                <button type="button" id="closeScanner"
-                        class="w-10 h-10 bg-white/20 backdrop-blur-md hover:bg-white/30 rounded-xl flex items-center justify-center text-white transition-colors">
-                    <i class="fas fa-times text-lg"></i>
-                </button>
+                <div>
+                    <h3 class="text-xs font-bold text-white leading-none" id="scannerTitle">Scan Barcode</h3>
+                    <p class="text-[10px] text-white/60 mt-0.5" id="scannerDescription">Arahkan kamera ke barcode</p>
+                </div>
             </div>
+            <button type="button" id="closeScanner"
+                    class="w-8 h-8 bg-white/10 hover:bg-red-500/80 rounded-full flex items-center justify-center text-white transition-colors flex-shrink-0">
+                <i class="fas fa-times text-xs"></i>
+            </button>
         </div>
 
-        <div id="scannerContainer" class="flex-1 w-full bg-black flex items-center justify-center relative overflow-hidden">
-            <div id="scannerPlaceholder" class="text-center px-4 z-10">
-                <div class="w-20 h-20 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-camera text-3xl text-white/60"></i>
+        {{-- Video area --}}
+        <div id="scannerContainer" class="scanner-pinjam-video">
+            <div id="scannerPlaceholder" class="absolute inset-0 flex items-center justify-center z-10 px-4">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-camera text-2xl text-white/60"></i>
+                    </div>
+                    <p class="text-sm text-white/70 mb-1">Kamera akan aktif otomatis</p>
+                    <p class="text-xs text-white/40">Pastikan izin kamera diaktifkan</p>
                 </div>
-                <p class="text-sm text-white/70 mb-2">Kamera akan aktif otomatis</p>
-                <p class="text-xs text-white/40">Pastikan izin kamera diaktifkan</p>
             </div>
             <div id="scannerVideo" class="w-full h-full hidden">
                 <div id="reader" class="w-full h-full"></div>
             </div>
             <div id="scannerLoading" class="absolute inset-0 bg-black/60 flex items-center justify-center hidden z-10">
                 <div class="text-center text-white">
-                    <div class="w-14 h-14 border-4 border-white/20 border-t-white rounded-full spinner mx-auto mb-4"></div>
-                    <p class="text-sm font-medium">Memulai kamera...</p>
+                    <div class="w-12 h-12 border-4 border-white/20 border-t-white rounded-full spinner mx-auto mb-3"></div>
+                    <p class="text-xs font-medium">Memulai kamera...</p>
                 </div>
             </div>
             <div id="scanOverlay" class="absolute inset-0 z-10 pointer-events-none hidden">
                 <div class="absolute inset-0 flex items-center justify-center">
-                    <div class="relative" style="width:85%;max-width:500px;aspect-ratio:16/9;">
-                        <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-emerald-400 rounded-tl-lg"></div>
-                        <div class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-emerald-400 rounded-tr-lg"></div>
-                        <div class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-emerald-400 rounded-bl-lg"></div>
-                        <div class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-emerald-400 rounded-br-lg"></div>
+                    <div class="relative" style="width:78%;max-width:320px;aspect-ratio:4/3;">
+                        <div class="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-emerald-400 rounded-tl-lg"></div>
+                        <div class="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-emerald-400 rounded-tr-lg"></div>
+                        <div class="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-emerald-400 rounded-bl-lg"></div>
+                        <div class="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-emerald-400 rounded-br-lg"></div>
                         <div class="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-scan-line"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-4 pb-6 pt-10">
-            <div class="max-w-2xl mx-auto">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-gray-500" id="scannerStatusDot"></span>
-                        <span class="text-xs text-white/80" id="scannerStatus">Siap untuk scan</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button type="button" id="toggleTorchBtn"
-                                class="w-10 h-10 bg-white/15 backdrop-blur-md hover:bg-white/25 rounded-xl flex items-center justify-center text-white/80 transition-colors hidden">
-                            <i class="fas fa-bolt text-sm"></i>
-                        </button>
-                        <button type="button" id="switchCameraBtn"
-                                class="w-10 h-10 bg-white/15 backdrop-blur-md hover:bg-white/25 rounded-xl flex items-center justify-center text-white/80 transition-colors hidden">
-                            <i class="fas fa-sync-alt text-sm"></i>
-                        </button>
-                    </div>
+        {{-- Footer --}}
+        <div class="scanner-pinjam-footer">
+            {{-- Status row --}}
+            <div class="flex items-center justify-between mb-2.5">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-gray-500" id="scannerStatusDot"></span>
+                    <span class="text-[11px] text-white/70" id="scannerStatus">Siap untuk scan</span>
                 </div>
-                <div class="flex gap-3">
-                    <button type="button" id="cancelScan"
-                            class="flex-1 py-3 bg-white/15 backdrop-blur-md hover:bg-white/25 text-white rounded-xl font-semibold text-sm transition-colors">
-                        <i class="fas fa-arrow-left mr-2"></i>Kembali
+                <div class="flex items-center gap-2">
+                    <button type="button" id="toggleTorchBtn"
+                            class="w-8 h-8 bg-white/10 hover:bg-amber-500/60 rounded-lg flex items-center justify-center text-white/80 transition-colors hidden">
+                        <i class="fas fa-bolt text-xs"></i>
                     </button>
-                    <button type="button" id="startScanBtn"
-                            class="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-semibold text-sm transition-colors hidden">
-                        <i class="fas fa-play mr-2"></i>Mulai Scan
-                    </button>
-                    <button type="button" id="stopScanBtn"
-                            class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold text-sm transition-colors hidden">
-                        <i class="fas fa-stop mr-2"></i>Stop
-                    </button>
-                    <button type="button" id="manualInputBtn"
-                            class="py-3 px-4 bg-white/15 backdrop-blur-md hover:bg-white/25 text-white rounded-xl font-semibold text-sm transition-colors"
-                            onclick="showManualInputDialog()">
-                        <i class="fas fa-keyboard"></i>
+                    <button type="button" id="switchCameraBtn"
+                            class="w-8 h-8 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center text-white/80 transition-colors hidden">
+                        <i class="fas fa-sync-alt text-xs"></i>
                     </button>
                 </div>
             </div>
+            {{-- Action buttons --}}
+            <div class="flex gap-2">
+                <button type="button" id="cancelScan"
+                        class="flex-1 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl font-semibold text-xs transition-colors">
+                    <i class="fas fa-arrow-left mr-1.5"></i>Kembali
+                </button>
+                <button type="button" id="startScanBtn"
+                        class="flex-1 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-semibold text-xs transition-colors hidden">
+                    <i class="fas fa-play mr-1.5"></i>Mulai Scan
+                </button>
+                <button type="button" id="stopScanBtn"
+                        class="flex-1 py-2 bg-red-500/80 hover:bg-red-600 text-white rounded-xl font-semibold text-xs transition-colors hidden">
+                    <i class="fas fa-stop mr-1.5"></i>Stop
+                </button>
+                <button type="button" id="manualInputBtn"
+                        class="py-2 px-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-semibold text-xs transition-colors"
+                        onclick="showManualInputDialog()">
+                    <i class="fas fa-keyboard"></i>
+                </button>
+            </div>
         </div>
+
     </div>
 </div>
 
@@ -497,6 +557,8 @@ let lastScannedCode    = '';
 let lastScanTime       = 0;
 const scanCooldown     = 1500;
 let isProcessingBarcode = false;
+let cameraDevices      = [];   // semua videoinput yang terdeteksi
+let currentCameraIndex = 0;    // indeks kamera aktif
 
 const hasNativeBarcodeAPI = ('BarcodeDetector' in window);
 
@@ -561,11 +623,13 @@ function updateEmptyState() {
 // ─────────────────────────────────────────────────
 // Submit button state
 // ─────────────────────────────────────────────────
+let anggotaHasOverdue = false;
+
 function updateSubmitButton() {
     const btn   = document.getElementById('submitBtn');
     const count = parseInt(document.getElementById('selectedCount').textContent);
     const id    = document.getElementById('anggota_id').value;
-    btn.disabled = !(count > 0 && id);
+    btn.disabled = !(count > 0 && id && !anggotaHasOverdue);
 }
 
 // ─────────────────────────────────────────────────
@@ -615,35 +679,40 @@ function validateTanggalKembali() {
 }
 
 // ─────────────────────────────────────────────────
-// Scanner
+// Scanner — Device-Aware
 // ─────────────────────────────────────────────────
-document.getElementById('scanAnggotaBtn').addEventListener('click', function () {
+
+// ── Button Listeners ──
+document.getElementById('scanAnggotaBtn').addEventListener('click', () => {
     currentScanType = 'anggota';
-    document.getElementById('scannerTitle').textContent = 'Scan Barcode Anggota';
+    document.getElementById('scannerTitle').textContent       = 'Scan Barcode Anggota';
     document.getElementById('scannerDescription').textContent = 'Arahkan kamera ke barcode anggota';
     openScannerModal();
 });
 
-document.getElementById('scanBukuBtn').addEventListener('click', function () {
+document.getElementById('scanBukuBtn').addEventListener('click', () => {
     currentScanType = 'buku';
-    document.getElementById('scannerTitle').textContent = 'Scan Barcode Buku';
+    document.getElementById('scannerTitle').textContent       = 'Scan Barcode Buku';
     document.getElementById('scannerDescription').textContent = 'Arahkan kamera ke barcode buku';
     openScannerModal();
 });
 
-function openScannerModal() {
-    document.getElementById('scannerModal').classList.remove('hidden');
-    lastScannedCode = ''; lastScanTime = 0;
-    if (hasNativeBarcodeAPI) initNativeScanner(); else initHTML5Scanner();
-}
-
 document.getElementById('closeScanner').addEventListener('click', closeScanner);
-document.getElementById('cancelScan').addEventListener('click', closeScanner);
-document.getElementById('startScanBtn').addEventListener('click', function () {
-    if (hasNativeBarcodeAPI) initNativeScanner(); else initHTML5Scanner();
-});
-document.getElementById('stopScanBtn').addEventListener('click', stopAllScanners);
+document.getElementById('cancelScan').addEventListener('click',  closeScanner);
+document.getElementById('startScanBtn').addEventListener('click', () => startScanner());
+document.getElementById('stopScanBtn').addEventListener('click',  stopAllScanners);
 
+// Switch to next available camera
+document.getElementById('switchCameraBtn').addEventListener('click', async () => {
+    if (cameraDevices.length < 2) return;
+    currentCameraIndex = (currentCameraIndex + 1) % cameraDevices.length;
+    stopAllScanners();
+    const dev = cameraDevices[currentCameraIndex];
+    updateScannerStatus('idle', 'Beralih kamera...');
+    await startScannerWithDeviceId(dev.deviceId, dev.label);
+});
+
+// Torch / flashlight toggle
 document.getElementById('toggleTorchBtn').addEventListener('click', async function () {
     if (!nativeScanStream) return;
     const track = nativeScanStream.getVideoTracks()[0];
@@ -651,71 +720,225 @@ document.getElementById('toggleTorchBtn').addEventListener('click', async functi
     try {
         torchEnabled = !torchEnabled;
         await track.applyConstraints({ advanced: [{ torch: torchEnabled }] });
-        this.classList.toggle('bg-amber-500/60', torchEnabled);
+        this.classList.toggle('bg-amber-500/60',  torchEnabled);
         this.classList.toggle('bg-white/15', !torchEnabled);
-    } catch (e) {}
+    } catch (e) { torchEnabled = !torchEnabled; }
 });
 
-async function initNativeScanner() {
-    const loading     = document.getElementById('scannerLoading');
-    const video       = document.getElementById('scannerVideo');
-    const placeholder = document.getElementById('scannerPlaceholder');
-    const overlay     = document.getElementById('scanOverlay');
+// ── Open Modal ──
+async function openScannerModal() {
+    document.getElementById('scannerModal').classList.remove('hidden');
+    lastScannedCode = ''; lastScanTime = 0; isProcessingBarcode = false;
 
-    loading.classList.remove('hidden');
-    placeholder.classList.add('hidden');
-    video.classList.add('hidden');
+    // Reset semua UI dulu
+    document.getElementById('scannerLoading').classList.add('hidden');
+    document.getElementById('scannerVideo').classList.add('hidden');
+    document.getElementById('scanOverlay')?.classList.add('hidden');
+    document.getElementById('startScanBtn').classList.add('hidden');
+    document.getElementById('stopScanBtn').classList.add('hidden');
+    document.getElementById('toggleTorchBtn').classList.add('hidden');
+    document.getElementById('switchCameraBtn').classList.add('hidden');
 
+    const ph = document.getElementById('scannerPlaceholder');
+    ph.classList.remove('hidden');
+    ph.innerHTML = `<div class="text-center">
+        <div class="w-12 h-12 border-4 border-white/20 border-t-white rounded-full spinner mx-auto mb-3"></div>
+        <p class="text-sm text-white/70">Mendeteksi kamera tersedia...</p>
+    </div>`;
+
+    updateScannerStatus('idle', 'Mendeteksi kamera...');
+
+    // Enumerate cameras kemudian start
+    await enumerateCameras();
+    await startScanner();
+}
+
+// ── Enumerate available cameras (tanpa butuh permission dulu) ──
+async function enumerateCameras() {
+    cameraDevices = []; currentCameraIndex = 0;
+    if (!navigator.mediaDevices?.enumerateDevices) return;
     try {
-        nativeScanStream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920, min: 1280 }, height: { ideal: 1080, min: 720 }, frameRate: { ideal: 30, min: 15 } },
-            audio: false
+        const all = await navigator.mediaDevices.enumerateDevices();
+        let vids  = all.filter(d => d.kind === 'videoinput');
+        if (!vids.length) return;
+
+        // Sort: rear/back cameras pertama
+        vids.sort((a, b) => {
+            const rA = /back|rear|environment|belakang/i.test(a.label) ? 1 : 0;
+            const rB = /back|rear|environment|belakang/i.test(b.label) ? 1 : 0;
+            return rB - rA;
+        });
+        cameraDevices = vids;
+    } catch (e) {}
+}
+
+// ── Re-enumerate setelah permission diberikan untuk mendapatkan label ──
+async function refreshCameraLabels() {
+    if (!navigator.mediaDevices?.enumerateDevices) return;
+    try {
+        const all  = await navigator.mediaDevices.enumerateDevices();
+        let vids   = all.filter(d => d.kind === 'videoinput');
+        if (!vids.length || vids[0].label === '') return;
+
+        vids.sort((a, b) => {
+            const rA = /back|rear|environment|belakang/i.test(a.label) ? 1 : 0;
+            const rB = /back|rear|environment|belakang/i.test(b.label) ? 1 : 0;
+            return rB - rA;
         });
 
-        let videoEl = document.getElementById('nativeScanVideo');
-        if (!videoEl) {
-            videoEl = document.createElement('video');
-            videoEl.id = 'nativeScanVideo';
-            videoEl.setAttribute('playsinline', '');
-            videoEl.setAttribute('autoplay', '');
-            videoEl.setAttribute('muted', '');
-            videoEl.style.cssText = 'width:100%;height:100%;object-fit:cover;';
-            const readerEl = document.getElementById('reader');
-            readerEl.innerHTML = '';
-            readerEl.appendChild(videoEl);
+        // Sinkronkan index: cari deviceId yang sedang aktif di list baru
+        if (nativeScanStream) {
+            const activeId = nativeScanStream.getVideoTracks()[0]?.getSettings()?.deviceId;
+            const idx = vids.findIndex(d => d.deviceId === activeId);
+            if (idx >= 0) currentCameraIndex = idx;
         }
-        videoEl.srcObject = nativeScanStream;
-        await videoEl.play();
 
-        const track = nativeScanStream.getVideoTracks()[0];
-        const caps  = track.getCapabilities ? track.getCapabilities() : {};
-        if (caps.torch) document.getElementById('toggleTorchBtn').classList.remove('hidden');
-        try {
-            if (caps.focusMode?.includes('continuous')) await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
-        } catch (e) {}
+        cameraDevices = vids;
+        document.getElementById('switchCameraBtn').classList.toggle('hidden', vids.length < 2);
+    } catch (e) {}
+}
 
-        loading.classList.add('hidden');
-        video.classList.remove('hidden');
-        if (overlay) overlay.classList.remove('hidden');
-
-        updateScannerStatus('active', 'Scanner aktif');
-        document.getElementById('startScanBtn').classList.add('hidden');
-        document.getElementById('stopScanBtn').classList.remove('hidden');
-
-        nativeBarcodeDetector = new BarcodeDetector({
-            formats: ['code_128', 'code_39', 'code_93', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'itf', 'codabar', 'qr_code', 'data_matrix', 'aztec', 'pdf417']
-        });
-        nativeScanCanvas = document.createElement('canvas');
-        startNativeScanLoop(videoEl);
-
-    } catch (err) {
-        loading.classList.add('hidden');
-        if (err.name === 'NotAllowedError') { showNotification('Akses kamera ditolak.', 'error'); setupManualInput(); }
-        else if (err.name === 'NotFoundError') { showNotification('Tidak ada kamera.', 'error'); setupManualInput(); }
-        else initHTML5Scanner();
+// ── Main start logic ──
+async function startScanner() {
+    if (cameraDevices.length > 0 && cameraDevices[currentCameraIndex]?.deviceId) {
+        const dev = cameraDevices[currentCameraIndex];
+        await startScannerWithDeviceId(dev.deviceId, dev.label);
+    } else {
+        // Belum ada device list — langsung pakai strategi facingMode
+        await startWithFacingModeFallback();
     }
 }
 
+// ── Start dengan deviceId tertentu, dengan fallback ──
+async function startScannerWithDeviceId(deviceId, label) {
+    updateScannerStatus('idle',
+        label ? 'Menghubungkan: ' + label.substring(0, 30) + '...' : 'Menghubungkan kamera...');
+
+    // Attempt 1: deviceId + resolusi ideal (tanpa min)
+    let r = await tryGetUserMedia({ deviceId: { exact: deviceId }, width: { ideal: 1280 }, height: { ideal: 720 } });
+    if (r === 'fatal' || r === true) return;
+
+    // Attempt 2: deviceId saja (tanpa constraint resolusi)
+    r = await tryGetUserMedia({ deviceId: { exact: deviceId } });
+    if (r === 'fatal' || r === true) return;
+
+    // Fallback ke facingMode
+    await startWithFacingModeFallback();
+}
+
+// ── Fallback bertahap menggunakan facingMode ──
+async function startWithFacingModeFallback() {
+    // 1. environment ideal + resolusi
+    let r = await tryGetUserMedia({ facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } });
+    if (r === 'fatal' || r === true) return;
+
+    // 2. user ideal + resolusi
+    r = await tryGetUserMedia({ facingMode: { ideal: 'user' }, width: { ideal: 1280 }, height: { ideal: 720 } });
+    if (r === 'fatal' || r === true) return;
+
+    // 3. environment tanpa resolusi
+    r = await tryGetUserMedia({ facingMode: { ideal: 'environment' } });
+    if (r === 'fatal' || r === true) return;
+
+    // 4. kamera apapun (constraint minimal)
+    r = await tryGetUserMedia(true);
+    if (r === 'fatal' || r === true) return;
+
+    // Semua getUserMedia gagal — coba html5-qrcode
+    if (typeof Html5Qrcode !== 'undefined') {
+        initHTML5Scanner();
+    } else {
+        setupManualInput();
+    }
+}
+
+// ── Coba getUserMedia, return true | false | 'fatal' ──
+async function tryGetUserMedia(videoConstraints) {
+    try {
+        nativeScanStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
+        await setupVideoFromStream(nativeScanStream);
+        await refreshCameraLabels();
+        return true;
+    } catch (err) {
+        if (nativeScanStream) { nativeScanStream.getTracks().forEach(t => t.stop()); nativeScanStream = null; }
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+            setupPermissionDenied(); return 'fatal';
+        }
+        return false; // NotFoundError, OverconstrainedError, dll → coba strategi berikutnya
+    }
+}
+
+// ── Setup elemen video dan mulai deteksi ──
+async function setupVideoFromStream(stream) {
+    let videoEl = document.getElementById('nativeScanVideo');
+    if (!videoEl) {
+        videoEl = document.createElement('video');
+        videoEl.id = 'nativeScanVideo';
+        videoEl.setAttribute('playsinline', '');
+        videoEl.setAttribute('autoplay',    '');
+        videoEl.setAttribute('muted',       '');
+        videoEl.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+        const readerEl = document.getElementById('reader');
+        readerEl.innerHTML = '';
+        readerEl.appendChild(videoEl);
+    } else {
+        // Hentikan stream lama sebelum assign baru
+        if (videoEl.srcObject) {
+            videoEl.srcObject.getTracks().forEach(t => t.stop());
+        }
+    }
+
+    videoEl.srcObject = stream;
+
+    // Tunggu video siap (loadedmetadata atau timeout 8 detik)
+    await new Promise((resolve) => {
+        if (videoEl.readyState >= 2) { resolve(); return; }
+        const onReady = () => { videoEl.removeEventListener('loadedmetadata', onReady); resolve(); };
+        videoEl.addEventListener('loadedmetadata', onReady);
+        videoEl.play().catch(() => {});
+        setTimeout(resolve, 8000);
+    });
+
+    // Kemampuan track (torch, focus)
+    const track = stream.getVideoTracks()[0];
+    if (track) {
+        const caps = track.getCapabilities ? track.getCapabilities() : {};
+        document.getElementById('toggleTorchBtn').classList.toggle('hidden', !caps.torch);
+        try {
+            if (caps.focusMode?.includes('continuous')) {
+                await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
+            }
+        } catch (e) {}
+    }
+
+    // Tampilkan video
+    document.getElementById('scannerLoading').classList.add('hidden');
+    document.getElementById('scannerPlaceholder').classList.add('hidden');
+    document.getElementById('scannerVideo').classList.remove('hidden');
+    document.getElementById('scanOverlay')?.classList.remove('hidden');
+    document.getElementById('startScanBtn').classList.add('hidden');
+    document.getElementById('stopScanBtn').classList.remove('hidden');
+
+    // Label kamera di status bar
+    const devLabel = cameraDevices[currentCameraIndex]?.label
+        || (track?.getSettings()?.facingMode === 'user' ? 'Kamera Depan' : 'Kamera Belakang');
+    const camInfo  = cameraDevices.length > 1 ? ` (${currentCameraIndex + 1}/${cameraDevices.length})` : '';
+    updateScannerStatus('active', devLabel.substring(0, 30) + camInfo);
+
+    // Mulai deteksi barcode
+    if (hasNativeBarcodeAPI) {
+        nativeBarcodeDetector = new BarcodeDetector({
+            formats: ['code_128', 'code_39', 'code_93', 'ean_13', 'ean_8',
+                      'upc_a', 'upc_e', 'itf', 'codabar', 'qr_code', 'data_matrix', 'aztec', 'pdf417']
+        });
+        startNativeScanLoop(videoEl);
+    } else if (typeof Html5Qrcode !== 'undefined') {
+        // BarcodeDetector tidak ada, gunakan html5-qrcode di atas stream yang sama
+        initHTML5Scanner();
+    }
+}
+
+// ── Native BarcodeDetector scan loop (interval 50ms) ──
 function startNativeScanLoop(videoEl) {
     if (nativeScanInterval) clearInterval(nativeScanInterval);
     nativeScanInterval = setInterval(async () => {
@@ -727,7 +950,7 @@ function startNativeScanLoop(videoEl) {
                 const now  = Date.now();
                 if (code === lastScannedCode && (now - lastScanTime) < scanCooldown) return;
                 lastScannedCode = code; lastScanTime = now;
-                if (navigator.vibrate) navigator.vibrate(100);
+                if (navigator.vibrate) navigator.vibrate([80]);
                 flashScanSuccess();
                 processScannedBarcode(code);
             }
@@ -746,116 +969,187 @@ function flashScanSuccess() {
     setTimeout(() => { flash.remove(); }, 400);
 }
 
+// ── html5-qrcode fallback (pakai deviceId jika tersedia) ──
 function initHTML5Scanner() {
     const loading     = document.getElementById('scannerLoading');
     const video       = document.getElementById('scannerVideo');
     const placeholder = document.getElementById('scannerPlaceholder');
     const overlay     = document.getElementById('scanOverlay');
 
+    // Hentikan stream getUserMedia yang ada
+    if (nativeScanStream) { nativeScanStream.getTracks().forEach(t => t.stop()); nativeScanStream = null; }
+    if (nativeScanInterval) { clearInterval(nativeScanInterval); nativeScanInterval = null; }
+    if (html5QrcodeScanner) { try { html5QrcodeScanner.stop().catch(()=>{}); } catch(e){} html5QrcodeScanner = null; }
+
     loading.classList.remove('hidden');
     placeholder.classList.add('hidden');
     video.classList.remove('hidden');
 
-    try {
-        html5QrcodeScanner = new Html5Qrcode('reader');
-        const config = {
-            fps: 30,
-            qrbox: (w, h) => ({ width: Math.floor(w * .85), height: Math.floor(h * .70) }),
-            aspectRatio: window.innerWidth > window.innerHeight ? 16/9 : 9/16,
-            formatsToSupport: [
-                Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39,
-                Html5QrcodeSupportedFormats.CODE_93, Html5QrcodeSupportedFormats.EAN_13,
-                Html5QrcodeSupportedFormats.EAN_8, Html5QrcodeSupportedFormats.UPC_A,
-                Html5QrcodeSupportedFormats.UPC_E, Html5QrcodeSupportedFormats.ITF,
-                Html5QrcodeSupportedFormats.CODABAR, Html5QrcodeSupportedFormats.QR_CODE,
-                Html5QrcodeSupportedFormats.DATA_MATRIX
-            ],
-            experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-            videoConstraints: { facingMode: { ideal: 'environment' }, width: { ideal: 1920, min: 1280 }, height: { ideal: 1080, min: 720 }, frameRate: { ideal: 30 } }
-        };
+    // Bersihkan reader
+    document.getElementById('reader').innerHTML = '';
 
-        html5QrcodeScanner.start({ facingMode: 'environment' }, config,
-            function (decodedText) {
-                const now = Date.now();
-                if (decodedText === lastScannedCode && (now - lastScanTime) < scanCooldown) return;
-                lastScannedCode = decodedText; lastScanTime = now;
-                if (navigator.vibrate) navigator.vibrate(100);
-                flashScanSuccess();
-                processScannedBarcode(decodedText);
-            },
-            function () {}
-        ).then(() => {
+    const config = {
+        fps: 15,
+        qrbox: (w, h) => ({ width: Math.floor(w * .82), height: Math.floor(h * .62) }),
+        aspectRatio: window.innerWidth > window.innerHeight ? 16/9 : 4/3,
+        formatsToSupport: [
+            Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39,
+            Html5QrcodeSupportedFormats.CODE_93,  Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.EAN_8,    Html5QrcodeSupportedFormats.UPC_A,
+            Html5QrcodeSupportedFormats.UPC_E,    Html5QrcodeSupportedFormats.ITF,
+            Html5QrcodeSupportedFormats.CODABAR,  Html5QrcodeSupportedFormats.QR_CODE,
+            Html5QrcodeSupportedFormats.DATA_MATRIX
+        ],
+        experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+        videoConstraints: { width: { ideal: 1280 }, height: { ideal: 720 } }
+    };
+
+    const onSuccess = (decodedText) => {
+        const now = Date.now();
+        if (decodedText === lastScannedCode && (now - lastScanTime) < scanCooldown) return;
+        lastScannedCode = decodedText; lastScanTime = now;
+        if (navigator.vibrate) navigator.vibrate([80]);
+        flashScanSuccess();
+        processScannedBarcode(decodedText);
+    };
+
+    // Pilih constraint: pakai deviceId kalau sudah ter-enumerate, kalau belum pakai facingMode
+    const hasDev    = cameraDevices.length > 0 && cameraDevices[currentCameraIndex]?.deviceId;
+    const camConst  = hasDev
+        ? { deviceId: { exact: cameraDevices[currentCameraIndex].deviceId } }
+        : { facingMode: { ideal: 'environment' } };
+
+    html5QrcodeScanner = new Html5Qrcode('reader');
+    html5QrcodeScanner.start(camConst, config, onSuccess, () => {})
+    .then(() => {
+        loading.classList.add('hidden');
+        overlay?.classList.remove('hidden');
+        updateScannerStatus('active', 'Scanner aktif');
+        document.getElementById('startScanBtn').classList.add('hidden');
+        document.getElementById('stopScanBtn').classList.remove('hidden');
+        // Refresh label & tombol switch setelah html5-qrcode berhasil start
+        refreshCameraLabels();
+    })
+    .catch(async () => {
+        // Coba fallback terakhir: facingMode user (kamera depan / webcam desktop)
+        try {
+            await html5QrcodeScanner.stop().catch(()=>{});
+        } catch(e) {}
+        html5QrcodeScanner = new Html5Qrcode('reader');
+        html5QrcodeScanner.start(
+            { facingMode: { ideal: 'user' } },
+            { ...config, videoConstraints: { width: { ideal: 640 }, height: { ideal: 480 } } },
+            onSuccess, () => {}
+        )
+        .then(() => {
             loading.classList.add('hidden');
-            if (overlay) overlay.classList.remove('hidden');
-            updateScannerStatus('active', 'Scanner aktif');
+            overlay?.classList.remove('hidden');
+            updateScannerStatus('active', 'Kamera depan aktif');
             document.getElementById('startScanBtn').classList.add('hidden');
             document.getElementById('stopScanBtn').classList.remove('hidden');
-        }).catch(err => {
+        })
+        .catch(() => {
             loading.classList.add('hidden');
             placeholder.classList.remove('hidden');
             video.classList.add('hidden');
-            showNotification('Gagal: ' + (err.message || err), 'error');
             setupManualInput();
         });
-    } catch (error) {
-        loading.classList.add('hidden');
-        placeholder.classList.remove('hidden');
-        video.classList.add('hidden');
-        showNotification('Gagal inisialisasi: ' + error.message, 'error');
-        setupManualInput();
-    }
+    });
 }
 
 function updateScannerStatus(state, text) {
     const dot    = document.getElementById('scannerStatusDot');
     const status = document.getElementById('scannerStatus');
-    status.textContent = text;
-    dot.className = state === 'active'
+    if (status) status.textContent = text;
+    if (dot) dot.className = state === 'active'
         ? 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse'
         : (state === 'error' ? 'w-2 h-2 rounded-full bg-red-500' : 'w-2 h-2 rounded-full bg-gray-500');
 }
 
 function stopAllScanners() {
-    if (nativeScanInterval) { clearInterval(nativeScanInterval); nativeScanInterval = null; }
-    if (nativeScanStream) { nativeScanStream.getTracks().forEach(t => t.stop()); nativeScanStream = null; }
+    if (nativeScanInterval)  { clearInterval(nativeScanInterval); nativeScanInterval = null; }
+    if (nativeScanStream)    { nativeScanStream.getTracks().forEach(t => t.stop()); nativeScanStream = null; }
     nativeBarcodeDetector = null; torchEnabled = false;
-    if (html5QrcodeScanner) { try { html5QrcodeScanner.stop().catch(() => {}); } catch (e) {} html5QrcodeScanner = null; }
+    if (html5QrcodeScanner)  { try { html5QrcodeScanner.stop().catch(()=>{}); } catch(e){} html5QrcodeScanner = null; }
     updateScannerStatus('idle', 'Scanner dihentikan');
     document.getElementById('startScanBtn').classList.remove('hidden');
     document.getElementById('stopScanBtn').classList.add('hidden');
     document.getElementById('toggleTorchBtn').classList.add('hidden');
+    // Jangan sembunyikan switchCameraBtn agar tetap bisa berganti kamera
 }
 
 function closeScanner() {
     stopAllScanners();
     isProcessingBarcode = false;
-    const modal = document.getElementById('scannerModal');
-    modal.classList.add('hidden');
-    const overlay = document.getElementById('scanOverlay');
-    if (overlay) overlay.classList.add('hidden');
+    document.getElementById('scannerModal').classList.add('hidden');
+    document.getElementById('scanOverlay')?.classList.add('hidden');
+    document.getElementById('switchCameraBtn').classList.add('hidden');
     updateScannerStatus('idle', 'Siap untuk scan');
-    document.getElementById('scannerPlaceholder').classList.remove('hidden');
+
+    // Reset placeholder ke default
+    const ph = document.getElementById('scannerPlaceholder');
+    ph.classList.remove('hidden');
+    ph.innerHTML = `<div class="text-center">
+        <div class="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <i class="fas fa-camera text-2xl text-white/60"></i>
+        </div>
+        <p class="text-sm text-white/70 mb-1">Kamera akan aktif otomatis</p>
+        <p class="text-xs text-white/40">Pastikan izin kamera diaktifkan</p>
+    </div>`;
     document.getElementById('scannerVideo').classList.add('hidden');
     document.getElementById('scannerLoading').classList.add('hidden');
     const nv = document.getElementById('nativeScanVideo');
-    if (nv) nv.srcObject = null;
+    if (nv) { nv.srcObject = null; }
 }
 
+// ── Tampilkan pesan izin ditolak ──
+function setupPermissionDenied() {
+    document.getElementById('scannerLoading').classList.add('hidden');
+    document.getElementById('scannerVideo').classList.add('hidden');
+    const ph = document.getElementById('scannerPlaceholder');
+    ph.classList.remove('hidden');
+    ph.innerHTML = `<div class="text-center">
+        <div class="w-14 h-14 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <i class="fas fa-ban text-2xl text-red-400"></i>
+        </div>
+        <p class="text-sm font-semibold text-white/80 mb-1">Akses Kamera Ditolak</p>
+        <p class="text-xs text-white/40 mb-4 max-w-xs mx-auto">
+            Izinkan akses kamera di browser, lalu muat ulang halaman atau klik tombol di bawah.
+        </p>
+        <div class="flex flex-col gap-2 items-center">
+            <button type="button" onclick="openScannerModal()"
+                    class="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-semibold text-xs transition-colors">
+                <i class="fas fa-redo mr-1.5"></i>Coba Lagi
+            </button>
+            <button type="button" onclick="showManualInputDialog()"
+                    class="px-5 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-xl font-semibold text-xs transition-colors">
+                <i class="fas fa-keyboard mr-1.5"></i>Input Manual
+            </button>
+        </div>
+    </div>`;
+    updateScannerStatus('error', 'Izin kamera ditolak');
+}
+
+// ── Tampilkan UI input manual (kamera tidak tersedia) ──
 function setupManualInput() {
     document.getElementById('scannerVideo').classList.add('hidden');
     document.getElementById('scannerLoading').classList.add('hidden');
-    const p = document.getElementById('scannerPlaceholder');
-    p.classList.remove('hidden');
-    p.innerHTML = `<div class="text-center px-4">
-        <div class="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <i class="fas fa-keyboard text-3xl text-white/60"></i>
+    const ph = document.getElementById('scannerPlaceholder');
+    ph.classList.remove('hidden');
+    ph.innerHTML = `<div class="text-center">
+        <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <i class="fas fa-keyboard text-2xl text-white/60"></i>
         </div>
-        <p class="text-sm text-white/70 mb-2">Kamera tidak tersedia</p>
-        <p class="text-xs text-white/40 mb-4">Gunakan input manual</p>
-        <button type="button" onclick="showManualInputDialog()" class="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-semibold text-sm transition-colors">
-            <i class="fas fa-keyboard mr-2"></i>Input Manual
+        <p class="text-sm text-white/70 mb-1">Kamera tidak tersedia</p>
+        <p class="text-xs text-white/40 mb-4">Gunakan input barcode manual</p>
+        <button type="button" onclick="showManualInputDialog()"
+                class="px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-semibold text-xs transition-colors">
+            <i class="fas fa-keyboard mr-1.5"></i>Input Manual
         </button>
     </div>`;
+    updateScannerStatus('error', 'Kamera tidak tersedia');
+    document.getElementById('startScanBtn').classList.remove('hidden');
+    document.getElementById('stopScanBtn').classList.add('hidden');
 }
 
 function showManualInputDialog() {
@@ -863,11 +1157,12 @@ function showManualInputDialog() {
         title: 'Input Barcode Manual',
         input: 'text',
         inputPlaceholder: 'Masukkan kode barcode...',
-        inputAttributes: { autocomplete: 'off' },
+        inputAttributes: { autocomplete: 'off', autocorrect: 'off', spellcheck: 'false' },
         showCancelButton: true,
-        confirmButtonText: 'Proses',
+        confirmButtonText: '<i class="fas fa-check mr-1"></i>Proses',
         cancelButtonText: 'Batal',
         confirmButtonColor: '#3b82f6',
+        didOpen: () => { document.querySelector('.swal2-input')?.focus(); },
         inputValidator: v => { if (!v?.trim()) return 'Masukkan kode barcode!'; }
     }).then(r => { if (r.isConfirmed && r.value) processScannedBarcode(r.value.trim()); });
 }
@@ -988,11 +1283,64 @@ function selectAnggota(anggota) {
         document.getElementById('anggotaDropdown').classList.add('hidden');
         selectedIndex = -1;
 
-        updateSubmitButton(); updateSummary();
+        // Cek apakah anggota memiliki peminjaman yang melewati jatuh tempo
+        checkOverdueLoans(anggota.id);
+
+        updateSummary();
         showNotification(`${anggota.nama_lengkap} dipilih!`, 'success');
     } catch (err) {
         showNotification('Gagal memproses data anggota: ' + err.message, 'error');
     }
+}
+
+function checkOverdueLoans(anggotaId) {
+    fetch(`{{ route('peminjaman.check-overdue-loan') }}?anggota_id=${anggotaId}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken }
+    })
+    .then(r => r.json())
+    .then(data => {
+        const banner   = document.getElementById('overdueBanner');
+        const list     = document.getElementById('overdueBookList');
+        const bukuSearch = document.getElementById('buku_search');
+
+        if (data.success && data.has_overdue) {
+            anggotaHasOverdue = true;
+
+            // Isi daftar buku terlambat
+            list.innerHTML = '';
+            (data.data || []).forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'flex items-start gap-2 text-xs bg-white border border-red-200 rounded-lg px-3 py-2';
+                li.innerHTML = `
+                    <i class="fas fa-book text-red-400 mt-0.5 flex-shrink-0"></i>
+                    <div class="min-w-0">
+                        <span class="font-semibold text-gray-900 block truncate">${item.judul_buku}</span>
+                        <span class="text-red-600">Jatuh tempo: ${item.tanggal_harus_kembali}
+                            &bull; <span class="font-bold">${item.hari_terlambat} hari terlambat</span>
+                        </span>
+                        <span class="text-gray-400 block">${item.nomor_peminjaman}</span>
+                    </div>`;
+                list.appendChild(li);
+            });
+
+            banner.classList.remove('hidden');
+            bukuSearch.disabled = true;
+            bukuSearch.placeholder = 'Selesaikan keterlambatan terlebih dahulu...';
+        } else {
+            anggotaHasOverdue = false;
+            banner.classList.add('hidden');
+            list.innerHTML = '';
+            bukuSearch.disabled = false;
+            bukuSearch.placeholder = 'Ketik judul / ISBN / barcode buku...';
+        }
+
+        updateSubmitButton();
+    })
+    .catch(() => {
+        // Jika gagal cek, biarkan form tetap bisa digunakan (fail open)
+        anggotaHasOverdue = false;
+        updateSubmitButton();
+    });
 }
 
 document.getElementById('clearAnggota').addEventListener('click', function () {
@@ -1001,6 +1349,15 @@ document.getElementById('clearAnggota').addEventListener('click', function () {
     document.getElementById('anggota_search').value = '';
     document.getElementById('anggotaDropdown').classList.add('hidden');
     selectedIndex = -1;
+
+    // Reset overdue state
+    anggotaHasOverdue = false;
+    document.getElementById('overdueBanner').classList.add('hidden');
+    document.getElementById('overdueBookList').innerHTML = '';
+    const bukuSearch = document.getElementById('buku_search');
+    bukuSearch.disabled = false;
+    bukuSearch.placeholder = 'Ketik judul / ISBN / barcode buku...';
+
     updateSubmitButton(); updateSummary();
 });
 
@@ -1105,29 +1462,45 @@ function addBookToList(book) {
         ? 'bg-emerald-100 text-emerald-700'
         : 'bg-amber-100 text-amber-700';
 
+    const defaultTgl = document.getElementById('tanggal_harus_kembali').value || '';
+    const defaultJam = document.getElementById('jam_kembali').value || '';
+    const minTgl     = document.getElementById('tanggal_peminjaman').value || '';
+
     const item = document.createElement('div');
-    item.className = 'book-item flex items-center gap-3 p-3 bg-white rounded-xl border border-emerald-100 shadow-sm animate-slide-right';
+    item.className = 'book-item flex flex-col gap-2 p-3 bg-white rounded-xl border border-emerald-100 shadow-sm animate-slide-right';
     item.setAttribute('data-book-id', book.id);
 
     item.innerHTML = `
-        <div class="w-9 h-9 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            <i class="fas fa-book text-white text-xs"></i>
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-book text-white text-xs"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h5 class="font-semibold text-xs text-gray-900 truncate leading-tight">${book.judul_buku}</h5>
+                <p class="text-[11px] text-gray-500 truncate mt-0.5">${book.penulis || 'N/A'}
+                    <span class="ml-1 ${stokColor} px-1.5 py-0 rounded text-[10px] font-medium">Stok: ${book.stok_tersedia}</span>
+                </p>
+            </div>
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+                <input type="number" name="jumlah_buku[${book.id}]" value="1" min="1" max="${book.stok_tersedia}"
+                       class="w-12 px-1.5 py-1 text-xs text-center border border-gray-200 rounded-lg focus:ring-1 focus:ring-emerald-500 bg-white font-semibold"
+                       onchange="updateTotalJumlah()">
+                <button type="button"
+                        class="w-7 h-7 flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-400 hover:text-red-600 rounded-lg transition-all"
+                        onclick="removeBook(${book.id})">
+                    <i class="fas fa-trash-alt text-[10px]"></i>
+                </button>
+            </div>
         </div>
-        <div class="flex-1 min-w-0">
-            <h5 class="font-semibold text-xs text-gray-900 truncate leading-tight">${book.judul_buku}</h5>
-            <p class="text-[11px] text-gray-500 truncate mt-0.5">${book.penulis || 'N/A'}
-                <span class="ml-1 ${stokColor} px-1.5 py-0 rounded text-[10px] font-medium">Stok: ${book.stok_tersedia}</span>
-            </p>
-        </div>
-        <div class="flex items-center gap-1.5 flex-shrink-0">
-            <input type="number" name="jumlah_buku[${book.id}]" value="1" min="1" max="${book.stok_tersedia}"
-                   class="w-12 px-1.5 py-1 text-xs text-center border border-gray-200 rounded-lg focus:ring-1 focus:ring-emerald-500 bg-white font-semibold"
-                   onchange="updateTotalJumlah()">
-            <button type="button"
-                    class="w-7 h-7 flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-400 hover:text-red-600 rounded-lg transition-all"
-                    onclick="removeBook(${book.id})">
-                <i class="fas fa-trash-alt text-[10px]"></i>
-            </button>
+        <div class="book-return-date-row hidden flex items-center gap-2 pt-2 border-t border-amber-100/80">
+            <i class="fas fa-calendar-check text-amber-400 text-[10px] flex-shrink-0"></i>
+            <span class="text-[10px] text-gray-500 font-medium whitespace-nowrap">Batas kembali:</span>
+            <input type="date" name="tanggal_kembali_buku[${book.id}]" value="${defaultTgl}" required
+                   ${minTgl ? `min="${minTgl}"` : ''}
+                   class="flex-1 min-w-0 px-2 py-1 text-[11px] border border-amber-200 rounded-lg focus:ring-1 focus:ring-amber-400 focus:border-amber-400 bg-amber-50/40 outline-none">
+            <i class="fas fa-clock text-amber-400 text-[10px] flex-shrink-0"></i>
+            <input type="time" name="jam_kembali_buku[${book.id}]" value="${defaultJam}" required
+                   class="w-24 px-2 py-1 text-[11px] border border-amber-200 rounded-lg focus:ring-1 focus:ring-amber-400 focus:border-amber-400 bg-amber-50/40 outline-none">
         </div>`;
 
     list.appendChild(item);
@@ -1143,6 +1516,7 @@ function addBookToList(book) {
     selectedIndex = -1;
 
     updateSubmitButton(); updateTotalJumlah(); updateSummary(); updateEmptyState();
+    updateReturnDateVisibility();
     showNotification('Buku berhasil ditambahkan!', 'success');
 }
 
@@ -1159,6 +1533,7 @@ function removeBook(bookId) {
         document.getElementById('selectedCount').textContent =
             parseInt(document.getElementById('selectedCount').textContent) - 1;
         updateSubmitButton(); updateTotalJumlah(); updateSummary(); updateEmptyState();
+        updateReturnDateVisibility();
     }, 250);
 }
 
@@ -1166,6 +1541,43 @@ function updateTotalJumlah() {
     let total = 0;
     document.querySelectorAll('input[name^="jumlah_buku["]').forEach(i => { total += parseInt(i.value) || 0; });
     document.getElementById('totalJumlah').textContent = total;
+}
+
+function applyDefaultDateToAll() {
+    const val    = document.getElementById('tanggal_harus_kembali').value;
+    const minTgl = document.getElementById('tanggal_peminjaman').value || '';
+    if (!val) return;
+    document.querySelectorAll('input[name^="tanggal_kembali_buku["]').forEach(inp => {
+        inp.value = val;
+        if (minTgl) inp.min = minTgl;
+    });
+}
+
+function applyDefaultTimeToAll() {
+    const val = document.getElementById('jam_kembali').value;
+    if (!val) return;
+    document.querySelectorAll('input[name^="jam_kembali_buku["]').forEach(inp => { inp.value = val; });
+}
+
+function updateReturnDateVisibility() {
+    const count   = parseInt(document.getElementById('selectedCount').textContent);
+    const rows    = document.querySelectorAll('.book-return-date-row');
+    const tglCol  = document.getElementById('defaultTglCol');
+    const jamCol  = document.getElementById('defaultJamCol');
+
+    if (count >= 2) {
+        // Tampilkan baris tanggal kembali per-buku
+        rows.forEach(r => r.classList.remove('hidden'));
+        // Sembunyikan kolom default di jadwal
+        tglCol?.classList.add('hidden');
+        jamCol?.classList.add('hidden');
+    } else {
+        // Sembunyikan baris per-buku (tidak perlu untuk 1 buku)
+        rows.forEach(r => r.classList.add('hidden'));
+        // Tampilkan kembali kolom default
+        tglCol?.classList.remove('hidden');
+        jamCol?.classList.remove('hidden');
+    }
 }
 
 // ─────────────────────────────────────────────────
@@ -1207,6 +1619,16 @@ function validateForm() {
         Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Pilih anggota terlebih dahulu!', confirmButtonColor: '#3b82f6' });
         return false;
     }
+    if (anggotaHasOverdue) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Tidak Dapat Meminjam!',
+            html: 'Anggota ini masih memiliki buku yang <b>melewati batas waktu pengembalian</b>.<br><br>Kembalikan buku tersebut terlebih dahulu sebelum dapat meminjam buku baru.',
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Mengerti'
+        });
+        return false;
+    }
     if (books.length === 0) {
         Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Pilih minimal 1 buku!', confirmButtonColor: '#3b82f6' });
         return false;
@@ -1216,10 +1638,23 @@ function validateForm() {
         return false;
     }
     if (!jamKembali) {
-        Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Jam kembali wajib diisi!', confirmButtonColor: '#3b82f6' });
+        Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Jam kembali default wajib diisi!', confirmButtonColor: '#3b82f6' });
         document.getElementById('jam_kembali').focus();
         return false;
     }
+
+    // Validasi tanggal & jam kembali per buku (hanya jika 2+ buku dipilih)
+    const bookCount = parseInt(document.getElementById('selectedCount').textContent);
+    if (bookCount >= 2) {
+        let allDatesOk = true;
+        document.querySelectorAll('input[name^="tanggal_kembali_buku["]').forEach(inp => { if (!inp.value) allDatesOk = false; });
+        document.querySelectorAll('input[name^="jam_kembali_buku["]').forEach(inp => { if (!inp.value) allDatesOk = false; });
+        if (!allDatesOk) {
+            Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Isi tanggal dan jam kembali untuk setiap buku yang dipilih!', confirmButtonColor: '#3b82f6' });
+            return false;
+        }
+    }
+
     return validateTanggalKembali();
 }
 

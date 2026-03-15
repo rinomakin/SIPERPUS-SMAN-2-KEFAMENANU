@@ -165,7 +165,7 @@
                         {{-- Left: Avatar + Info --}}
                         <div class="flex items-center gap-4 min-w-0 flex-1">
                             <div class="relative flex-shrink-0">
-                                <img src="{{ $kunjungan->anggota && $kunjungan->anggota->foto ? asset('storage/' . $kunjungan->anggota->foto) : asset('images/default-avatar.png') }}"
+                                <img src="{{ $kunjungan->anggota && $kunjungan->anggota->foto ? asset('storage/anggota/' . $kunjungan->anggota->foto) : asset('images/default-avatar.png') }}"
                                      alt="Foto" class="w-12 h-12 rounded-xl object-cover border-2 border-gray-200"
                                      onerror="this.src='{{ asset('images/default-avatar.png') }}'">
                                 @if(!$kunjungan->waktu_pulang)

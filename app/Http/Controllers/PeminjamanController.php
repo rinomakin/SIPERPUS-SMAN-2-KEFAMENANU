@@ -10,6 +10,7 @@ use App\Models\Buku;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
+use Carbon\Carbon;
 
 class PeminjamanController extends Controller
 {
@@ -168,6 +169,10 @@ class PeminjamanController extends Controller
             'jam_peminjaman' => 'nullable|date_format:H:i',
             'tanggal_harus_kembali' => 'required|date|after_or_equal:tanggal_peminjaman',
             'jam_kembali' => 'required|date_format:H:i',
+            'tanggal_kembali_buku' => 'nullable|array',
+            'tanggal_kembali_buku.*' => 'nullable|date|after_or_equal:tanggal_peminjaman',
+            'jam_kembali_buku' => 'nullable|array',
+            'jam_kembali_buku.*' => 'nullable|date_format:H:i',
             'catatan' => 'nullable|string',
         ], [
             'buku_ids.required' => 'Pilih minimal 1 buku untuk dipinjam.',
@@ -176,6 +181,7 @@ class PeminjamanController extends Controller
             'buku_ids.*.exists' => 'Buku yang dipilih tidak valid.',
             'tanggal_harus_kembali.after_or_equal' => 'Tanggal kembali tidak boleh kurang dari tanggal pinjam.',
             'jam_kembali.required' => 'Jam kembali wajib diisi.',
+            'tanggal_kembali_buku.*.after_or_equal' => 'Tanggal kembali buku tidak boleh kurang dari tanggal pinjam.',
         ]);
 
         // Custom validation for jam_kembali
@@ -185,6 +191,18 @@ class PeminjamanController extends Controller
                     ->withInput()
                     ->withErrors(['jam_kembali' => 'Jam pengembalian tidak boleh sama dengan jam peminjaman']);
             }
+        }
+
+        // Cek apakah anggota memiliki buku yang terlambat dikembalikan
+        $overdueCount = Peminjaman::where('anggota_id', $request->anggota_id)
+            ->where('status', 'dipinjam')
+            ->where('tanggal_harus_kembali', '<', Carbon::today())
+            ->count();
+
+        if ($overdueCount > 0) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Anggota ini tidak dapat meminjam buku baru karena masih memiliki ' . $overdueCount . ' peminjaman yang melewati batas waktu pengembalian. Harap kembalikan buku tersebut terlebih dahulu.');
         }
 
         DB::beginTransaction();
@@ -220,10 +238,16 @@ class PeminjamanController extends Controller
                     throw new \Exception("Buku {$buku->judul_buku} hanya tersedia {$buku->stok_tersedia} eksemplar, diminta {$jumlah} eksemplar");
                 }
 
+                // Ambil tanggal & jam kembali per-buku, fallback ke global
+                $tglKembaliBuku = $request->tanggal_kembali_buku[$buku_id] ?? $request->tanggal_harus_kembali;
+                $jamKembaliBuku = $request->jam_kembali_buku[$buku_id]     ?? $request->jam_kembali;
+
                 // Create detail peminjaman
                 $peminjaman->detailPeminjaman()->create([
                     'buku_id' => $buku_id,
                     'jumlah' => $jumlah,
+                    'tanggal_harus_kembali' => $tglKembaliBuku,
+                    'jam_kembali' => $jamKembaliBuku,
                     'kondisi_kembali' => 'baik',
                     'catatan' => null,
                 ]);
@@ -746,6 +770,57 @@ class PeminjamanController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat mencari buku: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API untuk check apakah anggota memiliki peminjaman yang melewati jatuh tempo
+     */
+    public function checkOverdueLoan(Request $request)
+    {
+        try {
+            $request->validate([
+                'anggota_id' => 'required|exists:anggota,id'
+            ]);
+
+            $overdueLoans = Peminjaman::where('anggota_id', $request->anggota_id)
+                ->where('status', 'dipinjam')
+                ->where('tanggal_harus_kembali', '<', Carbon::today())
+                ->with('detailPeminjaman.buku')
+                ->get();
+
+            if ($overdueLoans->isEmpty()) {
+                return response()->json([
+                    'success' => true,
+                    'has_overdue' => false,
+                ]);
+            }
+
+            $books = [];
+            foreach ($overdueLoans as $loan) {
+                $daysLate = Carbon::today()->diffInDays(Carbon::parse($loan->tanggal_harus_kembali));
+                foreach ($loan->detailPeminjaman as $detail) {
+                    $books[] = [
+                        'nomor_peminjaman'      => $loan->nomor_peminjaman,
+                        'judul_buku'            => $detail->buku ? $detail->buku->judul_buku : 'N/A',
+                        'tanggal_harus_kembali' => Carbon::parse($loan->tanggal_harus_kembali)->format('d/m/Y'),
+                        'hari_terlambat'        => $daysLate,
+                    ];
+                }
+            }
+
+            return response()->json([
+                'success'     => true,
+                'has_overdue' => true,
+                'message'     => 'Anggota memiliki ' . $overdueLoans->count() . ' peminjaman yang melewati batas waktu pengembalian.',
+                'data'        => $books,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
             ], 500);
         }
     }

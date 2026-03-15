@@ -38,7 +38,7 @@
             <div class="space-y-4">
                 <!-- Member Photo -->
                 <div class="flex items-center space-x-4">
-                    <img src="{{ $kunjungan->anggota->foto ? asset('storage/' . $kunjungan->anggota->foto) : 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" fill="#e5e7eb"/><text x="40" y="48" text-anchor="middle" fill="#9ca3af" font-family="Arial" font-size="28">👤</text></svg>') }}" 
+                    <img src="{{ $kunjungan->anggota->foto ? asset('storage/anggota/' . $kunjungan->anggota->foto) : 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" fill="#e5e7eb"/><text x="40" y="48" text-anchor="middle" fill="#9ca3af" font-family="Arial" font-size="28">👤</text></svg>') }}" 
                          alt="Foto Anggota" class="w-20 h-20 rounded-full object-cover border-4 border-gray-200">
                     <div>
                         <h3 class="text-xl font-bold text-gray-900">{{ $kunjungan->anggota->nama_lengkap }}</h3>

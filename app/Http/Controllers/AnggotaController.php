@@ -7,7 +7,6 @@ use App\Models\Anggota;
 use App\Models\Kelas;
 use App\Models\Jurusan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AnggotaExport;
@@ -26,7 +25,7 @@ class AnggotaController extends Controller
     {
         // Handle DataTables AJAX request
         if ($request->ajax()) {
-            $query = Anggota::with(['kelas.jurusan']);
+            $query = Anggota::with(['kelas.jurusan'])->orderBy('nama_lengkap', 'asc');
             
             // Apply filters from request
             if ($request->filled('filter_kelas_id')) {
@@ -180,7 +179,7 @@ class AnggotaController extends Controller
             if ($request->hasFile('foto')) {
                 $foto = $request->file('foto');
                 $fotoName = time() . '_' . Str::random(10) . '.' . $foto->getClientOriginalExtension();
-                $foto->storeAs('public/anggota', $fotoName);
+                $foto->move(public_path('storage/anggota'), $fotoName);
                 $data['foto'] = $fotoName;
             }
 
@@ -240,13 +239,13 @@ class AnggotaController extends Controller
             // Handle foto upload
             if ($request->hasFile('foto')) {
                 // Delete old foto if exists
-                if ($anggota->foto && Storage::exists('public/anggota/' . $anggota->foto)) {
-                    Storage::delete('public/anggota/' . $anggota->foto);
+                if ($anggota->foto && file_exists(public_path('storage/anggota/' . $anggota->foto))) {
+                    unlink(public_path('storage/anggota/' . $anggota->foto));
                 }
 
                 $foto = $request->file('foto');
                 $fotoName = time() . '_' . Str::random(10) . '.' . $foto->getClientOriginalExtension();
-                $foto->storeAs('public/anggota', $fotoName);
+                $foto->move(public_path('storage/anggota'), $fotoName);
                 $data['foto'] = $fotoName;
             }
 
@@ -269,8 +268,8 @@ class AnggotaController extends Controller
             $anggota = Anggota::findOrFail($id);
             
             // Delete foto if exists
-            if ($anggota->foto && Storage::exists('public/anggota/' . $anggota->foto)) {
-                Storage::delete('public/anggota/' . $anggota->foto);
+            if ($anggota->foto && file_exists(public_path('storage/anggota/' . $anggota->foto))) {
+                unlink(public_path('storage/anggota/' . $anggota->foto));
             }
             
             $anggota->delete();
@@ -295,8 +294,8 @@ class AnggotaController extends Controller
             $anggota = Anggota::whereIn('id', $request->ids)->get();
             
             foreach ($anggota as $item) {
-                if ($item->foto && Storage::exists('public/anggota/' . $item->foto)) {
-                    Storage::delete('public/anggota/' . $item->foto);
+                if ($item->foto && file_exists(public_path('storage/anggota/' . $item->foto))) {
+                    unlink(public_path('storage/anggota/' . $item->foto));
                 }
             }
             
