@@ -2,6 +2,83 @@
 
 @section('title', 'Pengaturan Website')
 
+@push('styles')
+<style>
+/* ── Override inline styles untuk dark mode ── */
+
+/* Header back button & badge */
+html[data-theme="dark"] .mb-8 a.rounded-xl[style],
+html[data-theme="dark"] .mb-8 div.hidden.sm\:flex[style] {
+    background: rgba(30,41,59,0.85) !important;
+    border-color: rgba(148,163,184,0.2) !important;
+}
+html[data-theme="dark"] .mb-8 div.hidden.sm\:flex span { color: #94a3b8 !important; }
+
+/* Card containers (glass white) */
+html[data-theme="dark"] #formPengaturan > .mb-8.rounded-2xl,
+html[data-theme="dark"] #formPengaturan > .grid > .rounded-2xl {
+    background: rgba(22, 32, 51, 0.92) !important;
+    border-color: rgba(99,102,241,0.18) !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35) !important;
+}
+
+/* Card body inner padding area */
+html[data-theme="dark"] #formPengaturan .p-6 { background: transparent !important; }
+
+/* Logo & Favicon preview containers */
+html[data-theme="dark"] #logoPreviewContainer,
+html[data-theme="dark"] #faviconPreviewContainer {
+    background: rgba(99, 60, 180, 0.12) !important;
+    border-color: rgba(124,58,237,0.35) !important;
+}
+
+/* Upload file buttons (violet) */
+html[data-theme="dark"] #formPengaturan button.text-violet-600 {
+    background: rgba(124,58,237,0.2) !important;
+    border-color: rgba(124,58,237,0.4) !important;
+    color: #c4b5fd !important;
+}
+html[data-theme="dark"] #formPengaturan button.text-violet-600:hover {
+    background: rgba(124,58,237,0.3) !important;
+}
+
+/* Form inputs & textareas (override violet/emerald inline bg) */
+html[data-theme="dark"] #formPengaturan input[style],
+html[data-theme="dark"] #formPengaturan textarea[style] {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+html[data-theme="dark"] #formPengaturan input[style]::placeholder,
+html[data-theme="dark"] #formPengaturan textarea[style]::placeholder {
+    color: #475569 !important;
+}
+html[data-theme="dark"] #formPengaturan input[style]:focus,
+html[data-theme="dark"] #formPengaturan textarea[style]:focus {
+    border-color: #7c3aed !important;
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.15) !important;
+}
+
+/* Kembali button */
+html[data-theme="dark"] #formPengaturan button.text-gray-600 {
+    background: rgba(30,41,59,0.85) !important;
+    border-color: rgba(148,163,184,0.2) !important;
+    color: #94a3b8 !important;
+}
+html[data-theme="dark"] #formPengaturan button.text-gray-600:hover {
+    background: rgba(51,65,85,0.9) !important;
+}
+
+/* Label text */
+html[data-theme="dark"] #formPengaturan label.text-sm.font-semibold { color: #cbd5e1 !important; }
+html[data-theme="dark"] #formPengaturan p.text-xs.text-gray-400     { color: #475569 !important; }
+html[data-theme="dark"] #formPengaturan p.text-xs.text-gray-500     { color: #475569 !important; }
+
+/* Info text di action bar */
+html[data-theme="dark"] .mt-8 p.text-xs.text-gray-400 { color: #475569 !important; }
+</style>
+@endpush
+
 @section('content')
 <div class="min-h-screen py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

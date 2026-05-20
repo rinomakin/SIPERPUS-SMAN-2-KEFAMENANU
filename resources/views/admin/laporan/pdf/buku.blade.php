@@ -6,9 +6,9 @@
 @section('stats')
 @php
     $totalBuku = $buku->count();
-    $totalStok = $buku->sum('stok');
-    $tersedia = $buku->where('stok', '>', 0)->count();
-    $habis = $buku->where('stok', 0)->count();
+    $totalStok = $buku->sum('jumlah_stok');
+    $tersedia = $buku->where('stok_tersedia', '>', 0)->count();
+    $habis = $buku->where('stok_tersedia', 0)->count();
 @endphp
 <div class="stats">
     <table>
@@ -41,12 +41,17 @@
             <th>Pengarang</th>
             <th>Kategori</th>
             <th>Jenis</th>
-            <th style="width:40px;">Stok</th>
+            <th style="width:40px;" class="text-center">Total Eks.</th>
+            <th style="width:40px;" class="text-center">Tersedia</th>
             <th>Status</th>
         </tr>
     </thead>
     <tbody>
         @foreach($buku as $index => $item)
+        @php
+            $stokTotal    = $item->jumlah_stok ?? 0;
+            $stokTersedia = $item->stok_tersedia ?? 0;
+        @endphp
         <tr>
             <td class="text-center">{{ $index + 1 }}</td>
             <td>
@@ -57,10 +62,13 @@
             <td>{{ $item->pengarang }}</td>
             <td>{{ $item->kategoriBuku->nama_kategori ?? '-' }}</td>
             <td>{{ $item->jenisBuku->nama_jenis ?? '-' }}</td>
-            <td class="text-center font-bold">{{ $item->stok }}</td>
+            <td class="text-center font-bold">{{ $stokTotal }}</td>
+            <td class="text-center font-bold">{{ $stokTersedia }}</td>
             <td>
-                @if($item->stok > 0)
+                @if($stokTersedia > 0)
                     <span class="badge badge-green">Tersedia</span>
+                @elseif($stokTotal > 0)
+                    <span class="badge badge-yellow">Dipinjam</span>
                 @else
                     <span class="badge badge-red">Habis</span>
                 @endif

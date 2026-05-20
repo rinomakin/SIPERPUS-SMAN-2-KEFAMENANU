@@ -106,9 +106,9 @@ class LaporanController extends Controller
 
         if ($request->filled('status')) {
             if ($request->status == 'tersedia') {
-                $query->where('stok', '>', 0);
+                $query->where('stok_tersedia', '>', 0);
             } elseif ($request->status == 'dipinjam') {
-                $query->where('stok', 0);
+                $query->where('stok_tersedia', 0);
             }
         }
 

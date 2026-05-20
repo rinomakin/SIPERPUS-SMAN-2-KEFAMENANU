@@ -14,33 +14,14 @@ class JenisBukuController extends Controller
         $this->middleware(['auth', 'role:ADMIN']);
     }
 
-    public function index(Request $request)
+    public function index()
     {
-        $query = JenisBuku::query();
+        $jenis          = JenisBuku::withCount('buku')->orderBy('nama_jenis')->get();
+        $totalJenis     = $jenis->count();
+        $jenisAktif     = $jenis->where('status', 1)->count();
+        $jenisNonaktif  = $jenis->where('status', 0)->count();
 
-        // Pencarian
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('nama_jenis', 'like', "%{$search}%")
-                  ->orWhere('kode_jenis', 'like', "%{$search}%")
-                  ->orWhere('deskripsi', 'like', "%{$search}%");
-            });
-        }
-
-        // Filter status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Sorting
-        $sortBy = $request->get('sort_by', 'created_at');
-        $sortOrder = $request->get('sort_order', 'desc');
-        $query->orderBy($sortBy, $sortOrder);
-
-        $jenis = $query->paginate(10)->withQueryString();
-
-        return view('admin.jenis-buku.index', compact('jenis'));
+        return view('admin.jenis-buku.index', compact('jenis', 'totalJenis', 'jenisAktif', 'jenisNonaktif'));
     }
 
     public function create()

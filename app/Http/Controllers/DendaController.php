@@ -16,7 +16,15 @@ class DendaController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'role:ADMIN,PETUGAS']);
+        $this->middleware('auth');
+        // Read-only: Kepala Sekolah boleh lihat (jika punya permission denda.view)
+        $this->middleware('role:ADMIN,PETUGAS,KEPALA_SEKOLAH')->only([
+            'index', 'show', 'riwayat', 'scanBarcodeDenda', 'searchDenda',
+        ]);
+        // Write operations: hanya Admin dan Petugas
+        $this->middleware('role:ADMIN,PETUGAS')->except([
+            'index', 'show', 'riwayat', 'scanBarcodeDenda', 'searchDenda',
+        ]);
     }
 
     public function index(Request $request)
@@ -197,7 +205,7 @@ class DendaController extends Controller
                 'nomor_anggota' => $anggota->nomor_anggota,
                 'barcode_anggota' => $anggota->barcode_anggota,
                 'kelas' => $anggota->kelas ? $anggota->kelas->nama_kelas : '-',
-                'foto' => $anggota->foto ? asset('storage/' . $anggota->foto) : null,
+                'foto' => $anggota->foto ? asset('storage/anggota/' . $anggota->foto) : null,
             ],
             'denda' => $dendaBelumBayar,
             'total_denda' => $dendaBelumBayar->sum('jumlah_denda'),
@@ -423,6 +431,36 @@ class DendaController extends Controller
                 'per_page' => $denda->perPage(),
                 'total' => $denda->total()
             ]
+        ]);
+    }
+
+    /**
+     * Bayar lunas semua denda belum bayar milik satu anggota (via AJAX dari scan barcode)
+     */
+    public function bayarLunasAnggota(Request $request)
+    {
+        $request->validate(['anggota_id' => 'required|exists:anggota,id']);
+
+        $dendas = Denda::where('anggota_id', $request->anggota_id)
+            ->where('status_pembayaran', 'belum_dibayar')
+            ->get();
+
+        if ($dendas->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'Tidak ada denda yang perlu dibayar.']);
+        }
+
+        foreach ($dendas as $denda) {
+            $denda->update([
+                'status_pembayaran' => 'sudah_dibayar',
+                'tanggal_pembayaran' => now(),
+            ]);
+            $this->syncPengembalianStatus($denda, 'sudah_dibayar', now());
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $dendas->count() . ' denda berhasil dilunasi.',
+            'count'   => $dendas->count(),
         ]);
     }
 

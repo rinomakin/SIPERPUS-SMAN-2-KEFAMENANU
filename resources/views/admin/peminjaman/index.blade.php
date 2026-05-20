@@ -153,12 +153,169 @@
     .filter-chip.active {
         box-shadow: 0 2px 8px rgba(59,130,246,.25);
     }
+
+    /* ─────────────── Dark Mode ─────────────── */
+
+    /* Page header */
+    [data-theme="dark"] #pinjam-page h2 { color: #f1f5f9; }
+    [data-theme="dark"] #pinjam-page p.text-gray-500 { color: #94a3b8; }
+
+    /* Riwayat button */
+    [data-theme="dark"] #pinjam-page a.bg-white {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+        color: #94a3b8 !important;
+    }
+    [data-theme="dark"] #pinjam-page a.bg-white:hover {
+        background: #334155 !important;
+    }
+
+    /* Stat cards */
+    [data-theme="dark"] .stat-mini {
+        background: #1e293b !important;
+        border-color: rgba(255,255,255,0.06) !important;
+    }
+    [data-theme="dark"] .stat-mini:hover {
+        box-shadow: 0 8px 20px -6px rgba(0,0,0,.4) !important;
+    }
+    [data-theme="dark"] .stat-mini .text-gray-500 { color: #64748b !important; }
+    [data-theme="dark"] .stat-mini .text-gray-900 { color: #f1f5f9 !important; }
+    [data-theme="dark"] .stat-mini .bg-blue-50   { background-color: rgba(59,130,246,0.15) !important; }
+    [data-theme="dark"] .stat-mini .bg-amber-50  { background-color: rgba(245,158,11,0.15) !important; }
+    [data-theme="dark"] .stat-mini .bg-rose-50   { background-color: rgba(239,68,68,0.15) !important; }
+    [data-theme="dark"] .stat-mini .bg-violet-50 { background-color: rgba(139,92,246,0.15) !important; }
+
+    /* Table card */
+    [data-theme="dark"] #pinjam-table-card {
+        background: #1e293b !important;
+        border-color: rgba(255,255,255,0.06) !important;
+    }
+    [data-theme="dark"] #pinjam-table-card .border-b { border-bottom-color: #334155 !important; }
+
+    /* Search input */
+    [data-theme="dark"] #searchInput {
+        background: #0f172a !important;
+        border-color: #334155 !important;
+        color: #f1f5f9 !important;
+    }
+    [data-theme="dark"] #searchInput::placeholder { color: #475569; }
+    [data-theme="dark"] #searchInput:focus {
+        background: #0f172a !important;
+        border-color: #3b82f6 !important;
+    }
+
+    /* Filter chips – default state */
+    [data-theme="dark"] .filter-chip {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+        color: #94a3b8 !important;
+    }
+    /* Active states */
+    [data-theme="dark"] .filter-chip.active.bg-blue-50,
+    [data-theme="dark"] .filter-chip.active.text-blue-700 {
+        background: rgba(59,130,246,0.15) !important;
+        border-color: rgba(59,130,246,0.4) !important;
+        color: #93c5fd !important;
+    }
+    [data-theme="dark"] .filter-chip.active.bg-amber-50,
+    [data-theme="dark"] .filter-chip.active.text-amber-700 {
+        background: rgba(245,158,11,0.15) !important;
+        border-color: rgba(245,158,11,0.4) !important;
+        color: #fcd34d !important;
+    }
+    [data-theme="dark"] .filter-chip.active.bg-rose-50,
+    [data-theme="dark"] .filter-chip.active.text-rose-700 {
+        background: rgba(239,68,68,0.15) !important;
+        border-color: rgba(239,68,68,0.4) !important;
+        color: #fca5a5 !important;
+    }
+
+    /* Filter Lanjutan button */
+    [data-theme="dark"] button[onclick="openFilterModal()"] {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+        color: #94a3b8 !important;
+    }
+    [data-theme="dark"] button[onclick="openFilterModal()"]:hover {
+        background: #334155 !important;
+    }
+
+    /* Separator line */
+    [data-theme="dark"] .w-px.h-6.bg-gray-200 { background-color: #334155 !important; }
+
+    /* DataTables info / length */
+    [data-theme="dark"] #peminjaman-table_wrapper .dataTables_length,
+    [data-theme="dark"] #peminjaman-table_wrapper .dataTables_info { color: #64748b; }
+    [data-theme="dark"] #peminjaman-table_wrapper .dataTables_length select {
+        background-color: #0f172a !important;
+        border-color: #334155 !important;
+        color: #f1f5f9 !important;
+    }
+
+    /* Table header */
+    [data-theme="dark"] #peminjaman-table thead th {
+        background: #0f172a !important;
+        color: #64748b !important;
+        border-bottom-color: #334155 !important;
+    }
+    /* Table body rows */
+    [data-theme="dark"] #peminjaman-table tbody tr.odd  { background-color: #1e293b !important; }
+    [data-theme="dark"] #peminjaman-table tbody tr.even { background-color: #1a2744 !important; }
+    [data-theme="dark"] #peminjaman-table tbody td {
+        border-bottom-color: #334155 !important;
+        color: #e2e8f0;
+    }
+    [data-theme="dark"] #peminjaman-table tbody tr:hover {
+        background-color: #243047 !important;
+    }
+
+    /* Pagination buttons */
+    [data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+        color: #94a3b8 !important;
+    }
+    [data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+        color: #fff !important;
+        border-color: transparent !important;
+    }
+    [data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
+        background: #334155 !important;
+        border-color: #475569 !important;
+        color: #f1f5f9 !important;
+    }
+
+    /* Filter Modal */
+    [data-theme="dark"] #pinjam-modal-panel {
+        background: #1e293b !important;
+    }
+    [data-theme="dark"] #pinjam-modal-panel .border-b,
+    [data-theme="dark"] #pinjam-modal-panel .border-t { border-color: #334155 !important; }
+    [data-theme="dark"] #pinjam-modal-panel .text-gray-900 { color: #f1f5f9 !important; }
+    [data-theme="dark"] #pinjam-modal-panel .text-gray-500 { color: #94a3b8 !important; }
+    [data-theme="dark"] #pinjam-modal-panel .text-gray-700 { color: #e2e8f0 !important; }
+    [data-theme="dark"] #pinjam-modal-panel .text-gray-400 { color: #64748b !important; }
+    [data-theme="dark"] #pinjam-modal-panel select,
+    [data-theme="dark"] #pinjam-modal-panel input[type="date"] {
+        background: #0f172a !important;
+        border-color: #334155 !important;
+        color: #f1f5f9 !important;
+    }
+    [data-theme="dark"] #pinjam-modal-panel .bg-gray-100 {
+        background-color: #334155 !important;
+        color: #e2e8f0 !important;
+    }
+    [data-theme="dark"] #pinjam-modal-panel button.hover\:bg-gray-100:hover,
+    [data-theme="dark"] #pinjam-modal-panel button.hover\:bg-gray-200:hover {
+        background-color: #475569 !important;
+    }
 </style>
 @endpush
 
 @section('content')
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<div class="space-y-5">
+<div id="pinjam-page" class="space-y-5">
 
     <!-- Page Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 anim-up">
@@ -232,7 +389,7 @@
     </div>
 
     <!-- Table Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden anim-up" style="animation-delay:.25s">
+    <div id="pinjam-table-card" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden anim-up" style="animation-delay:.25s">
         <!-- Toolbar -->
         <div class="px-5 py-4 border-b border-gray-100">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
@@ -303,7 +460,7 @@
         <!-- Overlay -->
         <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onclick="closeFilterModal()"></div>
         <!-- Panel -->
-        <div class="modal-panel relative bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+        <div id="pinjam-modal-panel" class="modal-panel relative bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
             <!-- Header -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                 <div>

@@ -12,28 +12,13 @@ class RakBukuController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $query = RakBuku::query();
-
-        // Filter berdasarkan pencarian
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('nama_rak', 'like', "%{$search}%")
-                  ->orWhere('kode_rak', 'like', "%{$search}%")
-                  ->orWhere('lokasi', 'like', "%{$search}%");
-            });
-        }
-
-        // Filter berdasarkan status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        $rakBuku = $query->orderBy('created_at', 'desc')->paginate(10);
-        
-        return view('admin.rak-buku.index', compact('rakBuku'));
+        $rakBuku       = RakBuku::orderBy('nama_rak')->get();
+        $totalRak      = $rakBuku->count();
+        $rakAktif      = $rakBuku->where('status', 'Aktif')->count();
+        $rakNonaktif   = $rakBuku->where('status', 'Nonaktif')->count();
+        return view('admin.rak-buku.index', compact('rakBuku', 'totalRak', 'rakAktif', 'rakNonaktif'));
     }
 
     /**

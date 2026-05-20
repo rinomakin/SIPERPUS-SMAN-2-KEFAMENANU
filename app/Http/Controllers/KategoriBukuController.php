@@ -14,8 +14,11 @@ class KategoriBukuController extends Controller
     }
     public function index()
     {
-        $kategoris = KategoriBuku::withCount('buku')->orderBy('nama_kategori')->paginate(10);
-        return view('admin.kategori-buku.index', compact('kategoris'));
+        $kategoris       = KategoriBuku::withCount('buku')->orderBy('nama_kategori')->get();
+        $totalKategori   = $kategoris->count();
+        $totalBuku       = $kategoris->sum('buku_count');
+        $kategoriAda     = $kategoris->where('buku_count', '>', 0)->count();
+        return view('admin.kategori-buku.index', compact('kategoris', 'totalKategori', 'totalBuku', 'kategoriAda'));
     }
 
     public function create()
@@ -115,29 +118,22 @@ class KategoriBukuController extends Controller
     public function destroy(KategoriBuku $kategoriBuku)
     {
         try {
-            // Check if kategori is being used by any books
             $bukuCount = $kategoriBuku->buku()->count();
             if ($bukuCount > 0) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "Kategori tidak dapat dihapus karena masih digunakan oleh {$bukuCount} buku"
-                ]);
+                return redirect()->route('kategori-buku.index')
+                    ->with('error', "Kategori tidak dapat dihapus karena masih digunakan oleh {$bukuCount} buku.");
             }
 
             DB::beginTransaction();
             $kategoriBuku->delete();
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Kategori buku berhasil dihapus'
-            ]);
+            return redirect()->route('kategori-buku.index')
+                ->with('success', 'Kategori buku berhasil dihapus.');
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ]);
+            return redirect()->route('kategori-buku.index')
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 

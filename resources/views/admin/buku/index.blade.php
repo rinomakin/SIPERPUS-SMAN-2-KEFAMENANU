@@ -236,12 +236,12 @@
                     </a>
                     @endif
 
-                    @if(Auth::user()->hasPermission('buku.export') || Auth::user()->isAdmin())
+                    <!-- @if(Auth::user()->hasPermission('buku.export') || Auth::user()->isAdmin())
                     <a href="{{ route('buku.export', request()->query()) }}" class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">
                         <i class="fas fa-file-excel text-emerald-500"></i>
                         <span class="btn-text">Export</span>
                     </a>
-                    @endif
+                    @endif -->
 
                     @if(Auth::user()->hasPermission('buku.import') || Auth::user()->isAdmin())
                     <a href="{{ route('buku.download-template') }}" class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">

@@ -165,11 +165,94 @@
 
     /* ── Clock ───────────────────────────────────── */
     #live-clock { font-variant-numeric:tabular-nums; }
+
+    /* ─────────────── Dark Mode ─────────────── */
+
+    /* Stat cards */
+    [data-theme="dark"] .stat-card {
+        background: #1e293b !important;
+        border-color: rgba(255,255,255,0.06) !important;
+    }
+    [data-theme="dark"] #petugas-dash .text-gray-900 { color: #f1f5f9 !important; }
+    [data-theme="dark"] #petugas-dash .text-gray-800 { color: #f1f5f9 !important; }
+    [data-theme="dark"] #petugas-dash .text-gray-700 { color: #e2e8f0 !important; }
+    [data-theme="dark"] #petugas-dash .text-gray-600 { color: #94a3b8 !important; }
+    [data-theme="dark"] #petugas-dash .text-gray-500 { color: #64748b !important; }
+    [data-theme="dark"] #petugas-dash .text-gray-400 { color: #475569 !important; }
+    /* Stat card mini-badges */
+    [data-theme="dark"] .stat-card .bg-emerald-50 { background-color: rgba(16,185,129,0.13) !important; }
+    [data-theme="dark"] .stat-card .bg-rose-50    { background-color: rgba(244,63,94,0.13)  !important; }
+    [data-theme="dark"] .stat-card .bg-blue-50    { background-color: rgba(59,130,246,0.13)  !important; }
+    [data-theme="dark"] .stat-card .bg-amber-50   { background-color: rgba(245,158,11,0.13)  !important; }
+    [data-theme="dark"] .stat-card .bg-indigo-50  { background-color: rgba(99,102,241,0.13)  !important; }
+    [data-theme="dark"] .stat-card .bg-gray-50    { background-color: rgba(255,255,255,0.05) !important; }
+
+    /* Section cards */
+    [data-theme="dark"] .section-card {
+        background: #1e293b !important;
+        border-color: rgba(255,255,255,0.06) !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,.3) !important;
+    }
+    [data-theme="dark"] .section-header { border-bottom-color: #334155 !important; }
+    [data-theme="dark"] .section-header .bg-amber-100 {
+        background-color: rgba(245,158,11,0.15) !important;
+        color: #fcd34d !important;
+    }
+    [data-theme="dark"] .section-card .border-t { border-top-color: #334155 !important; }
+    [data-theme="dark"] .section-card .bg-emerald-50 { background-color: rgba(16,185,129,0.10) !important; }
+    [data-theme="dark"] .section-card .bg-violet-50  { background-color: rgba(139,92,246,0.12) !important; }
+    [data-theme="dark"] .section-card .text-violet-600 { color: #c4b5fd !important; }
+
+    /* Quick action buttons */
+    [data-theme="dark"] .qa-btn.green {
+        background: rgba(16,185,129,0.08) !important;
+        border-color: rgba(16,185,129,0.22) !important;
+        color: #6ee7b7 !important;
+    }
+    [data-theme="dark"] .qa-btn.green:hover  { background: rgba(16,185,129,0.15) !important; }
+    [data-theme="dark"] .qa-btn.green .qa-icon  { background: rgba(16,185,129,0.18) !important; color: #34d399 !important; }
+    [data-theme="dark"] .qa-btn.blue {
+        background: rgba(59,130,246,0.08) !important;
+        border-color: rgba(59,130,246,0.22) !important;
+        color: #93c5fd !important;
+    }
+    [data-theme="dark"] .qa-btn.blue:hover   { background: rgba(59,130,246,0.15) !important; }
+    [data-theme="dark"] .qa-btn.blue .qa-icon   { background: rgba(59,130,246,0.18) !important; color: #60a5fa !important; }
+    [data-theme="dark"] .qa-btn.amber {
+        background: rgba(245,158,11,0.08) !important;
+        border-color: rgba(245,158,11,0.22) !important;
+        color: #fcd34d !important;
+    }
+    [data-theme="dark"] .qa-btn.amber:hover  { background: rgba(245,158,11,0.15) !important; }
+    [data-theme="dark"] .qa-btn.amber .qa-icon  { background: rgba(245,158,11,0.18) !important; color: #fbbf24 !important; }
+    [data-theme="dark"] .qa-btn.violet {
+        background: rgba(139,92,246,0.08) !important;
+        border-color: rgba(139,92,246,0.22) !important;
+        color: #c4b5fd !important;
+    }
+    [data-theme="dark"] .qa-btn.violet:hover { background: rgba(139,92,246,0.15) !important; }
+    [data-theme="dark"] .qa-btn.violet .qa-icon { background: rgba(139,92,246,0.18) !important; color: #a78bfa !important; }
+
+    /* Activity list */
+    [data-theme="dark"] .activity-item { border-bottom-color: #334155 !important; }
+    [data-theme="dark"] .activity-item:hover { background: #243047 !important; }
+    [data-theme="dark"] .divide-y.divide-gray-50 > * + * { border-top-color: #334155 !important; }
+
+    /* Visitor rows */
+    [data-theme="dark"] .visitor-row { border-bottom-color: #334155 !important; }
+    [data-theme="dark"] .visitor-row:hover { background: rgba(16,185,129,0.06) !important; }
+
+    /* Badges */
+    [data-theme="dark"] .badge-green { background: rgba(16,185,129,0.12) !important; color: #6ee7b7 !important; border-color: rgba(16,185,129,0.28) !important; }
+    [data-theme="dark"] .badge-amber { background: rgba(245,158,11,0.12)  !important; color: #fcd34d   !important; border-color: rgba(245,158,11,0.28)  !important; }
+    [data-theme="dark"] .badge-blue  { background: rgba(59,130,246,0.12)  !important; color: #93c5fd   !important; border-color: rgba(59,130,246,0.28)  !important; }
+    [data-theme="dark"] .badge-rose  { background: rgba(244,63,94,0.12)   !important; color: #fda4af   !important; border-color: rgba(244,63,94,0.28)   !important; }
+    [data-theme="dark"] .badge-gray  { background: rgba(255,255,255,0.05) !important; color: #94a3b8   !important; border-color: rgba(255,255,255,0.10) !important; }
 </style>
 @endpush
 
 @section('content')
-<div class="py-6">
+<div id="petugas-dash" class="py-6">
 <div class="px-4 sm:px-6 lg:px-8 space-y-6">
 
 {{-- ══════════════════════════════════════════════════════
@@ -652,6 +735,15 @@ const currentHour = {{ (int) now()->format('H') }};
 const tamuAnggota = {{ $tamuAnggota }};
 const tamuUmum    = {{ $tamuUmum }};
 
+// Theme helpers
+const isDark       = document.documentElement.getAttribute('data-theme') === 'dark';
+const gridColor    = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
+const tickColor    = isDark ? '#475569' : '#9ca3af';
+const legendColor  = isDark ? '#94a3b8' : '#6b7280';
+const donutBorder  = isDark ? '#1e293b' : '#fff';
+const centerNumClr = isDark ? '#f1f5f9' : '#111827';
+const centerSubClr = isDark ? '#64748b' : '#9ca3af';
+
 // Default chart.js globals
 Chart.defaults.font.family = "'Inter', sans-serif";
 
@@ -666,8 +758,8 @@ Chart.defaults.font.family = "'Inter', sans-serif";
             labels: ['Anggota', 'Tamu Umum'],
             datasets: [{
                 data: total > 0 ? [tamuAnggota, tamuUmum] : [1, 1],
-                backgroundColor: total > 0 ? ['#10b981', '#8b5cf6'] : ['#e2e8f0', '#e2e8f0'],
-                borderColor: ['#fff', '#fff'],
+                backgroundColor: total > 0 ? ['#10b981', '#8b5cf6'] : [isDark ? '#334155' : '#e2e8f0', isDark ? '#334155' : '#e2e8f0'],
+                borderColor: [donutBorder, donutBorder],
                 borderWidth: 4,
                 hoverOffset: 8,
             }]
@@ -702,10 +794,10 @@ Chart.defaults.font.family = "'Inter', sans-serif";
                 ctx.textBaseline = 'middle';
                 const cx = width / 2, cy = height / 2;
                 ctx.font = 'bold 24px Inter, sans-serif';
-                ctx.fillStyle = '#111827';
+                ctx.fillStyle = centerNumClr;
                 ctx.fillText(total, cx, cy - 9);
                 ctx.font = '11px Inter, sans-serif';
-                ctx.fillStyle = '#9ca3af';
+                ctx.fillStyle = centerSubClr;
                 ctx.fillText('Total', cx, cy + 13);
                 ctx.restore();
             }
@@ -783,7 +875,7 @@ Chart.defaults.font.family = "'Inter', sans-serif";
                     position: 'bottom',
                     labels: {
                         boxWidth: 12, boxHeight: 3, padding: 16,
-                        font: { size: 11 }, color: '#6b7280',
+                        font: { size: 11 }, color: legendColor,
                         usePointStyle: true, pointStyle: 'circle',
                     }
                 },
@@ -798,12 +890,12 @@ Chart.defaults.font.family = "'Inter', sans-serif";
             scales: {
                 x: {
                     grid: { display: false },
-                    ticks: { font: { size: 11 }, color: '#9ca3af' }
+                    ticks: { font: { size: 11 }, color: tickColor }
                 },
                 y: {
                     beginAtZero: true,
-                    grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
-                    ticks: { font: { size: 11 }, color: '#9ca3af', stepSize: 1, precision: 0 }
+                    grid: { color: gridColor, drawBorder: false },
+                    ticks: { font: { size: 11 }, color: tickColor, stepSize: 1, precision: 0 }
                 }
             }
         }
@@ -855,12 +947,12 @@ Chart.defaults.font.family = "'Inter', sans-serif";
             scales: {
                 x: {
                     grid: { display: false },
-                    ticks: { font: { size: 10 }, color: '#9ca3af' }
+                    ticks: { font: { size: 10 }, color: tickColor }
                 },
                 y: {
                     beginAtZero: true,
-                    grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
-                    ticks: { font: { size: 10 }, color: '#9ca3af', stepSize: 1, precision: 0 }
+                    grid: { color: gridColor, drawBorder: false },
+                    ticks: { font: { size: 10 }, color: tickColor, stepSize: 1, precision: 0 }
                 }
             }
         }

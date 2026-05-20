@@ -1,521 +1,508 @@
 @extends('layouts.admin')
 
+@section('title', 'Data Jenis Buku')
+
 @push('styles')
-<style>
-    .animate-fadeIn {
-        animation: fadeIn 0.3s ease-in-out;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; transform: scale(0.95); }
-        to { opacity: 1; transform: scale(1); }
-    }
-    
-    .modal-backdrop {
-        transition: opacity 0.3s ease;
-    }
-    
-    .checkbox-wrapper {
-        position: relative;
-        display: inline-block;
-    }
-    
-    .checkbox-wrapper input[type="checkbox"] {
-        opacity: 0;
-        position: absolute;
-        left: 0;
-        top: 0;
-    }
-    
-    .checkbox-wrapper .checkmark {
-        height: 18px;
-        width: 18px;
-        background-color: #fff;
-        border: 2px solid #d1d5db;
-        border-radius: 3px;
-        display: inline-block;
-        position: relative;
-        transition: all 0.2s ease;
-    }
-    
-    .checkbox-wrapper input[type="checkbox"]:checked + .checkmark {
-        background-color: #3b82f6;
-        border-color: #3b82f6;
-    }
-    
-    .checkbox-wrapper input[type="checkbox"]:checked + .checkmark:after {
-        content: '';
-        position: absolute;
-        left: 5px;
-        top: 2px;
-        width: 4px;
-        height: 8px;
-        border: solid white;
-        border-width: 0 2px 2px 0;
-        transform: rotate(45deg);
-    }
-    
-    /* Modal improvements */
-    #crudModal {
-        backdrop-filter: blur(4px);
-    }
-    
-    #crudModal .relative {
-        max-height: 90vh;
-        overflow-y: auto;
-    }
-    
-    /* Form improvements */
-    #crudForm input:focus,
-    #crudForm textarea:focus,
-    #crudForm select:focus {
-        outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-    
-    /* Loading animation */
-    .animate-spin {
-        animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-</style>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
 @endpush
 
 @section('content')
-<div class="container px-6 mx-auto grid">
-    <h2 class="my-6 text-2xl font-semibold text-gray-700">
-        Data Jenis Buku
-    </h2>
+<style>
+/* ===== Animations ===== */
+@keyframes fadeInUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+.anim-up { animation: fadeInUp 0.4s ease forwards; }
+.anim-d1 { animation-delay:.05s; opacity:0; }
+.anim-d2 { animation-delay:.10s; opacity:0; }
+.anim-d3 { animation-delay:.15s; opacity:0; }
+.anim-d4 { animation-delay:.20s; opacity:0; }
+.anim-d5 { animation-delay:.25s; opacity:0; }
 
-    <!-- Alert Sukses -->
-    @if(session('success'))
-    <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
-        {{ session('success') }}
+/* ===== Stat Cards ===== */
+.stat-card {
+    background:#fff; border-radius:16px; padding:20px; position:relative; overflow:hidden;
+    border:1px solid rgba(0,0,0,.04);
+    box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.03);
+    transition:all .3s ease;
+}
+.stat-card:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,.08); }
+.stat-icon { width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.stat-bg { position:absolute; top:-20px; right:-20px; width:90px; height:90px; border-radius:50%; opacity:.06; }
+.stat-value { font-size:26px; font-weight:800; line-height:1.2; }
+.stat-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; color:#9ca3af; }
+
+/* ===== Glass Card ===== */
+.glass-card {
+    background:rgba(255,255,255,.97); backdrop-filter:blur(20px);
+    border-radius:16px; border:1px solid rgba(255,255,255,.8);
+    box-shadow:0 4px 24px rgba(0,0,0,.06); overflow:hidden;
+}
+
+/* ===== DataTable Overrides ===== */
+#jenisTable_wrapper .dataTables_filter input {
+    border:1px solid #e5e7eb; border-radius:8px; padding:6px 12px;
+    font-size:13px; outline:none; transition:.2s;
+}
+#jenisTable_wrapper .dataTables_filter input:focus { border-color:#0ea5e9; box-shadow:0 0 0 3px rgba(14,165,233,.1); }
+#jenisTable_wrapper .dataTables_length select {
+    border:1px solid #e5e7eb; border-radius:8px; padding:5px 8px; font-size:13px;
+}
+#jenisTable_wrapper .dataTables_info { font-size:12px; color:#9ca3af; }
+#jenisTable_wrapper .dataTables_paginate .paginate_button {
+    border-radius:8px !important; font-size:13px !important; padding:4px 10px !important; transition:.15s !important;
+}
+#jenisTable_wrapper .dataTables_paginate .paginate_button.current,
+#jenisTable_wrapper .dataTables_paginate .paginate_button.current:hover {
+    background:#0ea5e9 !important; color:#fff !important; border-color:#0ea5e9 !important;
+}
+#jenisTable_wrapper .dataTables_paginate .paginate_button:hover {
+    background:#f3f4f6 !important; color:#374151 !important; border-color:#e5e7eb !important;
+}
+
+/* ===== Table ===== */
+.jenis-table tbody tr { transition:background .15s; }
+.jenis-table tbody tr:hover { background:#f8fafc; }
+.jenis-table thead th {
+    background:#f8fafc; font-size:10px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.8px; color:#94a3b8; padding:12px 16px; border-bottom:2px solid #f1f5f9; white-space:nowrap;
+}
+.jenis-table tbody td { padding:12px 16px; font-size:13px; color:#374151; border-bottom:1px solid #f8fafc; }
+
+/* ===== Badges ===== */
+.badge-aktif    { background:#dcfce7; color:#16a34a; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+.badge-nonaktif { background:#fee2e2; color:#dc2626; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+.kode-badge {
+    background:linear-gradient(135deg,#0ea5e9,#38bdf8);
+    color:#fff; padding:3px 10px; border-radius:8px; font-size:11px; font-weight:700;
+    letter-spacing:.5px; font-family:monospace;
+}
+.buku-badge {
+    display:inline-flex; align-items:center; gap:4px;
+    background:#f0f9ff; color:#0369a1; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600;
+}
+
+/* ===== Action Buttons ===== */
+.btn-edit {
+    display:inline-flex; align-items:center; gap:4px;
+    background:#ede9fe; color:#6d28d9; border:none; border-radius:8px;
+    padding:5px 10px; font-size:11px; font-weight:600; cursor:pointer; transition:.2s;
+}
+.btn-edit:hover { background:#6d28d9; color:#fff; }
+.btn-delete {
+    display:inline-flex; align-items:center; gap:4px;
+    background:#fee2e2; color:#dc2626; border:none; border-radius:8px;
+    padding:5px 10px; font-size:11px; font-weight:600; cursor:pointer; transition:.2s;
+}
+.btn-delete:hover { background:#dc2626; color:#fff; }
+
+/* ===== Modal ===== */
+.modal-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,.45); backdrop-filter:blur(4px);
+    display:flex; align-items:center; justify-content:center; z-index:9999;
+    opacity:0; pointer-events:none; transition:opacity .2s ease;
+}
+.modal-overlay.active { opacity:1; pointer-events:all; }
+.modal-box {
+    background:#fff; border-radius:20px; padding:28px; width:100%; max-width:480px;
+    box-shadow:0 20px 60px rgba(0,0,0,.2);
+    transform:scale(.95) translateY(10px); transition:.2s ease;
+    max-height:90vh; overflow-y:auto;
+}
+.modal-overlay.active .modal-box { transform:scale(1) translateY(0); }
+.modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+.modal-title { font-size:17px; font-weight:700; color:#1e293b; }
+.modal-close {
+    width:32px; height:32px; border-radius:50%; border:none; background:#f1f5f9;
+    color:#64748b; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    font-size:13px; transition:.2s;
+}
+.modal-close:hover { background:#e2e8f0; color:#1e293b; }
+.form-group { margin-bottom:16px; }
+.form-label { display:block; font-size:12px; font-weight:600; color:#374151; margin-bottom:6px; text-transform:uppercase; letter-spacing:.4px; }
+.form-control {
+    width:100%; padding:10px 14px; border:1.5px solid #e5e7eb; border-radius:10px;
+    font-size:13px; outline:none; transition:.2s; background:#fff;
+}
+.form-control:focus { border-color:#0ea5e9; box-shadow:0 0 0 3px rgba(14,165,233,.1); }
+.form-control[readonly] { background:#f8fafc; color:#94a3b8; cursor:not-allowed; }
+.form-textarea { resize:vertical; min-height:80px; }
+.kode-auto-input {
+    background:linear-gradient(135deg,#f0f9ff,#e0f2fe);
+    border-color:#7dd3fc; color:#0369a1; font-weight:700;
+    font-family:monospace; font-size:14px; letter-spacing:.5px;
+}
+.kode-hint { font-size:11px; color:#0ea5e9; margin-top:5px; display:flex; align-items:center; gap:4px; }
+.btn-primary {
+    background:linear-gradient(135deg,#0ea5e9,#38bdf8); color:#fff;
+    border:none; border-radius:10px; padding:10px 20px; font-size:13px;
+    font-weight:600; cursor:pointer; transition:.2s; width:100%;
+}
+.btn-primary:hover { opacity:.9; transform:translateY(-1px); box-shadow:0 4px 12px rgba(14,165,233,.4); }
+.btn-secondary {
+    background:#f1f5f9; color:#64748b; border:none; border-radius:10px;
+    padding:10px 20px; font-size:13px; font-weight:600; cursor:pointer; transition:.2s; width:100%;
+}
+.btn-secondary:hover { background:#e2e8f0; }
+</style>
+
+<!-- ── Page Header ─────────────────────────────────── -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 anim-up anim-d1">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800">Data Jenis Buku</h2>
+        <p class="text-sm text-gray-400 mt-1">Kelola kategori dan jenis koleksi buku perpustakaan</p>
     </div>
-    @endif
+    <button onclick="openTambahModal()"
+            class="flex items-center gap-2 bg-gradient-to-r from-sky-500 to-cyan-400 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
+        <i class="fas fa-plus"></i>
+        Tambah Jenis Buku
+    </button>
+</div>
 
-    <!-- Alert Error -->
-    @if(session('error'))
-    <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
-        {{ session('error') }}
-    </div>
-    @endif
-
-    <!-- Alert Validasi Error -->
-    @if($errors->any())
-    <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
-        <ul>
-            @foreach($errors->all() as $error)
-            <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-    @endif
-
-    <!-- Filter dan Pencarian -->
-
-
-    <!-- Tombol Aksi -->
-    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0">
-        <div class="flex space-x-2">
-            <button onclick="openModal('tambahModal')"
-                    class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-lg active:bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue">
-                <i class="fas fa-plus mr-1"></i> Tambah Data
-            </button>
-            
-           
-            
-            
-            <button onclick="bulkDelete()" id="bulkDeleteBtn" 
-                    class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-red-600 border border-transparent rounded-lg active:bg-red-600 hover:bg-red-700 focus:outline-none focus:shadow-outline-red hidden">
-                <i class="fas fa-trash mr-1"></i> Hapus Terpilih
-            </button>
+<!-- ── Stat Cards ─────────────────────────────────── -->
+<div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+    <div class="stat-card anim-up anim-d2">
+        <div class="stat-bg" style="background:#0ea5e9;"></div>
+        <div class="stat-icon mb-3" style="background:#e0f2fe; color:#0ea5e9;">
+            <i class="fas fa-tags"></i>
         </div>
-        
-        <div class="text-sm text-gray-600">
-            Total: {{ $jenis->total() }} data
-        </div>
+        <div class="stat-value" style="color:#0ea5e9;">{{ $totalJenis }}</div>
+        <div class="stat-label">Total Jenis</div>
     </div>
+    <div class="stat-card anim-up anim-d3">
+        <div class="stat-bg" style="background:#22c55e;"></div>
+        <div class="stat-icon mb-3" style="background:#dcfce7; color:#16a34a;">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-value" style="color:#16a34a;">{{ $jenisAktif }}</div>
+        <div class="stat-label">Jenis Aktif</div>
+    </div>
+    <div class="stat-card anim-up anim-d4 col-span-2 lg:col-span-1">
+        <div class="stat-bg" style="background:#ef4444;"></div>
+        <div class="stat-icon mb-3" style="background:#fee2e2; color:#dc2626;">
+            <i class="fas fa-times-circle"></i>
+        </div>
+        <div class="stat-value" style="color:#dc2626;">{{ $jenisNonaktif }}</div>
+        <div class="stat-label">Tidak Aktif</div>
+    </div>
+</div>
 
-    <!-- Tabel -->
-    <div class="w-full overflow-hidden rounded-lg shadow-xs">
-        <div class="w-full overflow-x-auto">
-            <table class="w-full whitespace-no-wrap">
-                <thead>
-                    <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b bg-gray-50">
-                        <th class="px-4 py-3">
-                            <label class="checkbox-wrapper">
-                                <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
-                                <span class="checkmark"></span>
-                            </label>
-                        </th>
-                        <th class="px-4 py-3">No</th>
-                        <th class="px-4 py-3">Nama Jenis</th>
-                        <th class="px-4 py-3">Kode Jenis</th>
-                        <th class="px-4 py-3">Deskripsi</th>
-                        <th class="px-4 py-3">Status</th>
-                        <th class="px-4 py-3">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y">
-                    @forelse($jenis as $index => $item)
-                    <tr class="text-gray-700">
-                        <td class="px-4 py-3">
-                            <label class="checkbox-wrapper">
-                                <input type="checkbox" class="item-checkbox" value="{{ $item->id }}" onchange="updateBulkDeleteButton()">
-                                <span class="checkmark"></span>
-                            </label>
-                        </td>
-                        <td class="px-4 py-3 text-sm">
-                            {{ $index + $jenis->firstItem() }}
-                        </td>
-                        <td class="px-4 py-3 text-sm">
-                            {{ $item->nama_jenis }}
-                        </td>
-                        <td class="px-4 py-3 text-sm">
-                            {{ $item->kode_jenis }}
-                        </td>
-                        <td class="px-4 py-3 text-sm">
-                            {{ $item->deskripsi ?: '-' }}
-                        </td>
-                        <td class="px-4 py-3 text-sm">
-                            <span class="px-2 py-1 font-semibold leading-tight rounded-full {{ $item->status ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100' }}">
-                                {{ $item->status ? 'Aktif' : 'Tidak Aktif' }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 text-sm">
-                            <a href="{{ route('jenis-buku.show', $item->id) }}" class="text-green-500 hover:text-green-700 mr-2" title="Lihat Detail">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <button data-id="{{ $item->id }}" 
-                                    data-nama="{{ $item->nama_jenis ?? '' }}" 
-                                    data-kode="{{ $item->kode_jenis ?? '' }}" 
-                                    data-deskripsi="{{ $item->deskripsi ?? '' }}" 
-                                    data-status="{{ $item->status ?? 1 }}"
-                                    onclick="openEditModalFromData(this)" 
-                                    class="text-blue-500 hover:text-blue-700 mr-2" 
-                                    title="Edit Data">
-                                <i class="fas fa-edit"></i>
+<!-- ── Data Table Card ─────────────────────────────── -->
+<div class="glass-card p-6 anim-up anim-d5">
+    <div class="overflow-x-auto">
+        <table id="jenisTable" class="jenis-table w-full" style="width:100%">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Kode Jenis</th>
+                    <th>Nama Jenis</th>
+                    <th>Deskripsi</th>
+                    <th>Jml Buku</th>
+                    <th>Status</th>
+                    <th class="no-sort">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($jenis as $index => $item)
+                <tr>
+                    <td>{{ $index + 1 }}</td>
+                    <td><span class="kode-badge">{{ $item->kode_jenis }}</span></td>
+                    <td class="font-semibold text-gray-800">{{ $item->nama_jenis }}</td>
+                    <td class="text-gray-500 max-w-xs" style="max-width:220px; white-space:normal;">
+                        {{ $item->deskripsi ?: '-' }}
+                    </td>
+                    <td>
+                        <span class="buku-badge">
+                            <i class="fas fa-book text-xs"></i>
+                            {{ $item->buku_count }}
+                        </span>
+                    </td>
+                    <td>
+                        @if($item->status)
+                            <span class="badge-aktif">Aktif</span>
+                        @else
+                            <span class="badge-nonaktif">Tidak Aktif</span>
+                        @endif
+                    </td>
+                    <td>
+                        <div class="flex items-center gap-2">
+                            <button onclick="openEditModal({{ $item->id }}, '{{ addslashes($item->nama_jenis) }}', '{{ $item->kode_jenis }}', '{{ addslashes($item->deskripsi ?? '') }}', {{ $item->status ? 1 : 0 }})"
+                                    class="btn-edit">
+                                <i class="fas fa-edit"></i> Edit
                             </button>
-                            <form action="{{ route('jenis-buku.destroy', $item->id) }}" method="POST" class="inline-block">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-500 hover:text-red-700" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')" title="Hapus Data">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr class="text-gray-700">
-                        <td colspan="7" class="px-4 py-3 text-sm text-center">
-                            Tidak ada data jenis buku.
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        <div class="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 border-t bg-gray-50">
-            <div class="flex items-center justify-between">
-                <div>
-                    Menampilkan {{ $jenis->firstItem() ?? 0 }} sampai {{ $jenis->lastItem() ?? 0 }} dari {{ $jenis->total() }} data
-                </div>
-                <div>
-                    {{ $jenis->links() }}
-                </div>
-            </div>
-        </div>
+                            <button onclick="deleteJenis({{ $item->id }}, '{{ addslashes($item->nama_jenis) }}', {{ $item->buku_count }})"
+                                    class="btn-delete">
+                                <i class="fas fa-trash"></i> Hapus
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                @endforelse
+            </tbody>
+        </table>
     </div>
+</div>
 
-<!-- Modal Tambah Jenis Buku -->
-<div id="tambahModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-medium text-gray-900">Tambah Jenis Buku</h3>
-                <button onclick="closeModal('tambahModal')" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times"></i>
+<!-- ══════════════════════════════════════════════════════
+     MODAL TAMBAH JENIS BUKU
+══════════════════════════════════════════════════════ -->
+<div id="tambahModal" class="modal-overlay" onclick="handleOverlayClick(event,'tambahModal')">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title"><i class="fas fa-plus-circle text-sky-500 mr-2"></i>Tambah Jenis Buku</h3>
+                <p class="text-xs text-gray-400 mt-0.5">Kode jenis digenerate otomatis dari nama</p>
+            </div>
+            <button class="modal-close" onclick="closeTambahModal()"><i class="fas fa-times"></i></button>
+        </div>
+
+        <form id="tambahForm" method="POST" action="{{ route('jenis-buku.store') }}">
+            @csrf
+
+            <div class="form-group">
+                <label class="form-label">Nama Jenis <span class="text-red-500">*</span></label>
+                <input type="text" name="nama_jenis" id="nama_jenis" required
+                       class="form-control" placeholder="Contoh: Fiksi, Non Fiksi, Ilmu Pengetahuan"
+                       oninput="autoGenerateKode(this.value)">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Kode Jenis <span class="text-red-500">*</span></label>
+                <input type="text" name="kode_jenis" id="kode_jenis" required maxlength="10"
+                       class="form-control kode-auto-input"
+                       placeholder="Otomatis dari nama…">
+                <p class="kode-hint"><i class="fas fa-magic"></i> Digenerate otomatis — bisa diubah manual (maks. 10 karakter)</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Deskripsi</label>
+                <textarea name="deskripsi" id="deskripsi" rows="3" maxlength="500"
+                          class="form-control form-textarea"
+                          placeholder="Deskripsi singkat jenis buku (opsional)"></textarea>
+                <p style="font-size:11px; color:#94a3b8; margin-top:4px;">Maksimal 500 karakter</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Status <span class="text-red-500">*</span></label>
+                <select name="status" id="status" required class="form-control">
+                    <option value="1">Aktif</option>
+                    <option value="0">Tidak Aktif</option>
+                </select>
+            </div>
+
+            <div class="flex gap-3 mt-4">
+                <button type="button" onclick="closeTambahModal()" class="btn-secondary">Batal</button>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save mr-2"></i>Simpan Jenis Buku
                 </button>
             </div>
-            
-            <form id="tambahForm" method="POST" action="{{ route('jenis-buku.store') }}">
-                @csrf
-                <div class="mb-4">
-                    <label for="nama_jenis" class="block text-sm font-medium text-gray-700 mb-2">Nama Jenis <span class="text-red-500">*</span></label>
-                    <input type="text" name="nama_jenis" id="nama_jenis" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           placeholder="Masukkan nama jenis buku">
-                </div>
-                
-                <div class="mb-4">
-                    <label for="kode_jenis" class="block text-sm font-medium text-gray-700 mb-2">Kode Jenis <span class="text-red-500">*</span></label>
-                    <input type="text" name="kode_jenis" id="kode_jenis" required maxlength="10"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           placeholder="Masukkan kode jenis (maks. 10 karakter)">
-                </div>
-                
-                <div class="mb-4">
-                    <label for="deskripsi" class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
-                    <textarea name="deskripsi" id="deskripsi" rows="3" maxlength="500"
-                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              placeholder="Masukkan deskripsi jenis buku (opsional, maks. 500 karakter)"></textarea>
-                    <p class="mt-1 text-xs text-gray-500">Maksimal 500 karakter</p>
-                </div>
-                
-                <div class="mb-4">
-                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status <span class="text-red-500">*</span></label>
-                    <select name="status" id="status" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="1">Aktif</option>
-                        <option value="0">Tidak Aktif</option>
-                    </select>
-                </div>
-                
-                <div class="flex justify-end space-x-3">
-                    <button type="button" onclick="closeModal('tambahModal')"
-                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                        Simpan
-                    </button>
-                </div>
-            </form>
-        </div>
+        </form>
     </div>
 </div>
 
-<!-- Modal Edit Jenis Buku -->
-<div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-medium text-gray-900">Edit Jenis Buku</h3>
-                <button onclick="closeModal('editModal')" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times"></i>
+<!-- ══════════════════════════════════════════════════════
+     MODAL EDIT JENIS BUKU
+══════════════════════════════════════════════════════ -->
+<div id="editModal" class="modal-overlay" onclick="handleOverlayClick(event,'editModal')">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title"><i class="fas fa-edit text-purple-500 mr-2"></i>Edit Jenis Buku</h3>
+            </div>
+            <button class="modal-close" onclick="closeEditModal()"><i class="fas fa-times"></i></button>
+        </div>
+
+        <form id="editForm" method="POST">
+            @csrf
+            @method('PUT')
+
+            <div class="form-group">
+                <label class="form-label">Nama Jenis <span class="text-red-500">*</span></label>
+                <input type="text" name="nama_jenis" id="edit_nama_jenis" required
+                       class="form-control" placeholder="Nama jenis buku">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Kode Jenis <span class="text-red-500">*</span></label>
+                <input type="text" name="kode_jenis" id="edit_kode_jenis" required maxlength="10"
+                       class="form-control kode-auto-input" placeholder="Kode jenis">
+                <p class="kode-hint"><i class="fas fa-pen"></i> Dapat diubah (maks. 10 karakter)</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Deskripsi</label>
+                <textarea name="deskripsi" id="edit_deskripsi" rows="3" maxlength="500"
+                          class="form-control form-textarea"
+                          placeholder="Deskripsi singkat jenis buku (opsional)"></textarea>
+                <p style="font-size:11px; color:#94a3b8; margin-top:4px;">Maksimal 500 karakter</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Status <span class="text-red-500">*</span></label>
+                <select name="status" id="edit_status" required class="form-control">
+                    <option value="1">Aktif</option>
+                    <option value="0">Tidak Aktif</option>
+                </select>
+            </div>
+
+            <div class="flex gap-3 mt-4">
+                <button type="button" onclick="closeEditModal()" class="btn-secondary">Batal</button>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save mr-2"></i>Simpan Perubahan
                 </button>
             </div>
-            
-            <form id="editForm" method="POST">
-                @csrf
-                @method('PUT')
-                
-                <div class="mb-4">
-                    <label for="edit_nama_jenis" class="block text-sm font-medium text-gray-700 mb-2">Nama Jenis <span class="text-red-500">*</span></label>
-                    <input type="text" name="nama_jenis" id="edit_nama_jenis" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           placeholder="Masukkan nama jenis buku">
-                </div>
-                
-                <div class="mb-4">
-                    <label for="edit_kode_jenis" class="block text-sm font-medium text-gray-700 mb-2">Kode Jenis <span class="text-red-500">*</span></label>
-                    <input type="text" name="kode_jenis" id="edit_kode_jenis" required maxlength="10"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           placeholder="Masukkan kode jenis (maks. 10 karakter)">
-                </div>
-                
-                <div class="mb-4">
-                    <label for="edit_deskripsi" class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
-                    <textarea name="deskripsi" id="edit_deskripsi" rows="3" maxlength="500"
-                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              placeholder="Masukkan deskripsi jenis buku (opsional, maks. 500 karakter)"></textarea>
-                    <p class="mt-1 text-xs text-gray-500">Maksimal 500 karakter</p>
-                </div>
-                
-                <div class="mb-4">
-                    <label for="edit_status" class="block text-sm font-medium text-gray-700 mb-2">Status <span class="text-red-500">*</span></label>
-                    <select name="status" id="edit_status" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="1">Aktif</option>
-                        <option value="0">Tidak Aktif</option>
-                    </select>
-                </div>
-                
-                <div class="flex justify-end space-x-3">
-                    <button type="button" onclick="closeModal('editModal')"
-                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                        Update
-                    </button>
-                </div>
-            </form>
-        </div>
+        </form>
     </div>
 </div>
-</div>
 
+<!-- Form Delete Hidden -->
+<form id="deleteForm" method="POST" style="display:none;">
+    @csrf
+    @method('DELETE')
+</form>
+
+@push('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script>
-// Pastikan fungsi tersedia secara global
-window.openModal = function(modalId) {
-    document.getElementById(modalId).classList.remove('hidden');
-}
-
-window.closeModal = function(modalId) {
-    document.getElementById(modalId).classList.add('hidden');
-    // Reset form jika modal tambah
-    if (modalId === 'tambahModal') {
-        document.getElementById('tambahForm').reset();
-    }
-}
-
-window.openEditModal = function(id, nama_jenis, kode_jenis, deskripsi, status) {
-    try {
-        console.log('openEditModal called with:', {id, nama_jenis, kode_jenis, deskripsi, status});
-        
-        // Set form action
-        document.getElementById('editForm').action = `{{ route('jenis-buku.update', '') }}/${id}`;
-        
-        // Set form values (handle null/undefined values)
-        document.getElementById('edit_nama_jenis').value = nama_jenis || '';
-        document.getElementById('edit_kode_jenis').value = kode_jenis || '';
-        document.getElementById('edit_deskripsi').value = deskripsi || '';
-        document.getElementById('edit_status').value = status || '1';
-        
-        // Open modal
-        window.openModal('editModal');
-    } catch (error) {
-        console.error('Error in openEditModal:', error);
-        showErrorAlert('Terjadi kesalahan saat membuka modal edit');
-    }
-}
-
-window.openEditModalFromData = function(button) {
-    try {
-        const id = button.getAttribute('data-id');
-        const nama = button.getAttribute('data-nama');
-        const kode = button.getAttribute('data-kode');
-        const deskripsi = button.getAttribute('data-deskripsi');
-        const status = button.getAttribute('data-status');
-        
-        console.log('openEditModalFromData called with:', {id, nama, kode, deskripsi, status});
-        
-        // Set form action
-        document.getElementById('editForm').action = `{{ route('jenis-buku.update', '') }}/${id}`;
-        
-        // Set form values (handle null/undefined values)
-        document.getElementById('edit_nama_jenis').value = nama || '';
-        document.getElementById('edit_kode_jenis').value = kode || '';
-        document.getElementById('edit_deskripsi').value = deskripsi || '';
-        document.getElementById('edit_status').value = status || '1';
-        
-        // Open modal
-        window.openModal('editModal');
-    } catch (error) {
-        console.error('Error in openEditModalFromData:', error);
-        showErrorAlert('Terjadi kesalahan saat membuka modal edit');
-    }
-}
-
-    function toggleSelectAll() {
-        const selectAllCheckbox = document.getElementById('selectAll');
-        const itemCheckboxes = document.querySelectorAll('.item-checkbox');
-        
-        if (selectAllCheckbox && itemCheckboxes.length > 0) {
-            itemCheckboxes.forEach(checkbox => {
-                checkbox.checked = selectAllCheckbox.checked;
-            });
-            
-            updateBulkDeleteButton();
-        }
-    }
-
-    function updateBulkDeleteButton() {
-        const checkedBoxes = document.querySelectorAll('.item-checkbox:checked');
-        const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
-        
-        if (bulkDeleteBtn) {
-            if (checkedBoxes.length > 0) {
-                bulkDeleteBtn.classList.remove('hidden');
-            } else {
-                bulkDeleteBtn.classList.add('hidden');
-            }
-        }
-    }
-
-    function bulkDelete() {
-        const checkedBoxes = document.querySelectorAll('.item-checkbox:checked');
-        const ids = Array.from(checkedBoxes).map(cb => cb.value);
-        
-        if (ids.length === 0) {
-            showWarningAlert('Pilih data yang akan dihapus');
-            return;
-        }
-        
-        showConfirmDialog(
-            `Apakah Anda yakin ingin menghapus ${ids.length} data jenis buku?`,
-            'Konfirmasi Hapus Jenis Buku',
-            function() {
-        
-        // Get CSRF token safely
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                         document.querySelector('input[name="_token"]')?.value ||
-                         '{{ csrf_token() }}';
-        
-        fetch('{{ route("jenis-buku.bulk-delete") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            body: JSON.stringify({ ids: ids })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showSuccessAlert(data.message);
-                location.reload();
-            } else {
-                showErrorAlert('Error: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showErrorAlert('Terjadi kesalahan saat menghapus data');
-        });
+// ── DataTable Init ───────────────────────────────────
+$(document).ready(function () {
+    $('#jenisTable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json',
+            emptyTable: 'Tidak ada data jenis buku',
+            zeroRecords: 'Data tidak ditemukan',
+        },
+        pageLength: 10,
+        lengthMenu: [5, 10, 25, 50],
+        columnDefs: [
+            { orderable: false, targets: 6 }, // Aksi
+        ],
+        order: [[0, 'asc']],
+        responsive: true,
     });
+
+    // ── SweetAlert2: Flash Messages ──────────────────
+    @if(session('success'))
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: '{{ session('success') }}',
+        timer: 2800,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end',
+        background: '#f0fdf4',
+        iconColor: '#16a34a',
+    });
+    @endif
+
+    @if(session('error'))
+    Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: '{{ session('error') }}',
+        confirmButtonColor: '#0ea5e9',
+        confirmButtonText: 'OK',
+    });
+    @endif
+
+    @if($errors->any())
+    Swal.fire({
+        icon: 'warning',
+        title: 'Periksa Data',
+        html: `<ul style="text-align:left;padding-left:20px;">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>`,
+        confirmButtonColor: '#0ea5e9',
+        confirmButtonText: 'OK',
+    });
+    @endif
+});
+
+// ── Auto Generate Kode dari Nama ─────────────────────
+function autoGenerateKode(nama) {
+    if (!nama.trim()) {
+        document.getElementById('kode_jenis').value = '';
+        return;
     }
-
-    function exportData() {
-        const search = document.getElementById('search').value;
-        const status = document.getElementById('status').value;
-        
-        let url = '{{ route("jenis-buku.export") }}?';
-        if (search) url += `search=${encodeURIComponent(search)}&`;
-        if (status) url += `status=${status}&`;
-        
-        window.location.href = url;
+    const words = nama.trim().split(/\s+/);
+    let kode = '';
+    if (words.length === 1) {
+        // Ambil 3 huruf pertama
+        kode = words[0].substring(0, 3).toUpperCase();
+    } else {
+        // Ambil huruf pertama tiap kata (maks 5 kata)
+        kode = words.slice(0, 5).map(w => w[0].toUpperCase()).join('');
     }
+    document.getElementById('kode_jenis').value = kode;
+}
 
+// ── Modal Open/Close ─────────────────────────────────
+function openTambahModal() {
+    document.getElementById('tambahModal').classList.add('active');
+    setTimeout(() => document.getElementById('nama_jenis').focus(), 200);
+}
 
+function closeTambahModal() {
+    document.getElementById('tambahModal').classList.remove('active');
+    document.getElementById('tambahForm').reset();
+    document.getElementById('kode_jenis').value = '';
+}
 
-// Close modal when clicking outside
-window.onclick = function(event) {
-    const tambahModal = document.getElementById('tambahModal');
-    const editModal = document.getElementById('editModal');
-    
-    if (event.target === tambahModal) {
-        closeModal('tambahModal');
-    }
-    if (event.target === editModal) {
-        closeModal('editModal');
+function openEditModal(id, nama, kode, deskripsi, status) {
+    document.getElementById('editForm').action = '{{ url('admin/jenis-buku') }}/' + id;
+    document.getElementById('edit_nama_jenis').value  = nama;
+    document.getElementById('edit_kode_jenis').value  = kode;
+    document.getElementById('edit_deskripsi').value   = deskripsi;
+    document.getElementById('edit_status').value      = status;
+    document.getElementById('editModal').classList.add('active');
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.remove('active');
+}
+
+function handleOverlayClick(event, modalId) {
+    if (event.target === document.getElementById(modalId)) {
+        if (modalId === 'tambahModal') closeTambahModal();
+        else closeEditModal();
     }
 }
 
-// Pastikan script dimuat setelah DOM ready
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Modal functions loaded');
-    console.log('openModal function:', typeof window.openModal);
-    console.log('openEditModal function:', typeof window.openEditModal);
-});
+// ── Delete dengan SweetAlert2 ────────────────────────
+function deleteJenis(id, nama, jumlahBuku) {
+    if (jumlahBuku > 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Dapat Dihapus',
+            html: `Jenis buku <strong>${nama}</strong> masih digunakan oleh <strong>${jumlahBuku} buku</strong>.<br>Hapus atau pindahkan buku tersebut terlebih dahulu.`,
+            confirmButtonColor: '#0ea5e9',
+            confirmButtonText: 'Mengerti',
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: 'Hapus Jenis Buku?',
+        html: `Jenis buku <strong>${nama}</strong> akan dihapus permanen.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-trash mr-1"></i> Ya, Hapus',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+    }).then(result => {
+        if (result.isConfirmed) {
+            const form = document.getElementById('deleteForm');
+            form.action = '{{ url('admin/jenis-buku') }}/' + id;
+            form.submit();
+        }
+    });
+}
 </script>
+@endpush
 @endsection

@@ -2,6 +2,25 @@
 
 @section('title', 'Tambah Denda')
 
+@push('styles')
+<style>
+html[data-theme="dark"] .bg-white.rounded-xl.shadow-lg {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+html[data-theme="dark"] .bg-red-50 {
+    background-color: rgba(239,68,68,0.1) !important;
+    border-color: rgba(239,68,68,0.3) !important;
+}
+html[data-theme="dark"] .bg-gray-50.rounded-lg,
+html[data-theme="dark"] .bg-gray-50.p-4 {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #cbd5e1 !important;
+}
+</style>
+@endpush
+
 @section('content')
 <div class="max-w-6xl mx-auto">
     <!-- Page Header -->

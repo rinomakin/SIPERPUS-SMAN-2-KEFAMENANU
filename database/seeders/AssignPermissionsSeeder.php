@@ -27,54 +27,114 @@ class AssignPermissionsSeeder extends Seeder
         $allPermissions = Permission::where('status', 'aktif')->pluck('slug')->toArray();
         $adminRole->syncPermissions($allPermissions);
 
-        // Kepala Sekolah gets ALL permissions except admin-only role/permission management
-        $allPermissions = Permission::where('status', 'aktif')->pluck('slug')->toArray();
-        
-        // Remove admin-only permissions
-        $adminOnlyPermissions = [
-            'role.view', 'role.create', 'role.edit', 'role.delete', 'role.manage',
-            'permission.view', 'permission.manage'
+        // Kepala Sekolah gets view/read-only + laporan + export permissions only
+        // They are supervisors/observers, not operators
+        $kepalaSekolahPermissions = [
+            // Dashboard
+            'dashboard.view',
+
+            // User Management - view only
+            'user.view',
+
+            // Anggota - view & export only
+            'anggota.view',
+            'anggota.export',
+
+            // Buku - view & export only
+            'buku.view',
+            'buku.export',
+            'buku.print-barcode',
+
+            // Kelas & Jurusan - view only
+            'kelas.view',
+            'jurusan.view',
+
+            // Katalog Buku - view only
+            'kategori-buku.view',
+            'jenis-buku.view',
+            'sumber-buku.view',
+            'rak-buku.view',
+
+            // Peminjaman - view & export only
+            'peminjaman.view',
+            'peminjaman.show',
+            'peminjaman.export',
+            'peminjaman.scan',
+
+            // Pengembalian - view & export only
+            'pengembalian.view',
+            'pengembalian.show',
+            'pengembalian.export',
+            'pengembalian.scan',
+
+            // Riwayat Transaksi
+            'riwayat-transaksi.view',
+            'riwayat-transaksi.export',
+
+            // Denda - view & export only
+            'denda.view',
+            'denda.export',
+
+            // Buku Tamu - view & export only (no edit/delete)
+            'buku-tamu.view',
+            'buku-tamu.export',
+
+            // Laporan - full access (core kepsek need)
+            'laporan.view',
+            'laporan.anggota',
+            'laporan.buku',
+            'laporan.peminjaman',
+            'laporan.pengembalian',
+            'laporan.denda',
+            'laporan.buku-tamu',
+            'laporan.kas',
+
+            // Pengaturan - view only
+            'pengaturan.view',
         ];
-        
-        $kepalaSekolahPermissions = array_diff($allPermissions, $adminOnlyPermissions);
-        
+
         $kepalaSekolahRole->syncPermissions($kepalaSekolahPermissions);
 
-        // Petugas gets basic permissions
+        // Petugas gets operational permissions
         $petugasPermissions = [
             // Dashboard
             'dashboard.view',
-            
-            // Anggota - basic operations
+
+            // Anggota - create & edit (no delete)
             'anggota.view',
             'anggota.create',
             'anggota.edit',
-            
+
             // Buku - view only
             'buku.view',
-            
-            // Peminjaman - basic operations
+
+            // Peminjaman - full operational access
             'peminjaman.view',
             'peminjaman.create',
+            'peminjaman.edit',
             'peminjaman.show',
             'peminjaman.scan',
-            
-            // Pengembalian - basic operations
+
+            // Pengembalian - full operational access
             'pengembalian.view',
             'pengembalian.create',
             'pengembalian.show',
             'pengembalian.scan',
-            
+
             // Riwayat transaksi
             'riwayat-transaksi.view',
-            
-            // Denda - view only
+            'riwayat-transaksi.export',
+
+            // Denda - manage fines (view, create, edit)
             'denda.view',
-            
-            // Buku Tamu - full access
+            'denda.create',
+            'denda.edit',
+
+            // Buku Tamu - full access (front desk task)
             'buku-tamu.view',
             'buku-tamu.create',
             'buku-tamu.edit',
+            'buku-tamu.delete',
             'buku-tamu.export',
         ];
         

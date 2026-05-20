@@ -15,9 +15,12 @@ class KelasController extends Controller
 
     public function index()
     {
-        $kelas = Kelas::with('jurusan')->paginate(10);
-        $jurusan = Jurusan::where('status', 'aktif')->get();
-        return view('admin.kelas.index', compact('kelas', 'jurusan'));
+        $kelas       = Kelas::with(['jurusan', 'anggota'])->orderBy('created_at', 'desc')->get();
+        $jurusan     = Jurusan::where('status', 'aktif')->get();
+        $totalKelas  = $kelas->count();
+        $kelasAktif  = $kelas->where('status', 'aktif')->count();
+        $kelasNonaktif = $kelas->where('status', 'nonaktif')->count();
+        return view('admin.kelas.index', compact('kelas', 'jurusan', 'totalKelas', 'kelasAktif', 'kelasNonaktif'));
     }
 
     public function store(Request $request)

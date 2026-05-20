@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>Dashboard Admin - SIPERPUS Wireframe</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; display: flex; height: 100vh; background: #f3f4f6; font-size: 13px; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 200px; min-width: 200px;
+    background: #1e2130;
+    color: #cdd0d9;
+    display: flex; flex-direction: column;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-brand {
+    padding: 18px 16px;
+    border-bottom: 1px solid #2d3147;
+  }
+  .sidebar-brand .brand-title {
+    font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 1px;
+  }
+  .sidebar-brand .brand-sub {
+    font-size: 10px; color: #7b8299; margin-top: 2px;
+  }
+  .sidebar-menu { padding: 8px 0; flex: 1; }
+  .menu-section-label {
+    font-size: 9.5px; font-weight: 700; color: #6b7280;
+    padding: 12px 16px 4px;
+    letter-spacing: 0.8px; text-transform: uppercase;
+  }
+  .menu-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 16px;
+    color: #9ca3af;
+    cursor: pointer;
+    font-size: 12.5px;
+    transition: background 0.1s;
+  }
+  .menu-item.active {
+    background: #2d3147;
+    color: #fff;
+    border-left: 3px solid #4f7ef8;
+  }
+  .menu-item:hover { background: #252840; color: #fff; }
+  .menu-icon {
+    width: 16px; height: 16px; background: #4b5563;
+    border-radius: 3px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .menu-item.active .menu-icon { background: #4f7ef8; }
+  .menu-item .sub-icon {
+    width: 14px; height: 14px; background: #374151;
+    border-radius: 2px; flex-shrink: 0;
+  }
+  .sub-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 7px 16px 7px 28px;
+    color: #9ca3af; font-size: 12px; cursor: pointer;
+  }
+  .sub-item:hover { background: #252840; color: #ddd; }
+  .sidebar-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #2d3147;
+    font-size: 11px; color: #6b7280;
+    cursor: pointer;
+  }
+
+  /* MAIN */
+  .main-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* TOPBAR */
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0 24px;
+    height: 52px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 10px; }
+  .topbar-close {
+    width: 20px; height: 20px; background: #e5e7eb;
+    border-radius: 3px; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: #666; cursor: pointer;
+  }
+  .topbar-title { font-size: 16px; font-weight: 600; color: #111827; }
+  .topbar-right { display: flex; align-items: center; gap: 14px; }
+  .topbar-right .user-info { text-align: right; }
+  .topbar-right .user-name { font-size: 13px; font-weight: 600; color: #111827; }
+  .topbar-right .user-role { font-size: 11px; color: #6b7280; }
+  .avatar {
+    width: 34px; height: 34px; background: #4f7ef8;
+    border-radius: 6px; display: flex; align-items: center;
+    justify-content: center; color: #fff; font-weight: 700; font-size: 13px;
+  }
+
+  /* BREADCRUMB */
+  .breadcrumb {
+    padding: 8px 24px;
+    background: #fff;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 11.5px; color: #9ca3af;
+    display: flex; align-items: center; gap: 6px;
+    flex-shrink: 0;
+  }
+  .breadcrumb .active { color: #374151; font-weight: 500; }
+  .home-icon {
+    width: 13px; height: 13px; background: #d1d5db; border-radius: 2px;
+  }
+
+  /* CONTENT */
+  .content {
+    flex: 1; overflow-y: auto;
+    padding: 24px;
+    background: #f3f4f6;
+  }
+
+  /* PAGE HEADER */
+  .page-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 20px;
+  }
+  .page-header-left .page-title { font-size: 22px; font-weight: 700; color: #111827; }
+  .page-header-left .page-sub { font-size: 12.5px; color: #6b7280; margin-top: 3px; }
+  .page-header-right { text-align: right; display: flex; align-items: center; gap: 12px; }
+  .date-box { text-align: right; }
+  .date-box .day { font-size: 10px; color: #9ca3af; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 600; }
+  .date-box .full-date { font-size: 20px; font-weight: 700; color: #111827; }
+  .cal-icon { width: 40px; height: 40px; background: #4f7ef8; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .cal-icon-inner { width: 18px; height: 18px; background: rgba(255,255,255,0.9); border-radius: 3px; }
+
+  /* STAT CARDS */
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 16px; margin-bottom: 20px;
+  }
+  .stat-card {
+    background: #fff; border-radius: 10px;
+    padding: 18px 18px 14px;
+    position: relative; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .stat-blob {
+    position: absolute; top: -20px; right: -20px;
+    width: 90px; height: 90px; border-radius: 50%;
+    opacity: 0.15;
+  }
+  .stat-card-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: #e0e7ff; display: flex;
+    align-items: center; justify-content: center;
+    margin-bottom: 12px;
+  }
+  .icon-inner { width: 18px; height: 18px; border-radius: 3px; background: #4f7ef8; }
+  .stat-number { font-size: 26px; font-weight: 700; color: #111827; line-height: 1; }
+  .stat-number.orange { color: #f59e0b; }
+  .stat-label { font-size: 10px; color: #9ca3af; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+  .stat-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    margin-top: 8px; font-size: 11px;
+  }
+  .badge-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .badge-dot.blue { background: #4f7ef8; }
+  .badge-dot.green { background: #10b981; }
+  .badge-dot.red { background: #ef4444; }
+  .badge-dot.yellow { background: #f59e0b; }
+  .badge-text.blue { color: #4f7ef8; }
+  .badge-text.green { color: #10b981; }
+  .badge-text.red { color: #ef4444; }
+  .badge-text.yellow { color: #f59e0b; }
+
+  /* BOTTOM GRID */
+  .bottom-grid {
+    display: grid; grid-template-columns: 1fr 340px;
+    gap: 16px; margin-bottom: 20px;
+  }
+
+  /* CHART CARD */
+  .chart-card {
+    background: #fff; border-radius: 10px;
+    padding: 18px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .card-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 13.5px; font-weight: 600; color: #111827;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title-icon { width: 18px; height: 18px; background: #4f7ef8; border-radius: 4px; }
+  .card-meta { font-size: 11px; color: #9ca3af; }
+  .chart-legend { display: flex; gap: 14px; margin-bottom: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #6b7280; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+  .legend-dot.blue { background: #4f7ef8; }
+  .legend-dot.green { background: #10b981; }
+
+  /* SVG Chart Area */
+  .chart-area { width: 100%; height: 140px; position: relative; }
+  .chart-labels { display: flex; justify-content: space-between; margin-top: 6px; }
+  .chart-labels span { font-size: 10px; color: #9ca3af; }
+
+  /* CHART BOTTOM STATS */
+  .chart-bottom-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 12px; margin-top: 14px;
+    border-top: 1px solid #f0f0f0; padding-top: 14px;
+  }
+  .cbs-item { text-align: center; }
+  .cbs-num { font-size: 22px; font-weight: 700; }
+  .cbs-num.blue { color: #4f7ef8; }
+  .cbs-num.green { color: #10b981; }
+  .cbs-num.yellow { color: #f59e0b; }
+  .cbs-label { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600; margin-top: 2px; }
+
+  /* QUICK ACCESS */
+  .quick-card {
+    background: #fff; border-radius: 10px;
+    padding: 18px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .quick-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-top: 12px;
+  }
+  .quick-item {
+    border-radius: 8px; padding: 14px 10px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 6px; cursor: pointer;
+  }
+  .qi-laporan { background: #eff6ff; }
+  .qi-anggota { background: #f0fdf4; }
+  .qi-buku { background: #faf5ff; }
+  .qi-riwayat { background: #fff7ed; }
+  .qi-peminjaman { background: #fdf2f8; }
+  .qi-pengaturan { background: #fffbeb; }
+  .quick-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .qi-icon-inner { width: 18px; height: 18px; border-radius: 4px; }
+  .qi-laporan .quick-icon { background: #4f7ef8; }
+  .qi-anggota .quick-icon { background: #10b981; }
+  .qi-buku .quick-icon { background: #8b5cf6; }
+  .qi-riwayat .quick-icon { background: #f97316; }
+  .qi-peminjaman .quick-icon { background: #ec4899; }
+  .qi-pengaturan .quick-icon { background: #f59e0b; }
+  .quick-label { font-size: 11px; font-weight: 500; color: #374151; text-align: center; }
+
+  /* TABLE CARD */
+  .table-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .table-card {
+    background: #fff; border-radius: 10px;
+    padding: 18px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .table-head { display: grid; gap: 0; }
+  .tbl-header {
+    display: grid; font-size: 10px; font-weight: 600;
+    color: #9ca3af; text-transform: uppercase;
+    border-bottom: 1px solid #f0f0f0; padding-bottom: 7px;
+    margin-bottom: 4px; letter-spacing: 0.4px;
+  }
+  .tbl-header.peminjaman { grid-template-columns: 2fr 1.5fr 1fr; }
+  .tbl-header.pengembalian { grid-template-columns: 2fr 1.5fr 1fr; }
+  .tbl-row {
+    display: grid; padding: 7px 0;
+    border-bottom: 1px solid #fafafa;
+    align-items: center; font-size: 12px;
+  }
+  .tbl-row.peminjaman { grid-template-columns: 2fr 1.5fr 1fr; }
+  .tbl-row.pengembalian { grid-template-columns: 2fr 1.5fr 1fr; }
+  .tbl-row-text { color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tbl-row-sub { color: #9ca3af; font-size: 10.5px; }
+  .badge-status {
+    display: inline-block; padding: 2px 8px;
+    border-radius: 12px; font-size: 10px; font-weight: 600;
+  }
+  .badge-aktif { background: #d1fae5; color: #059669; }
+  .badge-terlambat { background: #fee2e2; color: #dc2626; }
+  .badge-selesai { background: #e0e7ff; color: #4338ca; }
+  .badge-belum { background: #fef3c7; color: #d97706; }
+  .see-all { font-size: 11px; color: #4f7ef8; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-title">SIPERPUS</div>
+    <div class="brand-sub">Admin Panel</div>
+  </div>
+  <div class="sidebar-menu">
+    <div class="menu-item active">
+      <div class="menu-icon"><div style="width:10px;height:10px;background:#fff;border-radius:2px;"></div></div>
+      Dashboard
+    </div>
+
+    <div class="menu-section-label">Master Data</div>
+    <div class="menu-item">
+      <div class="menu-icon"></div>
+      Data Master
+    </div>
+
+    <div class="menu-section-label">Manajemen Data</div>
+    <div class="sub-item"><div class="sub-icon"></div> Data User</div>
+    <div class="sub-item"><div class="sub-icon"></div> Data Anggota</div>
+    <div class="sub-item"><div class="sub-icon"></div> Data Buku</div>
+
+    <div class="menu-section-label">Transaksi</div>
+    <div class="sub-item"><div class="sub-icon"></div> Peminjaman</div>
+    <div class="sub-item"><div class="sub-icon"></div> Pengembalian</div>
+    <div class="sub-item"><div class="sub-icon"></div> Denda</div>
+    <div class="sub-item"><div class="sub-icon"></div> Buku Tamu</div>
+
+    <div class="menu-section-label">Laporan</div>
+    <div class="sub-item"><div class="sub-icon"></div> Laporan</div>
+
+    <div class="menu-section-label">Pengaturan</div>
+    <div class="sub-item"><div class="sub-icon"></div> Pengaturan Website</div>
+  </div>
+  <div class="sidebar-footer">&laquo; Tutup Sidebar</div>
+</div>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-close">&#x2715;</div>
+      <div class="topbar-title">Dashboard</div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-info">
+        <div class="user-name">Rdm</div>
+        <div class="user-role">Administrator</div>
+      </div>
+      <div class="avatar">R</div>
+    </div>
+  </div>
+
+  <!-- BREADCRUMB -->
+  <div class="breadcrumb">
+    <div class="home-icon"></div>
+    <span class="active">Dashboard</span>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-title">Dashboard Admin</div>
+        <div class="page-sub">Sistem Informasi Perpustakaan &mdash; Ringkasan Hari Ini</div>
+      </div>
+      <div class="page-header-right">
+        <div class="date-box">
+          <div class="day">Senin</div>
+          <div class="full-date">23 Maret 2026</div>
+        </div>
+        <div class="cal-icon"><div class="cal-icon-inner"></div></div>
+      </div>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="stat-grid">
+      <!-- Card 1: Total Anggota -->
+      <div class="stat-card">
+        <div class="stat-blob" style="background:#4f7ef8;"></div>
+        <div class="stat-card-icon" style="background:#e0e7ff;">
+          <div class="icon-inner" style="background:#4f7ef8;"></div>
+        </div>
+        <div class="stat-number">125</div>
+        <div class="stat-label">Total Anggota</div>
+        <div class="stat-badge">
+          <div class="badge-dot blue"></div>
+          <span class="badge-text blue">Terdaftar</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Total Buku -->
+      <div class="stat-card">
+        <div class="stat-blob" style="background:#10b981;"></div>
+        <div class="stat-card-icon" style="background:#d1fae5;">
+          <div class="icon-inner" style="background:#10b981;"></div>
+        </div>
+        <div class="stat-number">480</div>
+        <div class="stat-label">Total Buku</div>
+        <div class="stat-badge">
+          <div class="badge-dot green"></div>
+          <span class="badge-text green">Koleksi</span>
+        </div>
+      </div>
+
+      <!-- Card 3: Sedang Dipinjam -->
+      <div class="stat-card">
+        <div class="stat-blob" style="background:#8b5cf6;"></div>
+        <div class="stat-card-icon" style="background:#ede9fe;">
+          <div class="icon-inner" style="background:#8b5cf6;"></div>
+        </div>
+        <div class="stat-number">34</div>
+        <div class="stat-label">Sedang Dipinjam</div>
+        <div class="stat-badge">
+          <div class="badge-dot red"></div>
+          <span class="badge-text red">8 terlambat</span>
+        </div>
+      </div>
+
+      <!-- Card 4: Denda Belum Dibayar -->
+      <div class="stat-card">
+        <div class="stat-blob" style="background:#f59e0b;"></div>
+        <div class="stat-card-icon" style="background:#fef3c7;">
+          <div class="icon-inner" style="background:#f59e0b;"></div>
+        </div>
+        <div class="stat-number orange">Rp 45.000</div>
+        <div class="stat-label">Denda Belum Dibayar</div>
+        <div class="stat-badge">
+          <div class="badge-dot yellow"></div>
+          <span class="badge-text yellow">3 kasus</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHART + QUICK ACCESS -->
+    <div class="bottom-grid">
+
+      <!-- CHART CARD -->
+      <div class="chart-card">
+        <div class="card-header">
+          <div class="card-title">
+            <div class="card-title-icon"></div>
+            Aktivitas 7 Hari Terakhir
+          </div>
+          <div class="card-meta">17 Mar &ndash; 23 Mar 2026</div>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot blue"></div> Peminjaman</div>
+          <div class="legend-item"><div class="legend-dot green"></div> Pengembalian</div>
+        </div>
+
+        <!-- SVG Bar Chart -->
+        <div class="chart-area">
+          <svg width="100%" height="140" viewBox="0 0 560 140" preserveAspectRatio="xMidYMid meet">
+            <!-- Grid lines -->
+            <line x1="0" y1="20" x2="560" y2="20" stroke="#f0f0f0" stroke-width="1"/>
+            <line x1="0" y1="55" x2="560" y2="55" stroke="#f0f0f0" stroke-width="1"/>
+            <line x1="0" y1="90" x2="560" y2="90" stroke="#f0f0f0" stroke-width="1"/>
+            <line x1="0" y1="125" x2="560" y2="125" stroke="#e5e7eb" stroke-width="1"/>
+            <!-- Y-axis labels -->
+            <text x="0" y="18" fill="#9ca3af" font-size="9">10</text>
+            <text x="0" y="53" fill="#9ca3af" font-size="9">7</text>
+            <text x="0" y="88" fill="#9ca3af" font-size="9">4</text>
+            <text x="0" y="123" fill="#9ca3af" font-size="9">1</text>
+
+            <!-- Day 1: 17/03 -->
+            <rect x="30" y="90" width="16" height="35" fill="#4f7ef8" rx="3"/>
+            <rect x="50" y="73" width="16" height="52" fill="#10b981" rx="3"/>
+
+            <!-- Day 2: 18/03 -->
+            <rect x="106" y="108" width="16" height="17" fill="#4f7ef8" rx="3"/>
+            <rect x="126" y="97" width="16" height="28" fill="#10b981" rx="3"/>
+
+            <!-- Day 3: 19/03 -->
+            <rect x="182" y="55" width="16" height="70" fill="#4f7ef8" rx="3"/>
+            <rect x="202" y="73" width="16" height="52" fill="#10b981" rx="3"/>
+
+            <!-- Day 4: 20/03 -->
+            <rect x="258" y="37" width="16" height="88" fill="#4f7ef8" rx="3"/>
+            <rect x="278" y="55" width="16" height="70" fill="#10b981" rx="3"/>
+
+            <!-- Day 5: 21/03 -->
+            <rect x="334" y="73" width="16" height="52" fill="#4f7ef8" rx="3"/>
+            <rect x="354" y="90" width="16" height="35" fill="#10b981" rx="3"/>
+
+            <!-- Day 6: 22/03 -->
+            <rect x="410" y="90" width="16" height="35" fill="#4f7ef8" rx="3"/>
+            <rect x="430" y="108" width="16" height="17" fill="#10b981" rx="3"/>
+
+            <!-- Day 7: 23/03 -->
+            <rect x="486" y="55" width="16" height="70" fill="#4f7ef8" rx="3"/>
+            <rect x="506" y="37" width="16" height="88" fill="#10b981" rx="3"/>
+          </svg>
+        </div>
+        <div class="chart-labels">
+          <span>17/03</span><span>18/03</span><span>19/03</span><span>20/03</span><span>21/03</span><span>22/03</span><span>23/03</span>
+        </div>
+
+        <div class="chart-bottom-stats">
+          <div class="cbs-item">
+            <div class="cbs-num blue">42</div>
+            <div class="cbs-label">Peminjaman Bulan Ini</div>
+          </div>
+          <div class="cbs-item">
+            <div class="cbs-num green">38</div>
+            <div class="cbs-label">Pengembalian Bulan Ini</div>
+          </div>
+          <div class="cbs-item">
+            <div class="cbs-num yellow">12</div>
+            <div class="cbs-label">Denda Bulan Ini</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUICK ACCESS -->
+      <div class="quick-card">
+        <div class="card-header">
+          <div class="card-title">
+            <div class="card-title-icon" style="background:#8b5cf6;"></div>
+            Akses Cepat
+          </div>
+        </div>
+        <div class="quick-grid">
+          <div class="quick-item qi-laporan">
+            <div class="quick-icon"><div class="qi-icon-inner" style="background:rgba(255,255,255,0.9);"></div></div>
+            <div class="quick-label">Laporan</div>
+          </div>
+          <div class="quick-item qi-anggota">
+            <div class="quick-icon"><div class="qi-icon-inner" style="background:rgba(255,255,255,0.9);"></div></div>
+            <div class="quick-label">Data Anggota</div>
+          </div>
+          <div class="quick-item qi-buku">
+            <div class="quick-icon"><div class="qi-icon-inner" style="background:rgba(255,255,255,0.9);"></div></div>
+            <div class="quick-label">Data Buku</div>
+          </div>
+          <div class="quick-item qi-riwayat">
+            <div class="quick-icon"><div class="qi-icon-inner" style="background:rgba(255,255,255,0.9);"></div></div>
+            <div class="quick-label">Riwayat Pinjam</div>
+          </div>
+          <div class="quick-item qi-peminjaman">
+            <div class="quick-icon"><div class="qi-icon-inner" style="background:rgba(255,255,255,0.9);"></div></div>
+            <div class="quick-label">Peminjaman</div>
+          </div>
+          <div class="quick-item qi-pengaturan">
+            <div class="quick-icon"><div class="qi-icon-inner" style="background:rgba(255,255,255,0.9);"></div></div>
+            <div class="quick-label">Pengaturan</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE SECTION -->
+    <div class="table-grid">
+
+      <!-- Peminjaman Terbaru -->
+      <div class="table-card">
+        <div class="card-header">
+          <div class="card-title">
+            <div class="card-title-icon" style="background:#4f7ef8;"></div>
+            Peminjaman Terbaru
+          </div>
+          <span class="see-all">Lihat Semua</span>
+        </div>
+        <div class="tbl-header peminjaman">
+          <span>Anggota / Buku</span>
+          <span>Tgl Kembali</span>
+          <span>Status</span>
+        </div>
+        <div class="tbl-row peminjaman">
+          <div><div class="tbl-row-text">Budi Santoso</div><div class="tbl-row-sub">Laskar Pelangi</div></div>
+          <div class="tbl-row-sub">25 Mar 2026</div>
+          <div><span class="badge-status badge-aktif">Aktif</span></div>
+        </div>
+        <div class="tbl-row peminjaman">
+          <div><div class="tbl-row-text">Sari Dewi</div><div class="tbl-row-sub">Harry Potter</div></div>
+          <div class="tbl-row-sub">20 Mar 2026</div>
+          <div><span class="badge-status badge-terlambat">Terlambat</span></div>
+        </div>
+        <div class="tbl-row peminjaman">
+          <div><div class="tbl-row-text">Ahmad Fauzi</div><div class="tbl-row-sub">Bumi Manusia</div></div>
+          <div class="tbl-row-sub">28 Mar 2026</div>
+          <div><span class="badge-status badge-aktif">Aktif</span></div>
+        </div>
+        <div class="tbl-row peminjaman">
+          <div><div class="tbl-row-text">Rina Marlina</div><div class="tbl-row-sub">Si Cerdik Kancil</div></div>
+          <div class="tbl-row-sub">18 Mar 2026</div>
+          <div><span class="badge-status badge-terlambat">Terlambat</span></div>
+        </div>
+      </div>
+
+      <!-- Pengembalian Terbaru -->
+      <div class="table-card">
+        <div class="card-header">
+          <div class="card-title">
+            <div class="card-title-icon" style="background:#10b981;"></div>
+            Pengembalian Terbaru
+          </div>
+          <span class="see-all">Lihat Semua</span>
+        </div>
+        <div class="tbl-header pengembalian">
+          <span>Anggota / Buku</span>
+          <span>Tgl Kembali</span>
+          <span>Status</span>
+        </div>
+        <div class="tbl-row pengembalian">
+          <div><div class="tbl-row-text">Hendra Wijaya</div><div class="tbl-row-sub">Negeri 5 Menara</div></div>
+          <div class="tbl-row-sub">22 Mar 2026</div>
+          <div><span class="badge-status badge-selesai">Selesai</span></div>
+        </div>
+        <div class="tbl-row pengembalian">
+          <div><div class="tbl-row-text">Fitri Handayani</div><div class="tbl-row-sub">Dilan 1990</div></div>
+          <div class="tbl-row-sub">21 Mar 2026</div>
+          <div><span class="badge-status badge-belum">Ada Denda</span></div>
+        </div>
+        <div class="tbl-row pengembalian">
+          <div><div class="tbl-row-text">Rizki Pratama</div><div class="tbl-row-sub">Ronggeng Dukuh</div></div>
+          <div class="tbl-row-sub">23 Mar 2026</div>
+          <div><span class="badge-status badge-selesai">Selesai</span></div>
+        </div>
+        <div class="tbl-row pengembalian">
+          <div><div class="tbl-row-text">Maya Sari</div><div class="tbl-row-sub">Ayat-ayat Cinta</div></div>
+          <div class="tbl-row-sub">19 Mar 2026</div>
+          <div><span class="badge-status badge-belum">Ada Denda</span></div>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- end content -->
+</div><!-- end main-wrap -->
+
+</body>
+</html>

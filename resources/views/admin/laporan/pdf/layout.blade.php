@@ -16,7 +16,7 @@
         /* Header */
         .header { border-bottom: 3px double #333; padding-bottom: 12px; margin-bottom: 15px; }
         .header table { width: 100%; }
-        .header .logo { width: 65px; vertical-align: middle; }
+        .header .logo { width: 65px; vertical-align: middle; padding-right: 10px; }
         .header .logo img { width: 60px; height: 60px; object-fit: contain; }
         .header .info { text-align: center; vertical-align: middle; padding: 0 10px; }
         .header .school-name { font-size: 16px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -102,16 +102,32 @@
 <body>
     <div class="page">
         {{-- Header --}}
+        @php
+            $logoSrc = null;
+            if ($pengaturan && $pengaturan->logo) {
+                $logoPath = public_path($pengaturan->logo);
+                if (file_exists($logoPath)) {
+                    $ext  = strtolower(pathinfo($logoPath, PATHINFO_EXTENSION));
+                    $mime = in_array($ext, ['jpg','jpeg']) ? 'image/jpeg' : 'image/png';
+                    $logoSrc = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($logoPath));
+                }
+            }
+        @endphp
         <div class="header">
             <table>
                 <tr>
                     <td class="logo">
-                        @if($pengaturan && $pengaturan->logo)
-                            <img src="{{ public_path('storage/' . $pengaturan->logo) }}" alt="Logo">
+                        @if($logoSrc)
+                            <img src="{{ $logoSrc }}" alt="Logo">
                         @endif
                     </td>
                     <td class="info">
-                        <div class="school-name">{{ $pengaturan->nama_website ?? 'PERPUSTAKAAN' }}</div>
+                        
+                        @if($pengaturan && $pengaturan->deskripsi_website)
+                            <div class="school-name"">
+                                {{ $pengaturan->deskripsi_website }}
+                            </div>
+                        @endif
                         @if($pengaturan && $pengaturan->alamat_sekolah)
                             <div class="school-address">{{ $pengaturan->alamat_sekolah }}</div>
                         @endif

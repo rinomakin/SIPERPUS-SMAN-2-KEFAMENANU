@@ -2,673 +2,308 @@
 
 @section('title', 'Data Sumber Buku')
 
+@push('styles')
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+@endpush
+
 @section('content')
-<meta name="csrf-token" content="{{ csrf_token() }}">
 <style>
-    .line-clamp-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
+@keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.anim-up{animation:fadeInUp .4s ease forwards}
+.anim-d1{animation-delay:.05s;opacity:0}.anim-d2{animation-delay:.10s;opacity:0}
+.anim-d3{animation-delay:.15s;opacity:0}.anim-d4{animation-delay:.20s;opacity:0}
+.anim-d5{animation-delay:.25s;opacity:0}
+
+.stat-card{background:#fff;border-radius:16px;padding:20px;position:relative;overflow:hidden;border:1px solid rgba(0,0,0,.04);box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.03);transition:all .3s ease}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.stat-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.stat-bg{position:absolute;top:-20px;right:-20px;width:90px;height:90px;border-radius:50%;opacity:.06}
+.stat-value{font-size:26px;font-weight:800;line-height:1.2}
+.stat-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#9ca3af}
+
+.glass-card{background:rgba(255,255,255,.97);backdrop-filter:blur(20px);border-radius:16px;border:1px solid rgba(255,255,255,.8);box-shadow:0 4px 24px rgba(0,0,0,.06);overflow:hidden}
+
+#sumberTable_wrapper .dataTables_filter input{border:1px solid #e5e7eb;border-radius:8px;padding:6px 12px;font-size:13px;outline:none;transition:.2s}
+#sumberTable_wrapper .dataTables_filter input:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.1)}
+#sumberTable_wrapper .dataTables_length select{border:1px solid #e5e7eb;border-radius:8px;padding:5px 8px;font-size:13px}
+#sumberTable_wrapper .dataTables_info{font-size:12px;color:#9ca3af}
+#sumberTable_wrapper .dataTables_paginate .paginate_button{border-radius:8px !important;font-size:13px !important;padding:4px 10px !important;transition:.15s !important}
+#sumberTable_wrapper .dataTables_paginate .paginate_button.current,
+#sumberTable_wrapper .dataTables_paginate .paginate_button.current:hover{background:#f59e0b !important;color:#fff !important;border-color:#f59e0b !important}
+#sumberTable_wrapper .dataTables_paginate .paginate_button:hover{background:#f3f4f6 !important;color:#374151 !important;border-color:#e5e7eb !important}
+
+.sb-table tbody tr{transition:background .15s}
+.sb-table tbody tr:hover{background:#f8fafc}
+.sb-table thead th{background:#f8fafc;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#94a3b8;padding:12px 16px;border-bottom:2px solid #f1f5f9;white-space:nowrap}
+.sb-table tbody td{padding:12px 16px;font-size:13px;color:#374151;border-bottom:1px solid #f8fafc}
+
+.kode-badge{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#fff;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:.5px;font-family:monospace}
+.badge-aktif{background:#dcfce7;color:#16a34a;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-nonaktif{background:#fee2e2;color:#dc2626;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.buku-badge{display:inline-flex;align-items:center;gap:4px;background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+
+.btn-edit{display:inline-flex;align-items:center;gap:4px;background:#ede9fe;color:#6d28d9;border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;transition:.2s}
+.btn-edit:hover{background:#6d28d9;color:#fff}
+.btn-delete{display:inline-flex;align-items:center;gap:4px;background:#fee2e2;color:#dc2626;border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;transition:.2s}
+.btn-delete:hover{background:#dc2626;color:#fff}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .2s ease}
+.modal-overlay.active{opacity:1;pointer-events:all}
+.modal-box{background:#fff;border-radius:20px;padding:28px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:scale(.95) translateY(10px);transition:.2s ease;max-height:90vh;overflow-y:auto}
+.modal-overlay.active .modal-box{transform:scale(1) translateY(0)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-title{font-size:17px;font-weight:700;color:#1e293b}
+.modal-close{width:32px;height:32px;border-radius:50%;border:none;background:#f1f5f9;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:.2s}
+.modal-close:hover{background:#e2e8f0;color:#1e293b}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+.form-control{width:100%;padding:10px 14px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:13px;outline:none;transition:.2s;background:#fff}
+.form-control:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.1)}
+.form-textarea{resize:vertical;min-height:80px}
+.kode-auto-input{background:linear-gradient(135deg,#fffbeb,#fef3c7);border-color:#fcd34d;color:#92400e;font-weight:700;font-family:monospace;font-size:14px;letter-spacing:.5px}
+.kode-hint{font-size:11px;color:#f59e0b;margin-top:5px;display:flex;align-items:center;gap:4px}
+.btn-primary{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;width:100%}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 4px 12px rgba(245,158,11,.4)}
+.btn-secondary{background:#f1f5f9;color:#64748b;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;width:100%}
+.btn-secondary:hover{background:#e2e8f0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin-icon{animation:spin 1s linear infinite}
 </style>
 
-<div class="space-y-6">
-    <!-- Filter Section -->
-    
-
-    <!-- Header Section with Actions -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-2 mb-4">
-        <div class="flex justify-between flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div class="flex items-center gap-3">
-                <button onclick="showCreateModal()" 
-                        class="inline-flex text-xs items-center px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform">
-                    <i class="fas fa-plus mr-2"></i>
-                    Tambah
-                </button>
-                
-                <!-- Bulk Action Buttons (Hidden by default) -->
-                <div id="bulkActionButtons" class="flex items-center gap-2 opacity-0 transition-all duration-300 ease-in-out">
-                    <button onclick="deleteSelected()" 
-                            class="inline-flex text-xs items-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                        <i class="fas fa-trash mr-2"></i>
-                        Hapus 
-                    </button>
-                    <span id="selectedCount" class="text-[10px] text-gray-500 transition-all duration-200 mr-2 font-medium bg-gray-100 px-2 py-1 rounded-full">0 sumber dipilih</span>
-                </div>
-            </div>
-
-            <div class="flex items-center w-auto gap-3 ">
-            <form method="GET" action="{{ route('sumber-buku.index') }}" class="flex gap-2">
-            <div class="flex gap-4 items-center justify-between">
-                <!-- Search Input -->
-                <div>
-                 <!-- <label class="block text-xs font-medium text-gray-700 mb-2">Cari Sumber Buku</label> -->
-                    <input type="text" name="search" value="{{ request('search') }}" 
-                           placeholder="Nama sumber, kode, atau deskripsi..."
-                           class="w-full text-xs px-2 py-3 border border-gray-300 rounded-lg focus:ring-1 outline-none focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                </div>
-                <!-- Status Filter -->
-                <div>
-                    <!-- <label class="block text-xs font-medium text-gray-700 mb-2">Status</label> -->
-                    <select name="status" class="w-full text-xs px-2 py-3 border border-gray-300 rounded-lg focus:ring-1 outline-none focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                        <option value="">Semua Status</option>
-                        <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                        <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="flex flex-col  items-center justify-center sm:flex-row gap-3">
-                <button type="submit" 
-                        class="bg-blue-500 p-2  h-10 hover:bg-blue-600   text-white rounded-lg text-xs transition-colors">
-                    <i class="fas fa-search mr-2"></i>
-                    Filter
-                </button>
-                <a href="{{ route('sumber-buku.index') }}" 
-                   class="inline-flex text-xs items-center p-2  h-10 justify-center px-2 py-3 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
-                    <i class="fas fa-refresh mr-2"></i>
-                    Reset
-                </a>
-            </div>
-            </form>
-            </div>
-
-            </div>
-        </div>
+<!-- Header -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 anim-up anim-d1">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800">Data Sumber Buku</h2>
+        <p class="text-sm text-gray-400 mt-1">Kelola sumber pengadaan koleksi buku perpustakaan</p>
     </div>
-
-    <!-- Sumber Buku Table -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            <div class="flex items-center">
-                                <input type="checkbox" id="selectAll" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 transition-all duration-200">
-                                <span class="ml-2 text-xs text-gray-500 transition-all duration-200">Pilih</span>
-                            </div>
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Kode
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Nama Sumber
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Deskripsi
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
-                        </th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Jumlah Buku
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Aksi
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($sumber as $sumberItem)
-                    <tr class="hover:bg-gray-50 transition-colors duration-200">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <input type="checkbox" class="sumber-checkbox w-4 h-4 text-xs text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-1 outline-none transition-all duration-200" value="{{ $sumberItem->id }}">
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-xs font-medium text-gray-900">{{ $sumberItem->kode_sumber ?? '-' }}</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="text-xs font-medium text-gray-900">{{ $sumberItem->nama_sumber }}</div>
-                            <div class="text-xs text-gray-500 mt-1">Dibuat: {{ $sumberItem->created_at->format('d/m/Y') }}</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="text-xs text-gray-600 line-clamp-2">
-                                {{ $sumberItem->deskripsi ?? 'Tidak ada deskripsi' }}
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                {{ $sumberItem->status === 'aktif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                <span class="w-2 h-2 rounded-full mr-1.5
-                                    {{ $sumberItem->status === 'aktif' ? 'bg-green-400' : 'bg-red-400' }}"></span>
-                                {{ ucfirst($sumberItem->status) }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-xs text-center text-gray-900">{{ $sumberItem->buku_count ?? 0 }} buku</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex items-center space-x-2">
-                                <button onclick="showDetailModal({{ $sumberItem->id }})" 
-                                       class="text-blue-600 hover:text-blue-900 transition-colors duration-200" title="Lihat Detail">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button onclick="showEditModal({{ $sumberItem->id }})" 
-                                       class="text-yellow-600 hover:text-yellow-900 transition-colors duration-200" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button onclick="confirmDeleteSumber({{ $sumberItem->id }})" 
-                                        class="text-red-600 hover:text-red-900 transition-colors duration-200" title="Hapus">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="7" class="px-6 py-12 text-center">
-                            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                                <i class="fas fa-book-open text-3xl text-gray-400"></i>
-                            </div>
-                            <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada sumber buku ditemukan</h3>
-                            <p class="text-gray-600 mb-6">Belum ada data sumber buku yang ditambahkan atau tidak ada sumber yang sesuai dengan filter.</p>
-                            <button onclick="showCreateModal()" 
-                                   class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200">
-                                <i class="fas fa-plus mr-2"></i>
-                                Tambah Sumber Buku Pertama
-                            </button>
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Pagination -->
-    @if($sumber->hasPages())
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div class="flex items-center justify-between">
-            <div class="text-sm text-gray-700">
-                Menampilkan {{ $sumber->firstItem() ?? 0 }} - {{ $sumber->lastItem() ?? 0 }} dari {{ $sumber->total() }} sumber buku
-            </div>
-            <div class="flex items-center space-x-2">
-                {{ $sumber->appends(request()->query())->links() }}
-            </div>
-        </div>
-    </div>
-    @endif
+    <button onclick="openTambahModal()"
+            class="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
+        <i class="fas fa-plus"></i> Tambah Sumber Buku
+    </button>
 </div>
 
-<!-- Create/Edit Modal -->
-<div id="sumberModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 id="modalTitle" class="text-lg font-semibold text-gray-900">Tambah Sumber Buku</h3>
-                    <button type="button" onclick="hideSumberModal()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                
-                <form id="sumberForm" class="space-y-4">
-                    @csrf
-                    <input type="hidden" id="sumberId" name="id">
-                    <input type="hidden" id="formMethod" name="_method">
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Sumber <span class="text-red-500">*</span></label>
-                        <input type="text" id="nama_sumber" name="nama_sumber" required
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                               placeholder="Masukkan nama sumber buku">
-                        <div id="nama_sumber_error" class="text-red-500 text-sm mt-1 hidden"></div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Kode Sumber</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="kode_sumber" name="kode_sumber"
-                                   class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                   placeholder="Kosongkan untuk auto-generate">
-                            <button type="button" onclick="generateKodeSumber()" 
-                                    class="px-3 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors">
-                                <i class="fas fa-magic"></i>
-                            </button>
+<!-- Stat Cards -->
+<div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+    <div class="stat-card anim-up anim-d2">
+        <div class="stat-bg" style="background:#f59e0b"></div>
+        <div class="stat-icon mb-3" style="background:#fef3c7;color:#d97706"><i class="fas fa-book-open"></i></div>
+        <div class="stat-value" style="color:#d97706">{{ $totalSumber }}</div>
+        <div class="stat-label">Total Sumber</div>
+    </div>
+    <div class="stat-card anim-up anim-d3">
+        <div class="stat-bg" style="background:#22c55e"></div>
+        <div class="stat-icon mb-3" style="background:#dcfce7;color:#16a34a"><i class="fas fa-check-circle"></i></div>
+        <div class="stat-value" style="color:#16a34a">{{ $sumberAktif }}</div>
+        <div class="stat-label">Aktif</div>
+    </div>
+    <div class="stat-card anim-up anim-d4 col-span-2 lg:col-span-1">
+        <div class="stat-bg" style="background:#ef4444"></div>
+        <div class="stat-icon mb-3" style="background:#fee2e2;color:#dc2626"><i class="fas fa-times-circle"></i></div>
+        <div class="stat-value" style="color:#dc2626">{{ $sumberNonaktif }}</div>
+        <div class="stat-label">Nonaktif</div>
+    </div>
+</div>
+
+<!-- DataTable -->
+<div class="glass-card p-6 anim-up anim-d5">
+    <div class="overflow-x-auto">
+        <table id="sumberTable" class="sb-table w-full" style="width:100%">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Kode</th>
+                    <th>Nama Sumber</th>
+                    <th>Deskripsi</th>
+                    <th>Status</th>
+                    <th>Jml Buku</th>
+                    <th class="no-sort">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($sumber as $index => $item)
+                <tr>
+                    <td>{{ $index + 1 }}</td>
+                    <td>
+                        @if($item->kode_sumber)
+                            <span class="kode-badge">{{ $item->kode_sumber }}</span>
+                        @else <span class="text-gray-400 text-xs italic">—</span>
+                        @endif
+                    </td>
+                    <td class="font-semibold text-gray-800">{{ $item->nama_sumber }}</td>
+                    <td class="text-gray-500" style="max-width:200px;white-space:normal">{{ $item->deskripsi ?: '—' }}</td>
+                    <td>
+                        @if($item->status === 'aktif')
+                            <span class="badge-aktif">Aktif</span>
+                        @else
+                            <span class="badge-nonaktif">Nonaktif</span>
+                        @endif
+                    </td>
+                    <td>
+                        <span class="buku-badge"><i class="fas fa-book text-xs"></i>{{ $item->buku_count }}</span>
+                    </td>
+                    <td>
+                        <div class="flex items-center gap-2">
+                            <button onclick="openEditModal({{ $item->id }}, '{{ addslashes($item->nama_sumber) }}', '{{ $item->kode_sumber }}', '{{ addslashes($item->deskripsi ?? '') }}', '{{ $item->status }}')"
+                                    class="btn-edit"><i class="fas fa-edit"></i> Edit</button>
+                            <button onclick="deleteItem({{ $item->id }}, '{{ addslashes($item->nama_sumber) }}', {{ $item->buku_count }})"
+                                    class="btn-delete"><i class="fas fa-trash"></i> Hapus</button>
                         </div>
-                        <div id="kode_sumber_error" class="text-red-500 text-sm mt-1 hidden"></div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Status <span class="text-red-500">*</span></label>
-                        <select id="status" name="status" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                            <option value="">Pilih Status</option>
-                            <option value="aktif">Aktif</option>
-                            <option value="nonaktif">Nonaktif</option>
-                        </select>
-                        <div id="status_error" class="text-red-500 text-sm mt-1 hidden"></div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
-                        <textarea id="deskripsi" name="deskripsi" rows="3"
-                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                  placeholder="Masukkan deskripsi sumber buku (opsional)"></textarea>
-                        <div id="deskripsi_error" class="text-red-500 text-sm mt-1 hidden"></div>
-                    </div>
-                    
-                    <div class="flex space-x-3 pt-4">
-                        <button type="button" onclick="hideSumberModal()" 
-                                class="flex-1 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-lg transition-all duration-200">
-                            Batal
-                        </button>
-                        <button type="submit" id="submitBtn"
-                                class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200">
-                            <i class="fas fa-save mr-2"></i>
-                            Simpan
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+                    </td>
+                </tr>
+                @empty
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
 
-<!-- Detail Modal -->
-<div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Detail Sumber Buku</h3>
-                    <button type="button" onclick="hideDetailModal()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times"></i>
+<!-- Modal Tambah -->
+<div id="tambahModal" class="modal-overlay" onclick="handleOverlayClick(event,'tambahModal')">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title"><i class="fas fa-plus-circle text-amber-500 mr-2"></i>Tambah Sumber Buku</h3>
+                <p class="text-xs text-gray-400 mt-0.5">Kode digenerate otomatis (SB001, SB002…)</p>
+            </div>
+            <button class="modal-close" onclick="closeTambahModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="tambahForm" method="POST" action="{{ route('sumber-buku.store') }}">
+            @csrf
+            <div class="form-group">
+                <label class="form-label">Nama Sumber <span class="text-red-500">*</span></label>
+                <input type="text" name="nama_sumber" id="nama_sumber" required
+                       class="form-control" placeholder="Contoh: Pembelian, Donasi, Hibah">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Kode Sumber</label>
+                <div class="flex gap-2" style="align-items:stretch">
+                    <input type="text" name="kode_sumber" id="kode_sumber" maxlength="10"
+                           class="form-control kode-auto-input" placeholder="Kosongkan untuk auto-generate" style="flex:1">
+                    <button type="button" onclick="generateKodeSumber()"
+                            style="padding:0 14px;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#fff;border:none;border-radius:10px;font-size:12px;cursor:pointer;white-space:nowrap;font-weight:600">
+                        <i class="fas fa-magic"></i> Auto
                     </button>
                 </div>
-                
-                <div id="detailContent" class="space-y-4">
-                    <!-- Detail content will be loaded here -->
-                </div>
-                
-                <div class="flex justify-end pt-4">
-                    <button type="button" onclick="hideDetailModal()" 
-                            class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-lg transition-all duration-200">
-                        Tutup
-                    </button>
-                </div>
+                <p class="kode-hint"><i class="fas fa-magic"></i> Klik Auto atau kosongkan untuk digenerate server</p>
             </div>
+            <div class="form-group">
+                <label class="form-label">Status <span class="text-red-500">*</span></label>
+                <select name="status" id="status" required class="form-control">
+                    <option value="aktif">Aktif</option>
+                    <option value="nonaktif">Nonaktif</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Deskripsi</label>
+                <textarea name="deskripsi" id="deskripsi" rows="3" class="form-control form-textarea"
+                          placeholder="Deskripsi sumber buku (opsional)"></textarea>
+            </div>
+            <div class="flex gap-3 mt-4">
+                <button type="button" onclick="closeTambahModal()" class="btn-secondary">Batal</button>
+                <button type="submit" class="btn-primary"><i class="fas fa-save mr-2"></i>Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Edit -->
+<div id="editModal" class="modal-overlay" onclick="handleOverlayClick(event,'editModal')">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title"><i class="fas fa-edit text-purple-500 mr-2"></i>Edit Sumber Buku</h3>
+            </div>
+            <button class="modal-close" onclick="closeEditModal()"><i class="fas fa-times"></i></button>
         </div>
+        <form id="editForm" method="POST">
+            @csrf @method('PUT')
+            <div class="form-group">
+                <label class="form-label">Nama Sumber <span class="text-red-500">*</span></label>
+                <input type="text" name="nama_sumber" id="edit_nama_sumber" required class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Kode Sumber</label>
+                <input type="text" name="kode_sumber" id="edit_kode_sumber" maxlength="10"
+                       class="form-control kode-auto-input" placeholder="Kode sumber">
+                <p class="kode-hint"><i class="fas fa-pen"></i> Dapat diubah (maks. 10 karakter)</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Status <span class="text-red-500">*</span></label>
+                <select name="status" id="edit_status" required class="form-control">
+                    <option value="aktif">Aktif</option>
+                    <option value="nonaktif">Nonaktif</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Deskripsi</label>
+                <textarea name="deskripsi" id="edit_deskripsi" rows="3" class="form-control form-textarea"></textarea>
+            </div>
+            <div class="flex gap-3 mt-4">
+                <button type="button" onclick="closeEditModal()" class="btn-secondary">Batal</button>
+                <button type="submit" class="btn-primary"><i class="fas fa-save mr-2"></i>Simpan Perubahan</button>
+            </div>
+        </form>
     </div>
 </div>
 
-<!-- Loading Overlay -->
-<div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg p-6 flex items-center space-x-3">
-        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-        <span class="text-gray-700">Memproses...</span>
-    </div>
-</div>
+<form id="deleteForm" method="POST" style="display:none">@csrf @method('DELETE')</form>
 
+@push('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const selectAll = document.getElementById('selectAll');
-    const sumberCheckboxes = document.querySelectorAll('.sumber-checkbox');
-    const selectedCount = document.getElementById('selectedCount');
-    const bulkActionButtons = document.getElementById('bulkActionButtons');
-    
-    // Initialize bulk action buttons as hidden
-    bulkActionButtons.style.opacity = '0';
-    bulkActionButtons.style.pointerEvents = 'none';
-
-    // Select all functionality
-    selectAll.addEventListener('change', function() {
-        sumberCheckboxes.forEach(checkbox => {
-            checkbox.checked = this.checked;
-            
-            // Add visual feedback for all rows
-            const row = checkbox.closest('tr');
-            if (this.checked) {
-                row.classList.add('bg-blue-50', 'border-l-4', 'border-l-blue-500');
-            } else {
-                row.classList.remove('bg-blue-50', 'border-l-4', 'border-l-blue-500');
-            }
-        });
-        updateSelectedCount();
+$(document).ready(function(){
+    $('#sumberTable').DataTable({
+        language:{url:'//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json',emptyTable:'Tidak ada data sumber buku',zeroRecords:'Data tidak ditemukan'},
+        pageLength:10,lengthMenu:[5,10,25,50],
+        columnDefs:[{orderable:false,targets:6}],order:[[0,'asc']],responsive:true
     });
 
-    // Individual checkbox change
-    sumberCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            updateSelectedCount();
-            updateSelectAllState();
-            
-            // Add visual feedback
-            const row = this.closest('tr');
-            if (this.checked) {
-                row.classList.add('bg-blue-50', 'border-l-4', 'border-l-blue-500');
-            } else {
-                row.classList.remove('bg-blue-50', 'border-l-4', 'border-l-blue-500');
-            }
-        });
-    });
-
-    function updateSelectedCount() {
-        const checkedBoxes = document.querySelectorAll('.sumber-checkbox:checked');
-        selectedCount.textContent = `${checkedBoxes.length} sumber dipilih`;
-        
-        // Show/hide bulk action buttons based on selection with smooth animation
-        if (checkedBoxes.length > 0) {
-            bulkActionButtons.style.opacity = '1';
-            bulkActionButtons.style.pointerEvents = 'auto';
-            selectedCount.classList.add('text-blue-600', 'font-medium', 'bg-blue-100');
-        } else {
-            bulkActionButtons.style.opacity = '0';
-            bulkActionButtons.style.pointerEvents = 'none';
-            selectedCount.classList.remove('text-blue-600', 'font-medium', 'bg-blue-100');
-        }
-    }
-
-    function updateSelectAllState() {
-        const checkedBoxes = document.querySelectorAll('.sumber-checkbox:checked');
-        const totalBoxes = sumberCheckboxes.length;
-        const selectAllLabel = selectAll.nextElementSibling;
-        
-        selectAll.checked = checkedBoxes.length === totalBoxes;
-        selectAll.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < totalBoxes;
-        
-        // Update label color based on selection
-        if (checkedBoxes.length > 0) {
-            selectAllLabel.classList.add('text-blue-600', 'font-medium');
-        } else {
-            selectAllLabel.classList.remove('text-blue-600', 'font-medium');
-        }
-    }
+    @if(session('success'))
+    Swal.fire({icon:'success',title:'Berhasil!',text:'{{ session('success') }}',timer:2800,timerProgressBar:true,showConfirmButton:false,toast:true,position:'top-end',background:'#f0fdf4',iconColor:'#16a34a'});
+    @endif
+    @if(session('error'))
+    Swal.fire({icon:'error',title:'Gagal!',text:'{{ session('error') }}',confirmButtonColor:'#f59e0b',confirmButtonText:'OK'});
+    @endif
+    @if($errors->any())
+    Swal.fire({icon:'warning',title:'Periksa Data',html:`<ul style="text-align:left;padding-left:20px;">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>`,confirmButtonColor:'#f59e0b',confirmButtonText:'OK'});
+    @endif
 });
-
-// Modal functions
-function showCreateModal() {
-    document.getElementById('modalTitle').textContent = 'Tambah Sumber Buku';
-    document.getElementById('sumberForm').reset();
-    document.getElementById('sumberId').value = '';
-    document.getElementById('formMethod').value = '';
-    clearErrors();
-    document.getElementById('sumberModal').classList.remove('hidden');
-}
-
-function showEditModal(id) {
-    document.getElementById('modalTitle').textContent = 'Edit Sumber Buku';
-    document.getElementById('sumberId').value = id;
-    document.getElementById('formMethod').value = 'PUT';
-    clearErrors();
-    
-    showLoading();
-    fetch(`/admin/sumber-buku/${id}/edit`, {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        hideLoading();
-        if (data.success) {
-            document.getElementById('nama_sumber').value = data.data.nama_sumber;
-            document.getElementById('kode_sumber').value = data.data.kode_sumber || '';
-            document.getElementById('status').value = data.data.status;
-            document.getElementById('deskripsi').value = data.data.deskripsi || '';
-            document.getElementById('sumberModal').classList.remove('hidden');
-        } else {
-            showErrorAlert('Gagal memuat data sumber buku');
-        }
-    })
-    .catch(error => {
-        hideLoading();
-        console.error('Error:', error);
-        showErrorAlert('Terjadi kesalahan saat memuat data');
-    });
-}
-
-function showDetailModal(id) {
-    showLoading();
-    fetch(`/admin/sumber-buku/${id}`, {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        hideLoading();
-        if (data.success) {
-            const sumber = data.data;
-            const statusBadge = sumber.status === 'aktif' 
-                ? '<span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Aktif</span>'
-                : '<span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">Nonaktif</span>';
-                
-            document.getElementById('detailContent').innerHTML = `
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Nama Sumber</label>
-                    <p class="mt-1 text-sm text-gray-900">${sumber.nama_sumber}</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Kode Sumber</label>
-                    <p class="mt-1 text-sm text-gray-900">${sumber.kode_sumber || 'Tidak ada kode'}</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Status</label>
-                    <p class="mt-1">${statusBadge}</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
-                    <p class="mt-1 text-sm text-gray-900">${sumber.deskripsi || 'Tidak ada deskripsi'}</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Jumlah Buku</label>
-                    <p class="mt-1 text-sm text-gray-900">${sumber.buku_count || 0} buku</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Dibuat</label>
-                    <p class="mt-1 text-sm text-gray-900">${new Date(sumber.created_at).toLocaleDateString('id-ID')}</p>
-                </div>
-            `;
-            document.getElementById('detailModal').classList.remove('hidden');
-        } else {
-            showErrorAlert('Gagal memuat detail sumber buku');
-        }
-    })
-    .catch(error => {
-        hideLoading();
-        console.error('Error:', error);
-        showErrorAlert('Terjadi kesalahan saat memuat data');
-    });
-}
-
-function hideSumberModal() {
-    document.getElementById('sumberModal').classList.add('hidden');
-}
-
-function hideDetailModal() {
-    document.getElementById('detailModal').classList.add('hidden');
-}
 
 function generateKodeSumber() {
-    fetch('{{ route("sumber-buku.generate-kode") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('kode_sumber').value = data.kode;
-        } else {
-            showErrorAlert('Gagal generate kode: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showErrorAlert('Terjadi kesalahan saat generate kode');
-    });
+    $.post('{{ route("sumber-buku.generate-kode") }}',{_token:'{{ csrf_token() }}'})
+     .done(res=>{ if(res.success) document.getElementById('kode_sumber').value=res.kode; })
+     .fail(()=>Swal.fire({icon:'error',title:'Error',text:'Gagal generate kode.',timer:2000,showConfirmButton:false}));
 }
 
-// Handle form submission
-document.getElementById('sumberForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    const submitBtn = document.getElementById('submitBtn');
-    const originalText = submitBtn.innerHTML;
-    const sumberId = document.getElementById('sumberId').value;
-    const method = sumberId ? 'PUT' : 'POST';
-    const url = sumberId ? `/admin/sumber-buku/${sumberId}` : '/admin/sumber-buku';
-    
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
-    submitBtn.disabled = true;
-    clearErrors();
-    
-    fetch(url, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showSuccessAlert(data.message);
-            hideSumberModal();
-            location.reload();
-        } else {
-            if (data.errors) {
-                displayErrors(data.errors);
-            } else {
-                showErrorAlert(data.message || 'Terjadi kesalahan');
-            }
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showErrorAlert('Terjadi kesalahan saat menyimpan data');
-    })
-    .finally(() => {
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    });
-});
-
-function clearErrors() {
-    const errorElements = document.querySelectorAll('[id$="_error"]');
-    errorElements.forEach(element => {
-        element.classList.add('hidden');
-        element.textContent = '';
-    });
+function openTambahModal(){
+    document.getElementById('tambahModal').classList.add('active');
+    generateKodeSumber();
+    setTimeout(()=>document.getElementById('nama_sumber').focus(),200);
 }
-
-function displayErrors(errors) {
-    for (const field in errors) {
-        const errorElement = document.getElementById(field + '_error');
-        if (errorElement) {
-            errorElement.textContent = errors[field][0];
-            errorElement.classList.remove('hidden');
-        }
-    }
+function closeTambahModal(){
+    document.getElementById('tambahModal').classList.remove('active');
+    document.getElementById('tambahForm').reset();
 }
-
-// Delete functions
-function confirmDeleteSumber(id) {
-    showConfirmDialog(
-        'Yakin ingin menghapus sumber buku ini?',
-        'Konfirmasi Hapus Sumber Buku',
-        function() {
-            deleteSumber(id);
-        }
-    );
+function openEditModal(id,nama,kode,deskripsi,status){
+    document.getElementById('editForm').action='{{ url('admin/sumber-buku') }}/'+id;
+    document.getElementById('edit_nama_sumber').value=nama;
+    document.getElementById('edit_kode_sumber').value=kode||'';
+    document.getElementById('edit_deskripsi').value=deskripsi;
+    document.getElementById('edit_status').value=status;
+    document.getElementById('editModal').classList.add('active');
 }
+function closeEditModal(){ document.getElementById('editModal').classList.remove('active'); }
+function handleOverlayClick(e,id){ if(e.target===document.getElementById(id)){ id==='tambahModal'?closeTambahModal():closeEditModal(); } }
 
-function deleteSumber(id) {
-    showLoading();
-    
-    fetch(`/admin/sumber-buku/${id}`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        hideLoading();
-        if (data.success) {
-            showSuccessAlert(data.message);
-            setTimeout(() => location.reload(), 1500);
-        } else {
-            showErrorAlert(data.message || 'Gagal menghapus sumber buku');
-        }
-    })
-    .catch(error => {
-        hideLoading();
-        console.error('Error:', error);
-        showErrorAlert('Terjadi kesalahan saat menghapus sumber buku');
-    });
-}
-
-// Delete selected sumber
-function deleteSelected() {
-    const selectedIds = Array.from(document.querySelectorAll('.sumber-checkbox:checked')).map(cb => cb.value);
-    
-    if (selectedIds.length === 0) {
-        showWarningAlert('Pilih sumber buku yang akan dihapus');
+function deleteItem(id, nama, jumlahBuku) {
+    if (jumlahBuku > 0) {
+        Swal.fire({icon:'warning',title:'Tidak Dapat Dihapus',html:`Sumber <strong>${nama}</strong> masih digunakan oleh <strong>${jumlahBuku} buku</strong>.`,confirmButtonColor:'#f59e0b',confirmButtonText:'Mengerti'});
         return;
     }
-
-    showConfirmDialog(
-        `Yakin ingin menghapus ${selectedIds.length} sumber buku yang dipilih?`,
-        'Konfirmasi Hapus Sumber Buku',
-        function() {
-            showLoading();
-            
-            fetch('{{ route("sumber-buku.destroy-multiple") }}', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ sumber_ids: selectedIds })
-            })
-            .then(response => response.json())
-            .then(data => {
-                hideLoading();
-                if (data.success) {
-                    let message = data.message;
-                    if (data.errors && data.errors.length > 0) {
-                        message += '\n\nBeberapa sumber tidak dapat dihapus:\n' + data.errors.slice(0, 3).join('\n');
-                        if (data.errors.length > 3) {
-                            message += `\n... dan ${data.errors.length - 3} error lainnya`;
-                        }
-                    }
-                    showSuccessAlert(message);
-                    setTimeout(() => location.reload(), 2000);
-                } else {
-                    showErrorAlert(data.message || 'Gagal menghapus sumber buku');
-                }
-            })
-            .catch(error => {
-                hideLoading();
-                console.error('Error:', error);
-                showErrorAlert('Terjadi kesalahan saat menghapus sumber buku');
-            });
-        }
-    );
-}
-
-function showLoading() {
-    document.getElementById('loadingOverlay').classList.remove('hidden');
-}
-
-function hideLoading() {
-    document.getElementById('loadingOverlay').classList.add('hidden');
+    Swal.fire({title:'Hapus Sumber Buku?',html:`Sumber <strong>${nama}</strong> akan dihapus permanen.`,icon:'warning',showCancelButton:true,confirmButtonColor:'#dc2626',cancelButtonColor:'#6b7280',confirmButtonText:'<i class="fas fa-trash mr-1"></i> Ya, Hapus',cancelButtonText:'Batal',reverseButtons:true})
+    .then(r=>{ if(r.isConfirmed){ const f=document.getElementById('deleteForm'); f.action='{{ url('admin/sumber-buku') }}/'+id; f.submit(); } });
 }
 </script>
+@endpush
 @endsection

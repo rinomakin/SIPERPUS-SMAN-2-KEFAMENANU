@@ -1,17 +1,24 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <!-- Anti-FOUC: Apply theme before render -->
+    <script>
+        (function(){
+            var t = localStorage.getItem('theme');
+            if(t === 'dark') document.documentElement.setAttribute('data-theme','dark');
+        })();
+    </script>
     <title>{{ $pengaturan->nama_website ?? 'SIPERPUS' }} - Admin</title>
 
     @if($pengaturan && $pengaturan->favicon)
-        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . $pengaturan->favicon) }}">
+        <link rel="icon" type="image/x-icon" href="{{ asset($pengaturan->favicon) }}">
     @endif
 
     <!-- Vite CSS & JS -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/dark-mode.css', 'resources/js/app.js'])
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -528,8 +535,13 @@
                             </div>
                         </div>
 
-                        <!-- Right: Profile -->
+                        <!-- Right: Dark Mode + Profile -->
                         <div class="flex items-center gap-2">
+                            <!-- Dark Mode Toggle -->
+                            <button id="adminThemeToggle" class="dark-toggle-btn" title="Toggle Dark Mode (Ctrl+Shift+D)">
+                                <i class="fas fa-moon icon-moon"></i>
+                                <i class="fas fa-sun icon-sun"></i>
+                            </button>
                             <!-- Profile -->
                             <div class="relative" id="profileMenuContainer">
                                 <button onclick="toggleProfileDropdown(event)"
@@ -907,6 +919,25 @@
     })();
     </script>
 
+    <script>
+    (function() {
+        var btn = document.getElementById('adminThemeToggle');
+        var html = document.documentElement;
+        if (!btn) return;
+        btn.addEventListener('click', function() {
+            var current = html.getAttribute('data-theme') || 'light';
+            var next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+                e.preventDefault();
+                btn.click();
+            }
+        });
+    })();
+    </script>
     @stack('scripts')
 </body>
 </html>

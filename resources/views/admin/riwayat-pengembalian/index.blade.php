@@ -182,6 +182,93 @@
     /* Modal */
     .modal-backdrop { backdrop-filter: blur(4px); background: rgba(15,23,42,.45); }
     .modal-content  { animation: scaleIn .3s ease both; }
+
+    /* ══════════════════════════════════════════════
+       DARK MODE OVERRIDES — Riwayat Pengembalian
+    ══════════════════════════════════════════════ */
+    html[data-theme="dark"] .stat-card {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+    }
+    html[data-theme="dark"] .filter-chip {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+        color: #94a3b8 !important;
+    }
+    html[data-theme="dark"] .filter-chip:hover {
+        background: #334155 !important;
+        border-color: #475569 !important;
+        color: #cbd5e1 !important;
+    }
+    html[data-theme="dark"] #riwayat-table thead th {
+        background: linear-gradient(135deg, #1e293b, #0f172a) !important;
+        color: #64748b !important;
+        border-color: #334155 !important;
+    }
+    html[data-theme="dark"] #riwayat-table tbody td { border-color: #1e293b !important; }
+    html[data-theme="dark"] #riwayat-table tbody tr:hover { background: rgba(99,102,241,0.07) !important; }
+    html[data-theme="dark"] #riwayat-table tbody tr.selected-row { background: rgba(16,185,129,0.1) !important; }
+    html[data-theme="dark"] #riwayat-table_wrapper .dataTables_length select {
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
+        color: #f1f5f9 !important;
+    }
+    html[data-theme="dark"] .dataTables_wrapper .dataTables_info,
+    html[data-theme="dark"] .dataTables_wrapper .dataTables_length { color: #64748b !important; }
+    html[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
+        background: #1e293b !important;
+        border-color: #475569 !important;
+        color: #a5b4fc !important;
+    }
+    html[data-theme="dark"] .nomor-badge {
+        background: rgba(16,185,129,0.15) !important;
+        border-color: rgba(16,185,129,0.3) !important;
+        color: #34d399 !important;
+    }
+    html[data-theme="dark"] .badge-tepat {
+        background: rgba(16,185,129,0.15) !important;
+        border-color: rgba(16,185,129,0.3) !important;
+        color: #34d399 !important;
+    }
+    html[data-theme="dark"] .badge-terlambat {
+        background: rgba(239,68,68,0.15) !important;
+        border-color: rgba(239,68,68,0.3) !important;
+        color: #f87171 !important;
+    }
+    html[data-theme="dark"] .denda-card.has-denda {
+        background: rgba(239,68,68,0.12) !important;
+        border-color: rgba(239,68,68,0.25) !important;
+    }
+    html[data-theme="dark"] .denda-card.paid {
+        background: rgba(16,185,129,0.12) !important;
+        border-color: rgba(16,185,129,0.25) !important;
+    }
+    html[data-theme="dark"] .denda-status-chip.belum {
+        background: rgba(239,68,68,0.2) !important;
+        color: #fca5a5 !important;
+    }
+    html[data-theme="dark"] .denda-status-chip.lunas {
+        background: rgba(16,185,129,0.2) !important;
+        color: #6ee7b7 !important;
+    }
+    html[data-theme="dark"] .denda-badge.no-denda {
+        background: rgba(16,185,129,0.12) !important;
+        border-color: rgba(16,185,129,0.25) !important;
+        color: #34d399 !important;
+    }
+    html[data-theme="dark"] .active-filter-chip {
+        background: rgba(16,185,129,0.15) !important;
+        color: #34d399 !important;
+    }
+    html[data-theme="dark"] #bulkBar {
+        background: rgba(239,68,68,0.1) !important;
+        border-color: rgba(239,68,68,0.25) !important;
+    }
+    html[data-theme="dark"] .modal-content {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+    }
+    html[data-theme="dark"] .modal-content .border-t { border-color: #334155 !important; }
 </style>
 @endpush
 

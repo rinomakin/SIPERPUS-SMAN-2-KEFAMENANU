@@ -1,7 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "Bash(php:*)"
+      "Bash(php:*)",
+      "Bash(python:*)",
+      "Bash(npm i -g @anthropic-ai/claude-code 2>&1)",
+      "Bash(find:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(grep:*)",
+      "Bash(npm run:*)",
+      "Bash(npm list:*)",
+      "Bash(\"/c/Program Files/Google/Chrome/Application/chrome.exe\" --headless --disable-gpu --screenshot=\"D:/laragon/www/perpus02/Gambar/KrangkaWeb/dashboard/dashboard_admin.png\" --window-size=1280,900 \"file:///D:/laragon/www/perpus02/Gambar/KrangkaWeb/dashboard/dashboard_admin_wireframe.html\")",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8000/admin/dashboard)"
     ]
   }
 }

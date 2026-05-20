@@ -118,6 +118,62 @@
 }
 .select-all-btn:hover { border-color: #10b981; color: #059669; background: #f0fdf4; }
 .select-all-btn.all-selected { border-color: #10b981; color: white; background: #10b981; }
+
+/* ══════════════════════════════════════════════
+   DARK MODE OVERRIDES — Pengembalian Create
+══════════════════════════════════════════════ */
+html[data-theme="dark"] .glass-card {
+    background: rgba(30,41,59,0.95) !important;
+    border-color: #334155 !important;
+}
+html[data-theme="dark"] .step-circle {
+    background: #334155 !important;
+    color: #94a3b8 !important;
+}
+html[data-theme="dark"] .step-line { background: #334155 !important; }
+html[data-theme="dark"] .step-label { color: #64748b !important; }
+html[data-theme="dark"] .step-label.active { color: #34d399 !important; }
+
+html[data-theme="dark"] .book-check-card {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+html[data-theme="dark"] .book-check-card:hover {
+    background: rgba(16,185,129,0.08) !important;
+    border-color: rgba(16,185,129,0.4) !important;
+}
+html[data-theme="dark"] .book-check-card.selected {
+    background: rgba(16,185,129,0.12) !important;
+    border-color: rgba(16,185,129,0.5) !important;
+}
+html[data-theme="dark"] .book-check-card.already-returned {
+    background: #0f172a !important;
+    border-color: #1e293b !important;
+}
+
+html[data-theme="dark"] .peminjaman-card {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+html[data-theme="dark"] .select-all-btn {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #94a3b8 !important;
+}
+html[data-theme="dark"] .select-all-btn:hover {
+    background: rgba(16,185,129,0.1) !important;
+    border-color: rgba(16,185,129,0.4) !important;
+    color: #34d399 !important;
+}
+
+html[data-theme="dark"] #anggotaSearchResults {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+html[data-theme="dark"] #anggotaSearchResults > * {
+    border-color: #334155 !important;
+}
 </style>
 
 <div class="min-h-screen py-6">
@@ -433,7 +489,12 @@ function updateDateTime() {
     const now = new Date();
     const d = document.getElementById('tanggal_kembali');
     const t = document.getElementById('jam_kembali');
-    if (d) d.value = now.toISOString().split('T')[0];
+    if (d) {
+        const year  = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day   = String(now.getDate()).padStart(2, '0');
+        d.value = `${year}-${month}-${day}`;
+    }
     if (t) t.value = now.toTimeString().slice(0, 5);
 }
 
@@ -803,7 +864,9 @@ function renderKondisiBuku(selected) {
         list.innerHTML = '<p class="text-xs text-gray-400 italic">Pilih buku terlebih dahulu di Langkah 2</p>';
         return;
     }
-    const tanggalKembali = document.getElementById('tanggal_kembali')?.value || new Date().toISOString().split('T')[0];
+    const _now1 = new Date();
+    const _todayLocal = `${_now1.getFullYear()}-${String(_now1.getMonth()+1).padStart(2,'0')}-${String(_now1.getDate()).padStart(2,'0')}`;
+    const tanggalKembali = document.getElementById('tanggal_kembali')?.value || _todayLocal;
     let html = '';
     selected.forEach(s => {
         const key = `${s.peminjamanId}_${s.detailId}`;
@@ -902,7 +965,9 @@ function recalculateDenda() {
     if (!peminjaman) return;
 
     const selected = Object.values(selectedBooks);
-    const tanggalKembali = document.getElementById('tanggal_kembali')?.value || new Date().toISOString().split('T')[0];
+    const _now2 = new Date();
+    const _todayLocal2 = `${_now2.getFullYear()}-${String(_now2.getMonth()+1).padStart(2,'0')}-${String(_now2.getDate()).padStart(2,'0')}`;
+    const tanggalKembali = document.getElementById('tanggal_kembali')?.value || _todayLocal2;
     const retDate = new Date(tanggalKembali);
 
     let totalDenda = 0;
@@ -1058,7 +1123,8 @@ function toggleTanggalPembayaran(value) {
         tanggalInput.setAttribute('required', 'required');
         // Auto-fill hari ini jika kosong
         if (!tanggalInput.value) {
-            tanggalInput.value = new Date().toISOString().split('T')[0];
+            const _n = new Date();
+            tanggalInput.value = `${_n.getFullYear()}-${String(_n.getMonth()+1).padStart(2,'0')}-${String(_n.getDate()).padStart(2,'0')}`;
         }
     } else {
         section.classList.add('hidden');

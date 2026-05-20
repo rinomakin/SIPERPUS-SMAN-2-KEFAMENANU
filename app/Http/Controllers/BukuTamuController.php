@@ -145,6 +145,13 @@ class BukuTamuController extends Controller
 
     public function destroy($id)
     {
+        if (Auth::user()->isKepalaSekolah()) {
+            if (request()->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Anda tidak memiliki izin untuk menghapus data.'], 403);
+            }
+            abort(403, 'Anda tidak memiliki izin untuk menghapus data.');
+        }
+
         $kunjungan = BukuTamu::findOrFail($id);
         $kunjungan->delete();
 
@@ -152,7 +159,7 @@ class BukuTamuController extends Controller
             return response()->json(['success' => true, 'message' => 'Data kunjungan berhasil dihapus.']);
         }
 
-        if (auth()->user()->hasRole('ADMIN')) {
+        if (Auth::user()->isAdmin()) {
             return redirect()->route('admin.buku-tamu.index')->with('success', 'Data kunjungan berhasil dihapus.');
         } else {
             return redirect()->route('petugas.buku-tamu.index')->with('success', 'Data kunjungan berhasil dihapus.');
@@ -161,6 +168,10 @@ class BukuTamuController extends Controller
 
     public function bulkDelete(Request $request)
     {
+        if (Auth::user()->isKepalaSekolah()) {
+            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki izin untuk menghapus data.'], 403);
+        }
+
         $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:buku_tamu,id',
@@ -182,6 +193,10 @@ class BukuTamuController extends Controller
 
     public function edit($id)
     {
+        if (Auth::user()->isKepalaSekolah()) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit data.');
+        }
+
         $kunjungan = BukuTamu::with(['anggota.kelas', 'anggota.jurusan'])->findOrFail($id);
         $anggota = Anggota::where('status', 'aktif')->get();
         return view('admin.buku-tamu.edit', compact('kunjungan', 'anggota'));
@@ -189,6 +204,9 @@ class BukuTamuController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (Auth::user()->isKepalaSekolah()) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit data.');
+        }
         $request->validate([
             'anggota_id' => 'nullable|exists:anggota,id',
             'nama_tamu' => 'required_without:anggota_id|string|max:255',
@@ -334,17 +352,21 @@ class BukuTamuController extends Controller
                     return '<span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Sedang Berkunjung</span>';
                 })
                 ->addColumn('action', function($row) {
-                    return '<div class="flex items-center gap-1">
+                    $isKepsek = Auth::user()->isKepalaSekolah();
+                    $html = '<div class="flex items-center gap-1">
                                 <a href="' . route('admin.buku-tamu.show', $row->id) . '" class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors" title="Detail">
                                     <i class="fas fa-eye text-xs"></i>
-                                </a>
-                                <a href="' . route('admin.buku-tamu.edit', $row->id) . '" class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors" title="Edit">
+                                </a>';
+                    if (!$isKepsek) {
+                        $html .= '<a href="' . route('admin.buku-tamu.edit', $row->id) . '" class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors" title="Edit">
                                     <i class="fas fa-edit text-xs"></i>
                                 </a>
                                 <button onclick="hapusData(' . $row->id . ')" class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors" title="Hapus">
                                     <i class="fas fa-trash text-xs"></i>
-                                </button>
-                            </div>';
+                                </button>';
+                    }
+                    $html .= '</div>';
+                    return $html;
                 })
                 ->rawColumns(['tamu_info', 'tipe_badge', 'kelas_instansi', 'waktu_pulang_info', 'keperluan_info', 'status_badge', 'action'])
                 ->make(true);

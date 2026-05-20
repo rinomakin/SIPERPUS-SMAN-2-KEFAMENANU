@@ -3,345 +3,523 @@
 @section('title', 'Dashboard Kepala Sekolah')
 
 @section('content')
-<div class="max-w-7xl mx-auto">
-    <!-- Page Header -->
-    <div class="mb-6">
-        <div class="flex justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900">Dashboard Kepala Sekolah</h1>
-                <p class="text-gray-600 mt-1">Sistem Informasi Perpustakaan SMK Negeri 1 Kefamenanu</p>
+<style>
+/* ── Stat Cards ── */
+.ks-stat {
+    position: relative; overflow: hidden; border-radius: 18px; padding: 22px 24px;
+    background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.03);
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+.ks-stat:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.10); }
+.ks-stat-glow {
+    position: absolute; width: 120px; height: 120px; border-radius: 50%;
+    top: -30px; right: -30px; opacity: .12;
+}
+.ks-stat-icon {
+    width: 46px; height: 46px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    margin-bottom: 14px; flex-shrink: 0;
+}
+.ks-stat-value { font-size: 26px; font-weight: 800; line-height: 1.1; }
+.ks-stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: #9ca3af; margin-top: 2px; }
+.ks-stat-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; margin-top: 8px;
+}
+
+/* ── Glass Card ── */
+.ks-card {
+    background: white; border-radius: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.03);
+    overflow: hidden;
+}
+
+/* ── Section Header ── */
+.ks-section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 22px; border-bottom: 1px solid #f1f5f9;
+}
+.ks-section-title { font-size: 14px; font-weight: 700; color: #1e293b; }
+
+/* ── Quick Link ── */
+.ks-qlink {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; padding: 18px 12px; border-radius: 14px; text-decoration: none;
+    transition: transform .2s ease, box-shadow .2s ease; text-align: center;
+}
+.ks-qlink:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+.ks-qlink-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.ks-qlink-label { font-size: 11px; font-weight: 600; }
+
+/* ── Overdue row ── */
+.ks-overdue-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 22px; border-bottom: 1px solid #f8fafc; transition: background .15s;
+}
+.ks-overdue-row:hover { background: #fef9ff; }
+.ks-overdue-row:last-child { border-bottom: none; }
+
+/* ── Animations ── */
+@keyframes ks-fadein { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform: translateY(0); } }
+.ks-anim { animation: ks-fadein .45s ease forwards; opacity: 0; }
+.ks-d1 { animation-delay: .05s; } .ks-d2 { animation-delay: .10s; }
+.ks-d3 { animation-delay: .15s; } .ks-d4 { animation-delay: .20s; }
+.ks-d5 { animation-delay: .25s; } .ks-d6 { animation-delay: .30s; }
+.ks-d7 { animation-delay: .35s; } .ks-d8 { animation-delay: .40s; }
+
+/* ─────────────── Dark Mode ─────────────── */
+[data-theme="dark"] .ks-stat {
+    background: #1e293b;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.06);
+}
+[data-theme="dark"] .ks-stat:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.5); }
+[data-theme="dark"] .ks-stat-value { color: #f1f5f9 !important; }
+[data-theme="dark"] .ks-stat-label { color: #64748b; }
+[data-theme="dark"] .ks-stat-icon  { background: rgba(255,255,255,0.07) !important; }
+[data-theme="dark"] .ks-stat-badge { background: rgba(255,255,255,0.07) !important; }
+
+[data-theme="dark"] .ks-card {
+    background: #1e293b;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.06);
+}
+[data-theme="dark"] .ks-section-header { border-bottom-color: #334155; }
+[data-theme="dark"] .ks-section-title  { color: #f1f5f9; }
+[data-theme="dark"] .ks-section-header .w-7 { background: rgba(255,255,255,0.08) !important; }
+
+[data-theme="dark"] .ks-qlink       { background: rgba(255,255,255,0.05) !important; }
+[data-theme="dark"] .ks-qlink:hover { background: rgba(255,255,255,0.09) !important; box-shadow: 0 6px 18px rgba(0,0,0,0.35); }
+[data-theme="dark"] .ks-qlink-label { color: #cbd5e1 !important; }
+
+[data-theme="dark"] .ks-overdue-row            { border-bottom-color: #334155; }
+[data-theme="dark"] .ks-overdue-row:hover      { background: #243047; }
+
+/* Dashboard scoped text overrides */
+[data-theme="dark"] .ks-dashboard .text-gray-900 { color: #f1f5f9; }
+[data-theme="dark"] .ks-dashboard .text-gray-800 { color: #f1f5f9; }
+[data-theme="dark"] .ks-dashboard .text-gray-700 { color: #e2e8f0; }
+[data-theme="dark"] .ks-dashboard .text-gray-500 { color: #94a3b8; }
+[data-theme="dark"] .ks-dashboard .text-gray-400 { color: #64748b; }
+
+/* Chart area monthly summary boxes */
+[data-theme="dark"] .ks-card .bg-indigo-50  { background-color: rgba(99,102,241,0.13)  !important; }
+[data-theme="dark"] .ks-card .bg-emerald-50 { background-color: rgba(16,185,129,0.13)  !important; }
+[data-theme="dark"] .ks-card .bg-amber-50   { background-color: rgba(245,158,11,0.13)  !important; }
+[data-theme="dark"] .ks-card .text-indigo-700  { color: #a5b4fc !important; }
+[data-theme="dark"] .ks-card .text-emerald-700 { color: #6ee7b7 !important; }
+[data-theme="dark"] .ks-card .text-amber-700   { color: #fcd34d !important; }
+
+/* System status strip */
+[data-theme="dark"] #ks-system-status {
+    background: rgba(16,185,129,0.08) !important;
+    border-color: rgba(16,185,129,0.22) !important;
+}
+[data-theme="dark"] #ks-system-status .text-green-800 { color: #86efac !important; }
+[data-theme="dark"] #ks-system-status .text-green-600 { color: #4ade80 !important; }
+[data-theme="dark"] #ks-system-status .text-green-400 { color: #22c55e !important; }
+
+/* Summary ring cards */
+[data-theme="dark"] .ks-ring-card .text-gray-800 { color: #f1f5f9 !important; }
+[data-theme="dark"] .ks-ring-card .text-gray-500 { color: #94a3b8 !important; }
+[data-theme="dark"] .ks-ring-card .text-purple-700  { color: #c4b5fd !important; }
+[data-theme="dark"] .ks-ring-card .text-purple-600  { color: #c4b5fd !important; }
+[data-theme="dark"] .ks-ring-card .text-emerald-700 { color: #6ee7b7 !important; }
+[data-theme="dark"] .ks-ring-card .text-emerald-600 { color: #6ee7b7 !important; }
+[data-theme="dark"] .ks-ring-card .text-amber-700   { color: #fcd34d !important; }
+[data-theme="dark"] .ks-ring-card .text-amber-600   { color: #fcd34d !important; }
+[data-theme="dark"] .ks-ring-card .bg-purple-50  { background-color: rgba(139,92,246,0.13) !important; }
+[data-theme="dark"] .ks-ring-card .bg-emerald-50 { background-color: rgba(16,185,129,0.13) !important; }
+[data-theme="dark"] .ks-ring-card .bg-amber-50   { background-color: rgba(245,158,11,0.13) !important; }
+[data-theme="dark"] .ks-ring-card svg circle[stroke="#e2e8f0"] { stroke: #334155; }
+
+/* Overdue section */
+[data-theme="dark"] .ks-section-title.text-red-700    { color: #fca5a5 !important; }
+[data-theme="dark"] .ks-card .bg-red-50               { background-color: rgba(239,68,68,0.10) !important; }
+[data-theme="dark"] .ks-card .border-red-100          { border-color:     rgba(239,68,68,0.22) !important; }
+[data-theme="dark"] .ks-card .bg-red-100              { background-color: rgba(239,68,68,0.15) !important; }
+</style>
+
+<div class="max-w-7xl mx-auto ks-dashboard">
+
+    {{-- ===== Header ===== --}}
+    <div class="flex items-center justify-between mb-6 ks-anim ks-d1">
+        <div>
+            <h1 class="text-2xl font-extrabold text-gray-900 leading-tight">Dashboard Kepala Sekolah</h1>
+            <p class="text-sm text-gray-500 mt-0.5">Sistem Informasi Perpustakaan — Ringkasan Hari Ini</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="text-right hidden sm:block">
+                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide">{{ now()->isoFormat('dddd') }}</div>
+                <div class="text-sm font-bold text-gray-700">{{ now()->isoFormat('D MMMM Y') }}</div>
             </div>
-            <div>
-                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                    {{ now()->format('d F Y') }}
-                </span>
+            <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                <i class="fas fa-graduation-cap text-white text-sm"></i>
             </div>
         </div>
     </div>
 
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <!-- Total Anggota -->
-        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600 uppercase tracking-wider">Total Anggota</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ number_format($totalAnggota) }}</p>
-                </div>
-                <div class="bg-blue-100 p-3 rounded-full">
-                    <i class="fas fa-users text-blue-600 text-2xl"></i>
-                </div>
+    {{-- ===== Stat Cards ===== --}}
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+
+        {{-- Anggota --}}
+        <div class="ks-stat ks-anim ks-d2">
+            <div class="ks-stat-glow" style="background:#3b82f6;"></div>
+            <div class="ks-stat-icon" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);color:#3b82f6;">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="ks-stat-value text-gray-900">{{ number_format($totalAnggota) }}</div>
+            <div class="ks-stat-label">Total Anggota</div>
+            <div class="ks-stat-badge" style="background:#eff6ff;color:#3b82f6;">
+                <i class="fas fa-circle text-[6px]"></i> Terdaftar
             </div>
         </div>
 
-        <!-- Total Buku -->
-        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600 uppercase tracking-wider">Total Buku</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ number_format($totalBuku) }}</p>
-                </div>
-                <div class="bg-green-100 p-3 rounded-full">
-                    <i class="fas fa-book text-green-600 text-2xl"></i>
-                </div>
+        {{-- Buku --}}
+        <div class="ks-stat ks-anim ks-d3">
+            <div class="ks-stat-glow" style="background:#10b981;"></div>
+            <div class="ks-stat-icon" style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);color:#10b981;">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="ks-stat-value text-gray-900">{{ number_format($totalBuku) }}</div>
+            <div class="ks-stat-label">Total Buku</div>
+            <div class="ks-stat-badge" style="background:#ecfdf5;color:#10b981;">
+                <i class="fas fa-circle text-[6px]"></i> Koleksi
             </div>
         </div>
 
-        <!-- Buku Dipinjam -->
-        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-indigo-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600 uppercase tracking-wider">Buku Dipinjam</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ number_format($totalPeminjaman) }}</p>
-                </div>
-                <div class="bg-indigo-100 p-3 rounded-full">
-                    <i class="fas fa-book-reader text-indigo-600 text-2xl"></i>
-                </div>
+        {{-- Sedang Dipinjam --}}
+        <div class="ks-stat ks-anim ks-d4">
+            <div class="ks-stat-glow" style="background:#8b5cf6;"></div>
+            <div class="ks-stat-icon" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);color:#8b5cf6;">
+                <i class="fas fa-book-reader"></i>
+            </div>
+            <div class="ks-stat-value text-gray-900">{{ number_format($totalPeminjaman) }}</div>
+            <div class="ks-stat-label">Sedang Dipinjam</div>
+            @if($terlambat > 0)
+            <div class="ks-stat-badge" style="background:#fef2f2;color:#ef4444;">
+                <i class="fas fa-exclamation-circle text-[8px]"></i> {{ $terlambat }} terlambat
+            </div>
+            @else
+            <div class="ks-stat-badge" style="background:#f0fdf4;color:#16a34a;">
+                <i class="fas fa-check-circle text-[8px]"></i> Tepat waktu
+            </div>
+            @endif
+        </div>
+
+        {{-- Denda --}}
+        <div class="ks-stat ks-anim ks-d5">
+            <div class="ks-stat-glow" style="background:#f59e0b;"></div>
+            <div class="ks-stat-icon" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);color:#f59e0b;">
+                <i class="fas fa-coins"></i>
+            </div>
+            <div class="ks-stat-value" style="color:#d97706;">Rp {{ number_format($totalDendaNominal, 0, ',', '.') }}</div>
+            <div class="ks-stat-label">Denda Belum Dibayar</div>
+            <div class="ks-stat-badge" style="background:#fffbeb;color:#d97706;">
+                <i class="fas fa-circle text-[6px]"></i> {{ $jumlahDendaBelum }} kasus
             </div>
         </div>
 
-        <!-- Total Denda -->
-        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600 uppercase tracking-wider">Total Denda</p>
-                    <p class="text-3xl font-bold text-gray-900">Rp {{ number_format($totalDenda, 0, ',', '.') }}</p>
-                </div>
-                <div class="bg-yellow-100 p-3 rounded-full">
-                    <i class="fas fa-exclamation-triangle text-yellow-600 text-2xl"></i>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- Activity Cards -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <!-- Aktivitas Perpustakaan -->
-        <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 border-purple-500 hover:shadow-xl transition-shadow duration-300">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-800">Aktivitas Bulan Ini</h3>
-                <div class="bg-purple-100 p-2 rounded-lg">
-                    <i class="fas fa-chart-line text-purple-600"></i>
-                </div>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="text-center bg-blue-50 rounded-lg p-4">
-                    <div class="text-2xl font-bold text-blue-600">{{ number_format($peminjamanBulanIni) }}</div>
-                    <div class="text-sm text-gray-600">Peminjaman</div>
-                    <div class="w-full bg-blue-200 rounded-full h-2 mt-2">
-                        <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: {{ min(($peminjamanBulanIni / max($totalBuku, 1)) * 100, 100) }}%"></div>
+    {{-- ===== Row 2: Chart + Quick Links ===== --}}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+
+        {{-- Chart 7 hari --}}
+        <div class="ks-card lg:col-span-2 ks-anim ks-d6">
+            <div class="ks-section-header">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 bg-indigo-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-chart-area text-indigo-600 text-xs"></i>
                     </div>
+                    <span class="ks-section-title">Aktivitas 7 Hari Terakhir</span>
                 </div>
-                <div class="text-center bg-green-50 rounded-lg p-4">
-                    <div class="text-2xl font-bold text-green-600">{{ number_format($pengembalianBulanIni) }}</div>
-                    <div class="text-sm text-gray-600">Pengembalian</div>
-                    <div class="w-full bg-green-200 rounded-full h-2 mt-2">
-                        <div class="bg-green-600 h-2 rounded-full transition-all duration-500" style="width: {{ min(($pengembalianBulanIni / max($totalBuku, 1)) * 100, 100) }}%"></div>
-                    </div>
-                </div>
+                <span class="text-[11px] text-gray-400 font-medium">{{ now()->subDays(6)->format('d M') }} – {{ now()->format('d M Y') }}</span>
             </div>
-            <div class="mt-4 text-center">
-                <a href="{{ route('laporan.index') }}" 
-                   class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
-                    <i class="fas fa-chart-line mr-2"></i>
-                    Lihat Laporan Lengkap
-                </a>
+            <div class="p-4">
+                <canvas id="activityChart" style="height:190px;"></canvas>
+            </div>
+            <div class="px-5 pb-4 grid grid-cols-3 gap-3">
+                <div class="bg-indigo-50 rounded-xl p-3 text-center">
+                    <div class="text-lg font-extrabold text-indigo-700">{{ $peminjamanBulanIni }}</div>
+                    <div class="text-[10px] text-gray-500 font-semibold uppercase tracking-wide mt-0.5">Peminjaman Bulan Ini</div>
+                </div>
+                <div class="bg-emerald-50 rounded-xl p-3 text-center">
+                    <div class="text-lg font-extrabold text-emerald-700">{{ $pengembalianBulanIni }}</div>
+                    <div class="text-[10px] text-gray-500 font-semibold uppercase tracking-wide mt-0.5">Pengembalian Bulan Ini</div>
+                </div>
+                <div class="bg-amber-50 rounded-xl p-3 text-center">
+                    <div class="text-lg font-extrabold text-amber-700">{{ $dendaBulanIni }}</div>
+                    <div class="text-[10px] text-gray-500 font-semibold uppercase tracking-wide mt-0.5">Denda Bulan Ini</div>
+                </div>
             </div>
         </div>
 
-        <!-- Ringkasan Sistem -->
-        <div class="bg-white rounded-xl shadow-lg p-6 border-t-4 border-indigo-500 hover:shadow-xl transition-shadow duration-300">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-800">Ringkasan Sistem</h3>
-                <div class="bg-indigo-100 p-2 rounded-lg">
-                    <i class="fas fa-cogs text-indigo-600"></i>
+        {{-- Quick Links --}}
+        <div class="ks-card ks-anim ks-d7">
+            <div class="ks-section-header">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-th-large text-purple-600 text-xs"></i>
+                    </div>
+                    <span class="ks-section-title">Akses Cepat</span>
                 </div>
             </div>
-            <div class="space-y-4">
-                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <div class="text-2xl font-bold text-indigo-600">{{ number_format(($totalPeminjaman / max($totalBuku, 1)) * 100, 1) }}%</div>
-                            <div class="text-sm text-gray-600">Tingkat Sirkulasi Buku</div>
-                        </div>
-                        <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-percentage text-indigo-600 text-xl"></i>
-                        </div>
+            <div class="p-4 grid grid-cols-2 gap-3">
+                <a href="{{ route('laporan.index') }}" class="ks-qlink" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);">
+                    <div class="ks-qlink-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb);">
+                        <i class="fas fa-chart-bar text-white text-sm"></i>
                     </div>
-                </div>
-                <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <div class="text-2xl font-bold text-green-600">{{ number_format($totalBuku - $totalPeminjaman) }}</div>
-                            <div class="text-sm text-gray-600">Buku Tersedia</div>
-                        </div>
-                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-check-circle text-green-600 text-xl"></i>
-                        </div>
+                    <span class="ks-qlink-label text-blue-700">Laporan</span>
+                </a>
+                <a href="{{ route('kepsek.data-anggota') }}" class="ks-qlink" style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);">
+                    <div class="ks-qlink-icon" style="background:linear-gradient(135deg,#10b981,#059669);">
+                        <i class="fas fa-users text-white text-sm"></i>
                     </div>
-                </div>
+                    <span class="ks-qlink-label text-emerald-700">Data Anggota</span>
+                </a>
+                <a href="{{ route('kepsek.data-buku') }}" class="ks-qlink" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);">
+                    <div class="ks-qlink-icon" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);">
+                        <i class="fas fa-book text-white text-sm"></i>
+                    </div>
+                    <span class="ks-qlink-label text-purple-700">Data Buku</span>
+                </a>
+                <a href="{{ route('kepsek.riwayat-peminjaman') }}" class="ks-qlink" style="background:linear-gradient(135deg,#fff7ed,#ffedd5);">
+                    <div class="ks-qlink-icon" style="background:linear-gradient(135deg,#f97316,#ea580c);">
+                        <i class="fas fa-history text-white text-sm"></i>
+                    </div>
+                    <span class="ks-qlink-label text-orange-700">Riwayat Pinjam</span>
+                </a>
+                <a href="{{ route('kepsek.riwayat-pengembalian') }}" class="ks-qlink" style="background:linear-gradient(135deg,#fff1f2,#ffe4e6);">
+                    <div class="ks-qlink-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626);">
+                        <i class="fas fa-undo-alt text-white text-sm"></i>
+                    </div>
+                    <span class="ks-qlink-label text-red-700">Riwayat Kembali</span>
+                </a>
+                @if(Auth::user()->hasAnyPermission(['denda.view','denda.manage']))
+                <a href="{{ route('admin.denda.index') }}" class="ks-qlink" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);">
+                    <div class="ks-qlink-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+                        <i class="fas fa-coins text-white text-sm"></i>
+                    </div>
+                    <span class="ks-qlink-label text-amber-700">Data Denda</span>
+                </a>
+                @else
+                <a href="{{ route('admin.buku-tamu.index') }}" class="ks-qlink" style="background:linear-gradient(135deg,#f0fdfa,#ccfbf1);">
+                    <div class="ks-qlink-icon" style="background:linear-gradient(135deg,#14b8a6,#0d9488);">
+                        <i class="fas fa-clipboard-list text-white text-sm"></i>
+                    </div>
+                    <span class="ks-qlink-label text-teal-700">Buku Tamu</span>
+                </a>
+                @endif
             </div>
-            <div class="mt-4 text-center">
-                <div class="text-xs text-gray-500 flex items-center justify-center">
-                    <i class="fas fa-sync-alt mr-1 animate-spin"></i>
-                    Data diperbarui secara real-time
+
+            {{-- System status strip --}}
+            <div id="ks-system-status" class="mx-4 mb-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 rounded-xl px-4 py-3 flex items-center gap-3">
+                <div class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse flex-shrink-0"></div>
+                <div class="flex-1">
+                    <div class="text-xs font-semibold text-green-800">Sistem Online</div>
+                    <div class="text-[10px] text-green-600" id="liveTime">{{ now()->format('H:i') }} WITA</div>
                 </div>
+                <i class="fas fa-shield-alt text-green-400 text-sm"></i>
             </div>
         </div>
+
     </div>
 
-    <!-- Quick Access Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- Monitoring Card -->
-        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-            <div class="flex items-center justify-between mb-4">
-                <div class="bg-white bg-opacity-20 p-3 rounded-lg">
-                    <i class="fas fa-eye text-2xl"></i>
+    {{-- ===== Row 3: Overdue alert ===== --}}
+    @if($terlambat > 0)
+    <div class="ks-card ks-anim ks-d8 mb-4">
+        <div class="ks-section-header">
+            <div class="flex items-center gap-2">
+                <div class="w-7 h-7 bg-red-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-xs"></i>
                 </div>
-                <div class="text-right">
-                    <div class="text-sm opacity-80">Real-time</div>
-                    <div class="text-lg font-semibold">Monitoring</div>
-                </div>
+                <span class="ks-section-title text-red-700">Anggota Terlambat Mengembalikan</span>
             </div>
-            <p class="text-blue-100 text-sm mb-4">Pantau aktivitas perpustakaan secara real-time dan dapatkan insight terbaru</p>
-            <div class="flex items-center text-xs">
-                <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                Status: Aktif
-            </div>
-        </div>
-
-        <!-- Laporan Card -->
-        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-            <div class="flex items-center justify-between mb-4">
-                <div class="bg-white bg-opacity-20 p-3 rounded-lg">
-                    <i class="fas fa-chart-bar text-2xl"></i>
-                </div>
-                <div class="text-right">
-                    <div class="text-sm opacity-80">Analytics</div>
-                    <div class="text-lg font-semibold">Laporan</div>
-                </div>
-            </div>
-            <p class="text-green-100 text-sm mb-4">Akses laporan komprehensif dan statistik perpustakaan</p>
-            <div class="mt-auto">
-                <a href="{{ route('laporan.index') }}" 
-                   class="inline-flex items-center px-3 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg text-xs font-medium transition-colors duration-200">
-                    <i class="fas fa-arrow-right mr-1"></i>
-                    Lihat Laporan
-                </a>
-            </div>
-        </div>
-
-        <!-- Data Access Card -->
-        <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-            <div class="flex items-center justify-between mb-4">
-                <div class="bg-white bg-opacity-20 p-3 rounded-lg">
-                    <i class="fas fa-database text-2xl"></i>
-                </div>
-                <div class="text-right">
-                    <div class="text-sm opacity-80">Data</div>
-                    <div class="text-lg font-semibold">Akses Data</div>
-                </div>
-            </div>
-            <p class="text-purple-100 text-sm mb-4">Akses data anggota, buku, dan riwayat transaksi perpustakaan</p>
-            <div class="grid grid-cols-2 gap-2 mt-auto">
-                <a href="{{ route('kepsek.data-anggota') }}" 
-                   class="inline-flex items-center justify-center px-2 py-1 bg-white bg-opacity-20 hover:bg-opacity-30 rounded text-xs font-medium transition-colors duration-200">
-                    <i class="fas fa-users mr-1"></i>
-                    Anggota
-                </a>
-                <a href="{{ route('kepsek.data-buku') }}" 
-                   class="inline-flex items-center justify-center px-2 py-1 bg-white bg-opacity-20 hover:bg-opacity-30 rounded text-xs font-medium transition-colors duration-200">
-                    <i class="fas fa-book mr-1"></i>
-                    Buku
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Status Notifications -->
-    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                <i class="fas fa-bell text-orange-500 mr-2"></i>
-                Notifikasi & Status Sistem
-            </h3>
-            <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">
-                {{ now()->format('H:i') }} WIB
+            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-red-700 bg-red-50 border border-red-200 px-2.5 py-1 rounded-full">
+                <i class="fas fa-clock text-[9px]"></i>
+                {{ $terlambat }} peminjaman
             </span>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="flex items-center p-3 bg-green-50 rounded-lg">
-                <div class="w-3 h-3 bg-green-500 rounded-full mr-3 animate-pulse"></div>
-                <div>
-                    <div class="text-sm font-medium text-gray-700">Sistem Online</div>
-                    <div class="text-xs text-gray-500">Berjalan normal</div>
-                </div>
+        @forelse($anggotaTerlambat as $p)
+        <div class="ks-overdue-row">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                {{ strtoupper(substr($p->anggota->nama_lengkap ?? 'N', 0, 1)) }}
             </div>
-            <div class="flex items-center p-3 bg-blue-50 rounded-lg">
-                <div class="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
-                <div>
-                    <div class="text-sm font-medium text-gray-700">Database</div>
-                    <div class="text-xs text-gray-500">Terhubung</div>
-                </div>
+            <div class="flex-1 min-w-0">
+                <div class="text-sm font-semibold text-gray-900 truncate">{{ $p->anggota->nama_lengkap ?? '-' }}</div>
+                <div class="text-[11px] text-gray-400">{{ $p->anggota->nomor_anggota ?? '' }}</div>
             </div>
-            <div class="flex items-center p-3 bg-yellow-50 rounded-lg">
-                <div class="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
-                <div>
-                    <div class="text-sm font-medium text-gray-700">Backup</div>
-                    <div class="text-xs text-gray-500">Terjadwal</div>
+            <div class="text-right flex-shrink-0">
+                <div class="text-xs font-semibold text-red-600">
+                    {{ \Carbon\Carbon::parse($p->tanggal_harus_kembali)->diffInDays(now()) }} hari terlambat
                 </div>
-            </div>
-            <div class="flex items-center p-3 bg-purple-50 rounded-lg">
-                <div class="w-3 h-3 bg-purple-500 rounded-full mr-3"></div>
-                <div>
-                    <div class="text-sm font-medium text-gray-700">Monitoring</div>
-                    <div class="text-xs text-gray-500">Aktif</div>
+                <div class="text-[10px] text-gray-400">
+                    Batas: {{ \Carbon\Carbon::parse($p->tanggal_harus_kembali)->format('d M Y') }}
                 </div>
             </div>
         </div>
+        @empty
+        @endforelse
+        @if($terlambat > 5)
+        <div class="px-5 py-3 bg-red-50 border-t border-red-100 text-center">
+            <a href="{{ route('admin.pengembalian.index') }}" class="text-xs font-semibold text-red-600 hover:text-red-700">
+                Lihat semua {{ $terlambat }} peminjaman terlambat <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+        @endif
     </div>
+    @endif
+
+    {{-- ===== Summary Ring ===== --}}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 ks-anim ks-d8">
+        {{-- Sirkulasi --}}
+        <div class="ks-card ks-ring-card p-5 flex items-center gap-4">
+            <div class="relative w-16 h-16 flex-shrink-0">
+                <svg class="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
+                    <circle cx="32" cy="32" r="28" fill="none" stroke="#e2e8f0" stroke-width="6"/>
+                    <circle cx="32" cy="32" r="28" fill="none" stroke="#8b5cf6" stroke-width="6"
+                        stroke-dasharray="{{ min(($totalPeminjaman / max($totalBuku, 1)) * 175.9, 175.9) }} 175.9"
+                        stroke-linecap="round"/>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center text-xs font-bold text-purple-700">
+                    {{ number_format(($totalPeminjaman / max($totalBuku, 1)) * 100, 0) }}%
+                </div>
+            </div>
+            <div>
+                <div class="text-sm font-bold text-gray-800">Sirkulasi Buku</div>
+                <div class="text-xs text-gray-500 mt-0.5">{{ number_format($totalPeminjaman) }} dari {{ number_format($totalBuku) }} buku dipinjam</div>
+                <div class="text-[10px] text-purple-600 font-semibold mt-1.5 bg-purple-50 px-2 py-0.5 rounded-full inline-block">Tingkat Pemakaian</div>
+            </div>
+        </div>
+
+        {{-- Ketersediaan --}}
+        <div class="ks-card ks-ring-card p-5 flex items-center gap-4">
+            <div class="relative w-16 h-16 flex-shrink-0">
+                @php $tersedia = max($totalBuku - $totalPeminjaman, 0); $pct = ($tersedia / max($totalBuku, 1)) * 100; @endphp
+                <svg class="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
+                    <circle cx="32" cy="32" r="28" fill="none" stroke="#e2e8f0" stroke-width="6"/>
+                    <circle cx="32" cy="32" r="28" fill="none" stroke="#10b981" stroke-width="6"
+                        stroke-dasharray="{{ min($pct * 1.759, 175.9) }} 175.9"
+                        stroke-linecap="round"/>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center text-xs font-bold text-emerald-700">
+                    {{ number_format($pct, 0) }}%
+                </div>
+            </div>
+            <div>
+                <div class="text-sm font-bold text-gray-800">Buku Tersedia</div>
+                <div class="text-xs text-gray-500 mt-0.5">{{ number_format($tersedia) }} buku siap dipinjam</div>
+                <div class="text-[10px] text-emerald-600 font-semibold mt-1.5 bg-emerald-50 px-2 py-0.5 rounded-full inline-block">Stok Tersedia</div>
+            </div>
+        </div>
+
+        {{-- Penyelesaian Denda --}}
+        <div class="ks-card ks-ring-card p-5 flex items-center gap-4">
+            @php
+                $totalDendaAll = \App\Models\Denda::count();
+                $lunas = max($totalDendaAll - $jumlahDendaBelum, 0);
+                $pctLunas = ($lunas / max($totalDendaAll, 1)) * 100;
+            @endphp
+            <div class="relative w-16 h-16 flex-shrink-0">
+                <svg class="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
+                    <circle cx="32" cy="32" r="28" fill="none" stroke="#e2e8f0" stroke-width="6"/>
+                    <circle cx="32" cy="32" r="28" fill="none" stroke="#f59e0b" stroke-width="6"
+                        stroke-dasharray="{{ min($pctLunas * 1.759, 175.9) }} 175.9"
+                        stroke-linecap="round"/>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center text-xs font-bold text-amber-700">
+                    {{ number_format($pctLunas, 0) }}%
+                </div>
+            </div>
+            <div>
+                <div class="text-sm font-bold text-gray-800">Penyelesaian Denda</div>
+                <div class="text-xs text-gray-500 mt-0.5">{{ number_format($lunas) }} dari {{ number_format($totalDendaAll) }} kasus lunas</div>
+                <div class="text-[10px] text-amber-600 font-semibold mt-1.5 bg-amber-50 px-2 py-0.5 rounded-full inline-block">Tingkat Lunas</div>
+            </div>
+        </div>
+    </div>
+
 </div>
-@endsection
 
-@section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Animation for statistics cards
-    const cards = document.querySelectorAll('.grid > div');
-    cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        setTimeout(() => {
-            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, index * 150);
-    });
+document.addEventListener('DOMContentLoaded', function () {
 
-    // Progress bar animations
-    const progressBars = document.querySelectorAll('.bg-blue-600, .bg-green-600');
-    setTimeout(() => {
-        progressBars.forEach(bar => {
-            const width = bar.style.width;
-            bar.style.width = '0%';
-            bar.style.transition = 'width 1.5s ease-in-out';
-            setTimeout(() => {
-                bar.style.width = width;
-            }, 100);
-        });
-    }, 1000);
-
-    // Live time update
-    function updateTime() {
-        const timeElement = document.querySelector('.bg-orange-100.text-orange-800');
-        if (timeElement) {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('id-ID', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-            timeElement.textContent = timeString + ' WIB';
-        }
+    // ── Live clock ──
+    function tick() {
+        const el = document.getElementById('liveTime');
+        if (!el) return;
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2,'0');
+        const m = String(now.getMinutes()).padStart(2,'0');
+        el.textContent = h + ':' + m + ' WITA';
     }
+    setInterval(tick, 1000);
 
-    // Update time every minute
-    setInterval(updateTime, 60000);
+    // ── Activity Chart ──
+    const ctx = document.getElementById('activityChart')?.getContext('2d');
+    if (!ctx) return;
 
-    // Add hover effects for interactive elements
-    const interactiveCards = document.querySelectorAll('.hover\\:scale-105');
-    interactiveCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'scale(1.05)';
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'scale(1)';
-        });
-    });
+    const isDark   = document.documentElement.getAttribute('data-theme') === 'dark';
+    const gridClr  = isDark ? '#334155' : '#f1f5f9';
+    const tickClr  = isDark ? '#94a3b8' : '#6b7280';
+    const legendClr = isDark ? '#cbd5e1' : '#374151';
 
-    // Add floating animation to pulse elements
-    const pulseElements = document.querySelectorAll('.animate-pulse');
-    pulseElements.forEach(element => {
-        setInterval(() => {
-            element.style.opacity = '0.3';
-            setTimeout(() => {
-                element.style.opacity = '1';
-            }, 500);
-        }, 2000);
-    });
+    const labels  = {!! json_encode($chartLabels) !!};
+    const pinjam  = {!! json_encode($chartPinjam) !!};
+    const kembali = {!! json_encode($chartKembali) !!};
 
-    // Auto refresh data setiap 5 menit (optional)
-    setInterval(function() {
-        // Uncomment jika ingin auto refresh
-        // location.reload();
-    }, 300000); // 5 menit
-
-    // Show success message if dashboard loaded successfully
-    setTimeout(() => {
-        if (window.showToast) {
-            showToast('Dashboard berhasil dimuat', 'success');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: 'Peminjaman',
+                    data: pinjam,
+                    backgroundColor: 'rgba(99,102,241,.75)',
+                    borderRadius: 6,
+                    borderSkipped: false,
+                    barThickness: 14,
+                },
+                {
+                    label: 'Pengembalian',
+                    data: kembali,
+                    backgroundColor: 'rgba(16,185,129,.75)',
+                    borderRadius: 6,
+                    borderSkipped: false,
+                    barThickness: 14,
+                },
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { color: legendClr, font: { size: 11, weight: '600' }, boxWidth: 10, padding: 14 }
+                },
+                tooltip: {
+                    backgroundColor: isDark ? '#0f172a' : '#1e293b',
+                    titleColor: '#f1f5f9',
+                    bodyColor: '#cbd5e1',
+                    titleFont: { size: 11 }, bodyFont: { size: 11 },
+                    padding: 10, cornerRadius: 8,
+                }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: tickClr, font: { size: 10 } } },
+                y: {
+                    beginAtZero: true,
+                    grid: { color: gridClr },
+                    ticks: { color: tickClr, font: { size: 10 }, stepSize: 1 }
+                }
+            }
         }
-    }, 2000);
+    });
 });
 </script>
 @endsection

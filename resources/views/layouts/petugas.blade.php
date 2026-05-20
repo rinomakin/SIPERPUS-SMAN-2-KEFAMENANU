@@ -7,7 +7,7 @@
     <title>{{ $pengaturan->nama_website ?? 'SIPERPUS' }} - Petugas</title>
     
     @if($pengaturan && $pengaturan->favicon)
-        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . $pengaturan->favicon) }}">
+        <link rel="icon" type="image/x-icon" href="{{ asset($pengaturan->favicon) }}">
     @endif
     
     <!-- Vite CSS & JS -->

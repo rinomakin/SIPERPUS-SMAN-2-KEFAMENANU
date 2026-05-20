@@ -2,6 +2,64 @@
 
 @section('title', 'Riwayat Pembayaran Denda')
 
+@push('styles')
+<style>
+/* ===== Dark Mode Overrides: Denda Riwayat ===== */
+html[data-theme="dark"] .stat-card .stat-icon {
+    filter: brightness(0.65) saturate(1.4);
+}
+html[data-theme="dark"] .modal-box {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+html[data-theme="dark"] .filter-label { color: #94a3b8 !important; }
+html[data-theme="dark"] .filter-input {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+html[data-theme="dark"] .filter-input:focus {
+    border-color: #10b981 !important;
+    background-color: #1e293b !important;
+}
+html[data-theme="dark"] .filter-select {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+/* DataTables ID-based overrides */
+html[data-theme="dark"] #riwayat-table_wrapper .dataTables_length {
+    border-color: #334155 !important;
+    color: #94a3b8 !important;
+}
+html[data-theme="dark"] #riwayat-table_wrapper .dataTables_length select {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+html[data-theme="dark"] #riwayat-table_wrapper .dataTables_info { color: #64748b !important; }
+html[data-theme="dark"] #riwayat-table_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
+    background: #1e293b !important;
+    color: #a5b4fc !important;
+    border-color: #334155 !important;
+}
+html[data-theme="dark"] .riwayat-table thead th {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+html[data-theme="dark"] .riwayat-table tbody td { border-color: #1e293b !important; }
+html[data-theme="dark"] .riwayat-table tbody tr:hover { background: rgba(99,102,241,0.06) !important; }
+html[data-theme="dark"] .riwayat-table tbody tr.selected-row { background: rgba(59,130,246,0.12) !important; }
+html[data-theme="dark"] .dt-bottom-bar { border-color: #334155 !important; }
+html[data-theme="dark"] .glass-card > .border-b { border-color: #334155 !important; }
+html[data-theme="dark"] .avatar-img { border-color: #334155 !important; }
+/* Active filter bar */
+html[data-theme="dark"] .bg-emerald-50\/60 { background-color: rgba(16,185,129,0.08) !important; }
+html[data-theme="dark"] .border-emerald-100 { border-color: rgba(16,185,129,0.2) !important; }
+</style>
+@endpush
+
 @section('content')
 <!-- DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
@@ -225,6 +283,7 @@
 .filter-select:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); background: white; }
 </style>
 
+@php $canDelete = Auth::user()->isAdmin() || Auth::user()->isPetugas(); @endphp
 <div class="max-w-7xl mx-auto pb-24">
 
     {{-- ===== Statistics Cards ===== --}}
@@ -359,7 +418,9 @@
                 <thead>
                     <tr>
                         <th style="width:40px;text-align:center;">
+                            @if($canDelete)
                             <input type="checkbox" id="selectAllCb" class="select-all-cb" title="Pilih semua">
+                            @endif
                         </th>
                         <th class="text-left">Anggota</th>
                         <th class="text-left">Peminjaman</th>
@@ -374,7 +435,9 @@
                     <tr data-id="{{ $item->id }}">
                         {{-- Checkbox --}}
                         <td class="text-center" style="vertical-align:middle;">
+                            @if($canDelete)
                             <input type="checkbox" class="row-checkbox" value="{{ $item->id }}">
+                            @endif
                         </td>
 
                         {{-- Anggota --}}
@@ -382,7 +445,7 @@
                             <div class="flex items-center gap-2.5">
                                 @if($item->anggota && $item->anggota->foto)
                                     <img class="avatar-img"
-                                         src="{{ asset('storage/' . $item->anggota->foto) }}"
+                                         src="{{ asset('storage/anggota/' . $item->anggota->foto) }}"
                                          alt="{{ $item->anggota->nama_lengkap }}"
                                          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
                                     <div class="avatar-circle" style="display:none;background:linear-gradient(135deg,{{ ['#10b981,#059669','#3b82f6,#2563eb','#8b5cf6,#6d28d9','#f97316,#ea580c','#ec4899,#db2777'][($item->anggota->id ?? 0) % 5] }});">
@@ -463,12 +526,12 @@
 </div>{{-- end max-w-7xl --}}
 
 
+@if($canDelete)
 {{-- ===== Bulk Delete Form (hidden) ===== --}}
 <form id="bulkDeleteForm" action="{{ route('admin.denda.riwayat.bulk-destroy') }}" method="POST">
     @csrf
     <div id="bulkIdsContainer"></div>
 </form>
-
 
 {{-- ===== Bulk Action Bar ===== --}}
 <div id="bulkActionBar">
@@ -483,6 +546,7 @@
         <i class="fas fa-trash-alt text-xs"></i>Hapus Terpilih
     </button>
 </div>
+@endif
 
 
 {{-- ===== Filter Modal ===== --}}
@@ -630,6 +694,7 @@ $(document).ready(function () {
         ],
     });
 
+    @if($canDelete)
     // ========================
     // Select All & Row Checkboxes
     // ========================
@@ -651,18 +716,14 @@ $(document).ready(function () {
             selectAllCb.checked = false;
             selectAllCb.indeterminate = false;
         }
-
-        // Update selectAll state
-        const allVisible = document.querySelectorAll('#riwayat-table tbody .row-checkbox');
-        const allChecked = Array.from(allVisible).every(cb => cb.checked);
+        const allVisible  = document.querySelectorAll('#riwayat-table tbody .row-checkbox');
+        const allChecked  = Array.from(allVisible).every(cb => cb.checked);
         const someChecked = Array.from(allVisible).some(cb => cb.checked);
         selectAllCb.checked = allChecked && allVisible.length > 0;
         selectAllCb.indeterminate = someChecked && !allChecked;
     }
 
-    // Select All (only affects currently visible rows in DataTables)
     selectAllCb.addEventListener('change', function () {
-        // Select/deselect all rows across all pages
         riwayatTable.rows().every(function () {
             const row = this.node();
             const cb  = row.querySelector('.row-checkbox');
@@ -674,20 +735,14 @@ $(document).ready(function () {
         updateBulkBar();
     });
 
-    // Individual checkboxes
     $(document).on('change', '.row-checkbox', function () {
-        const row = $(this).closest('tr');
-        row.toggleClass('selected-row', this.checked);
+        $(this).closest('tr').toggleClass('selected-row', this.checked);
         updateBulkBar();
     });
 
-    // Re-attach after DataTables page change
     riwayatTable.on('draw', function () {
         selectAllCb.checked = false;
         selectAllCb.indeterminate = false;
-        // Keep checked state for rows that were selected
-        const checkedIds = getCheckedIds();
-        // (all unchecked after page change - intended behavior for page-based selection)
     });
 
     // ========================
@@ -709,7 +764,6 @@ $(document).ready(function () {
     document.getElementById('bulkDeleteBtn').addEventListener('click', function () {
         const ids = getCheckedIds();
         if (ids.length === 0) return;
-
         Swal.fire({
             title: 'Hapus Riwayat Denda?',
             html: `Anda akan menghapus <b>${ids.length} data</b> riwayat pembayaran denda.<br>
@@ -722,7 +776,6 @@ $(document).ready(function () {
             cancelButtonText: 'Batal',
         }).then(result => {
             if (result.isConfirmed) {
-                // Populate hidden form
                 const container = document.getElementById('bulkIdsContainer');
                 container.innerHTML = '';
                 ids.forEach(id => {
@@ -736,6 +789,7 @@ $(document).ready(function () {
             }
         });
     });
+    @endif
 
     // ========================
     // Filter Modal

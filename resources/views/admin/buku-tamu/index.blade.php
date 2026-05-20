@@ -246,14 +246,18 @@
                                    class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors" title="Detail">
                                     <i class="fas fa-eye text-xs"></i>
                                 </a>
+                                @if(!Auth::user()->isKepalaSekolah())
                                 <a href="{{ route('admin.buku-tamu.edit', $kunjungan->id) }}"
                                    class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors" title="Edit">
                                     <i class="fas fa-edit text-xs"></i>
                                 </a>
+                                @endif
+                                @if(!Auth::user()->isKepalaSekolah())
                                 <button onclick="hapusData({{ $kunjungan->id }})"
                                         class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors" title="Hapus">
                                     <i class="fas fa-trash text-xs"></i>
                                 </button>
+                                @endif
                             </div>
                         </div>
                     </div>

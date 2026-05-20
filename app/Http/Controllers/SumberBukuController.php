@@ -12,28 +12,13 @@ class SumberBukuController extends Controller
         $this->middleware(['auth', 'role:ADMIN']);
     }
 
-    public function index(Request $request)
+    public function index()
     {
-        $query = SumberBuku::query();
-
-        // Filter berdasarkan pencarian
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('nama_sumber', 'LIKE', "%{$search}%")
-                  ->orWhere('kode_sumber', 'LIKE', "%{$search}%")
-                  ->orWhere('deskripsi', 'LIKE', "%{$search}%");
-            });
-        }
-
-        // Filter berdasarkan status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        $sumber = $query->withCount('buku')->paginate(10)->withQueryString();
-        
-        return view('admin.sumber-buku.index', compact('sumber'));
+        $sumber         = SumberBuku::withCount('buku')->orderBy('nama_sumber')->get();
+        $totalSumber    = $sumber->count();
+        $sumberAktif    = $sumber->where('status', 'aktif')->count();
+        $sumberNonaktif = $sumber->where('status', 'nonaktif')->count();
+        return view('admin.sumber-buku.index', compact('sumber', 'totalSumber', 'sumberAktif', 'sumberNonaktif'));
     }
 
     public function create()

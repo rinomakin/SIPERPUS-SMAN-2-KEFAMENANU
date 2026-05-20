@@ -2,6 +2,33 @@
 
 @section('title', 'Detail Denda')
 
+@push('styles')
+<style>
+/* ===== Dark Mode Overrides: Denda Show ===== */
+html[data-theme="dark"] .bg-white.rounded-xl.shadow-lg {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+html[data-theme="dark"] .space-y-4 .border-b,
+html[data-theme="dark"] .space-y-3 .border-b {
+    border-color: #334155 !important;
+}
+html[data-theme="dark"] .bg-gray-50.p-3.rounded-lg {
+    background-color: #0f172a !important;
+    color: #cbd5e1 !important;
+}
+html[data-theme="dark"] .bg-gray-50.rounded-lg {
+    background-color: #0f172a !important;
+}
+html[data-theme="dark"] .bg-gray-200.rounded-lg {
+    background-color: #334155 !important;
+}
+html[data-theme="dark"] .bg-gray-200.rounded-lg .text-gray-500 {
+    color: #94a3b8 !important;
+}
+</style>
+@endpush
+
 @section('content')
 <div class="max-w-4xl mx-auto">
     <!-- Page Header -->
@@ -108,7 +135,7 @@
                 <div class="flex-shrink-0 h-16 w-16">
                     @if($denda->anggota->foto)
                         <img class="h-16 w-16 rounded-xl object-cover border-2 border-gray-100"
-                             src="{{ asset('storage/' . $denda->anggota->foto) }}"
+                             src="{{ asset('storage/anggota/' . $denda->anggota->foto) }}"
                              alt="{{ $denda->anggota->nama_lengkap }}"
                              onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
                         <div class="h-16 w-16 rounded-xl flex items-center justify-center text-white text-xl font-bold" style="display:none;background:linear-gradient(135deg,{{ ['#f97316,#ef4444','#8b5cf6,#6366f1','#10b981,#059669','#3b82f6,#2563eb','#ec4899,#db2777'][($denda->anggota->id ?? 0) % 5] }});">

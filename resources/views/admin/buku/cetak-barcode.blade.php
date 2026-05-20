@@ -59,9 +59,13 @@
                 
                 <div class="text-center mb-4">
                     <div class="inline-block p-4 bg-white border border-gray-300 rounded-lg">
-                        <img src="data:image/png;base64,{{ \App\Helpers\BarcodeHelper::generateBarcodeImage($buku->barcode_buku, 'C128') }}" 
+                        @if($buku->barcode)
+                        <img src="data:image/png;base64,{{ \App\Helpers\BarcodeHelper::generateBarcodeImage($buku->barcode, 'C128') }}"
                              alt="Barcode" class="barcode-image mb-2">
-                        <div class="barcode-text text-sm text-gray-700">{{ $buku->barcode_buku }}</div>
+                        <div class="barcode-text text-sm text-gray-700">{{ $buku->barcode }}</div>
+                        @else
+                        <div class="text-sm text-red-500 py-4">Barcode belum digenerate</div>
+                        @endif
                     </div>
                 </div>
                 

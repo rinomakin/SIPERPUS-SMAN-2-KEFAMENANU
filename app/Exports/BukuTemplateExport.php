@@ -23,7 +23,6 @@ class BukuTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, Wit
             [
                 'Pemrograman Web dengan Laravel',
                 '978-602-123456-7-8',
-                'BK000001', // Barcode (opsional, akan auto-generate jika kosong)
                 'John Doe', // Nama Penulis (string)
                 'Penerbit Teknologi', // Nama Penerbit (string)
                 $kategoris->first() ? $kategoris->first()->id : '1', // ID Kategori
@@ -40,7 +39,6 @@ class BukuTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, Wit
             [
                 'Matematika Dasar untuk SMA',
                 '978-602-987654-3-2',
-                'BK000002',
                 'Jane Smith',
                 'Penerbit Pendidikan',
                 $kategoris->count() > 1 ? $kategoris->get(1)->id : ($kategoris->first() ? $kategoris->first()->id : '1'),
@@ -64,7 +62,6 @@ class BukuTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, Wit
         if ($kategoris->count() > 0) {
             foreach ($kategoris as $kat) {
                 $kategoriData[] = [
-                    '',
                     '',
                     '',
                     '',
@@ -93,7 +90,6 @@ class BukuTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, Wit
                     '',
                     '',
                     '',
-                    '',
                     'ID: ' . $jen->id . ' - ' . $jen->nama_jenis,
                     '',
                     '',
@@ -112,7 +108,6 @@ class BukuTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, Wit
         if ($sumber->count() > 0) {
             foreach ($sumber as $sum) {
                 $sumberData[] = [
-                    '',
                     '',
                     '',
                     '',
@@ -147,7 +142,6 @@ class BukuTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, Wit
         return [
             'judul_buku',
             'isbn',
-            'barcode',
             'penulis',
             'penerbit',
             'kategori_id',

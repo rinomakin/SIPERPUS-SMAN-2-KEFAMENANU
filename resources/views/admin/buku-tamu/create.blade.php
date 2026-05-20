@@ -37,7 +37,7 @@
 
 <div class="space-y-5">
     {{-- Header --}}
-    <div class="glass-card rounded-2xl shadow-lg p-5 animate-fade">
+    <!-- <div class="glass-card rounded-2xl shadow-lg p-5 animate-fade">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div class="flex items-center gap-3">
                 <a href="{{ route('admin.buku-tamu.index') }}" class="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-colors">
@@ -58,7 +58,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     {{-- Tab Selector: Anggota / Tamu Umum --}}
     <div class="glass-card rounded-2xl shadow-lg p-5 animate-fade" style="animation-delay:0.05s">
@@ -85,9 +85,9 @@
                     <input type="text" id="search-member"
                            class="input-field pl-10"
                            placeholder="Ketik nama, nomor anggota, atau barcode...">
-                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <!-- <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400 text-sm"></i>
-                    </div>
+                    </div> -->
                 </div>
                 <button type="button" id="search-btn"
                         class="px-4 py-2.5 bg-violet-100 hover:bg-violet-200 text-violet-700 rounded-xl font-medium transition-colors text-sm">
@@ -208,7 +208,7 @@
                         <div class="relative">
                             <input type="datetime-local" id="waktu-datang" name="waktu_datang" class="input-field pl-10" value="{{ now()->format('Y-m-d\TH:i') }}" readonly>
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                <i class="fas fa-clock text-gray-400 text-sm"></i>
+                                <!-- <i class="fas fa-clock text-gray-400 text-sm"></i> -->
                             </div>
                         </div>
                         <p class="text-xs text-gray-400 mt-1">Otomatis real-time WITA</p>

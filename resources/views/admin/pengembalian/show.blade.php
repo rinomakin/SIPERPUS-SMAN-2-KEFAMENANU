@@ -117,6 +117,61 @@
         .no-print { display: none !important; }
         .section-card { box-shadow: none; border: 1px solid #e2e8f0; }
     }
+
+    /* ══════════════════════════════════════════════
+       DARK MODE OVERRIDES — Pengembalian Show
+    ══════════════════════════════════════════════ */
+    html[data-theme="dark"] .section-card {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+    }
+    html[data-theme="dark"] .info-row { border-color: #334155 !important; }
+    html[data-theme="dark"] .info-value { color: #f1f5f9 !important; }
+    html[data-theme="dark"] .book-table thead th {
+        background: linear-gradient(135deg, #1e293b, #0f172a) !important;
+        color: #64748b !important;
+        border-color: #334155 !important;
+    }
+    html[data-theme="dark"] .book-table tbody td { border-color: #1e293b !important; }
+    html[data-theme="dark"] .book-table tbody tr:hover { background: rgba(99,102,241,0.07) !important; }
+    html[data-theme="dark"] .kondisi-baik {
+        background: rgba(16,185,129,0.15) !important;
+        border-color: rgba(16,185,129,0.3) !important;
+        color: #34d399 !important;
+    }
+    html[data-theme="dark"] .kondisi-rusak {
+        background: rgba(239,68,68,0.15) !important;
+        border-color: rgba(239,68,68,0.3) !important;
+        color: #f87171 !important;
+    }
+    html[data-theme="dark"] .kondisi-sedang {
+        background: rgba(245,158,11,0.15) !important;
+        border-color: rgba(245,158,11,0.3) !important;
+        color: #fbbf24 !important;
+    }
+    /* Back/print action buttons */
+    html[data-theme="dark"] .bg-white.border.border-gray-200.text-gray-700 {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+        color: #cbd5e1 !important;
+    }
+    html[data-theme="dark"] .bg-white.border.border-gray-200.text-gray-700:hover {
+        background: #334155 !important;
+    }
+    /* Payment card inside show */
+    html[data-theme="dark"] .payment-card {
+        background: #0f172a !important;
+        border-color: #334155 !important;
+    }
+    /* Modal in show */
+    html[data-theme="dark"] .modal-anim.bg-white,
+    html[data-theme="dark"] .rounded-2xl.bg-white,
+    html[data-theme="dark"] .rounded-xl.bg-white {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+    }
+    html[data-theme="dark"] .border-t.border-gray-100 { border-color: #334155 !important; }
+    html[data-theme="dark"] .bg-gray-50.rounded-xl { background: #0f172a !important; }
 </style>
 @endpush
 
