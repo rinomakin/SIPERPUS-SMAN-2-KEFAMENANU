@@ -10,7 +10,9 @@ class KategoriBukuController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'role:ADMIN']);
+        $this->middleware('permission:kategori-buku.create')->only(['create', 'store']);
+        $this->middleware('permission:kategori-buku.edit')->only(['edit', 'update']);
+        $this->middleware('permission:kategori-buku.delete')->only(['destroy', 'destroyMultiple']);
     }
     public function index()
     {

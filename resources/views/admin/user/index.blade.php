@@ -74,7 +74,7 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         No. Telepon
                     </th>
-                    @if(Auth::user()->hasAnyPermission(['user.view', 'user.update', 'user.delete']) || Auth::user()->isAdmin())
+                    @if(Auth::user()->hasAnyPermission(['user.view', 'user.edit', 'user.delete']) || Auth::user()->isAdmin())
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Aksi
                     </th>
@@ -145,7 +145,7 @@
                                 @endif
                             </div>
                         </td>
-                        @if(Auth::user()->hasAnyPermission(['user.view', 'user.update', 'user.delete']) || Auth::user()->isAdmin())
+                        @if(Auth::user()->hasAnyPermission(['user.view', 'user.edit', 'user.delete']) || Auth::user()->isAdmin())
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center space-x-2">
                                 @if(Auth::user()->hasPermission('user.view') || Auth::user()->isAdmin())
@@ -155,7 +155,7 @@
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 @endif
-                                @if(Auth::user()->hasPermission('user.update') || Auth::user()->isAdmin())
+                                @if(Auth::user()->hasPermission('user.edit') || Auth::user()->isAdmin())
                                 <a href="{{ route('user.edit', $user->id) }}" 
                                    class="text-yellow-600 hover:text-yellow-900 p-1 rounded hover:bg-yellow-50 transition-colors" 
                                    title="Edit">
@@ -172,7 +172,7 @@
                                     </button>
                                 @endif
                                 @endif
-                                @if(Auth::user()->hasPermission('user.update') || Auth::user()->isAdmin())
+                                @if(Auth::user()->hasPermission('user.edit') || Auth::user()->isAdmin())
                                 <button type="button" 
                                         onclick="confirmResetPassword({{ $user->id }})"
                                         class="text-purple-600 hover:text-purple-900 p-1 rounded hover:bg-purple-50 transition-colors" 
@@ -180,7 +180,7 @@
                                     <i class="fas fa-key"></i>
                                 </button>
                                 @endif
-                                @if(!Auth::user()->hasAnyPermission(['user.view', 'user.update', 'user.delete']) && !Auth::user()->isAdmin())
+                                @if(!Auth::user()->hasAnyPermission(['user.view', 'user.edit', 'user.delete']) && !Auth::user()->isAdmin())
                                 <span class="text-gray-400 text-sm">Tidak ada aksi tersedia</span>
                                 @endif
                             </div>
@@ -189,7 +189,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ (Auth::user()->hasAnyPermission(['user.view', 'user.update', 'user.delete']) || Auth::user()->isAdmin()) ? '7' : '6' }}" class="px-6 py-12 text-center">
+                        <td colspan="{{ (Auth::user()->hasAnyPermission(['user.view', 'user.edit', 'user.delete']) || Auth::user()->isAdmin()) ? '7' : '6' }}" class="px-6 py-12 text-center">
                             <div class="flex flex-col items-center">
                                 <i class="fas fa-users text-gray-400 text-4xl mb-4"></i>
                                 <p class="text-gray-500 text-lg font-medium">Tidak ada data user</p>

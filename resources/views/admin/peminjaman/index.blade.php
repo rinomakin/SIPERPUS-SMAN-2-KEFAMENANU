@@ -436,7 +436,7 @@
                 <thead>
                     <tr>
                         <th>No</th>
-                        <th>Nomor Peminjaman</th>
+                        <!-- <th>Nomor Peminjaman</th> -->
                         <th>Anggota</th>
                         <th>Jumlah</th>
                         <th>Tgl. Pinjam</th>
@@ -551,7 +551,7 @@ $(document).ready(function() {
         },
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, className: 'px-4 py-3 text-center text-gray-400 font-medium' },
-            { data: 'nomor_badge', name: 'nomor_peminjaman', className: 'px-4 py-3' },
+            // { data: 'nomor_badge', name: 'nomor_peminjaman', className: 'px-4 py-3' },
             { data: 'anggota_info', name: 'anggota.nama_lengkap', className: 'px-4 py-3' },
             { data: 'jumlah_badge', name: 'jumlah_buku', className: 'px-4 py-3 text-center' },
             { data: 'tanggal_pinjam_info', name: 'tanggal_peminjaman', className: 'px-4 py-3' },

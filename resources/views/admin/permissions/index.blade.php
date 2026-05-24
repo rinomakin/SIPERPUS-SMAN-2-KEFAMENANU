@@ -96,8 +96,9 @@
 <!-- ==================== MODAL: Edit Hak Akses ==================== -->
 <div id="permissionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <div class="p-6 border-b border-gray-200">
+        <div class="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col">
+            <!-- Fixed Header -->
+            <div class="p-6 border-b border-gray-200 flex-none">
                 <div class="flex items-center justify-between">
                     <h3 id="modalTitle" class="text-lg font-semibold text-gray-900">Edit Hak Akses</h3>
                     <button type="button" onclick="hidePermissionModal()" class="text-gray-400 hover:text-gray-600">
@@ -106,11 +107,12 @@
                 </div>
             </div>
 
-            <form id="permissionForm" class="overflow-y-auto max-h-[calc(90vh-180px)]">
+            <!-- Scrollable form content + sticky footer -->
+            <form id="permissionForm" class="flex flex-col flex-1 overflow-hidden">
                 @csrf
                 <input type="hidden" id="roleId" name="role_id">
 
-                <div class="p-6">
+                <div class="flex-1 overflow-y-auto p-6">
                     <!-- Select All Controls -->
                     <div class="mb-6 p-4 bg-gray-50 rounded-lg">
                         <div class="flex items-center justify-between">
@@ -159,7 +161,8 @@
                     @endforeach
                 </div>
 
-                <div class="flex justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+                <!-- Sticky Footer -->
+                <div class="flex-none flex justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
                     <button type="button" onclick="hidePermissionModal()"
                             class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-lg transition-all duration-200">
                         Batal

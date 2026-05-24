@@ -12,7 +12,7 @@
                 <p class="text-gray-600 text-sm mt-1">Informasi lengkap user: {{ $user->nama_lengkap }}</p>
             </div>
             <div class="flex flex-col sm:flex-row gap-2">
-                @if(Auth::user()->hasPermission('user.update') || Auth::user()->isAdmin())
+                @if(Auth::user()->hasPermission('user.edit') || Auth::user()->isAdmin())
                 <a href="{{ route('user.edit', $user->id) }}" 
                    class="inline-flex items-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
                     <i class="fas fa-edit mr-2"></i>
@@ -222,7 +222,7 @@
                 </div>
 
                 <!-- Special Actions -->
-                @if((Auth::user()->hasAnyPermission(['user.update', 'user.delete']) || Auth::user()->isAdmin()) && $user->id !== auth()->id())
+                @if((Auth::user()->hasAnyPermission(['user.edit', 'user.delete']) || Auth::user()->isAdmin()) && $user->id !== auth()->id())
                     <div class="bg-gray-50 rounded-lg p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                             <i class="fas fa-tools mr-2 text-green-600"></i>
@@ -230,7 +230,7 @@
                         </h3>
                         
                         <div class="space-y-3">
-                            @if(Auth::user()->hasPermission('user.update') || Auth::user()->isAdmin())
+                            @if(Auth::user()->hasPermission('user.edit') || Auth::user()->isAdmin())
                             <button type="button" 
                                     onclick="confirmResetPassword({{ $user->id }})"
                                     class="w-full inline-flex items-center justify-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
@@ -285,7 +285,7 @@
         <div class="mt-8 pt-6 border-t border-gray-200">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div class="flex flex-col sm:flex-row gap-3">
-                    @if(Auth::user()->hasPermission('user.update') || Auth::user()->isAdmin())
+                    @if(Auth::user()->hasPermission('user.edit') || Auth::user()->isAdmin())
                     <a href="{{ route('user.edit', $user->id) }}" 
                        class="inline-flex items-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-lg transition-colors duration-200">
                         <i class="fas fa-edit mr-2"></i>
@@ -299,9 +299,9 @@
                     </a>
                 </div>
                 
-                @if((Auth::user()->hasAnyPermission(['user.update', 'user.delete']) || Auth::user()->isAdmin()) && $user->id !== auth()->id())
+                @if((Auth::user()->hasAnyPermission(['user.edit', 'user.delete']) || Auth::user()->isAdmin()) && $user->id !== auth()->id())
                     <div class="flex flex-col sm:flex-row gap-2">
-                        @if(Auth::user()->hasPermission('user.update') || Auth::user()->isAdmin())
+                        @if(Auth::user()->hasPermission('user.edit') || Auth::user()->isAdmin())
                         <button type="button" 
                                 onclick="confirmResetPassword({{ $user->id }})"
                                 class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-200">

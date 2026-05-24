@@ -19,6 +19,9 @@ class AnggotaController extends Controller
     public function __construct()
     {
         $this->middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS']);
+        $this->middleware('permission:anggota.create')->only(['create', 'store']);
+        $this->middleware('permission:anggota.edit')->only(['edit', 'update']);
+        $this->middleware('permission:anggota.delete')->only(['destroy', 'bulkDelete']);
     }
 
     public function index(Request $request)
@@ -117,7 +120,7 @@ class AnggotaController extends Controller
                         $actions .= '<a href="' . route('anggota.show', $row->id) . '" class="action-btn action-btn-view" title="Lihat Detail"><i class="fas fa-eye"></i></a>';
                     }
 
-                    if (auth()->user()->hasPermission('anggota.update') || auth()->user()->isAdmin()) {
+                    if (auth()->user()->hasPermission('anggota.edit') || auth()->user()->isAdmin()) {
                         $actions .= '<a href="' . route('anggota.edit', $row->id) . '" class="action-btn action-btn-edit" title="Edit"><i class="fas fa-edit"></i></a>';
                     }
 

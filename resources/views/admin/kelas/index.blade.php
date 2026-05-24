@@ -151,11 +151,13 @@
         <h2 class="text-2xl font-bold text-gray-800">Data Kelas</h2>
         <p class="text-sm text-gray-400 mt-1">Kelola data kelas dan rombongan belajar</p>
     </div>
+    @if(Auth::user()->hasPermission('kelas.create') || Auth::user()->isAdmin())
     <button onclick="openTambahModal()"
             class="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
         <i class="fas fa-plus"></i>
         Tambah Kelas
     </button>
+    @endif
 </div>
 
 <!-- ── Stat Cards ─────────────────────────────────── -->
@@ -217,26 +219,38 @@
                         </span>
                     </td>
                     <td>
-                        @if($item->status === 'aktif' || $item->status == 1)
-                            <span class="badge-aktif">Aktif</span>
-                        @else
-                            <span class="badge-nonaktif">Nonaktif</span>
-                        @endif
+                        @php $aktif = ($item->status === 'aktif' || $item->status == 1); @endphp
+                        <span class="{{ $aktif ? 'badge-aktif' : 'badge-nonaktif' }}">{{ $aktif ? 'Aktif' : 'Nonaktif' }}</span>
                     </td>
                     <td>
                         <div class="flex items-center gap-2">
+                            @if(Auth::user()->hasPermission('kelas.edit') || Auth::user()->isAdmin())
                             <button onclick="openEditModal({{ $item->id }}, '{{ $item->kode_kelas }}', '{{ addslashes($item->nama_kelas) }}', {{ $item->jurusan_id }}, '{{ $item->tahun_ajaran }}', '{{ $item->status }}')"
                                     class="btn-edit">
                                 <i class="fas fa-edit"></i> Edit
                             </button>
+                            @endif
+                            @if(Auth::user()->hasPermission('kelas.delete') || Auth::user()->isAdmin())
                             <button onclick="deleteKelas({{ $item->id }}, '{{ addslashes($item->nama_kelas) }}')"
                                     class="btn-delete">
                                 <i class="fas fa-trash"></i> Hapus
                             </button>
+                            @endif
                         </div>
                     </td>
                 </tr>
                 @empty
+                <tr>
+                    <td colspan="8" class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center gap-3">
+                            <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center">
+                                <i class="fas fa-school text-2xl text-indigo-300"></i>
+                            </div>
+                            <h4 class="text-sm font-semibold text-gray-700">Belum ada data kelas</h4>
+                            <p class="text-xs text-gray-400">Klik tombol "Tambah Kelas" untuk menambahkan kelas baru</p>
+                        </div>
+                    </td>
+                </tr>
                 @endforelse
             </tbody>
         </table>

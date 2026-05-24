@@ -273,7 +273,7 @@
             </button>
         </div>
 
-        <!-- Bulk Bar -->
+        @if($canDelete)
         <div id="bulkBar" class="mx-6 mt-4">
             <i class="fas fa-check-square text-rose-500"></i>
             <span class="text-sm font-semibold text-rose-700"><span id="selectedCount">0</span> data dipilih</span>
@@ -285,6 +285,7 @@
                 <i class="fas fa-times"></i><span>Batal</span>
             </button>
         </div>
+        @endif
 
         <!-- Table -->
         <div class="p-6">
@@ -293,16 +294,16 @@
                     <thead>
                         <tr>
                             <th class="text-center w-10">
-                                <input type="checkbox" id="checkAll" title="Pilih semua di halaman ini">
+                                @if($canDelete)<input type="checkbox" id="checkAll" title="Pilih semua di halaman ini">@endif
                             </th>
                             <th class="text-center w-12">No</th>
-                            <th class="text-left">No. Peminjaman</th>
+                            <!-- <th class="text-left">No. Peminjaman</th> -->
                             <th class="text-left">Anggota</th>
                             <th class="text-center">Buku</th>
                             <th class="text-left">Tgl Pinjam</th>
                             <th class="text-left">Batas Kembali</th>
                             <th class="text-center">Status</th>
-                            <th class="text-left">Petugas</th>
+                            <!-- <th class="text-left">Petugas</th> -->
                             <th class="text-center w-24">Aksi</th>
                         </tr>
                     </thead>
@@ -490,13 +491,13 @@ $(document).ready(function () {
         columns: [
             { data: 'checkbox',      name: 'checkbox',           orderable: false, searchable: false, className: 'text-center', width: '40px' },
             { data: 'DT_RowIndex',   name: 'DT_RowIndex',        orderable: false, searchable: false, className: 'text-center', width: '45px' },
-            { data: 'nomor_badge',   name: 'nomor_peminjaman',   orderable: false, searchable: false },
+            // { data: 'nomor_badge',   name: 'nomor_peminjaman',   orderable: false, searchable: false },
             { data: 'anggota_info',  name: 'anggota_id',         orderable: false, searchable: false },
             { data: 'jumlah_badge',  name: 'jumlah_badge',       orderable: false, searchable: false, className: 'text-center' },
             { data: 'tanggal_info',  name: 'tanggal_peminjaman', orderable: false, searchable: false },
             { data: 'batas_kembali', name: 'batas_kembali',      orderable: false, searchable: false },
             { data: 'status_badge',  name: 'status',             orderable: false, searchable: false, className: 'text-center' },
-            { data: 'petugas',       name: 'petugas',            orderable: false, searchable: false },
+            // { data: 'petugas',       name: 'petugas',            orderable: false, searchable: false },
             { data: 'action',        name: 'action',             orderable: false, searchable: false, className: 'text-center', width: '96px' },
         ],
         language: {
@@ -564,9 +565,10 @@ function bindCheckboxes() {
 
 function updateBulkBar() {
     const checked = document.querySelectorAll('.row-checkbox:checked');
-    document.getElementById('selectedCount').textContent = checked.length;
+    const countEl = document.getElementById('selectedCount');
+    if (countEl) countEl.textContent = checked.length;
     const bar = document.getElementById('bulkBar');
-    checked.length > 0 ? bar.classList.add('show') : bar.classList.remove('show');
+    if (bar) checked.length > 0 ? bar.classList.add('show') : bar.classList.remove('show');
 }
 
 function clearSelection() {
@@ -576,8 +578,10 @@ function clearSelection() {
     });
     const checkAll = document.getElementById('checkAll');
     if (checkAll) { checkAll.checked = false; checkAll.indeterminate = false; }
-    document.getElementById('bulkBar').classList.remove('show');
-    document.getElementById('selectedCount').textContent = '0';
+    const bulkBar = document.getElementById('bulkBar');
+    if (bulkBar) bulkBar.classList.remove('show');
+    const selectedCount = document.getElementById('selectedCount');
+    if (selectedCount) selectedCount.textContent = '0';
 }
 
 // ─── Quick Filter ──────────────────────────────────────────────────────────

@@ -12,11 +12,13 @@
                 <p class="text-gray-600 text-sm mt-1">Informasi lengkap role: {{ $role->nama_peran }}</p>
             </div>
             <div class="flex flex-col sm:flex-row gap-2">
+                @if(Auth::user()->hasPermission('role.edit') || Auth::user()->isAdmin())
                 <a href="{{ route('role.edit', $role->id) }}" 
                    class="inline-flex items-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
                     <i class="fas fa-edit mr-2"></i>
                     Edit Role
                 </a>
+                @endif
                 <a href="{{ route('role.index') }}" 
                    class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
                     <i class="fas fa-arrow-left mr-2"></i>
@@ -178,11 +180,13 @@
         <div class="mt-8 pt-6 border-t border-gray-200">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div class="flex flex-col sm:flex-row gap-3">
+                    @if(Auth::user()->hasPermission('role.edit') || Auth::user()->isAdmin())
                     <a href="{{ route('role.edit', $role->id) }}" 
                        class="inline-flex items-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-lg transition-colors duration-200">
                         <i class="fas fa-edit mr-2"></i>
                         Edit Role
                     </a>
+                    @endif
                     <a href="{{ route('role.index') }}" 
                        class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors duration-200">
                         <i class="fas fa-arrow-left mr-2"></i>
@@ -190,6 +194,7 @@
                     </a>
                 </div>
                 
+                @if(Auth::user()->hasPermission('role.delete') || Auth::user()->isAdmin())
                 <form action="{{ route('role.destroy', $role->id) }}" 
                       method="POST" 
                       onsubmit="return confirm('Apakah Anda yakin ingin menghapus role ini?')"
@@ -209,6 +214,7 @@
                         </p>
                     @endif
                 </form>
+                @endif
             </div>
         </div>
     </div>

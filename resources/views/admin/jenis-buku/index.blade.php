@@ -150,11 +150,13 @@
         <h2 class="text-2xl font-bold text-gray-800">Data Jenis Buku</h2>
         <p class="text-sm text-gray-400 mt-1">Kelola kategori dan jenis koleksi buku perpustakaan</p>
     </div>
+    @if(Auth::user()->hasPermission('jenis-buku.create') || Auth::user()->isAdmin())
     <button onclick="openTambahModal()"
             class="flex items-center gap-2 bg-gradient-to-r from-sky-500 to-cyan-400 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
         <i class="fas fa-plus"></i>
         Tambah Jenis Buku
     </button>
+    @endif
 </div>
 
 <!-- ── Stat Cards ─────────────────────────────────── -->
@@ -224,14 +226,18 @@
                     </td>
                     <td>
                         <div class="flex items-center gap-2">
+                            @if(Auth::user()->hasPermission('jenis-buku.edit') || Auth::user()->isAdmin())
                             <button onclick="openEditModal({{ $item->id }}, '{{ addslashes($item->nama_jenis) }}', '{{ $item->kode_jenis }}', '{{ addslashes($item->deskripsi ?? '') }}', {{ $item->status ? 1 : 0 }})"
                                     class="btn-edit">
                                 <i class="fas fa-edit"></i> Edit
                             </button>
+                            @endif
+                            @if(Auth::user()->hasPermission('jenis-buku.delete') || Auth::user()->isAdmin())
                             <button onclick="deleteJenis({{ $item->id }}, '{{ addslashes($item->nama_jenis) }}', {{ $item->buku_count }})"
                                     class="btn-delete">
                                 <i class="fas fa-trash"></i> Hapus
                             </button>
+                            @endif
                         </div>
                     </td>
                 </tr>

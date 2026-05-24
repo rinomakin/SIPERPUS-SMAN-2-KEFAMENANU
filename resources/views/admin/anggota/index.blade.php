@@ -336,7 +336,7 @@
                         <th class="px-4 py-3.5 text-left">Kelas</th>
                         <th class="px-4 py-3.5 text-left">Jenis</th>
                         <th class="px-4 py-3.5 text-left">Status</th>
-                        @if(Auth::user()->hasPermission('anggota.update') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
+                        @if(Auth::user()->hasPermission('anggota.view') || Auth::user()->hasPermission('anggota.edit') || Auth::user()->hasPermission('anggota.delete') || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
                         <th class="px-4 py-3.5 text-center w-40">Aksi</th>
                         @endif
                     </tr>
@@ -525,7 +525,7 @@ const Toast = Swal.mixin({
 
 $(document).ready(function() {
     const hasCheckboxColumn = {{ (Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin()) ? 'true' : 'false' }};
-    const hasActionColumn = {{ (Auth::user()->hasPermission('anggota.update') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin()) ? 'true' : 'false' }};
+    const hasActionColumn = {{ (Auth::user()->hasPermission('anggota.view') || Auth::user()->hasPermission('anggota.edit') || Auth::user()->hasPermission('anggota.delete') || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin()) ? 'true' : 'false' }};
 
     let columns = [];
 

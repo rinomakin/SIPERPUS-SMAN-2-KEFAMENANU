@@ -74,10 +74,12 @@
         <h2 class="text-2xl font-bold text-gray-800">Data Kategori Buku</h2>
         <p class="text-sm text-gray-400 mt-1">Kelola kategori koleksi buku perpustakaan</p>
     </div>
+    @if(Auth::user()->hasPermission('kategori-buku.create') || Auth::user()->isAdmin())
     <button onclick="openTambahModal()"
             class="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-400 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
         <i class="fas fa-plus"></i> Tambah Kategori
     </button>
+    @endif
 </div>
 
 <!-- Stat Cards -->
@@ -138,10 +140,14 @@
                     <td class="text-gray-500 text-xs">{{ $kategori->created_at->format('d/m/Y') }}</td>
                     <td>
                         <div class="flex items-center gap-2">
+                            @if(Auth::user()->hasPermission('kategori-buku.edit') || Auth::user()->isAdmin())
                             <button onclick="openEditModal({{ $kategori->id }}, '{{ addslashes($kategori->nama_kategori) }}', '{{ $kategori->kode_kategori }}', '{{ addslashes($kategori->deskripsi ?? '') }}')"
                                     class="btn-edit"><i class="fas fa-edit"></i> Edit</button>
+                            @endif
+                            @if(Auth::user()->hasPermission('kategori-buku.delete') || Auth::user()->isAdmin())
                             <button onclick="deleteKategori({{ $kategori->id }}, '{{ addslashes($kategori->nama_kategori) }}', {{ $kategori->buku_count }})"
                                     class="btn-delete"><i class="fas fa-trash"></i> Hapus</button>
+                            @endif
                         </div>
                     </td>
                 </tr>

@@ -21,6 +21,9 @@ class PengembalianController extends Controller
     {
         $this->middleware(['auth']);
         // Hapus middleware permission untuk method pencarian - akan dicek di method masing-masing jika diperlukan
+        $this->middleware('permission:pengembalian.create')->only(['create', 'store']);
+        $this->middleware('permission:pengembalian.edit')->only(['edit', 'update']);
+        $this->middleware('permission:pengembalian.delete')->only(['destroy']);
     }
 
     public function index(Request $request)

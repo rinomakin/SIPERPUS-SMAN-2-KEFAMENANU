@@ -76,7 +76,64 @@ html[data-theme="dark"] #formPengaturan p.text-xs.text-gray-500     { color: #47
 
 /* Info text di action bar */
 html[data-theme="dark"] .mt-8 p.text-xs.text-gray-400 { color: #475569 !important; }
+
+/* ── Read-only mode ── */
+.form-readonly input:not([type="file"]),
+.form-readonly textarea {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    color: #64748b !important;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+.form-readonly input:not([type="file"])::placeholder,
+.form-readonly textarea::placeholder { color: #94a3b8 !important; }
+.form-readonly .upload-btn {
+    opacity: 0.5;
+    cursor: not-allowed !important;
+    pointer-events: none;
+}
+.form-readonly .upload-overlay { display: none !important; }
+html[data-theme="dark"] .form-readonly input:not([type="file"]),
+html[data-theme="dark"] .form-readonly textarea {
+    background: #1e293b !important;
+    border-color: #1e293b !important;
+    color: #64748b !important;
+}
 </style>
+@endpush
+
+@push('scripts')
+<script>
+// ─── Toggle Edit Mode ──────────────────────────────────────────────────
+function toggleEdit() {
+    const form = document.getElementById('formPengaturan');
+    const isReadonly = form.classList.contains('form-readonly');
+
+    form.classList.toggle('form-readonly');
+
+    // Toggle disabled on all form controls
+    form.querySelectorAll('input, textarea').forEach(el => {
+        if (el.type !== 'hidden') {
+            el.disabled = isReadonly ? false : true;
+        }
+    });
+    // Toggle disabled on upload trigger buttons
+    form.querySelectorAll('.upload-btn').forEach(el => {
+        el.disabled = isReadonly ? false : true;
+    });
+
+    // Toggle button visibility
+    document.getElementById('btnEdit').classList.toggle('hidden');
+    document.getElementById('btnSimpan').classList.toggle('hidden');
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Ensure initial state: form is readonly
+    const form = document.getElementById('formPengaturan');
+    form.classList.add('form-readonly');
+});
+</script>
 @endpush
 
 @section('content')
@@ -161,10 +218,10 @@ html[data-theme="dark"] .mt-8 p.text-xs.text-gray-400 { color: #475569 !importan
                                         </div>
                                     </label>
                                 </div>
-                                <input type="file" name="logo" id="logo" accept="image/*" class="hidden" onchange="previewImage(this, 'logoPreview', 'logoPlaceholder')">
+                                <input type="file" name="logo" id="logo" accept="image/*" class="hidden" onchange="previewImage(this, 'logoPreview', 'logoPlaceholder')" disabled>
                                 <button type="button" onclick="document.getElementById('logo').click()"
-                                        class="px-4 py-2 rounded-xl text-sm font-medium text-violet-600 transition-all duration-200 hover:scale-105"
-                                        style="background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.15);">
+                                        class="upload-btn px-4 py-2 rounded-xl text-sm font-medium text-violet-600 transition-all duration-200 hover:scale-105"
+                                        style="background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.15);" disabled>
                                     <i class="fas fa-upload mr-1.5"></i>Pilih File Logo
                                 </button>
                                 <p class="text-xs text-gray-400">Format: JPG, PNG, GIF, SVG. Maks 2MB</p>
@@ -207,10 +264,10 @@ html[data-theme="dark"] .mt-8 p.text-xs.text-gray-400 { color: #475569 !importan
                                         </div>
                                     </label>
                                 </div>
-                                <input type="file" name="favicon" id="favicon" accept="image/*,.ico" class="hidden" onchange="previewImage(this, 'faviconPreview', 'faviconPlaceholder')">
+                                <input type="file" name="favicon" id="favicon" accept="image/*,.ico" class="hidden" onchange="previewImage(this, 'faviconPreview', 'faviconPlaceholder')" disabled>
                                 <button type="button" onclick="document.getElementById('favicon').click()"
-                                        class="px-4 py-2 rounded-xl text-sm font-medium text-violet-600 transition-all duration-200 hover:scale-105"
-                                        style="background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.15);">
+                                        class="upload-btn px-4 py-2 rounded-xl text-sm font-medium text-violet-600 transition-all duration-200 hover:scale-105"
+                                        style="background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.15);" disabled>
                                     <i class="fas fa-upload mr-1.5"></i>Pilih File Favicon
                                 </button>
                                 <p class="text-xs text-gray-400">Format: JPG, PNG, ICO, SVG. Maks 1MB</p>
@@ -245,7 +302,7 @@ html[data-theme="dark"] .mt-8 p.text-xs.text-gray-400 { color: #475569 !importan
                             <input type="text" name="nama_website" id="nama_website" value="{{ $pengaturan->nama_website }}"
                                    class="w-full px-4 py-3 rounded-xl text-sm transition-all duration-200 focus:ring-2 focus:ring-violet-400 focus:outline-none"
                                    style="background: rgba(124,58,237,0.03); border: 1px solid rgba(124,58,237,0.12);"
-                                   placeholder="Masukkan nama website">
+                                   placeholder="Masukkan nama website" disabled>
                         </div>
 
                         {{-- Deskripsi Website --}}
@@ -256,7 +313,7 @@ html[data-theme="dark"] .mt-8 p.text-xs.text-gray-400 { color: #475569 !importan
                             <textarea name="deskripsi_website" id="deskripsi_website" rows="4"
                                       class="w-full px-4 py-3 rounded-xl text-sm transition-all duration-200 focus:ring-2 focus:ring-violet-400 focus:outline-none resize-none"
                                       style="background: rgba(124,58,237,0.03); border: 1px solid rgba(124,58,237,0.12);"
-                                      placeholder="Masukkan deskripsi website">{{ $pengaturan->deskripsi_website }}</textarea>
+                                      placeholder="Masukkan deskripsi website" disabled>{{ $pengaturan->deskripsi_website }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -285,7 +342,7 @@ html[data-theme="dark"] .mt-8 p.text-xs.text-gray-400 { color: #475569 !importan
                             <textarea name="alamat_sekolah" id="alamat_sekolah" rows="2"
                                       class="w-full px-4 py-3 rounded-xl text-sm transition-all duration-200 focus:ring-2 focus:ring-emerald-400 focus:outline-none resize-none"
                                       style="background: rgba(16,185,129,0.03); border: 1px solid rgba(16,185,129,0.15);"
-                                      placeholder="Masukkan alamat sekolah">{{ $pengaturan->alamat_sekolah }}</textarea>
+                                      placeholder="Masukkan alamat sekolah" disabled>{{ $pengaturan->alamat_sekolah }}</textarea>
                         </div>
 
                         {{-- Telepon & Email --}}
@@ -297,7 +354,7 @@ html[data-theme="dark"] .mt-8 p.text-xs.text-gray-400 { color: #475569 !importan
                                 <input type="text" name="telepon_sekolah" id="telepon_sekolah" value="{{ $pengaturan->telepon_sekolah }}"
                                        class="w-full px-4 py-3 rounded-xl text-sm transition-all duration-200 focus:ring-2 focus:ring-emerald-400 focus:outline-none"
                                        style="background: rgba(16,185,129,0.03); border: 1px solid rgba(16,185,129,0.15);"
-                                       placeholder="08xxx">
+                                       placeholder="08xxx" disabled>
                             </div>
                             <div>
                                 <label for="email_sekolah" class="block text-sm font-semibold text-gray-700 mb-1.5">
@@ -306,7 +363,7 @@ html[data-theme="dark"] .mt-8 p.text-xs.text-gray-400 { color: #475569 !importan
                                 <input type="email" name="email_sekolah" id="email_sekolah" value="{{ $pengaturan->email_sekolah }}"
                                        class="w-full px-4 py-3 rounded-xl text-sm transition-all duration-200 focus:ring-2 focus:ring-emerald-400 focus:outline-none"
                                        style="background: rgba(16,185,129,0.03); border: 1px solid rgba(16,185,129,0.15);"
-                                       placeholder="email@sekolah.sch.id">
+                                       placeholder="email@sekolah.sch.id" disabled>
                             </div>
                         </div>
 
@@ -318,7 +375,7 @@ html[data-theme="dark"] .mt-8 p.text-xs.text-gray-400 { color: #475569 !importan
                             <input type="text" name="nama_kepala_sekolah" id="nama_kepala_sekolah" value="{{ $pengaturan->nama_kepala_sekolah }}"
                                    class="w-full px-4 py-3 rounded-xl text-sm transition-all duration-200 focus:ring-2 focus:ring-emerald-400 focus:outline-none"
                                    style="background: rgba(16,185,129,0.03); border: 1px solid rgba(16,185,129,0.15);"
-                                   placeholder="Nama kepala sekolah">
+                                   placeholder="Nama kepala sekolah" disabled>
                         </div>
 
                         {{-- Jam Operasional --}}
@@ -329,7 +386,7 @@ html[data-theme="dark"] .mt-8 p.text-xs.text-gray-400 { color: #475569 !importan
                             <input type="text" name="jam_operasional" id="jam_operasional" value="{{ $pengaturan->jam_operasional }}"
                                    class="w-full px-4 py-3 rounded-xl text-sm transition-all duration-200 focus:ring-2 focus:ring-emerald-400 focus:outline-none"
                                    style="background: rgba(16,185,129,0.03); border: 1px solid rgba(16,185,129,0.15);"
-                                   placeholder="Senin - Jumat, 08:00 - 15:00">
+                                   placeholder="Senin - Jumat, 08:00 - 15:00" disabled>
                         </div>
                     </div>
                 </div>
@@ -338,7 +395,7 @@ html[data-theme="dark"] .mt-8 p.text-xs.text-gray-400 { color: #475569 !importan
             {{-- Action Buttons --}}
             <div class="mt-8 flex items-center justify-between">
                 <p class="text-xs text-gray-400 hidden sm:block">
-                    <i class="fas fa-info-circle mr-1"></i>Perubahan akan langsung diterapkan setelah disimpan
+                    <i class="fas fa-info-circle mr-1"></i>Klik tombol Edit untuk mengubah pengaturan
                 </p>
                 <div class="flex items-center gap-3 ml-auto">
                     <button type="button" onclick="window.history.back()"
@@ -346,12 +403,20 @@ html[data-theme="dark"] .mt-8 p.text-xs.text-gray-400 { color: #475569 !importan
                             style="background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(0,0,0,0.08);">
                         <i class="fas fa-arrow-left mr-1.5"></i>Kembali
                     </button>
-                    <button type="submit" id="btnSimpan"
+                    @if(Auth::user()->hasPermission('pengaturan.edit') || Auth::user()->hasPermission('pengaturan.manage'))
+                    <button type="button" id="btnEdit" onclick="toggleEdit()"
                             class="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2"
+                            style="background: linear-gradient(135deg, #3b82f6, #6366f1); box-shadow: 0 4px 15px rgba(59,130,246,0.3);">
+                        <i class="fas fa-pen"></i>
+                        <span>Edit Pengaturan</span>
+                    </button>
+                    <button type="submit" id="btnSimpan"
+                            class="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2 hidden"
                             style="background: linear-gradient(135deg, #7c3aed, #a855f7); box-shadow: 0 4px 15px rgba(124,58,237,0.3);">
                         <i class="fas fa-save"></i>
                         <span>Simpan Pengaturan</span>
                     </button>
+                    @endif
                 </div>
             </div>
         </form>

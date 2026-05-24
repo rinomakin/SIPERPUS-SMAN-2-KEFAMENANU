@@ -36,6 +36,9 @@ class AssignPermissionsSeeder extends Seeder
             // User Management - view only
             'user.view',
 
+            // Role Management - view only
+            'role.view',
+
             // Anggota - view & export only
             'anggota.view',
             'anggota.export',
@@ -100,10 +103,14 @@ class AssignPermissionsSeeder extends Seeder
             // Dashboard
             'dashboard.view',
 
+            // Pengaturan - view only (edit can be granted by Admin via permission UI)
+            'pengaturan.view',
+
             // Anggota - create & edit (no delete)
             'anggota.view',
             'anggota.create',
             'anggota.edit',
+            'anggota.cetak-kartu',
 
             // Buku - view only
             'buku.view',

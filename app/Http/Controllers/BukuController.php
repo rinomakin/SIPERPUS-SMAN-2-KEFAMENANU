@@ -20,6 +20,9 @@ class BukuController extends Controller
     public function __construct()
     {
         $this->middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS']);
+        $this->middleware('permission:buku.create')->only(['create', 'store']);
+        $this->middleware('permission:buku.edit')->only(['edit', 'update']);
+        $this->middleware('permission:buku.delete')->only(['destroy', 'destroyMultiple']);
     }
 
     public function index(Request $request)
@@ -122,11 +125,11 @@ class BukuController extends Controller
                         $actions .= '<a href="' . route('buku.show', $row->id) . '" class="action-btn action-btn-view" title="Lihat Detail"><i class="fas fa-eye"></i></a>';
                     }
 
-                    if (auth()->user()->hasPermission('buku.update') || auth()->user()->isAdmin()) {
+                    if (auth()->user()->hasPermission('buku.edit') || auth()->user()->isAdmin()) {
                         $actions .= '<a href="' . route('buku.edit', $row->id) . '" class="action-btn action-btn-edit" title="Edit"><i class="fas fa-edit"></i></a>';
                     }
 
-                    if (auth()->user()->hasPermission('buku.cetak-barcode') || auth()->user()->isAdmin()) {
+                    if (auth()->user()->hasPermission('buku.print-barcode') || auth()->user()->isAdmin()) {
                         $actions .= '<a href="' . route('buku.cetak-barcode', $row->id) . '" class="action-btn action-btn-print" title="Cetak Barcode" target="_blank"><i class="fas fa-barcode"></i></a>';
                     }
 

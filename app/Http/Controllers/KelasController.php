@@ -10,7 +10,9 @@ class KelasController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'role:ADMIN']);
+        $this->middleware('permission:kelas.create')->only(['create', 'store']);
+        $this->middleware('permission:kelas.edit')->only(['edit', 'update']);
+        $this->middleware('permission:kelas.delete')->only(['destroy']);
     }
 
     public function index()

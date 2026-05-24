@@ -9,6 +9,13 @@ use Illuminate\Support\Facades\Validator;
 
 class RakBukuController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:rak-buku.create')->only(['create', 'store']);
+        $this->middleware('permission:rak-buku.edit')->only(['edit', 'update']);
+        $this->middleware('permission:rak-buku.delete')->only(['destroy']);
+    }
+
     /**
      * Display a listing of the resource.
      */

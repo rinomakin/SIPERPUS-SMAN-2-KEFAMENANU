@@ -13,7 +13,7 @@
                     <p class="text-gray-600 mt-1">Informasi lengkap buku perpustakaan</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    @if(Auth::user()->hasPermission('buku.update'))
+                    @if(Auth::user()->hasPermission('buku.edit'))
                     <a href="{{ route('buku.edit', $buku->id) }}" 
                        class="inline-flex items-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
                         <i class="fas fa-edit mr-2"></i>
@@ -208,7 +208,7 @@
                             <div id="barcode" class="mb-4"></div>
                             <p class="text-sm text-gray-600 font-mono">{{ $buku->barcode }}</p>
                             
-                            @if(Auth::user()->hasPermission('buku.cetak-barcode'))
+                            @if(Auth::user()->hasPermission('buku.print-barcode'))
                             <div class="flex flex-col gap-2 mt-4">
                                 <a href="{{ route('buku.print-barcode', $buku->id) }}" target="_blank"
                                    class="inline-flex items-center justify-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-all duration-200">
@@ -244,7 +244,7 @@
                     </h3>
                     
                     <div class="space-y-3">
-                        @if(Auth::user()->hasPermission('buku.update'))
+                        @if(Auth::user()->hasPermission('buku.edit'))
                         <a href="{{ route('buku.edit', $buku->id) }}" 
                            class="w-full inline-flex items-center justify-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg transition-all duration-200">
                             <i class="fas fa-edit mr-2"></i>
@@ -252,7 +252,7 @@
                         </a>
                         @endif
                         
-                        @if($buku->barcode && Auth::user()->hasPermission('buku.cetak-barcode'))
+                        @if($buku->barcode && Auth::user()->hasPermission('buku.print-barcode'))
                         <a href="{{ route('buku.print-barcode', $buku->id) }}" target="_blank"
                            class="w-full inline-flex items-center justify-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-all duration-200">
                             <i class="fas fa-print mr-2"></i>

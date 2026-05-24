@@ -46,6 +46,7 @@ class PermissionSeeder extends Seeder
             ['name' => 'Kelola Anggota', 'slug' => 'anggota.manage', 'description' => 'Dapat mengelola semua aspek anggota', 'group_name' => 'Anggota Management'],
             ['name' => 'Export Anggota', 'slug' => 'anggota.export', 'description' => 'Dapat export data anggota', 'group_name' => 'Anggota Management'],
             ['name' => 'Import Anggota', 'slug' => 'anggota.import', 'description' => 'Dapat import data anggota', 'group_name' => 'Anggota Management'],
+            ['name' => 'Cetak Kartu Anggota', 'slug' => 'anggota.cetak-kartu', 'description' => 'Dapat mencetak kartu anggota', 'group_name' => 'Anggota Management'],
 
             // Buku Management
             ['name' => 'Lihat Buku', 'slug' => 'buku.view', 'description' => 'Dapat melihat daftar buku', 'group_name' => 'Buku Management'],
@@ -93,24 +94,24 @@ class PermissionSeeder extends Seeder
             ['name' => 'Kelola Rak Buku', 'slug' => 'rak-buku.manage', 'description' => 'Dapat mengelola semua aspek rak buku', 'group_name' => 'Rak Buku Management'],
 
             // Peminjaman - Granular Permissions
-            ['name' => 'Lihat Peminjaman', 'slug' => 'peminjaman.view', 'description' => 'Dapat melihat daftar peminjaman', 'group_name' => 'Transaksi'],
-            ['name' => 'Tambah Peminjaman', 'slug' => 'peminjaman.create', 'description' => 'Dapat menambah peminjaman baru', 'group_name' => 'Transaksi'],
-            ['name' => 'Edit Peminjaman', 'slug' => 'peminjaman.edit', 'description' => 'Dapat mengedit data peminjaman', 'group_name' => 'Transaksi'],
-            ['name' => 'Hapus Peminjaman', 'slug' => 'peminjaman.delete', 'description' => 'Dapat menghapus peminjaman', 'group_name' => 'Transaksi'],
-            ['name' => 'Detail Peminjaman', 'slug' => 'peminjaman.show', 'description' => 'Dapat melihat detail peminjaman', 'group_name' => 'Transaksi'],
-            ['name' => 'Export Peminjaman', 'slug' => 'peminjaman.export', 'description' => 'Dapat export data peminjaman', 'group_name' => 'Transaksi'],
-            ['name' => 'Scan Barcode Peminjaman', 'slug' => 'peminjaman.scan', 'description' => 'Dapat scan barcode untuk peminjaman', 'group_name' => 'Transaksi'],
-            ['name' => 'Kelola Peminjaman', 'slug' => 'peminjaman.manage', 'description' => 'Dapat mengelola semua aspek peminjaman', 'group_name' => 'Transaksi'],
+            ['name' => 'Lihat Peminjaman', 'slug' => 'peminjaman.view', 'description' => 'Dapat melihat daftar peminjaman', 'group_name' => 'Peminjaman'],
+            ['name' => 'Tambah Peminjaman', 'slug' => 'peminjaman.create', 'description' => 'Dapat menambah peminjaman baru', 'group_name' => 'Peminjaman'],
+            ['name' => 'Edit Peminjaman', 'slug' => 'peminjaman.edit', 'description' => 'Dapat mengedit data peminjaman', 'group_name' => 'Peminjaman'],
+            ['name' => 'Hapus Peminjaman', 'slug' => 'peminjaman.delete', 'description' => 'Dapat menghapus peminjaman', 'group_name' => 'Peminjaman'],
+            ['name' => 'Detail Peminjaman', 'slug' => 'peminjaman.show', 'description' => 'Dapat melihat detail peminjaman', 'group_name' => 'Peminjaman'],
+            ['name' => 'Export Peminjaman', 'slug' => 'peminjaman.export', 'description' => 'Dapat export data peminjaman', 'group_name' => 'Peminjaman'],
+            ['name' => 'Scan Barcode Peminjaman', 'slug' => 'peminjaman.scan', 'description' => 'Dapat scan barcode untuk peminjaman', 'group_name' => 'Peminjaman'],
+            ['name' => 'Kelola Peminjaman', 'slug' => 'peminjaman.manage', 'description' => 'Dapat mengelola semua aspek peminjaman', 'group_name' => 'Peminjaman'],
 
             // Pengembalian - Granular Permissions
-            ['name' => 'Lihat Pengembalian', 'slug' => 'pengembalian.view', 'description' => 'Dapat melihat daftar pengembalian', 'group_name' => 'Transaksi'],
-            ['name' => 'Tambah Pengembalian', 'slug' => 'pengembalian.create', 'description' => 'Dapat menambah pengembalian baru', 'group_name' => 'Transaksi'],
-            ['name' => 'Edit Pengembalian', 'slug' => 'pengembalian.edit', 'description' => 'Dapat mengedit data pengembalian', 'group_name' => 'Transaksi'],
-            ['name' => 'Hapus Pengembalian', 'slug' => 'pengembalian.delete', 'description' => 'Dapat menghapus pengembalian', 'group_name' => 'Transaksi'],
-            ['name' => 'Detail Pengembalian', 'slug' => 'pengembalian.show', 'description' => 'Dapat melihat detail pengembalian', 'group_name' => 'Transaksi'],
-            ['name' => 'Export Pengembalian', 'slug' => 'pengembalian.export', 'description' => 'Dapat export data pengembalian', 'group_name' => 'Transaksi'],
-            ['name' => 'Scan Barcode Pengembalian', 'slug' => 'pengembalian.scan', 'description' => 'Dapat scan barcode untuk pengembalian', 'group_name' => 'Transaksi'],
-            ['name' => 'Kelola Pengembalian', 'slug' => 'pengembalian.manage', 'description' => 'Dapat mengelola semua aspek pengembalian', 'group_name' => 'Transaksi'],
+            ['name' => 'Lihat Pengembalian', 'slug' => 'pengembalian.view', 'description' => 'Dapat melihat daftar pengembalian', 'group_name' => 'Pengembalian'],
+            ['name' => 'Tambah Pengembalian', 'slug' => 'pengembalian.create', 'description' => 'Dapat menambah pengembalian baru', 'group_name' => 'Pengembalian'],
+            ['name' => 'Edit Pengembalian', 'slug' => 'pengembalian.edit', 'description' => 'Dapat mengedit data pengembalian', 'group_name' => 'Pengembalian'],
+            ['name' => 'Hapus Pengembalian', 'slug' => 'pengembalian.delete', 'description' => 'Dapat menghapus pengembalian', 'group_name' => 'Pengembalian'],
+            ['name' => 'Detail Pengembalian', 'slug' => 'pengembalian.show', 'description' => 'Dapat melihat detail pengembalian', 'group_name' => 'Pengembalian'],
+            ['name' => 'Export Pengembalian', 'slug' => 'pengembalian.export', 'description' => 'Dapat export data pengembalian', 'group_name' => 'Pengembalian'],
+            ['name' => 'Scan Barcode Pengembalian', 'slug' => 'pengembalian.scan', 'description' => 'Dapat scan barcode untuk pengembalian', 'group_name' => 'Pengembalian'],
+            ['name' => 'Kelola Pengembalian', 'slug' => 'pengembalian.manage', 'description' => 'Dapat mengelola semua aspek pengembalian', 'group_name' => 'Pengembalian'],
 
             // Riwayat Transaksi
             ['name' => 'Lihat Riwayat Transaksi', 'slug' => 'riwayat-transaksi.view', 'description' => 'Dapat melihat riwayat transaksi', 'group_name' => 'Transaksi'],

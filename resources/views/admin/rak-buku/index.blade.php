@@ -78,10 +78,12 @@
         <h2 class="text-2xl font-bold text-gray-800">Data Rak Buku</h2>
         <p class="text-sm text-gray-400 mt-1">Kelola rak dan lokasi penyimpanan buku perpustakaan</p>
     </div>
+    @if(Auth::user()->hasPermission('rak-buku.create') || Auth::user()->isAdmin())
     <button onclick="openTambahModal()"
             class="flex items-center gap-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
         <i class="fas fa-plus"></i> Tambah Rak Buku
     </button>
+    @endif
 </div>
 
 <!-- Stat Cards -->
@@ -154,13 +156,17 @@
                     </td>
                     <td>
                         <div class="flex items-center gap-2">
+                            @if(Auth::user()->hasPermission('rak-buku.edit') || Auth::user()->isAdmin())
                             <button onclick="openEditModal({{ $rak->id }}, '{{ addslashes($rak->nama_rak) }}', '{{ $rak->kode_rak }}', '{{ addslashes($rak->deskripsi ?? '') }}', '{{ addslashes($rak->lokasi ?? '') }}', {{ $rak->kapasitas }}, '{{ $rak->status }}')"
                                     class="btn-edit"><i class="fas fa-edit"></i> Edit</button>
-                            @if($rak->jumlah_buku == 0)
+                            @endif
+                            @if(Auth::user()->hasPermission('rak-buku.delete') || Auth::user()->isAdmin())
+                                @if($rak->jumlah_buku == 0)
                                 <button onclick="deleteRak({{ $rak->id }}, '{{ addslashes($rak->nama_rak) }}')"
                                         class="btn-delete"><i class="fas fa-trash"></i> Hapus</button>
-                            @else
+                                @else
                                 <span class="btn-delete-disabled" title="Rak masih berisi {{ $rak->jumlah_buku }} buku"><i class="fas fa-trash"></i> Hapus</span>
+                                @endif
                             @endif
                         </div>
                     </td>

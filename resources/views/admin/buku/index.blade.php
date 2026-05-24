@@ -285,7 +285,7 @@
     </div>
 
     <!-- Bulk Action Bar -->
-    @if(Auth::user()->hasPermission('buku.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('buku.cetak-barcode') || Auth::user()->isAdmin())
+    @if(Auth::user()->hasPermission('buku.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('buku.print-barcode') || Auth::user()->isAdmin())
     <div id="bulkActionBar" class="bulk-bar">
         <div class="glass-card rounded-xl border border-blue-200 bg-blue-50/50 px-4 py-2.5 flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -295,7 +295,7 @@
                 <span id="selectedCount" class="text-sm font-medium text-blue-700">0 buku dipilih</span>
             </div>
             <div class="flex items-center gap-2">
-                @if(Auth::user()->hasPermission('buku.cetak-barcode') || Auth::user()->isAdmin())
+                @if(Auth::user()->hasPermission('buku.print-barcode') || Auth::user()->isAdmin())
                 <button onclick="printBarcodeSelected()" class="toolbar-btn bg-white border border-purple-200 text-purple-700 hover:bg-purple-50 text-xs">
                     <i class="fas fa-barcode"></i>
                     <span class="btn-text">Cetak Barcode</span>
@@ -321,7 +321,7 @@
             <table id="buku-table" class="w-full" style="min-width: 900px;">
                 <thead>
                     <tr>
-                        @if(Auth::user()->hasPermission('buku.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('buku.cetak-barcode') || Auth::user()->isAdmin())
+                        @if(Auth::user()->hasPermission('buku.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('buku.print-barcode') || Auth::user()->isAdmin())
                         <th class="px-4 py-3.5 text-left w-12">
                             <div class="flex items-center justify-center">
                                 <input type="checkbox" id="selectAll" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer transition-all duration-200">
@@ -335,7 +335,7 @@
                         <th class="px-4 py-3.5 text-left">Jenis</th>
                         <th class="px-4 py-3.5 text-left">Stok</th>
                         <th class="px-4 py-3.5 text-left">Status</th>
-                        @if(Auth::user()->hasPermission('buku.update') || Auth::user()->isAdmin() || Auth::user()->hasPermission('buku.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('buku.cetak-barcode') || Auth::user()->isAdmin())
+                        @if(Auth::user()->hasPermission('buku.view') || Auth::user()->hasPermission('buku.edit') || Auth::user()->hasPermission('buku.delete') || Auth::user()->hasPermission('buku.print-barcode') || Auth::user()->isAdmin())
                         <th class="px-4 py-3.5 text-center w-40">Aksi</th>
                         @endif
                     </tr>
@@ -517,8 +517,8 @@ const Toast = Swal.mixin({
 });
 
 $(document).ready(function() {
-    const hasCheckboxColumn = {{ (Auth::user()->hasPermission('buku.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('buku.cetak-barcode') || Auth::user()->isAdmin()) ? 'true' : 'false' }};
-    const hasActionColumn = {{ (Auth::user()->hasPermission('buku.update') || Auth::user()->isAdmin() || Auth::user()->hasPermission('buku.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('buku.cetak-barcode') || Auth::user()->isAdmin()) ? 'true' : 'false' }};
+    const hasCheckboxColumn = {{ (Auth::user()->hasPermission('buku.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('buku.print-barcode') || Auth::user()->isAdmin()) ? 'true' : 'false' }};
+    const hasActionColumn = {{ (Auth::user()->hasPermission('buku.view') || Auth::user()->hasPermission('buku.edit') || Auth::user()->hasPermission('buku.delete') || Auth::user()->hasPermission('buku.print-barcode') || Auth::user()->isAdmin()) ? 'true' : 'false' }};
 
     let columns = [];
 

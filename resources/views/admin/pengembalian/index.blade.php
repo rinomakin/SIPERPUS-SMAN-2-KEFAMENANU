@@ -456,15 +456,15 @@
                     <thead>
                         <tr>
                             <th class="text-center" style="width:48px;">No</th>
-                            <th class="text-left">No. Pengembalian</th>
+                            <!-- <th class="text-left">No. Pengembalian</th> -->
                             <th class="text-left">Anggota</th>
                             <th class="text-center">Buku</th>
                             <th class="text-left">Tanggal Kembali</th>
                             <th class="text-center">Status</th>
-                            <th class="text-right">Denda</th>
-                            <th class="text-left">Petugas</th>
+                            <th class="text-left">Denda</th>
+                            <!-- <th class="text-left">Petugas</th> -->
                             @if(Auth::user()->hasPermission('pengembalian.show') || Auth::user()->isAdmin() || Auth::user()->hasPermission('pengembalian.edit') || Auth::user()->isAdmin() || Auth::user()->hasPermission('pengembalian.delete') || Auth::user()->isAdmin())
-                            <th class="text-center" style="width:108px;">Aksi</th>
+                            <th class="text-center" style="width:50px;">Aksi</th>
                             @endif
                         </tr>
                     </thead>
@@ -544,17 +544,17 @@ $(document).ready(function () {
     const hasAction = {{ (Auth::user()->hasPermission('pengembalian.show') || Auth::user()->isAdmin() || Auth::user()->hasPermission('pengembalian.edit') || Auth::user()->isAdmin() || Auth::user()->hasPermission('pengembalian.delete') || Auth::user()->isAdmin()) ? 'true' : 'false' }};
 
     let columns = [
-        { data: 'DT_RowIndex',  name: 'DT_RowIndex',  orderable: false, searchable: false, className: 'text-center' },
-        { data: 'nomor_badge',  name: 'nomor_pengembalian', orderable: false, searchable: false },
+        { data: 'DT_RowIndex',  name: 'DT_RowIndex',  orderable: false, searchable: false, className: 'text-left' },
+        // { data: 'nomor_badge',  name: 'nomor_pengembalian', orderable: false, searchable: false },
         { data: 'anggota_info', name: 'anggota_id',   orderable: false, searchable: false },
-        { data: 'jumlah_badge', name: 'jumlah_badge', orderable: false, searchable: false, className: 'text-center' },
+        { data: 'jumlah_badge', name: 'jumlah_badge', orderable: false, searchable: false, className: 'text-left ' },
         { data: 'tanggal_info', name: 'tanggal_pengembalian', orderable: false, searchable: false },
-        { data: 'status_badge', name: 'status',       orderable: false, searchable: false, className: 'text-center' },
-        { data: 'denda_info',   name: 'total_denda',  orderable: false, searchable: false, className: 'text-right' },
-        { data: 'petugas_info', name: 'user_id',      orderable: false, searchable: false },
+        { data: 'status_badge', name: 'status',       orderable: false, searchable: false, className: 'text-left' },
+        { data: 'denda_info',   name: 'total_denda',  orderable: false, searchable: false, className: 'text-left' },
+        // { data: 'petugas_info', name: 'user_id',      orderable: false, searchable: false },
     ];
     if (hasAction) {
-        columns.push({ data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-center' });
+        columns.push({ data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-left' });
     }
 
     pengembalianTable = $('#pengembalian-table').DataTable({

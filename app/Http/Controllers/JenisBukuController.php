@@ -11,7 +11,9 @@ class JenisBukuController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'role:ADMIN']);
+        $this->middleware('permission:jenis-buku.create')->only(['create', 'store']);
+        $this->middleware('permission:jenis-buku.edit')->only(['edit', 'update']);
+        $this->middleware('permission:jenis-buku.delete')->only(['destroy', 'bulkDelete']);
     }
 
     public function index()

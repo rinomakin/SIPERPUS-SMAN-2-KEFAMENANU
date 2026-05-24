@@ -8,6 +8,14 @@ use Illuminate\Support\Str;
 
 class RoleController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:role.view')->only(['index', 'show']);
+        $this->middleware('permission:role.create')->only(['create', 'store', 'generateKode']);
+        $this->middleware('permission:role.edit')->only(['edit', 'update']);
+        $this->middleware('permission:role.delete')->only(['destroy']);
+    }
+
     /**
      * Display a listing of the resource.
      */

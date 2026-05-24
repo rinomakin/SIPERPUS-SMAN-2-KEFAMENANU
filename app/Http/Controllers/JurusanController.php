@@ -9,13 +9,18 @@ class JurusanController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'role:ADMIN']);
+        $this->middleware('permission:jurusan.create')->only(['create', 'store']);
+        $this->middleware('permission:jurusan.edit')->only(['edit', 'update']);
+        $this->middleware('permission:jurusan.delete')->only(['destroy']);
     }
 
     public function index()
     {
         $jurusan = Jurusan::paginate(10);
-        return view('admin.jurusan.index', compact('jurusan'));
+        $totalJurusan = Jurusan::count();
+        $jurusanAktif = Jurusan::where('status', 1)->count();
+        $jurusanNonaktif = Jurusan::where('status', 0)->count();
+        return view('admin.jurusan.index', compact('jurusan', 'totalJurusan', 'jurusanAktif', 'jurusanNonaktif'));
     }
 
     public function create()

@@ -288,7 +288,7 @@
 
         {{-- Laporan Kas --}}
         @if(Auth::user()->hasPermission('laporan.kas') || Auth::user()->isAdmin())
-        <div class="report-item glass-card rounded-2xl p-6 cursor-pointer animate-item" style="animation-delay: 0.35s" onclick="openReportModal('kas')">
+        <!-- <div class="report-item glass-card rounded-2xl p-6 cursor-pointer animate-item" style="animation-delay: 0.35s" onclick="openReportModal('kas')">
             <div class="flex items-start justify-between">
                 <div class="flex items-start gap-4">
                     <div class="report-icon bg-gradient-to-br from-teal-500 to-cyan-600 text-white shadow-lg shadow-teal-200">
@@ -314,7 +314,7 @@
                     <i class="fas fa-arrow-right"></i>
                 </div>
             </div>
-        </div>
+        </div> -->
         @endif
     </div>
 </div>

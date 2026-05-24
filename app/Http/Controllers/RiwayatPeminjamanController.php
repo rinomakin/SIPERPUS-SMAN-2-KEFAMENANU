@@ -14,6 +14,7 @@ class RiwayatPeminjamanController extends Controller
     public function __construct()
     {
         $this->middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS']);
+        $this->middleware('role:ADMIN')->only(['destroy', 'bulkDestroy']);
     }
 
     public function index(Request $request)
@@ -28,11 +29,13 @@ class RiwayatPeminjamanController extends Controller
             'hari_ini'   => Peminjaman::whereDate('tanggal_peminjaman', today())->count(),
         ];
 
-        return view('admin.riwayat-peminjaman.index', compact('anggota', 'buku', 'summary'));
+        $canDelete = auth()->user()->isAdmin();
+        return view('admin.riwayat-peminjaman.index', compact('anggota', 'buku', 'summary', 'canDelete'));
     }
 
     public function getData(Request $request)
     {
+        $isAdmin = auth()->user()->isAdmin();
         $query = Peminjaman::with(['anggota.kelas', 'user', 'detailPeminjaman'])
             ->select('peminjaman.*');
 
@@ -82,7 +85,8 @@ class RiwayatPeminjamanController extends Controller
 
         return DataTables::of($query->orderBy('tanggal_peminjaman', 'desc'))
             ->addIndexColumn()
-            ->addColumn('checkbox', function ($row) {
+            ->addColumn('checkbox', function ($row) use ($isAdmin) {
+                if (!$isAdmin) return '';
                 return '<input type="checkbox" class="row-checkbox" value="' . $row->id . '">';
             })
             ->addColumn('nomor_badge', function ($row) {
@@ -142,10 +146,12 @@ class RiwayatPeminjamanController extends Controller
             ->addColumn('petugas', function ($row) {
                 return '<span class="text-xs text-gray-700 font-medium">' . e($row->user->name ?? '-') . '</span>';
             })
-            ->addColumn('action', function ($row) {
+            ->addColumn('action', function ($row) use ($isAdmin) {
                 $actions  = '<div class="flex items-center justify-center gap-1.5">';
                 $actions .= '<a href="' . route('peminjaman.show', $row->id) . '" class="action-btn view" title="Detail"><i class="fas fa-eye"></i></a>';
-                $actions .= '<button onclick="confirmDelete(' . $row->id . ', \'' . addslashes($row->nomor_peminjaman) . '\')" class="action-btn delete" title="Hapus"><i class="fas fa-trash"></i></button>';
+                if ($isAdmin) {
+                    $actions .= '<button onclick="confirmDelete(' . $row->id . ', \'' . addslashes($row->nomor_peminjaman) . '\')" class="action-btn delete" title="Hapus"><i class="fas fa-trash"></i></button>';
+                }
                 $actions .= '</div>';
                 return $actions;
             })

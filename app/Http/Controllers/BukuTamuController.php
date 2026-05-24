@@ -19,6 +19,9 @@ class BukuTamuController extends Controller
     public function __construct()
     {
         $this->middleware(['auth', 'role:ADMIN,PETUGAS,KEPALA_SEKOLAH']);
+        $this->middleware('permission:buku-tamu.create')->only(['create', 'store']);
+        $this->middleware('permission:buku-tamu.edit')->only(['edit', 'update']);
+        $this->middleware('permission:buku-tamu.delete')->only(['destroy', 'bulkDelete']);
     }
 
     public function index(Request $request)

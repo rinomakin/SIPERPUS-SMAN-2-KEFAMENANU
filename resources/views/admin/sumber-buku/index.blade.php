@@ -76,10 +76,12 @@
         <h2 class="text-2xl font-bold text-gray-800">Data Sumber Buku</h2>
         <p class="text-sm text-gray-400 mt-1">Kelola sumber pengadaan koleksi buku perpustakaan</p>
     </div>
+    @if(Auth::user()->hasPermission('sumber-buku.create') || Auth::user()->isAdmin())
     <button onclick="openTambahModal()"
             class="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
         <i class="fas fa-plus"></i> Tambah Sumber Buku
     </button>
+    @endif
 </div>
 
 <!-- Stat Cards -->
@@ -143,10 +145,14 @@
                     </td>
                     <td>
                         <div class="flex items-center gap-2">
+                            @if(Auth::user()->hasPermission('sumber-buku.edit') || Auth::user()->isAdmin())
                             <button onclick="openEditModal({{ $item->id }}, '{{ addslashes($item->nama_sumber) }}', '{{ $item->kode_sumber }}', '{{ addslashes($item->deskripsi ?? '') }}', '{{ $item->status }}')"
                                     class="btn-edit"><i class="fas fa-edit"></i> Edit</button>
+                            @endif
+                            @if(Auth::user()->hasPermission('sumber-buku.delete') || Auth::user()->isAdmin())
                             <button onclick="deleteItem({{ $item->id }}, '{{ addslashes($item->nama_sumber) }}', {{ $item->buku_count }})"
                                     class="btn-delete"><i class="fas fa-trash"></i> Hapus</button>
+                            @endif
                         </div>
                     </td>
                 </tr>

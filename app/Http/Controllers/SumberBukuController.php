@@ -9,7 +9,9 @@ class SumberBukuController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'role:ADMIN']);
+        $this->middleware('permission:sumber-buku.create')->only(['create', 'store']);
+        $this->middleware('permission:sumber-buku.edit')->only(['edit', 'update']);
+        $this->middleware('permission:sumber-buku.delete')->only(['destroy', 'destroyMultiple']);
     }
 
     public function index()

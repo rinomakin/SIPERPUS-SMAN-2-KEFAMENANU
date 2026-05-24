@@ -57,10 +57,12 @@
                 </select>
 
                 {{-- Tambah --}}
+                @if(Auth::user()->hasPermission('buku-tamu.create'))
                 <a href="{{ route('admin.buku-tamu.create') }}"
                    class="px-4 py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 text-white text-sm font-medium rounded-xl shadow-md hover:shadow-lg transition-all">
                     <i class="fas fa-plus mr-1.5"></i> Tambah
                 </a>
+                @endif
 
                 {{-- Riwayat --}}
                 <a href="{{ route('admin.buku-tamu.history') }}"
@@ -152,10 +154,12 @@
                 </div>
                 <h3 class="text-base font-semibold text-gray-900 mb-1">Belum ada tamu hari ini</h3>
                 <p class="text-sm text-gray-500 mb-4">Klik tombol "Tambah" untuk mencatat kunjungan baru</p>
+                @if(Auth::user()->hasPermission('buku-tamu.create'))
                 <a href="{{ route('admin.buku-tamu.create') }}"
                    class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white text-sm font-medium rounded-xl shadow-md hover:shadow-lg transition-all">
                     <i class="fas fa-plus mr-1.5"></i> Tambah Tamu
                 </a>
+                @endif
             </div>
         @else
             <div class="divide-y divide-gray-100">

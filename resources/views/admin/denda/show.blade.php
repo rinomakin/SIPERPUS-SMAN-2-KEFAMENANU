@@ -39,11 +39,13 @@ html[data-theme="dark"] .bg-gray-200.rounded-lg .text-gray-500 {
                 <p class="text-red-100 mt-1">Detail informasi denda keterlambatan</p>
             </div>
             <div class="flex items-center space-x-3">
+                @if(Auth::user()->isAdmin() || Auth::user()->isPetugas())
                 <a href="{{ route('admin.denda.edit', $denda->id) }}" 
                    class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition-colors duration-200">
                     <i class="fas fa-edit mr-2"></i>
                     Edit
                 </a>
+                @endif
                 <a href="{{ route('admin.denda.index') }}" 
                    class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition-colors duration-200">
                     <i class="fas fa-arrow-left mr-2"></i>
@@ -256,6 +258,7 @@ html[data-theme="dark"] .bg-gray-200.rounded-lg .text-gray-500 {
 
     <!-- Action Buttons -->
     <div class="flex justify-center space-x-4 mt-8">
+        @if(Auth::user()->isAdmin() || Auth::user()->isPetugas())
         <a href="{{ route('admin.denda.edit', $denda->id) }}" 
            class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200">
             <i class="fas fa-edit mr-2"></i>
@@ -273,6 +276,7 @@ html[data-theme="dark"] .bg-gray-200.rounded-lg .text-gray-500 {
                 Hapus Denda
             </button>
         </form>
+        @endif
         <a href="{{ route('admin.denda.index') }}" 
            class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200">
             <i class="fas fa-arrow-left mr-2"></i>

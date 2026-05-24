@@ -194,7 +194,7 @@
 
                 <!-- Action Buttons -->
                 <div class="flex items-center gap-2 sm:pb-1">
-                    @if(Auth::user()->hasPermission('anggota.update') || Auth::user()->isAdmin())
+                    @if(Auth::user()->hasPermission('anggota.edit') || Auth::user()->isAdmin())
                     <a href="{{ route('anggota.edit', $anggota->id) }}" class="action-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">
                         <i class="fas fa-edit text-blue-500"></i>
                         <span class="btn-text">Edit</span>

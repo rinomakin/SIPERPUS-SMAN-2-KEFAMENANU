@@ -327,10 +327,10 @@
 
                         <div id="masterDropdown" class="dropdown-menu {{ $masterDataActive ? 'open' : '' }} space-y-0.5 mt-1">
                             @if(Auth::user()->hasAnyPermission(['role.view', 'role.manage']) || Auth::user()->isAdmin())
-                            <a href="{{ route('role.index') }}"
+                            <!-- <a href="{{ route('role.index') }}"
                                class="dropdown-item {{ request()->routeIs('role.*') ? 'active' : '' }}">
                                 Data Role
-                            </a>
+                            </a> -->
                             @endif
 
                             @if(Auth::user()->hasAnyPermission(['permission.view', 'permission.manage']) || Auth::user()->isAdmin())
@@ -434,6 +434,14 @@
                             <i class="fas fa-undo-alt nav-icon"></i>
                             <span>Pengembalian</span>
                         </a>
+                        @endif
+
+                        @if(Auth::user()->hasAnyPermission(['riwayat-transaksi.view', 'riwayat-transaksi.manage']) || Auth::user()->isAdmin())
+                        <!-- <a href="{{ route('riwayat-peminjaman.index') }}"
+                           class="nav-link {{ request()->routeIs('riwayat-peminjaman.*') ? 'active' : '' }}">
+                            <i class="fas fa-history nav-icon"></i>
+                            <span>Riwayat Peminjaman</span>
+                        </a> -->
                         @endif
 
                         @if(Auth::user()->hasAnyPermission(['denda.view', 'denda.manage']) || Auth::user()->isAdmin())

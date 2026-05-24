@@ -102,7 +102,7 @@ Route::get('/kepsek-panel', [KepsekController::class, 'dashboard'])
 Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/pengaturan-website', [AdminController::class, 'pengaturanWebsite'])->middleware('permission:pengaturan.view')->name('admin.pengaturan');
-    Route::post('/pengaturan-website', [AdminController::class, 'updatePengaturanWebsite'])->middleware('permission:pengaturan.manage')->name('admin.pengaturan.update');
+    Route::post('/pengaturan-website', [AdminController::class, 'updatePengaturanWebsite'])->middleware('permission:pengaturan.edit|pengaturan.manage')->name('admin.pengaturan.update');
     
     // Profil untuk semua role (Admin, Kepala Sekolah, Petugas)
     Route::get('/profil', [AdminController::class, 'profil'])->name('admin.profil');
@@ -175,11 +175,9 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS'])->prefix('admin'
     Route::resource('rak-buku', \App\Http\Controllers\Admin\RakBukuController::class);
     Route::get('/rak-buku/get-rak', [\App\Http\Controllers\Admin\RakBukuController::class, 'getRakBuku'])->name('rak-buku.get-rak');
     
-    // CRUD Role — hanya admin/yang punya permission role.view
-    Route::middleware('permission:role.view')->group(function () {
-        Route::resource('role', RoleController::class);
-        Route::post('/role/generate-kode', [RoleController::class, 'generateKode'])->name('role.generate-kode');
-    });
+    // CRUD Role — middleware per-method di controller
+    Route::resource('role', RoleController::class);
+    Route::post('/role/generate-kode', [RoleController::class, 'generateKode'])->name('role.generate-kode');
 
     // Permission Management — hanya admin/yang punya permission permission.view
     Route::middleware('permission:permission.view')->group(function () {

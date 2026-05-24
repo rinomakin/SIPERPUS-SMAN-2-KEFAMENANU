@@ -17,6 +17,9 @@ class PeminjamanController extends Controller
     public function __construct()
     {
         $this->middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS']);
+        $this->middleware('permission:peminjaman.create')->only(['create', 'store']);
+        $this->middleware('permission:peminjaman.edit')->only(['edit', 'update']);
+        $this->middleware('permission:peminjaman.delete')->only(['destroy']);
     }
 
     public function index(Request $request)

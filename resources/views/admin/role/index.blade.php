@@ -11,11 +11,13 @@
                 <h2 class="text-2xl font-bold text-gray-800">Data Role</h2>
                 <p class="text-gray-600 text-sm mt-1">Kelola role dan permission sistem</p>
             </div>
+            @if(Auth::user()->hasPermission('role.create') || Auth::user()->isAdmin())
             <a href="{{ route('role.create') }}" 
                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
                 <i class="fas fa-plus mr-2"></i>
                 Tambah Role
             </a>
+            @endif
         </div>
     </div>
 
@@ -123,17 +125,21 @@
                                    title="Detail">
                                     <i class="fas fa-eye"></i>
                                 </a>
+                                @if(Auth::user()->hasPermission('role.edit') || Auth::user()->isAdmin())
                                 <a href="{{ route('role.edit', $role->id) }}" 
                                    class="text-yellow-600 hover:text-yellow-900 p-1 rounded hover:bg-yellow-50 transition-colors" 
                                    title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
+                                @endif
+                                @if(Auth::user()->hasPermission('role.delete') || Auth::user()->isAdmin())
                                 <button type="button" 
                                         onclick="confirmDeleteRole({{ $role->id }})"
                                         class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors" 
                                         title="Hapus">
                                     <i class="fas fa-trash"></i>
                                 </button>
+                                @endif
                             </div>
                         </td>
                     </tr>
