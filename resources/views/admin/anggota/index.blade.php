@@ -508,6 +508,13 @@
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 
 <script>
+@if(session('success'))
+Swal.fire({icon:'success',title:'Berhasil!',text:{!! json_encode(session('success')) !!},timer:2800,timerProgressBar:true,showConfirmButton:false,toast:true,position:'top-end',background:'#f0fdf4',iconColor:'#16a34a'});
+@endif
+@if(session('error'))
+Swal.fire({icon:'error',title:'Gagal!',text:{!! json_encode(session('error')) !!},confirmButtonColor:'#ef4444',confirmButtonText:'OK'});
+@endif
+
 let anggotaTable;
 let selectedIds = [];
 

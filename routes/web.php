@@ -116,7 +116,6 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS'])->prefix('admin'
     Route::post('/peminjaman/check-active-loan', [PeminjamanController::class, 'checkActiveLoan'])->name('peminjaman.check-active-loan');
     Route::get('/peminjaman/check-overdue-loan', [PeminjamanController::class, 'checkOverdueLoan'])->name('peminjaman.check-overdue-loan');
     
-
     
     // CRUD Anggota
     Route::get('/anggota/export', [AnggotaController::class, 'export'])->name('anggota.export');
@@ -281,8 +280,7 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS'])->prefix('admin'
     Route::delete('/riwayat-peminjaman/bulk', [RiwayatPeminjamanController::class, 'bulkDestroy'])->name('riwayat-peminjaman.bulk-destroy');
     Route::delete('/riwayat-peminjaman/{id}', [RiwayatPeminjamanController::class, 'destroy'])->name('riwayat-peminjaman.destroy');
     
-
-    
+   
     // Laporan
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/anggota', [LaporanController::class, 'anggota'])->name('admin.laporan.anggota');

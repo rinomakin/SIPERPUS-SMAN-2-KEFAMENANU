@@ -61,9 +61,9 @@ class BukuController extends Controller
                     $gradients = ['#6366f1,#8b5cf6','#3b82f6,#2563eb','#10b981,#059669','#f59e0b,#d97706','#ef4444,#dc2626'];
                     $gradient = $gradients[($row->id ?? 0) % 5];
                     $initial = strtoupper(substr($row->judul_buku ?? 'B', 0, 1));
-                    if ($row->cover_buku) {
+                    if ($row->gambar_sampul) {
                         return '<div class="cover-container">'
-                            . '<img src="' . asset('storage/' . $row->cover_buku) . '" alt="Cover" class="cover-img"'
+                            . '<img src="' . asset('uploads/' . $row->gambar_sampul) . '" alt="Cover" class="cover-img"'
                             . ' onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">'
                             . '<div class="cover-placeholder" style="display:none;background:linear-gradient(135deg,' . $gradient . ');color:white;font-weight:700;font-size:1.2rem;">' . $initial . '</div>'
                             . '</div>';
@@ -209,6 +209,8 @@ class BukuController extends Controller
             $data = $request->all();
             $data['barcode'] = $barcode;
             $data['stok_tersedia'] = $request->jumlah_stok;
+            $data['pengarang'] = $request->penulis;
+            unset($data['penulis']);
 
             // Handle file upload for gambar_sampul
             if ($request->hasFile('gambar_sampul')) {
@@ -508,8 +510,8 @@ class BukuController extends Controller
 
         $data = $request->all();
         $data['stok_tersedia'] = $request->jumlah_stok;
-        // Barcode tidak boleh diubah saat edit
-        unset($data['barcode']);
+        $data['pengarang'] = $request->penulis;
+        unset($data['barcode'], $data['penulis']);
 
         // Handle file upload for gambar_sampul
         if ($request->hasFile('gambar_sampul')) {

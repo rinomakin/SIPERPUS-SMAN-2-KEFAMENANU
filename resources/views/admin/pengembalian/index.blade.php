@@ -102,8 +102,7 @@
         border: 1px solid #e2e8f0; font-size: 13px; background: #f8fafc;
         outline: none; cursor: pointer;
     }
-    #pengembalian-table_wrapper .dataTables_length,
-    #pengembalian-table_wrapper .dataTables_info { font-size: 13px; color: #64748b; padding: 10px 0; }
+
     #pengembalian-table thead th {
         background: linear-gradient(135deg,#f8fafc 0%,#f1f5f9 100%);
         font-size: 10.5px; font-weight: 700; text-transform: uppercase;
@@ -111,8 +110,12 @@
         border-bottom: 2px solid #e2e8f0; white-space: nowrap;
     }
     #pengembalian-table tbody td {
-        padding: 13px 16px; font-size: 13px;
+        padding: 11px 14px; font-size: 13px;
         vertical-align: middle; border-bottom: 1px solid #f1f5f9;
+    }
+    #pengembalian-table tbody td:nth-child(5),
+    #pengembalian-table tbody td:nth-child(6) {
+        font-size: 11.5px;
     }
     #pengembalian-table tbody tr { transition: background .12s ease; }
     #pengembalian-table tbody tr:hover { background: #f0fdf4 !important; }
@@ -337,7 +340,7 @@
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="hidden lg:grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="stat-card emerald anim-up d1">
             <div class="flex items-start justify-between">
                 <div>
@@ -390,79 +393,50 @@
 
     <!-- Main Table Card -->
     <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden anim-up d5">
-
-        <!-- Gradient Header -->
-        <div class="bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-5">
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-undo-alt text-white"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-base font-bold text-white">Pengembalian Hari Ini</h3>
-                        <p class="text-emerald-100 text-xs mt-0.5">Data real-time pengembalian buku</p>
-                    </div>
-                </div>
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full lg:w-auto">
-                    <!-- Search -->
-                    <div class="relative w-full sm:w-auto">
-                        <input type="text" id="searchInput" placeholder="Cari nama, nomor pengembalian..."
-                               class="w-full sm:w-72 px-4 py-2.5 pl-10 text-sm bg-white/15 backdrop-blur-sm text-white placeholder-emerald-200 rounded-xl border border-white/20 focus:bg-white/25 focus:ring-2 focus:ring-white/30 focus:outline-none transition-all">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                            <i class="fas fa-search text-emerald-200 text-sm"></i>
-                        </div>
-                    </div>
-                    <!-- Action Buttons -->
-                    <div class="flex flex-wrap gap-2">
-                        <button onclick="openFilterModal()"
-                                class="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white px-3.5 py-2.5 rounded-xl font-semibold text-xs border border-white/25 transition-all">
-                            <i class="fas fa-sliders-h"></i><span>Filter</span>
-                        </button>
-                        @if(Auth::user()->hasPermission('riwayat-transaksi.view') || Auth::user()->isAdmin())
-                        <a href="{{ route('riwayat-pengembalian.index') }}"
-                           class="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white px-3.5 py-2.5 rounded-xl font-semibold text-xs border border-white/25 transition-all">
-                            <i class="fas fa-history"></i><span>Riwayat</span>
-                        </a>
-                        @endif
-                        @if(Auth::user()->hasPermission('pengembalian.create') || Auth::user()->isAdmin())
-                        <a href="{{ route('pengembalian.create') }}"
-                           class="flex items-center gap-1.5 bg-white hover:bg-emerald-50 text-emerald-700 px-3.5 py-2.5 rounded-xl font-semibold text-xs transition-all shadow-md">
-                            <i class="fas fa-plus"></i><span>Tambah</span>
-                        </a>
-                        @endif
+          <!-- Table Info + Bottom Bar -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-6 pt-4 pb-4">
+            <div class="text-sm text-gray-400" id="tableInfo">
+                <span id="tableLengthPlaceholder"></span>
+                <span id="tableInfoText"></span>
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <div class="relative flex-1 sm:flex-none sm:w-72">
+                    <input type="text" id="searchInput" placeholder="Cari..."
+                           class="w-full px-3 sm:px-5 py-3 pl-9 sm:pl-11 text-sm bg-gray-50 border border-gray-200 text-gray-700 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all">
+                    <div class="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
                     </div>
                 </div>
+                <button onclick="openFilterModal()"
+                        class="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 w-11 h-11 sm:w-auto sm:px-5 sm:py-3 rounded-xl font-semibold text-sm transition-all">
+                    <i class="fas fa-sliders-h sm:mr-2"></i><span class="hidden sm:inline">Filter</span>
+                </button>
+                @if(Auth::user()->hasPermission('riwayat-transaksi.view') || Auth::user()->isAdmin())
+                <a href="{{ route('riwayat-pengembalian.index') }}"
+                   class="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 w-11 h-11 sm:w-auto sm:px-5 sm:py-3 rounded-xl font-semibold text-sm transition-all">
+                    <i class="fas fa-history sm:mr-2"></i><span class="hidden sm:inline">Riwayat</span>
+                </a>
+                @endif
+                @if(Auth::user()->hasPermission('pengembalian.create') || Auth::user()->isAdmin())
+                <a href="{{ route('pengembalian.create') }}"
+                   class="flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white w-11 h-11 sm:w-auto sm:px-5 sm:py-3 rounded-xl font-semibold text-sm transition-all shadow-md">
+                    <i class="fas fa-plus sm:mr-2"></i><span class="hidden sm:inline">Tambah</span>
+                </a>
+                @endif
             </div>
         </div>
-
-        <!-- Quick Filter Bar -->
-        <div class="px-6 py-3 bg-gray-50/60 border-b border-gray-100 flex items-center gap-2 overflow-x-auto">
-            <span class="text-[11px] text-gray-400 font-semibold uppercase tracking-wider mr-1 whitespace-nowrap">Filter:</span>
-            <button class="filter-chip active" onclick="setQuickFilter('all', this)" data-filter="all">
-                <i class="fas fa-layer-group mr-1 text-[10px]"></i>Semua
-            </button>
-            <button class="filter-chip" onclick="setQuickFilter('tepat_waktu', this)" data-filter="tepat_waktu">
-                <i class="fas fa-check-circle mr-1 text-[10px]"></i>Tepat Waktu
-            </button>
-            <button class="filter-chip" onclick="setQuickFilter('terlambat', this)" data-filter="terlambat">
-                <i class="fas fa-exclamation-circle mr-1 text-[10px]"></i>Terlambat
-            </button>
-        </div>
-
         <!-- Table -->
-        <div class="p-6">
+        <div class="p-6 pb-2">
             <div class="overflow-x-auto">
-                <table id="pengembalian-table" class="min-w-full" style="min-width:860px;">
+                <table id="pengembalian-table" class="min-w-full w-full">
                     <thead>
                         <tr>
                             <th class="text-center" style="width:48px;">No</th>
-                            <!-- <th class="text-left">No. Pengembalian</th> -->
                             <th class="text-left">Anggota</th>
                             <th class="text-center">Buku</th>
                             <th class="text-left">Tanggal Kembali</th>
                             <th class="text-center">Status</th>
                             <th class="text-left">Denda</th>
-                            <!-- <th class="text-left">Petugas</th> -->
                             @if(Auth::user()->hasPermission('pengembalian.show') || Auth::user()->isAdmin() || Auth::user()->hasPermission('pengembalian.edit') || Auth::user()->isAdmin() || Auth::user()->hasPermission('pengembalian.delete') || Auth::user()->isAdmin())
                             <th class="text-center" style="width:50px;">Aksi</th>
                             @endif
@@ -472,6 +446,8 @@
                 </table>
             </div>
         </div>
+
+      
     </div>
 </div>
 
@@ -560,6 +536,20 @@ $(document).ready(function () {
     pengembalianTable = $('#pengembalian-table').DataTable({
         processing: true,
         serverSide: true,
+        dom: 'rtip',
+        initComplete: function () {
+            var len = $('<select class="px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 cursor-pointer outline-none">' +
+                '<option value="10">10</option>' +
+                '<option value="25">25</option>' +
+                '<option value="50">50</option>' +
+                '<option value="100">100</option>' +
+            '</select>').on('change', function () {
+                pengembalianTable.page.len(this.value).draw();
+            });
+            $('#tableLengthPlaceholder').html('Tampilkan ').append(len).append(' ');
+            var infoEl = $('.dataTables_info').detach();
+            
+        },
         ajax: {
             url : '{{ route("pengembalian.data") }}',
             type: 'GET',

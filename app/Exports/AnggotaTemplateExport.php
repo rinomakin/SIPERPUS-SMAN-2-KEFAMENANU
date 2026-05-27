@@ -6,16 +6,19 @@ use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 use App\Models\Kelas;
 
-class AnggotaTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, WithStyles
+class AnggotaTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, WithStyles, WithEvents
 {
     public function array(): array
     {
         $kelas = Kelas::with('jurusan')->get();
-        
-        $sampleData = [
+
+        return [
             [
                 'John Doe',
                 'Laki-laki',
@@ -23,10 +26,9 @@ class AnggotaTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, 
                 'Jl. Contoh No. 123, Kota Contoh',
                 '081234567890',
                 'john.doe@example.com',
-                $kelas->first() ? $kelas->first()->id : '1', // ID Kelas - lihat daftar kelas di bawah
-                'Siswa',
-                'siswa', // siswa/guru/staff
-                'aktif', // aktif/nonaktif/ditangguhkan
+                $kelas->first() ? $kelas->first()->id : '1',
+                'siswa',
+                'aktif',
                 '2024-01-01'
             ],
             [
@@ -36,49 +38,12 @@ class AnggotaTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, 
                 'Jl. Sample No. 456, Kota Sample',
                 '089876543210',
                 'jane.smith@example.com',
-                $kelas->count() > 1 ? $kelas->get(1)->id : ($kelas->first() ? $kelas->first()->id : '1'), // ID Kelas
-                'Guru',
-                'guru',
+                $kelas->count() > 1 ? $kelas->get(1)->id : ($kelas->first() ? $kelas->first()->id : '1'),
+                'siswa',
                 'aktif',
                 '2024-01-15'
             ]
         ];
-
-        // Tambahkan data kelas untuk referensi
-        $kelasData = [];
-        if ($kelas->count() > 0) {
-            foreach ($kelas as $k) {
-                $kelasData[] = [
-                    'ID: ' . $k->id . ' - ' . $k->nama_kelas . ' (' . $k->jurusan->nama_jurusan . ')',
-                    '',
-                    '',
-                    '',
-                    '',
-                    '',
-                    $k->id,
-                    '',
-                    '',
-                    '',
-                    ''
-                ];
-            }
-        } else {
-            $kelasData[] = [
-                'Belum ada data kelas. Silakan tambahkan kelas terlebih dahulu.',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                ''
-            ];
-        }
-
-        return array_merge($sampleData, [[''], [''], ['DAFTAR KELAS UNTUK REFERENSI:'], ['']], $kelasData);
     }
 
     public function headings(): array
@@ -86,12 +51,11 @@ class AnggotaTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, 
         return [
             'nama_lengkap',
             'jenis_kelamin',
-            'nik',
+            'nisn_nik',
             'alamat',
             'nomor_telepon',
             'email',
-            'kelas_id',
-            'jabatan',
+            'kelas',
             'jenis_anggota',
             'status',
             'tanggal_bergabung'
@@ -101,7 +65,6 @@ class AnggotaTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, 
     public function styles(Worksheet $sheet)
     {
         return [
-            // Style the first row as bold text
             1 => [
                 'font' => ['bold' => true],
                 'fill' => [
@@ -109,36 +72,40 @@ class AnggotaTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, 
                     'startColor' => ['rgb' => 'E8F5E8']
                 ]
             ],
-            // Style the reference section
-            'A' . (count($this->array()) - count($this->getKelasData()) + 1) => [
-                'font' => ['bold' => true],
-                'fill' => [
-                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'FFF3CD']
-                ]
-            ],
         ];
     }
 
-    private function getKelasData()
+    public function registerEvents(): array
     {
-        $kelas = Kelas::with('jurusan')->get();
-        $kelasData = [];
-        foreach ($kelas as $k) {
-            $kelasData[] = [
-                'ID: ' . $k->id . ' - ' . $k->nama_kelas . ' (' . $k->jurusan->nama_jurusan . ')',
-                '',
-                '',
-                '',
-                '',
-                '',
-                $k->id,
-                '',
-                '',
-                '',
-                ''
-            ];
+        return [
+            AfterSheet::class => function(AfterSheet $event) {
+                $mainSheet = $event->sheet->getDelegate();
+                $kelas = Kelas::with('jurusan')->get();
+                $listKelas = $kelas->map(fn($k) => "{$k->id} - {$k->nama_kelas} ({$k->jurusan->nama_jurusan})")->join(',');
+                $maxRow = 100;
+                $this->applyDropdownList($mainSheet, 'G', 2, $maxRow, $listKelas);
+            }
+        ];
+    }
+
+    private function applyDropdownList($sheet, string $column, int $startRow, int $endRow, string $list): void
+    {
+        if (empty($list)) return;
+
+        for ($row = $startRow; $row <= $endRow; $row++) {
+            $cell = $column . $row;
+            $validation = $sheet->getCell($cell)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setFormula1('"' . $list . '"');
+            $validation->setAllowBlank(true);
+            $validation->setShowDropDown(true);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setErrorStyle(DataValidation::STYLE_STOP);
+            $validation->setErrorTitle('Pilihan tidak valid');
+            $validation->setError('Silakan pilih dari daftar yang tersedia');
+            $validation->setPromptTitle('Pilih kelas');
+            $validation->setPrompt('Pilih kelas dari daftar yang sudah disediakan');
         }
-        return $kelasData;
     }
 } 

@@ -341,7 +341,7 @@
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="hidden lg:grid lg:grid-cols-4 gap-4">
         <div class="stat-mini bg-white rounded-xl border border-gray-100 p-4 anim-up d1">
             <div class="flex items-center justify-between">
                 <div>

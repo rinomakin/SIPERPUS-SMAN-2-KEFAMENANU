@@ -357,10 +357,8 @@ class AnggotaController extends Controller
                 
                 if (!empty($errors)) {
                     $uniqueErrors = array_unique($errors);
-                    // $errorCount = count($uniqueErrors);
-                    // $message .= " ⚠️ Ditemukan {$errorCount} jenis error:";
+                    $errorCount = count($uniqueErrors);
                     
-                    // Tampilkan hanya 3 error pertama untuk tidak terlalu panjang
                     $displayErrors = array_slice($uniqueErrors, 0, 3);
                     foreach ($displayErrors as $error) {
                         $message .= "\n• " . $error;

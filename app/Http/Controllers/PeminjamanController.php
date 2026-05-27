@@ -271,7 +271,18 @@ class PeminjamanController extends Controller
 
     public function show($id)
     {
-        $peminjaman = Peminjaman::with(['anggota', 'user', 'detailPeminjaman.buku'])->findOrFail($id);
+        $peminjaman = Peminjaman::with([
+            'anggota',
+            'user',
+            'detailPeminjaman.buku',
+            'detailPeminjaman.detailPengembalian'
+        ])->findOrFail($id);
+
+        // Filter hanya buku yang belum dikembalikan
+        $peminjaman->detailPeminjaman = $peminjaman->detailPeminjaman->filter(function($detail) {
+            return $detail->detailPengembalian->isEmpty();
+        });
+
         return view('admin.peminjaman.show', compact('peminjaman'));
     }
 
@@ -790,7 +801,7 @@ class PeminjamanController extends Controller
             $overdueLoans = Peminjaman::where('anggota_id', $request->anggota_id)
                 ->where('status', 'dipinjam')
                 ->where('tanggal_harus_kembali', '<', Carbon::today())
-                ->with('detailPeminjaman.buku')
+                ->with(['detailPeminjaman.buku', 'detailPeminjaman.detailPengembalian'])
                 ->get();
 
             if ($overdueLoans->isEmpty()) {
@@ -804,6 +815,8 @@ class PeminjamanController extends Controller
             foreach ($overdueLoans as $loan) {
                 $daysLate = Carbon::today()->diffInDays(Carbon::parse($loan->tanggal_harus_kembali));
                 foreach ($loan->detailPeminjaman as $detail) {
+                    // Skip buku yang sudah dikembalikan
+                    if ($detail->detailPengembalian->isNotEmpty()) continue;
                     $books[] = [
                         'nomor_peminjaman'      => $loan->nomor_peminjaman,
                         'judul_buku'            => $detail->buku ? $detail->buku->judul_buku : 'N/A',
@@ -842,14 +855,16 @@ class PeminjamanController extends Controller
             $anggotaId = $request->get('anggota_id');
             $bukuId = $request->get('buku_id');
 
-            // Check if anggota has active loan for this specific book
+            // Check if anggota has active loan for this specific book (belum dikembalikan)
             $activeLoan = Peminjaman::where('anggota_id', $anggotaId)
-                ->where('status', '!=', 'dikembalikan') // Only check non-returned loans
+                ->where('status', '!=', 'dikembalikan')
                 ->whereHas('detailPeminjaman', function($query) use ($bukuId) {
-                    $query->where('buku_id', $bukuId);
+                    $query->where('buku_id', $bukuId)
+                          ->whereDoesntHave('detailPengembalian');
                 })
                 ->with(['detailPeminjaman' => function($query) use ($bukuId) {
-                    $query->where('buku_id', $bukuId);
+                    $query->where('buku_id', $bukuId)
+                          ->whereDoesntHave('detailPengembalian');
                 }])
                 ->first();
 

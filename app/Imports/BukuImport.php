@@ -36,7 +36,7 @@ class BukuImport implements ToModel, WithHeadingRow, SkipsOnError
             $jumlahHalaman = !empty($row['jumlah_halaman']) ? (int)$row['jumlah_halaman'] : null;
             $bahasa        = !empty(trim((string)($row['bahasa'] ?? ''))) ? trim((string)$row['bahasa']) : 'Indonesia';
             $jumlahStok    = !empty($row['jumlah_stok'])    ? (int)$row['jumlah_stok']    : 1;
-            $lokasiRak     = trim((string)($row['lokasi_rak'] ?? ''));
+            $rakId         = !empty($row['rak_id']) ? (int)$row['rak_id'] : null;
             $status        = !empty(trim((string)($row['status'] ?? ''))) ? trim((string)$row['status']) : 'tersedia';
             $deskripsi     = trim((string)($row['deskripsi'] ?? ''));
 
@@ -68,6 +68,11 @@ class BukuImport implements ToModel, WithHeadingRow, SkipsOnError
 
             if (!empty($sumberId) && !\App\Models\SumberBuku::find($sumberId)) {
                 $this->addError("Baris {$this->rowNumber}: ID Sumber tidak valid (nilai: {$sumberId})");
+                return null;
+            }
+
+            if (!empty($rakId) && !\App\Models\RakBuku::find($rakId)) {
+                $this->addError("Baris {$this->rowNumber}: ID Rak tidak valid (nilai: {$rakId})");
                 return null;
             }
 
@@ -115,7 +120,7 @@ class BukuImport implements ToModel, WithHeadingRow, SkipsOnError
                 'bahasa'         => $bahasa,
                 'jumlah_stok'    => $jumlahStok,
                 'stok_tersedia'  => $jumlahStok,
-                'lokasi_rak'     => !empty($lokasiRak)  ? $lokasiRak  : null,
+                'rak_id'         => $rakId,
                 'status'         => $status,
                 'deskripsi'      => !empty($deskripsi)  ? $deskripsi  : null,
             ]);

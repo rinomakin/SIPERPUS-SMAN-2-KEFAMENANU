@@ -24,7 +24,7 @@ class AnggotaImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
             \Log::info('Import row data:', $row);
             
             // Check if this is a header row or empty row
-            if (empty($row['nama_lengkap']) && empty($row['nik'])) {
+            if (empty($row['nama_lengkap']) && empty($row['nisn_nik']) && empty($row['nik'])) {
                 \Log::info('Skipping empty or header row');
                 return null;
             }
@@ -32,15 +32,15 @@ class AnggotaImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
             // Convert data types and clean up
             $namaLengkap = trim((string)($row['nama_lengkap'] ?? ''));
             $jenisKelamin = trim((string)($row['jenis_kelamin'] ?? ''));
-            $nik = trim((string)($row['nik'] ?? ''));
+            $nik = trim((string)($row['nisn_nik'] ?? $row['nik'] ?? ''));
             $alamat = trim((string)($row['alamat'] ?? ''));
             $nomorTelepon = trim((string)($row['nomor_telepon'] ?? ''));
             $email = trim((string)($row['email'] ?? ''));
-            $kelasId = !empty($row['kelas_id']) ? (int)$row['kelas_id'] : null;
+            $kelasId = !empty($row['kelas']) ? (int)$row['kelas'] : (!empty($row['kelas_id']) ? (int)$row['kelas_id'] : null);
             $jabatan = trim((string)($row['jabatan'] ?? ''));
             $jenisAnggota = trim((string)($row['jenis_anggota'] ?? ''));
             $status = trim((string)($row['status'] ?? ''));
-            $tanggalBergabung = !empty($row['tanggal_bergabung']) ? $row['tanggal_bergabung'] : now();
+            $tanggalBergabung = $this->parseDate($row['tanggal_bergabung'] ?? null);
             
             // Handle NIK format issues (scientific notation from Excel)
             if (!empty($nik)) {
@@ -173,12 +173,11 @@ class AnggotaImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
         return [
             'nama_lengkap' => 'nullable',
             'jenis_kelamin' => 'nullable',
-            'nik' => 'nullable',
+            'nisn_nik' => 'nullable',
             'alamat' => 'nullable',
             'nomor_telepon' => 'nullable',
             'email' => 'nullable',
-            'kelas_id' => 'nullable',
-            'jabatan' => 'nullable',
+            'kelas' => 'nullable',
             'jenis_anggota' => 'nullable',
             'status' => 'nullable',
             'tanggal_bergabung' => 'nullable',
@@ -189,8 +188,8 @@ class AnggotaImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
     {
         return [
             'nama_lengkap.required' => 'Nama lengkap wajib diisi',
-            'nik.required' => 'NIK wajib diisi',
-            'kelas_id.exists' => 'ID Kelas tidak valid',
+            'nisn_nik.required' => 'NISN/NIK wajib diisi',
+            'kelas.exists' => 'ID Kelas tidak valid',
             'jenis_anggota.in' => 'Jenis anggota harus salah satu dari: siswa, guru, staff',
             'status.in' => 'Status harus salah satu dari: aktif, nonaktif, ditangguhkan',
             'tanggal_bergabung.date' => 'Format tanggal bergabung tidak valid',
@@ -217,7 +216,29 @@ class AnggotaImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
         return $this->imported;
     }
 
-    // Method untuk menambahkan error yang unik (tidak duplikat)
+    private function parseDate($value)
+    {
+        if (empty($value)) return now();
+
+        if (is_numeric($value)) {
+            try {
+                return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float)$value)->format('Y-m-d');
+            } catch (\Exception $e) {
+                return now();
+            }
+        }
+
+        if ($value instanceof \DateTime) {
+            return $value->format('Y-m-d');
+        }
+
+        try {
+            return \Carbon\Carbon::parse($value)->format('Y-m-d');
+        } catch (\Exception $e) {
+            return now();
+        }
+    }
+
     private function addUniqueError($errorMessage)
     {
         if (!in_array($errorMessage, $this->errorTracker)) {

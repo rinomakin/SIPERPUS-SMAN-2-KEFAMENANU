@@ -664,11 +664,16 @@ class PengembalianController extends Controller
                         'tanggal_kembali' => $tanggalKembali,
                         'jam_kembali' => $request->jam_kembali ?? now()->format('H:i'),
                         'status' => 'dikembalikan',
+                        'jumlah_buku' => 0,
                         'catatan' => $peminjaman->catatan . ($request->catatan_pengembalian ? "\n\nCatatan Pengembalian: " . $request->catatan_pengembalian : '')
                     ]);
                 } else {
-                    // Masih ada buku yang belum kembali
+                    // Masih ada buku yang belum kembali — hitung sisa jumlah buku
+                    $sisaJumlahBuku = $peminjaman->detailPeminjaman()
+                        ->whereDoesntHave('detailPengembalian')
+                        ->sum('jumlah');
                     $peminjaman->update([
+                        'jumlah_buku' => $sisaJumlahBuku,
                         'catatan' => $peminjaman->catatan . ($request->catatan_pengembalian ? "\n\nCatatan Pengembalian Sebagian: " . $request->catatan_pengembalian : '')
                     ]);
                 }
@@ -678,6 +683,7 @@ class PengembalianController extends Controller
                     'tanggal_kembali' => $tanggalKembali,
                     'jam_kembali' => $request->jam_kembali ?? now()->format('H:i'),
                     'status' => 'dikembalikan',
+                    'jumlah_buku' => 0,
                     'catatan' => $peminjaman->catatan . ($request->catatan_pengembalian ? "\n\nCatatan Pengembalian: " . $request->catatan_pengembalian : '')
                 ]);
             }

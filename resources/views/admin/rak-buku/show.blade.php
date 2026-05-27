@@ -191,8 +191,8 @@
                     <tr class="hover:bg-gray-50 transition-colors duration-200">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex-shrink-0 h-16 w-12">
-                                @if($buku->cover_buku)
-                                    <img src="{{ asset('storage/' . $buku->cover_buku) }}" alt="Cover {{ $buku->judul_buku }}" class="h-16 w-12 object-cover rounded-lg">
+                            @if($buku->gambar_sampul)
+                                <img src="{{ asset('uploads/' . $buku->gambar_sampul) }}" alt="Cover {{ $buku->judul_buku }}" class="h-16 w-12 object-cover rounded-lg">
                                 @else
                                     <div class="h-16 w-12 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
                                         <i class="fas fa-book text-blue-500"></i>

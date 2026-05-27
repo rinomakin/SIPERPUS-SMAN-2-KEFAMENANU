@@ -393,9 +393,10 @@
                     <div class="flex flex-col items-center text-center mb-5">
                         <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center overflow-hidden shadow-lg shadow-blue-500/20 mb-3">
                             @if($peminjaman->anggota && $peminjaman->anggota->foto)
-                                <img src="{{ asset('uploads/' . $peminjaman->anggota->foto) }}"
+                                <img src="{{ asset('storage/anggota/' . $peminjaman->anggota->foto) }}"
                                      alt="{{ $peminjaman->anggota->nama_lengkap }}"
-                                     class="w-full h-full object-cover">
+                                     class="w-full h-full object-cover"
+                                     onerror="this.parentElement.innerHTML='<span class=\'text-white text-2xl font-bold\'>{{ $peminjaman->anggota ? strtoupper(substr($peminjaman->anggota->nama_lengkap, 0, 1)) : '?' }}</span>'">
                             @else
                                 <span class="text-white text-2xl font-bold">
                                     {{ $peminjaman->anggota ? strtoupper(substr($peminjaman->anggota->nama_lengkap, 0, 1)) : '?' }}

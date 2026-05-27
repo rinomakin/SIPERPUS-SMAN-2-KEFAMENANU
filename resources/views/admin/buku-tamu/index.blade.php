@@ -40,21 +40,15 @@
                     </div>
                 </div>
 
-                {{-- Filter Status --}}
-                <select id="filterStatus" onchange="applyFilter()"
-                        class="px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white/70 focus:ring-2 focus:ring-violet-500">
-                    <option value="">Semua Status</option>
-                    <option value="berkunjung" {{ request('status') == 'berkunjung' ? 'selected' : '' }}>Sedang Berkunjung</option>
-                    <option value="pulang" {{ request('status') == 'pulang' ? 'selected' : '' }}>Sudah Pulang</option>
-                </select>
-
-                {{-- Filter Tipe --}}
-                <select id="filterTipe" onchange="applyFilter()"
-                        class="px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white/70 focus:ring-2 focus:ring-violet-500">
-                    <option value="">Semua Tipe</option>
-                    <option value="anggota" {{ request('tipe_tamu') == 'anggota' ? 'selected' : '' }}>Anggota</option>
-                    <option value="umum" {{ request('tipe_tamu') == 'umum' ? 'selected' : '' }}>Tamu Umum</option>
-                </select>
+                {{-- Filter Button --}}
+                <button type="button" onclick="openFilterModal()"
+                        class="px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white/70 hover:bg-violet-50 hover:border-violet-300 transition-all flex items-center gap-2 @if(request()->hasAny(['status','tipe_tamu'])) text-violet-700 border-violet-300 bg-violet-50 @else text-gray-600 @endif">
+                    <i class="fas fa-filter text-xs"></i>
+                    <span class="hidden sm:inline">Filter</span>
+                    @if(request()->hasAny(['status','tipe_tamu']))
+                        <span class="w-2 h-2 rounded-full bg-violet-500"></span>
+                    @endif
+                </button>
 
                 {{-- Tambah --}}
                 @if(Auth::user()->hasPermission('buku-tamu.create'))
@@ -74,7 +68,7 @@
     </div>
 
     {{-- Stats Cards --}}
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+    <div class="hidden md:grid md:grid-cols-5 gap-4">
         <div class="glass-card rounded-2xl p-4 animate-fade" style="animation-delay:0.05s">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center">
@@ -271,6 +265,61 @@
         @endif
     </div>
 </div>
+{{-- Filter Modal --}}
+<div id="filterModal" class="fixed inset-0 z-50 hidden" style="background:rgba(15,23,42,0.5);backdrop-filter:blur(4px);">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full transform transition-all duration-300 animate-fade">
+            <div class="bg-gradient-to-r from-violet-500 to-purple-600 px-5 py-4 rounded-t-2xl">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+                            <i class="fas fa-filter text-white text-sm"></i>
+                        </div>
+                        <h3 class="text-sm font-bold text-white">Filter Tamu</h3>
+                    </div>
+                    <button onclick="closeFilterModal()" class="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-5 space-y-4">
+                {{-- Status --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Status Kunjungan</label>
+                    <select id="filterStatus"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                        <option value="">Semua Status</option>
+                        <option value="berkunjung" {{ request('status') == 'berkunjung' ? 'selected' : '' }}>Sedang Berkunjung</option>
+                        <option value="pulang" {{ request('status') == 'pulang' ? 'selected' : '' }}>Sudah Pulang</option>
+                    </select>
+                </div>
+                {{-- Tipe --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Tipe Tamu</label>
+                    <select id="filterTipe"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                        <option value="">Semua Tipe</option>
+                        <option value="anggota" {{ request('tipe_tamu') == 'anggota' ? 'selected' : '' }}>Anggota</option>
+                        <option value="umum" {{ request('tipe_tamu') == 'umum' ? 'selected' : '' }}>Tamu Umum</option>
+                    </select>
+                </div>
+            </div>
+            <div class="px-5 py-4 border-t border-gray-100 flex justify-end gap-2">
+                @if(request()->hasAny(['search', 'status', 'tipe_tamu']))
+                    <a href="{{ route('admin.buku-tamu.index') }}"
+                       class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all">
+                        <i class="fas fa-undo mr-1"></i> Reset
+                    </a>
+                @endif
+                <button type="button" onclick="applyFilter()"
+                        class="px-5 py-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all">
+                    <i class="fas fa-check mr-1"></i> Terapkan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -285,6 +334,34 @@ document.addEventListener('DOMContentLoaded', function() {
             clearTimeout(searchTimeout);
             const val = this.value;
             searchTimeout = setTimeout(() => applyFilter(), 500);
+        });
+    }
+
+    // Enter key on search also triggers filter
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') applyFilter();
+        });
+    }
+});
+
+// Filter modal
+function openFilterModal() {
+    document.getElementById('filterModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeFilterModal() {
+    document.getElementById('filterModal').classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+// Close modal on outside click
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('filterModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) closeFilterModal();
         });
     }
 });
