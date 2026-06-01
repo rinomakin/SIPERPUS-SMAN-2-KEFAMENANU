@@ -456,6 +456,7 @@ let selectedAnggota = null;
 let allPeminjaman = []; // All active peminjaman for selected anggota
 let selectedBooks = {}; // { detailId: { peminjamanId, judul, jumlah, kondisi } }
 let activePeminjamanId = null; // currently active peminjaman in form
+let isSubmitting = false; // prevent double submit
 
 // Scanner state
 let nativeBarcodeDetector = null;
@@ -927,6 +928,16 @@ function renderKondisiBuku(selected) {
                         <option value="hilang" ${kondisi==='hilang'?'selected':''}>Hilang (+Rp 100.000)</option>
                     </select>
                 </div>
+                <!-- Jumlah Dikembalikan -->
+                <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-2 text-[10px] text-gray-500 font-semibold uppercase tracking-wide">
+                        <i class="fas fa-sort-amount-up-alt text-blue-400"></i>Jumlah Dikembalikan
+                    </div>
+                    <input type="number" name="jumlah_dikembalikan[${s.detailId}]"
+                           value="${s.jumlah}" min="1" max="${s.jumlah}"
+                           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none bg-white w-20 text-center"
+                           onchange="updateBookJumlah('${key}', this.value)">
+                </div>
                 <!-- Denda keterlambatan -->
                 <div class="flex items-center justify-between text-xs">
                     <span class="text-gray-500 flex items-center gap-1.5"><i class="fas fa-calendar-times text-red-400 text-[10px]"></i>Denda keterlambatan</span>
@@ -950,6 +961,12 @@ function renderKondisiBuku(selected) {
         </div>`;
     });
     list.innerHTML = html;
+}
+
+function updateBookJumlah(key, value) {
+    if (selectedBooks[key]) {
+        selectedBooks[key].jumlahDikembalikan = parseInt(value) || 1;
+    }
 }
 
 function updateBookKondisi(key, kondisi) {
@@ -1046,6 +1063,7 @@ function scrollToForm() {
 // ==================== FORM VALIDATION & SUBMIT ====================
 function validateAndSubmit(event) {
     event.preventDefault();
+    if (isSubmitting) return false;
 
     const selected = Object.values(selectedBooks);
     if (selected.length === 0) {
@@ -1103,11 +1121,19 @@ function validateAndSubmit(event) {
             cancelButtonText: 'Batal',
         }).then(result => {
             if (result.isConfirmed) {
+                isSubmitting = true;
+                const btn = document.getElementById('submitBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Memproses...';
                 document.getElementById('pengembalianForm').submit();
             }
         });
     } else {
         if (confirm('Proses pengembalian buku?')) {
+            isSubmitting = true;
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Memproses...';
             document.getElementById('pengembalianForm').submit();
         }
     }

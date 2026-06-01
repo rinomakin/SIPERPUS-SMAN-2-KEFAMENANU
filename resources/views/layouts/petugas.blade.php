@@ -11,7 +11,7 @@
     @endif
     
     <!-- Vite CSS & JS -->
-    @vite(['resources/css/app.css', 'resources/css/modern-components.css', 'resources/css/dark-mode.css', 'resources/css/animations.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/modern-components.css', 'resources/css/dark-mode.css', 'resources/css/animations.css', 'resources/js/app.js', 'resources/js/spa.js'])
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,6 +20,31 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        .spa-loader-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 99999;
+            height: 3px;
+            background: linear-gradient(90deg, #10b981, #059669, #3b82f6, #10b981);
+            background-size: 300% 100%;
+            animation: spa-loader 1.2s ease-in-out infinite;
+            box-shadow: 0 0 10px rgba(16,185,129,.5);
+        }
+        @keyframes spa-loader {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .spa-fade {
+            animation: spa-fade-in 0.2s ease-out;
+        }
+        @keyframes spa-fade-in {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         /* Modern Design System Variables */
         :root {
             --primary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -267,7 +292,7 @@
                                 
                                 <hr class="my-2 border-gray-100">
                                 
-                                <form method="POST" action="{{ route('logout') }}" class="block">
+                                <form method="POST" action="{{ route('logout') }}" class="block" data-spa-ignore>
                                     @csrf
                                     <button type="submit" 
                                             class="flex w-full items-center px-6 py-4 text-red-600 hover:bg-red-50 transition-all duration-300 group">
@@ -549,6 +574,8 @@
         });
     </script>
     
-    @stack('scripts')
+    <div id="spa-scripts">
+        @stack('scripts')
+    </div>
 </body>
 </html>

@@ -297,7 +297,7 @@
                     </div>
                     <span class="ks-qlink-label text-red-700">Riwayat Kembali</span>
                 </a>
-                @if(Auth::user()->hasAnyPermission(['denda.view','denda.manage']))
+                @if(Auth::user()->hasAnyPermission(['denda.view']))
                 <a href="{{ route('admin.denda.index') }}" class="ks-qlink" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);">
                     <div class="ks-qlink-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
                         <i class="fas fa-coins text-white text-sm"></i>

@@ -115,8 +115,8 @@ class RiwayatPengembalianController extends Controller
                         </div>';
             })
             ->addColumn('jumlah_badge', function ($row) {
-                $count = $row->detailPengembalian ? $row->detailPengembalian->count() : 0;
-                return '<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#ede9fe,#ddd6fe);color:#7c3aed;font-size:12px;font-weight:700;">' . $count . '</span>';
+                $total = $row->detailPengembalian ? $row->detailPengembalian->sum('jumlah_dikembalikan') : 0;
+                return '<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#ede9fe,#ddd6fe);color:#7c3aed;font-size:12px;font-weight:700;">' . $total . '</span>';
             })
             ->addColumn('tanggal_info', function ($row) {
                 $html = '<div class="text-xs font-medium text-gray-900">';
@@ -267,7 +267,7 @@ class RiwayatPengembalianController extends Controller
                             ? $return->jam_pengembalian->format('H:i')
                             : substr((string) $return->jam_pengembalian, 0, 5))
                         : '',
-                    $return->detailPengembalian ? $return->detailPengembalian->count() : 0,
+                    $return->detailPengembalian ? $return->detailPengembalian->sum('jumlah_dikembalikan') : 0,
                     $return->jumlah_hari_terlambat,
                     $return->total_denda,
                     $return->user->name ?? '',

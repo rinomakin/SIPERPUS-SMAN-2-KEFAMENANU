@@ -119,7 +119,7 @@
                             <td class="px-4 py-3 text-sm text-gray-600">{{ $item->tanggal_pengembalian ? $item->tanggal_pengembalian->format('d/m/Y') : '-' }}</td>
                             <td class="px-4 py-3 text-center">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">
-                                    {{ $item->detailPengembalian->count() }}
+                                    {{ $item->detailPengembalian->sum('jumlah_dikembalikan') }}
                                 </span>
                             </td>
                             <td class="px-4 py-3">

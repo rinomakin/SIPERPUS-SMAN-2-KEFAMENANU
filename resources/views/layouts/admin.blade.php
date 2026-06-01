@@ -18,7 +18,7 @@
     @endif
 
     <!-- Vite CSS & JS -->
-    @vite(['resources/css/app.css', 'resources/css/dark-mode.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/dark-mode.css', 'resources/js/app.js', 'resources/js/spa.js'])
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,13 +26,43 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <noscript id="spa-styles-start"></noscript>
     @stack('styles')
+    <noscript id="spa-styles-end"></noscript>
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
         html {
             scroll-behavior: smooth;
+        }
+
+        .spa-loader-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 99999;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #6366f1, #a855f7, #3b82f6);
+            background-size: 300% 100%;
+            animation: spa-loader 1.2s ease-in-out infinite;
+            box-shadow: 0 0 10px rgba(59,130,246,.5);
+        }
+        @keyframes spa-loader {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .spa-fade {
+            animation: spa-fade-in 0.2s ease-out;
+        }
+        @keyframes spa-fade-in {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* ============ SIDEBAR ============ */
@@ -303,10 +333,10 @@
                 <!-- Master Data Section -->
                 @php
                     $hasMasterPermission = Auth::user()->hasAnyPermission([
-                        'role.view', 'role.manage', 'permission.view', 'permission.manage',
-                        'jurusan.view', 'jurusan.manage', 'kelas.view', 'kelas.manage',
-                        'jenis-buku.view', 'jenis-buku.manage', 'kategori-buku.view', 'kategori-buku.manage',
-                        'rak-buku.view', 'rak-buku.manage', 'sumber-buku.view', 'sumber-buku.manage'
+                        'role.view', 'permission.view',
+                        'jurusan.view', 'kelas.view',
+                        'jenis-buku.view', 'kategori-buku.view',
+                        'rak-buku.view', 'sumber-buku.view'
                     ]) || Auth::user()->isAdmin();
 
                     $masterDataActive = request()->routeIs('role.*', 'permissions.*', 'jurusan.*', 'kelas.*', 'jenis-buku.*', 'kategori-buku.*', 'rak-buku.*', 'sumber-buku.*');
@@ -326,56 +356,56 @@
                         </button>
 
                         <div id="masterDropdown" class="dropdown-menu {{ $masterDataActive ? 'open' : '' }} space-y-0.5 mt-1">
-                            @if(Auth::user()->hasAnyPermission(['role.view', 'role.manage']) || Auth::user()->isAdmin())
+                            @if(Auth::user()->hasAnyPermission(['role.view']) || Auth::user()->isAdmin())
                             <!-- <a href="{{ route('role.index') }}"
                                class="dropdown-item {{ request()->routeIs('role.*') ? 'active' : '' }}">
                                 Data Role
                             </a> -->
                             @endif
 
-                            @if(Auth::user()->hasAnyPermission(['permission.view', 'permission.manage']) || Auth::user()->isAdmin())
+                            @if(Auth::user()->hasAnyPermission(['permission.view']) || Auth::user()->isAdmin())
                             <a href="{{ route('permissions.index') }}"
                                class="dropdown-item {{ request()->routeIs('permissions.*') ? 'active' : '' }}">
                                 Hak Akses
                             </a>
                             @endif
 
-                            @if(Auth::user()->hasAnyPermission(['jurusan.view', 'jurusan.manage']) || Auth::user()->isAdmin())
+                            @if(Auth::user()->hasAnyPermission(['jurusan.view']) || Auth::user()->isAdmin())
                             <a href="{{ route('jurusan.index') }}"
                                class="dropdown-item {{ request()->routeIs('jurusan.*') ? 'active' : '' }}">
                                 Data Jurusan
                             </a>
                             @endif
 
-                            @if(Auth::user()->hasAnyPermission(['kelas.view', 'kelas.manage']) || Auth::user()->isAdmin())
+                            @if(Auth::user()->hasAnyPermission(['kelas.view']) || Auth::user()->isAdmin())
                             <a href="{{ route('kelas.index') }}"
                                class="dropdown-item {{ request()->routeIs('kelas.*') ? 'active' : '' }}">
                                 Data Kelas
                             </a>
                             @endif
 
-                            @if(Auth::user()->hasAnyPermission(['jenis-buku.view', 'jenis-buku.manage']) || Auth::user()->isAdmin())
+                            @if(Auth::user()->hasAnyPermission(['jenis-buku.view']) || Auth::user()->isAdmin())
                             <a href="{{ route('jenis-buku.index') }}"
                                class="dropdown-item {{ request()->routeIs('jenis-buku.*') ? 'active' : '' }}">
                                 Jenis Buku
                             </a>
                             @endif
 
-                            @if(Auth::user()->hasAnyPermission(['kategori-buku.view', 'kategori-buku.manage']) || Auth::user()->isAdmin())
+                            @if(Auth::user()->hasAnyPermission(['kategori-buku.view']) || Auth::user()->isAdmin())
                             <a href="{{ route('kategori-buku.index') }}"
                                class="dropdown-item {{ request()->routeIs('kategori-buku.*') ? 'active' : '' }}">
                                 Kategori Buku
                             </a>
                             @endif
 
-                            @if(Auth::user()->hasAnyPermission(['rak-buku.view', 'rak-buku.manage']) || Auth::user()->isAdmin())
+                            @if(Auth::user()->hasAnyPermission(['rak-buku.view']) || Auth::user()->isAdmin())
                             <a href="{{ route('rak-buku.index') }}"
                                class="dropdown-item {{ request()->routeIs('rak-buku.*') ? 'active' : '' }}">
                                 Rak Buku
                             </a>
                             @endif
 
-                            @if(Auth::user()->hasAnyPermission(['sumber-buku.view', 'sumber-buku.manage']) || Auth::user()->isAdmin())
+                            @if(Auth::user()->hasAnyPermission(['sumber-buku.view']) || Auth::user()->isAdmin())
                             <a href="{{ route('sumber-buku.index') }}"
                                class="dropdown-item {{ request()->routeIs('sumber-buku.*') ? 'active' : '' }}">
                                 Sumber Buku
@@ -390,7 +420,7 @@
                 <div class="mt-6">
                     <div class="nav-section-label">Manajemen Data</div>
                     <div class="space-y-1">
-                        @if(Auth::user()->hasAnyPermission(['user.view', 'user.manage']) || Auth::user()->isAdmin())
+                        @if(Auth::user()->hasAnyPermission(['user.view']) || Auth::user()->isAdmin())
                         <a href="{{ route('user.index') }}"
                            class="nav-link {{ request()->routeIs('user.*') ? 'active' : '' }}">
                             <i class="fas fa-user-cog nav-icon"></i>
@@ -398,7 +428,7 @@
                         </a>
                         @endif
 
-                        @if(Auth::user()->hasAnyPermission(['anggota.view', 'anggota.manage']) || Auth::user()->isAdmin())
+                        @if(Auth::user()->hasAnyPermission(['anggota.view']) || Auth::user()->isAdmin())
                         <a href="{{ route('anggota.index') }}"
                            class="nav-link {{ request()->routeIs('anggota.*') ? 'active' : '' }}">
                             <i class="fas fa-users nav-icon"></i>
@@ -406,7 +436,7 @@
                         </a>
                         @endif
 
-                        @if(Auth::user()->hasAnyPermission(['buku.view', 'buku.manage']) || Auth::user()->isAdmin())
+                        @if(Auth::user()->hasAnyPermission(['buku.view']) || Auth::user()->isAdmin())
                         <a href="{{ route('buku.index') }}"
                            class="nav-link {{ request()->routeIs('buku.*') ? 'active' : '' }}">
                             <i class="fas fa-book nav-icon"></i>
@@ -420,7 +450,7 @@
                 <div class="mt-6">
                     <div class="nav-section-label">Transaksi</div>
                     <div class="space-y-1">
-                        @if(Auth::user()->hasAnyPermission(['peminjaman.view', 'peminjaman.manage']) || Auth::user()->isAdmin())
+                        @if(Auth::user()->hasAnyPermission(['peminjaman.view']) || Auth::user()->isAdmin())
                         <a href="{{ route('peminjaman.index') }}"
                            class="nav-link {{ request()->routeIs('peminjaman.*') ? 'active' : '' }}">
                             <i class="fas fa-hand-holding nav-icon"></i>
@@ -428,7 +458,7 @@
                         </a>
                         @endif
 
-                        @if(Auth::user()->hasAnyPermission(['pengembalian.view', 'pengembalian.manage']) || Auth::user()->isAdmin())
+                        @if(Auth::user()->hasAnyPermission(['pengembalian.view']) || Auth::user()->isAdmin())
                         <a href="{{ route('pengembalian.index') }}"
                            class="nav-link {{ request()->routeIs('pengembalian.*') ? 'active' : '' }}">
                             <i class="fas fa-undo-alt nav-icon"></i>
@@ -436,7 +466,7 @@
                         </a>
                         @endif
 
-                        @if(Auth::user()->hasAnyPermission(['riwayat-transaksi.view', 'riwayat-transaksi.manage']) || Auth::user()->isAdmin())
+                        @if(Auth::user()->hasAnyPermission(['riwayat-transaksi.view']) || Auth::user()->isAdmin())
                         <!-- <a href="{{ route('riwayat-peminjaman.index') }}"
                            class="nav-link {{ request()->routeIs('riwayat-peminjaman.*') ? 'active' : '' }}">
                             <i class="fas fa-history nav-icon"></i>
@@ -444,7 +474,7 @@
                         </a> -->
                         @endif
 
-                        @if(Auth::user()->hasAnyPermission(['denda.view', 'denda.manage']) || Auth::user()->isAdmin())
+                        @if(Auth::user()->hasAnyPermission(['denda.view']) || Auth::user()->isAdmin())
                         <a href="{{ route('admin.denda.index') }}"
                            class="nav-link {{ request()->routeIs('admin.denda.index', 'admin.denda.create', 'admin.denda.show', 'admin.denda.edit') ? 'active' : '' }}">
                             <i class="fas fa-money-bill-wave nav-icon"></i>
@@ -457,7 +487,7 @@
                         </a> -->
                         @endif
 
-                        @if(Auth::user()->hasAnyPermission(['buku-tamu.view', 'buku-tamu.manage']) || Auth::user()->isAdmin() || Auth::user()->isPetugas())
+                        @if(Auth::user()->hasAnyPermission(['buku-tamu.view']) || Auth::user()->isAdmin() || Auth::user()->isPetugas())
                         @php
                             $bukuTamuUrl    = Auth::user()->isPetugas() ? route('petugas.buku-tamu.index') : route('admin.buku-tamu.index');
                             $bukuTamuActive = Auth::user()->isPetugas() ? request()->routeIs('petugas.buku-tamu.*') : request()->routeIs('admin.buku-tamu.*');
@@ -493,7 +523,7 @@
                 @endif
 
                 <!-- Pengaturan -->
-                @if(Auth::user()->hasAnyPermission(['pengaturan.view', 'pengaturan.manage']) || Auth::user()->isAdmin())
+                @if(Auth::user()->hasAnyPermission(['pengaturan.view']) || Auth::user()->isAdmin())
                 <div class="mt-6">
                     <div class="nav-section-label">Pengaturan</div>
                     <div class="space-y-1">
@@ -625,7 +655,7 @@
 
                                     <!-- Logout -->
                                     <div class="border-t border-gray-100 p-2">
-                                        <form method="POST" action="{{ route('logout') }}">
+                                        <form method="POST" action="{{ route('logout') }}" data-spa-ignore>
                                             @csrf
                                             <button type="submit"
                                                     class="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-600 hover:bg-red-50 transition-colors">
@@ -946,6 +976,8 @@
         });
     })();
     </script>
-    @stack('scripts')
+    <div id="spa-scripts">
+        @stack('scripts')
+    </div>
 </body>
 </html>

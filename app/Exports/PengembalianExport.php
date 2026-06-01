@@ -69,7 +69,7 @@ class PengembalianExport implements FromCollection, WithHeadings, WithMapping, W
             $kelasJurusan,
             $pengembalian->tanggal_pengembalian ? $pengembalian->tanggal_pengembalian->format('d/m/Y') : '-',
             $pengembalian->jam_pengembalian ?: '-',
-            $pengembalian->detailPengembalian->count(),
+            $pengembalian->detailPengembalian->sum('jumlah_dikembalikan'),
             $daftarBuku,
             $pengembalian->jumlah_hari_terlambat,
             'Rp ' . number_format($pengembalian->total_denda, 0, ',', '.'),

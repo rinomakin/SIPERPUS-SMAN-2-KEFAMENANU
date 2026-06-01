@@ -52,7 +52,7 @@ class FixPermissions extends Command
             $this->info('dashboard.view: ' . ($adminUser->hasPermission('dashboard.view') ? 'YES' : 'NO'));
             $this->info('buku.view: ' . ($adminUser->hasPermission('buku.view') ? 'YES' : 'NO'));
             $this->info('anggota.view: ' . ($adminUser->hasPermission('anggota.view') ? 'YES' : 'NO'));
-            $this->info('user.manage: ' . ($adminUser->hasPermission('user.manage') ? 'YES' : 'NO'));
+            $this->info('user.view: ' . ($adminUser->hasPermission('user.view') ? 'YES' : 'NO'));
         }
         
         $this->info('');

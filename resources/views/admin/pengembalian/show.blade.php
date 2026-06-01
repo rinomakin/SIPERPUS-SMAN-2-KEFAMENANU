@@ -263,7 +263,7 @@
             </div>
             <div class="metric-item">
                 <span class="metric-label"><i class="fas fa-books mr-1"></i>Jumlah Buku</span>
-                <span class="metric-value">{{ $pengembalian->detailPengembalian->count() }} Buku</span>
+                <span class="metric-value">{{ $pengembalian->detailPengembalian->sum('jumlah_dikembalikan') }} Buku</span>
                 <span class="metric-sub">Dikembalikan</span>
             </div>
             <div class="metric-item">
@@ -418,7 +418,7 @@
                     </div>
                     <div class="flex-1">
                         <h3 class="text-sm font-bold text-white">Detail Buku Dikembalikan</h3>
-                        <p class="text-violet-100 text-xs">{{ $pengembalian->detailPengembalian->count() }} buku dikembalikan</p>
+                        <p class="text-violet-100 text-xs">{{ $pengembalian->detailPengembalian->sum('jumlah_dikembalikan') }} buku dikembalikan</p>
                     </div>
                 </div>
                 <div class="overflow-x-auto">

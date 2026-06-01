@@ -97,8 +97,8 @@
         </div>
     </div>
 
-    {{-- Bulk Delete Bar (admin & petugas only) --}}
-    @if(!Auth::user()->isKepalaSekolah())
+    {{-- Bulk Delete Bar --}}
+    @if(Auth::user()->hasPermission('buku-tamu.delete'))
     <div id="bulkBar" class="bulk-bar hidden glass-card rounded-2xl shadow-lg p-4">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -129,7 +129,7 @@
                 <thead>
                     <tr class="bg-gradient-to-r from-violet-50 to-purple-50">
                         <th class="px-4 py-3 text-center" style="width:40px;">
-                            @if(!Auth::user()->isKepalaSekolah())
+                            @if(Auth::user()->hasPermission('buku-tamu.delete'))
                             <input type="checkbox" id="selectAll" class="cb-row" title="Pilih Semua">
                             @endif
                         </th>
@@ -219,7 +219,7 @@
 <script>
 let historyTable;
 let selectedIds = new Set();
-var isKepsek = {{ Auth::user()->isKepalaSekolah() ? 'true' : 'false' }};
+var hasDeletePermission = {{ Auth::user()->hasPermission('buku-tamu.delete') ? 'true' : 'false' }};
 
 $(document).ready(function() {
     historyTable = $('#history-table').DataTable({
@@ -238,9 +238,9 @@ $(document).ready(function() {
             {
                 data: null, orderable: false, searchable: false,
                 className: 'px-4 py-3 text-center',
-                visible: !isKepsek,
+                visible: hasDeletePermission,
                 render: function(data, type, row) {
-                    if (isKepsek) return '';
+                    if (!hasDeletePermission) return '';
                     const checked = selectedIds.has(row.id) ? 'checked' : '';
                     return '<input type="checkbox" class="cb-row row-check" data-id="' + row.id + '" ' + checked + '>';
                 }

@@ -102,7 +102,7 @@ Route::get('/kepsek-panel', [KepsekController::class, 'dashboard'])
 Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/pengaturan-website', [AdminController::class, 'pengaturanWebsite'])->middleware('permission:pengaturan.view')->name('admin.pengaturan');
-    Route::post('/pengaturan-website', [AdminController::class, 'updatePengaturanWebsite'])->middleware('permission:pengaturan.edit|pengaturan.manage')->name('admin.pengaturan.update');
+    Route::post('/pengaturan-website', [AdminController::class, 'updatePengaturanWebsite'])->middleware('permission:pengaturan.edit')->name('admin.pengaturan.update');
     
     // Profil untuk semua role (Admin, Kepala Sekolah, Petugas)
     Route::get('/profil', [AdminController::class, 'profil'])->name('admin.profil');

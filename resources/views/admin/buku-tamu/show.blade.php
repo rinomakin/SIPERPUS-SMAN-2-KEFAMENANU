@@ -34,7 +34,8 @@
                 <i class="fas fa-user mr-2 text-blue-600"></i>
                 Informasi Anggota
             </h2>
-            
+
+            @if($kunjungan->anggota)
             <div class="space-y-4">
                 <!-- Member Photo -->
                 <div class="flex items-center space-x-4">
@@ -69,6 +70,29 @@
                     </div>
                 </div>
             </div>
+            @else
+            <div class="space-y-4">
+                <div class="flex items-center space-x-4">
+                    <div class="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
+                        <i class="fas fa-user text-3xl text-gray-400"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900">{{ $kunjungan->nama_tamu ?? 'Tamu Umum' }}</h3>
+                        <span class="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full font-medium">Tamu Umum</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">No. Telepon</label>
+                        <p class="text-gray-900">{{ $kunjungan->no_telepon ?? '-' }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Instansi</label>
+                        <p class="text-gray-900">{{ $kunjungan->instansi ?? '-' }}</p>
+                    </div>
+                </div>
+            </div>
+            @endif
         </div>
 
         <!-- Attendance Information -->
@@ -100,7 +124,7 @@
                 @if($kunjungan->petugas)
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Dicatat Oleh</label>
-                    <p class="text-gray-900">{{ $kunjungan->petugas->name }}</p>
+                    <p class="text-gray-900">{{ $kunjungan->petugas->nama_panggilan ?: $kunjungan->petugas->nama_lengkap }}</p>
                 </div>
                 @endif
             </div>

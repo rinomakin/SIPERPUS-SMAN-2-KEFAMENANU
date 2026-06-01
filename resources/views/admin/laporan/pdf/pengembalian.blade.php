@@ -54,7 +54,7 @@
                 <span style="font-size:9px; color:#666;">{{ $item->anggota->nomor_anggota }}</span>
             </td>
             <td>{{ $item->tanggal_pengembalian ? $item->tanggal_pengembalian->format('d/m/Y') : '-' }}</td>
-            <td class="text-center">{{ $item->detailPengembalian->count() }}</td>
+            <td class="text-center">{{ $item->detailPengembalian->sum('jumlah_dikembalikan') }}</td>
             <td>
                 @if($item->jumlah_hari_terlambat > 0)
                     <span class="badge badge-red">Terlambat {{ $item->jumlah_hari_terlambat }} hari</span>

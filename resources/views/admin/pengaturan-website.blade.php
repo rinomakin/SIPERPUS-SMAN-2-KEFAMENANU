@@ -403,7 +403,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             style="background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(0,0,0,0.08);">
                         <i class="fas fa-arrow-left mr-1.5"></i>Kembali
                     </button>
-                    @if(Auth::user()->hasPermission('pengaturan.edit') || Auth::user()->hasPermission('pengaturan.manage'))
+                    @if(Auth::user()->hasPermission('pengaturan.edit'))
                     <button type="button" id="btnEdit" onclick="toggleEdit()"
                             class="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2"
                             style="background: linear-gradient(135deg, #3b82f6, #6366f1); box-shadow: 0 4px 15px rgba(59,130,246,0.3);">

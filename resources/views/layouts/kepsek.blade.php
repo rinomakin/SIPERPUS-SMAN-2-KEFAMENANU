@@ -21,7 +21,7 @@
     @endif
 
     <!-- Vite CSS & JS -->
-    @vite(['resources/css/app.css', 'resources/css/dark-mode.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/dark-mode.css', 'resources/js/app.js', 'resources/js/spa.js'])
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,6 +31,31 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
+        .spa-loader-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 99999;
+            height: 3px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6, #a855f7, #6366f1);
+            background-size: 300% 100%;
+            animation: spa-loader 1.2s ease-in-out infinite;
+            box-shadow: 0 0 10px rgba(99,102,241,.5);
+        }
+        @keyframes spa-loader {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .spa-fade {
+            animation: spa-fade-in 0.2s ease-out;
+        }
+        @keyframes spa-fade-in {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .profile-dropdown {
             transform: translateY(-10px);
             opacity: 0;
@@ -111,7 +136,7 @@
                         <span class="font-medium">Riwayat Pengembalian</span>
                     </a>
 
-                    @if(Auth::user()->hasAnyPermission(['denda.view', 'denda.manage']))
+                    @if(Auth::user()->hasAnyPermission(['denda.view']))
                     <a href="{{ route('admin.denda.index') }}"
                        class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors {{ request()->routeIs('admin.denda.*') ? 'bg-white bg-opacity-20' : '' }}">
                         <i class="fas fa-coins"></i>
@@ -193,7 +218,7 @@
 
                                 <hr class="my-2">
 
-                                <form method="POST" action="{{ route('logout') }}" class="block">
+                                <form method="POST" action="{{ route('logout') }}" class="block" data-spa-ignore>
                                     @csrf
                                     <button type="submit"
                                             class="flex w-full items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors">
@@ -246,7 +271,7 @@
                     <i class="fas fa-undo-alt w-5"></i>
                     <span>Riwayat Pengembalian</span>
                 </a>
-                @if(Auth::user()->hasAnyPermission(['denda.view', 'denda.manage']))
+                @if(Auth::user()->hasAnyPermission(['denda.view']))
                 <a href="{{ route('admin.denda.index') }}"
                    class="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-purple-600 transition-colors {{ request()->routeIs('admin.denda.*') ? 'bg-purple-600' : '' }}">
                     <i class="fas fa-coins w-5"></i>
@@ -265,7 +290,7 @@
     </main>
 
     <!-- Logout Form -->
-    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden" data-spa-ignore>
         @csrf
     </form>
 
@@ -296,6 +321,8 @@
         });
     })();
     </script>
-    @stack('scripts')
+    <div id="spa-scripts">
+        @stack('scripts')
+    </div>
 </body>
 </html>

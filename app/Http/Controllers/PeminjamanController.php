@@ -278,9 +278,10 @@ class PeminjamanController extends Controller
             'detailPeminjaman.detailPengembalian'
         ])->findOrFail($id);
 
-        // Filter hanya buku yang belum dikembalikan
+        // Filter hanya buku yang belum dikembalikan seluruhnya
         $peminjaman->detailPeminjaman = $peminjaman->detailPeminjaman->filter(function($detail) {
-            return $detail->detailPengembalian->isEmpty();
+            $returned = $detail->detailPengembalian->sum('jumlah_dikembalikan');
+            return $returned < ($detail->jumlah ?? 1);
         });
 
         return view('admin.peminjaman.show', compact('peminjaman'));

@@ -206,7 +206,7 @@
                                 <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
                                     <i class="fas fa-user text-white" style="font-size:8px"></i>
                                 </div>
-                                <span class="text-sm font-medium text-gray-800">{{ $peminjaman->user->name ?? 'N/A' }}</span>
+                                <span class="text-sm font-medium text-gray-800">{{ $peminjaman->user->nama_panggilan ?: $peminjaman->user->nama_lengkap ?? 'N/A' }}</span>
                             </div>
                         </div>
                     </div>

@@ -355,16 +355,19 @@ class BukuTamuController extends Controller
                     return '<span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Sedang Berkunjung</span>';
                 })
                 ->addColumn('action', function($row) {
-                    $isKepsek = Auth::user()->isKepalaSekolah();
+                    $canEdit = Auth::user()->hasPermission('buku-tamu.edit');
+                    $canDelete = Auth::user()->hasPermission('buku-tamu.delete');
                     $html = '<div class="flex items-center gap-1">
                                 <a href="' . route('admin.buku-tamu.show', $row->id) . '" class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors" title="Detail">
                                     <i class="fas fa-eye text-xs"></i>
                                 </a>';
-                    if (!$isKepsek) {
+                    if ($canEdit) {
                         $html .= '<a href="' . route('admin.buku-tamu.edit', $row->id) . '" class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors" title="Edit">
                                     <i class="fas fa-edit text-xs"></i>
-                                </a>
-                                <button onclick="hapusData(' . $row->id . ')" class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors" title="Hapus">
+                                </a>';
+                    }
+                    if ($canDelete) {
+                        $html .= '<button onclick="hapusData(' . $row->id . ')" class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors" title="Hapus">
                                     <i class="fas fa-trash text-xs"></i>
                                 </button>';
                     }

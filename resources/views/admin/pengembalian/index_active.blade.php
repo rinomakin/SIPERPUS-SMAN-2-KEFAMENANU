@@ -71,7 +71,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                                            {{ $item->detailPeminjaman->sum('jumlah') }} Buku
+                                            {{ $item->jumlah_buku }} Buku
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
