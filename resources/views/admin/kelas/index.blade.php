@@ -527,7 +527,7 @@ function generateKodeKelas() {
     kodeInput.value = '';
 
     $.ajax({
-        url: '{{ route("kelas.generate-kode") }}',
+        url: '{{ url("admin/kelas/generate-kode") }}',
         method: 'POST',
         data: { _token: '{{ csrf_token() }}', jurusan_id: jurusanId, tahun_ajaran: tahunAjaran },
         success: function (res) {

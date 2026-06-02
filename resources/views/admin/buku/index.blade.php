@@ -550,7 +550,7 @@ $(document).ready(function() {
         processing: true,
         serverSide: true,
         ajax: {
-            url: '{{ route("buku.index") }}',
+            url: '{{ url("admin/buku") }}',
             data: function(d) {
                 d.filter_kategori_id = $('#filter_kategori_id').val();
                 d.filter_jenis_id = $('#filter_jenis_id').val();

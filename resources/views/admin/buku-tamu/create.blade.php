@@ -957,7 +957,7 @@ document.addEventListener('DOMContentLoaded', function () {
             jQuery('#search-results').hide();
 
             jQuery.ajax({
-                url: '{{ route("admin.buku-tamu.search-members") }}',
+                url: '{{ url("admin/buku-tamu/search-members") }}',
                 method: 'GET',
                 data: { q: query },
                 success: (res) => {
@@ -1069,7 +1069,7 @@ document.addEventListener('DOMContentLoaded', function () {
             };
 
             jQuery.ajax({
-                url: '{{ route("admin.buku-tamu.store") }}',
+                url: '{{ url("admin/buku-tamu") }}',
                 method: 'POST',
                 data: formData,
                 success: (res) => {

@@ -96,7 +96,7 @@ $(document).ready(function() {
     $('#anggota-table').DataTable({
         processing: true,
         serverSide: true,
-        ajax: '{{ route("anggota.index") }}',
+        ajax: '{{ url("admin/anggota") }}',
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'nomor_anggota', name: 'nomor_anggota' },

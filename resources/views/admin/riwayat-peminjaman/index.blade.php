@@ -472,7 +472,7 @@ $(document).ready(function () {
         processing : true,
         serverSide : true,
         ajax: {
-            url : '{{ route("riwayat-peminjaman.data") }}',
+            url : '{{ url("admin/riwayat-peminjaman/data") }}',
             type: 'GET',
             data: function (d) {
                 d.filter_status    = currentQuickFilter !== 'all' ? currentQuickFilter : $('#filter_status').val();

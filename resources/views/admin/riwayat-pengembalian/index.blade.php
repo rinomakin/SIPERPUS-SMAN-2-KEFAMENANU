@@ -581,7 +581,7 @@ $(document).ready(function () {
         processing : true,
         serverSide : true,
         ajax: {
-            url : '{{ route("riwayat-pengembalian.data") }}',
+            url : '{{ url("admin/riwayat-pengembalian/data") }}',
             type: 'GET',
             data: function (d) {
                 d.filter_status       = currentQuickFilter !== 'all' ? currentQuickFilter : $('#filter_status').val();

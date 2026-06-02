@@ -564,7 +564,7 @@ $(document).ready(function() {
         processing: true,
         serverSide: true,
         ajax: {
-            url: '{{ route("anggota.index") }}',
+            url: '{{ url("admin/anggota") }}',
             data: function(d) {
                 d.filter_kelas_id = $('#filter_kelas_id').val();
                 d.filter_jurusan_id = $('#filter_jurusan_id').val();

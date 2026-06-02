@@ -532,7 +532,7 @@ $(document).ready(function() {
         processing: true,
         serverSide: true,
         ajax: {
-            url: '{{ route("peminjaman.index") }}',
+            url: '{{ url("admin/peminjaman") }}',
             data: function(d) {
                 d.filter_status = currentQuickFilter || $('#filter_status').val();
                 d.filter_tanggal_dari = $('#filter_tanggal_dari').val();
@@ -596,7 +596,7 @@ $(document).ready(function() {
 // ===== Summary Cards =====
 function loadSummary() {
     $.ajax({
-        url: '{{ route("peminjaman.index") }}',
+        url: '{{ url("admin/peminjaman") }}',
         data: { ajax_summary: 1 },
         headers: { 'X-Requested-With': 'XMLHttpRequest' },
         success: function(res) {
