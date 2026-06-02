@@ -462,8 +462,8 @@ let riwayatTable;
 let currentQuickFilter = 'all';
 let pendingDeleteId    = null;
 const CSRF_TOKEN  = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-const DESTROY_URL = '{{ rtrim(route("riwayat-peminjaman.destroy", "__ID__"), "") }}';
-const BULK_URL    = '{{ route("riwayat-peminjaman.bulk-destroy") }}';
+const DESTROY_URL = '/admin/riwayat-peminjaman/__ID__';
+const BULK_URL    = '/admin/riwayat-peminjaman/bulk';
 
 // ─── DataTables Init ───────────────────────────────────────────────────────
 $(document).ready(function () {
@@ -472,7 +472,7 @@ $(document).ready(function () {
         processing : true,
         serverSide : true,
         ajax: {
-            url : '{{ url("admin/riwayat-peminjaman/data") }}',
+            url : '/admin/riwayat-peminjaman/data',
             type: 'GET',
             data: function (d) {
                 d.filter_status    = currentQuickFilter !== 'all' ? currentQuickFilter : $('#filter_status').val();

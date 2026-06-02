@@ -72,7 +72,7 @@ function confirmDelete(anggotaId) {
         if (result.isConfirmed) {
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '{{ route("anggota.index") }}/' + anggotaId;
+            form.action = '/admin/anggota/' + anggotaId;
             
             const csrfInput = document.createElement('input');
             csrfInput.type = 'hidden';
@@ -96,7 +96,7 @@ $(document).ready(function() {
     $('#anggota-table').DataTable({
         processing: true,
         serverSide: true,
-        ajax: '{{ url("admin/anggota") }}',
+        ajax: '/admin/anggota',
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'nomor_anggota', name: 'nomor_anggota' },

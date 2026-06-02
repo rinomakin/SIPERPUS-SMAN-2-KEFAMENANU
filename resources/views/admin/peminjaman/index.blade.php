@@ -532,7 +532,7 @@ $(document).ready(function() {
         processing: true,
         serverSide: true,
         ajax: {
-            url: '{{ url("admin/peminjaman") }}',
+            url: '/admin/peminjaman',
             data: function(d) {
                 d.filter_status = currentQuickFilter || $('#filter_status').val();
                 d.filter_tanggal_dari = $('#filter_tanggal_dari').val();
@@ -596,7 +596,7 @@ $(document).ready(function() {
 // ===== Summary Cards =====
 function loadSummary() {
     $.ajax({
-        url: '{{ url("admin/peminjaman") }}',
+        url: '/admin/peminjaman',
         data: { ajax_summary: 1 },
         headers: { 'X-Requested-With': 'XMLHttpRequest' },
         success: function(res) {
@@ -705,7 +705,7 @@ function confirmDelete(peminjamanId) {
         if (result.isConfirmed) {
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '{{ route("peminjaman.index") }}/' + peminjamanId;
+            form.action = '/admin/peminjaman/' + peminjamanId;
             const csrf = document.createElement('input');
             csrf.type = 'hidden'; csrf.name = '_token';
             csrf.value = document.querySelector('meta[name="csrf-token"]').content;

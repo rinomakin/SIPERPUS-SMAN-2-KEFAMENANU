@@ -337,7 +337,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'Konfirmasi Generate Barcode',
             function() {
                 showLoading();
-                fetch('{{ route("buku.generate-barcode") }}', {
+                fetch('/admin/buku/generate-barcode', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -373,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'Konfirmasi Hapus Buku',
             function() {
                 showLoading();
-                fetch('{{ route("buku.destroy", $buku->id) }}', {
+                fetch('/admin/buku/' + {{ $buku->id }}, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -384,7 +384,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     hideLoading();
                     if (data.success) {
                         showSuccessAlert('Buku berhasil dihapus');
-                        window.location.href = '{{ route("buku.index") }}';
+                        window.location.href = '/admin/buku';
                     } else {
                         showErrorAlert('Gagal menghapus buku: ' + data.message);
                     }

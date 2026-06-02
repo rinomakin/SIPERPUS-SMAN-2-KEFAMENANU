@@ -719,7 +719,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (form) {
         form.addEventListener('submit', function (e) {
             e.preventDefault();
-            fetch('{{ route("pengembalian.update-status-pembayaran-denda", $pengembalian->id) }}', {
+            fetch('/admin/pengembalian/' + {{ $pengembalian->id }} + '/update-status-pembayaran-denda', {
                 method : 'POST',
                 headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                 body   : new FormData(this),

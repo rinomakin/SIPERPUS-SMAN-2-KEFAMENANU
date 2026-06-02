@@ -226,7 +226,7 @@ $(document).ready(function() {
         processing: true,
         serverSide: true,
         ajax: {
-            url: '{{ url("admin/buku-tamu/history") }}',
+            url: '/admin/buku-tamu/history',
             data: function(d) {
                 d.filter_status = $('#filter_status').val();
                 d.filter_tipe = $('#filter_tipe').val();
@@ -400,7 +400,7 @@ function bulkDelete() {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: '{{ url("admin/buku-tamu/bulk-delete") }}',
+                url: '/admin/buku-tamu/bulk-delete',
                 type: 'POST',
                 headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
                 data: { ids: Array.from(selectedIds) },

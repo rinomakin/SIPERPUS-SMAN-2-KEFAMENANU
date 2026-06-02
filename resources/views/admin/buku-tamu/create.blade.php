@@ -834,7 +834,7 @@ document.addEventListener('DOMContentLoaded', function () {
         isProcessingBarcode = true;
         document.getElementById('scannerStatus').textContent = 'Memproses...';
 
-        fetch('{{ route("admin.buku-tamu.scan-barcode") }}', {
+        fetch('/admin/buku-tamu/scan-barcode', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
             body: JSON.stringify({ barcode })
@@ -957,7 +957,7 @@ document.addEventListener('DOMContentLoaded', function () {
             jQuery('#search-results').hide();
 
             jQuery.ajax({
-                url: '{{ url("admin/buku-tamu/search-members") }}',
+                url: '/admin/buku-tamu/search-members',
                 method: 'GET',
                 data: { q: query },
                 success: (res) => {
@@ -1069,7 +1069,7 @@ document.addEventListener('DOMContentLoaded', function () {
             };
 
             jQuery.ajax({
-                url: '{{ url("admin/buku-tamu") }}',
+                url: '/admin/buku-tamu',
                 method: 'POST',
                 data: formData,
                 success: (res) => {

@@ -1176,8 +1176,8 @@ function processScannedBarcode(barcode) {
     document.getElementById('scannerStatus').textContent = 'Memproses...';
 
     const route = currentScanType === 'anggota'
-        ? `{{ route('anggota.scan-barcode') }}`
-        : `{{ route('buku.scan-barcode') }}`;
+        ? '/admin/peminjaman/scan-anggota'
+        : '/admin/peminjaman/scan-buku';
 
     fetch(route, {
         method: 'POST',
@@ -1223,7 +1223,7 @@ const searchAnggota = debounce(function (query) {
     dropdown.innerHTML = '<div class="px-4 py-3 text-center text-gray-500 text-sm"><i class="fas fa-spinner spinner mr-2"></i>Mencari...</div>';
     dropdown.classList.remove('hidden');
 
-    fetch(`{{ route('peminjaman.search-anggota') }}?query=${encodeURIComponent(query)}`, {
+    fetch(`/admin/peminjaman/search-anggota?query=${encodeURIComponent(query)}`, {
         headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken }
     })
     .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
@@ -1294,7 +1294,7 @@ function selectAnggota(anggota) {
 }
 
 function checkOverdueLoans(anggotaId) {
-    fetch(`{{ route('peminjaman.check-overdue-loan') }}?anggota_id=${anggotaId}`, {
+    fetch(`/admin/peminjaman/check-overdue-loan?anggota_id=${anggotaId}`, {
         headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken }
     })
     .then(r => r.json())
@@ -1372,7 +1372,7 @@ const searchBuku = debounce(function (query) {
     dropdown.innerHTML = '<div class="px-4 py-3 text-center text-gray-500 text-sm"><i class="fas fa-spinner spinner mr-2"></i>Mencari...</div>';
     dropdown.classList.remove('hidden');
 
-    fetch(`{{ route('peminjaman.search-buku') }}?query=${encodeURIComponent(query)}`, {
+    fetch(`/admin/peminjaman/search-buku?query=${encodeURIComponent(query)}`, {
         headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken }
     })
     .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
@@ -1419,7 +1419,7 @@ function selectBook(book) {
     const anggotaId = document.getElementById('anggota_id').value;
     if (!anggotaId) { showNotification('Pilih anggota terlebih dahulu!', 'warning'); return; }
 
-    fetch(`{{ route('peminjaman.check-active-loan') }}`, {
+    fetch('/admin/peminjaman/check-active-loan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
         body: JSON.stringify({ anggota_id: anggotaId, buku_id: book.id })

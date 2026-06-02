@@ -277,7 +277,7 @@ $(document).ready(function(){
 });
 
 function generateKodeSumber() {
-    $.post('{{ route("sumber-buku.generate-kode") }}',{_token:'{{ csrf_token() }}'})
+    $.post('/admin/sumber-buku/generate-kode',{_token:'{{ csrf_token() }}'})
      .done(res=>{ if(res.success) document.getElementById('kode_sumber').value=res.kode; })
      .fail(()=>Swal.fire({icon:'error',title:'Error',text:'Gagal generate kode.',timer:2000,showConfirmButton:false}));
 }

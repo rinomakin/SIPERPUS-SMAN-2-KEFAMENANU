@@ -123,7 +123,7 @@ function confirmDelete(bukuId) {
         if (result.isConfirmed) {
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '{{ route("buku.index") }}/' + bukuId;
+            form.action = '/admin/buku/' + bukuId;
             
             const csrfInput = document.createElement('input');
             csrfInput.type = 'hidden';
@@ -147,7 +147,7 @@ $(document).ready(function() {
     $('#buku-table').DataTable({
         processing: true,
         serverSide: true,
-        ajax: '{{ route("buku.index") }}',
+        ajax: '/admin/buku',
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'judul_buku', name: 'judul_buku' },

@@ -551,7 +551,7 @@ $(document).ready(function () {
             
         },
         ajax: {
-            url : '{{ url("admin/pengembalian/data") }}',
+            url : '/admin/pengembalian/data',
             type: 'GET',
             data: function (d) {
                 d.filter_status       = currentQuickFilter !== 'all' ? currentQuickFilter : ($('#filter_status').val() || '');

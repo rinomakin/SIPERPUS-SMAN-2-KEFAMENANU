@@ -398,7 +398,7 @@ window.recordExit = async function(kunjunganId) {
     Swal.fire({ title: 'Menyimpan...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
     try {
-        const response = await fetch('{{ route("admin.buku-tamu.record-exit") }}', {
+        const response = await fetch('/admin/buku-tamu/record-exit', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -272,7 +272,7 @@ function onNamaKategoriInput(nama) {
 function generateKodeKategori(nama) {
     const spinner = document.getElementById('kodeSpinner');
     spinner.style.display = 'inline-flex';
-    $.post('{{ route("kategori-buku.generate-kode") }}', {_token:'{{ csrf_token() }}', nama_kategori: nama})
+    $.post('/admin/kategori-buku/generate-kode', {_token:'{{ csrf_token() }}', nama_kategori: nama})
      .done(res => { if(res.success) document.getElementById('kode_kategori').value = res.kode_kategori; })
      .always(() => spinner.style.display = 'none');
 }

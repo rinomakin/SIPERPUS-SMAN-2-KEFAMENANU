@@ -571,8 +571,8 @@ let riwayatTable;
 let currentQuickFilter = 'all';
 let pendingDeleteId    = null;
 const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-const DESTROY_URL = '{{ rtrim(route("riwayat-pengembalian.destroy", "__ID__"), "") }}';
-const BULK_URL    = '{{ route("riwayat-pengembalian.bulk-destroy") }}';
+const DESTROY_URL = '/admin/riwayat-pengembalian/__ID__';
+const BULK_URL    = '/admin/riwayat-pengembalian/bulk';
 
 // ─── DataTables Init ──────────────────────────────────────────────────────
 $(document).ready(function () {
@@ -581,7 +581,7 @@ $(document).ready(function () {
         processing : true,
         serverSide : true,
         ajax: {
-            url : '{{ url("admin/riwayat-pengembalian/data") }}',
+            url : '/admin/riwayat-pengembalian/data',
             type: 'GET',
             data: function (d) {
                 d.filter_status       = currentQuickFilter !== 'all' ? currentQuickFilter : $('#filter_status').val();

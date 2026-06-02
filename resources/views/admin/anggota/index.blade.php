@@ -564,7 +564,7 @@ $(document).ready(function() {
         processing: true,
         serverSide: true,
         ajax: {
-            url: '{{ url("admin/anggota") }}',
+            url: '/admin/anggota',
             data: function(d) {
                 d.filter_kelas_id = $('#filter_kelas_id').val();
                 d.filter_jurusan_id = $('#filter_jurusan_id').val();
@@ -805,7 +805,7 @@ function bulkDelete() {
             showLoadingOverlay();
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
 
-            fetch('{{ route("anggota.bulk-delete") }}', {
+            fetch('/admin/anggota/bulk-delete', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -841,7 +841,7 @@ function bulkPrintKartu() {
         return;
     }
 
-    const url = '{{ route("anggota.bulk-print-kartu") }}?ids=' + ids.join(',');
+    const url = '/admin/anggota/bulk-print-kartu?ids=' + ids.join(',');
     window.open(url, '_blank');
 }
 
@@ -860,7 +860,7 @@ function confirmDeleteAnggota(id) {
         if (result.isConfirmed) {
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '{{ route("anggota.index") }}/' + id;
+            form.action = '/admin/anggota/' + id;
 
             const csrfInput = document.createElement('input');
             csrfInput.type = 'hidden';

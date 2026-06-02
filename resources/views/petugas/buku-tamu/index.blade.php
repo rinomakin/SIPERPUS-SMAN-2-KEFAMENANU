@@ -411,7 +411,7 @@
 
             async searchMembers(query) {
                 try {
-                    const response = await fetch(`{{ route('petugas.absensi-pengunjung.search-members') }}?q=${encodeURIComponent(query)}`);
+                    const response = await fetch(`/petugas/buku-tamu/search-members?q=${encodeURIComponent(query)}`);
                     const result = await response.json();
 
                     if (result.success) {
@@ -497,7 +497,7 @@
                 }
 
                 try {
-                    const response = await fetch('{{ route("petugas.absensi-pengunjung.store") }}', {
+                    const response = await fetch('/petugas/buku-tamu', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -721,7 +721,7 @@
                 this.showMessage('Memproses barcode...', 'info');
                 
                 try {
-                    const response = await fetch('{{ route("petugas.absensi-pengunjung.scan-qr") }}', {
+                    const response = await fetch('/petugas/buku-tamu/scan-barcode', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

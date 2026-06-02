@@ -1101,7 +1101,7 @@ function searchByBarcode(barcode) {
     document.getElementById('barcodeLoading').classList.remove('hidden');
     document.getElementById('barcodeError').classList.add('hidden');
     document.getElementById('barcodeResult').classList.add('hidden');
-    fetch('{{ route("admin.denda.scan-barcode") }}?barcode=' + encodeURIComponent(barcode), {
+    fetch('/admin/denda/scan-barcode?barcode=' + encodeURIComponent(barcode), {
         headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
     })
     .then(r => r.json())
@@ -1149,7 +1149,7 @@ function doBayarLunas() {
     const btn = document.getElementById('bayarLunasBtn');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Memproses...';
-    fetch('{{ route("admin.denda.bayar-lunas-anggota") }}', {
+    fetch('/admin/denda/bayar-lunas-anggota', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

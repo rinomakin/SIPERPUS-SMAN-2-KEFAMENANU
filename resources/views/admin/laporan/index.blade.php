@@ -579,7 +579,7 @@ function viewReport() {
     const params = buildReportParams();
     if (!validateReportParams()) return;
 
-    const url = `{{ url('/admin/laporan') }}/${currentReportType}?${params}`;
+    const url = `/admin/laporan/${currentReportType}?${params}`;
     window.open(url, '_blank');
     closeReportModal();
 }
@@ -588,7 +588,7 @@ function downloadReport() {
     const params = buildReportParams();
     if (!validateReportParams()) return;
 
-    const url = `{{ url('/admin/laporan') }}/${currentReportType}?${params}&export=excel`;
+    const url = `/admin/laporan/${currentReportType}?${params}&export=excel`;
     window.location.href = url;
 
     const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
@@ -601,7 +601,7 @@ function downloadPdf() {
     const params = buildReportParams();
     if (!validateReportParams()) return;
 
-    const url = `{{ url('/admin/laporan') }}/${currentReportType}?${params}&export=pdf`;
+    const url = `/admin/laporan/${currentReportType}?${params}&export=pdf`;
     window.location.href = url;
 
     const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });

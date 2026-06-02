@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
         generateKodeBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
         generateKodeBtn.disabled = true;
         
-        fetch('{{ route("role.generate-kode") }}', {
+        fetch('/admin/role/generate-kode', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

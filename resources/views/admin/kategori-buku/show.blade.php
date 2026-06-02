@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'Konfirmasi Hapus Kategori',
             function() {
                 showLoading();
-                fetch('{{ route("kategori-buku.destroy", $kategoriBuku->id) }}', {
+                fetch('/admin/kategori-buku/' + {{ $kategoriBuku->id }}, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     hideLoading();
                     if (data.success) {
                         showSuccessAlert('Kategori berhasil dihapus');
-                        window.location.href = '{{ route("kategori-buku.index") }}';
+                        window.location.href = '/admin/kategori-buku';
                     } else {
                         showErrorAlert('Gagal menghapus kategori: ' + data.message);
                     }

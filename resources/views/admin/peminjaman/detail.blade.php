@@ -71,7 +71,7 @@ function removeBook(detailId) {
         'Apakah Anda yakin ingin menghapus buku ini dari peminjaman?',
         'Konfirmasi Hapus Buku',
         function() {
-            fetch('{{ route("peminjaman.remove-book") }}', {
+            fetch('/admin/peminjaman/remove-book', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

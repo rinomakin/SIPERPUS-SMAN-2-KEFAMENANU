@@ -185,7 +185,7 @@ function generateKode() {
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     button.disabled = true;
     
-    fetch('{{ route("kategori-buku.generate-kode") }}', {
+    fetch('/admin/kategori-buku/generate-kode', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

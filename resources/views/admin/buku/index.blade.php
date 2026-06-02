@@ -550,7 +550,7 @@ $(document).ready(function() {
         processing: true,
         serverSide: true,
         ajax: {
-            url: '{{ url("admin/buku") }}',
+            url: '/admin/buku',
             data: function(d) {
                 d.filter_kategori_id = $('#filter_kategori_id').val();
                 d.filter_jenis_id = $('#filter_jenis_id').val();
@@ -800,7 +800,7 @@ function deleteSelected() {
             showLoadingOverlay();
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
 
-            fetch('{{ route("buku.destroy-multiple") }}', {
+            fetch('/admin/buku/destroy-multiple', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -876,7 +876,7 @@ function confirmDeleteBuku(id) {
             showLoadingOverlay();
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
 
-            fetch('{{ route("buku.index") }}/' + id, {
+            fetch('/admin/buku/' + id, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
