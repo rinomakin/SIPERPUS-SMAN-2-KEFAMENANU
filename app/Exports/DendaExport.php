@@ -58,7 +58,7 @@ class DendaExport implements FromCollection, WithHeadings, WithMapping, WithStyl
             $no++,
             $denda->peminjaman->nomor_peminjaman,
             $denda->peminjaman->anggota->nama_lengkap,
-            $denda->peminjaman->anggota->nis ?: $denda->peminjaman->anggota->nik,
+            $denda->peminjaman->anggota->nis ?: $denda->peminjaman->anggota->nomor_anggota,
             $kelasJurusan,
             $daftarBuku,
             $denda->jumlah_hari_terlambat,

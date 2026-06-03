@@ -235,8 +235,12 @@ html[data-theme="dark"] #anggotaSearchResults > * {
                 <!-- Selected Anggota Info -->
                 <div id="anggotaInfo" class="mt-4 p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-200 hidden">
                     <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center shadow-lg">
-                            <i class="fas fa-user text-white text-lg"></i>
+                        <div class="anggota-photo-wrapper w-14 h-14 rounded-full flex-shrink-0 shadow-lg relative">
+                            <img id="anggotaFoto" src="" alt="" class="w-14 h-14 rounded-full object-cover hidden"
+                                 onerror="this.classList.add('hidden');document.getElementById('anggotaIcon').classList.remove('hidden')">
+                            <div id="anggotaIcon" class="w-14 h-14 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white text-lg"></i>
+                            </div>
                         </div>
                         <div class="flex-1 min-w-0">
                             <h4 id="anggotaNama" class="text-sm font-bold text-gray-900 truncate"></h4>
@@ -569,12 +573,13 @@ function renderAnggotaList(list) {
     let html = '';
     list.forEach(a => {
         const safeJson = JSON.stringify(a).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+        const fotoHtml = a.foto
+            ? `<img src="/storage/anggota/${a.foto}" alt="" class="w-9 h-9 rounded-full object-cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="w-9 h-9 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold" style="display:none">${(a.nama_lengkap || 'N').charAt(0).toUpperCase()}</div>`
+            : `<div class="w-9 h-9 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">${(a.nama_lengkap || 'N').charAt(0).toUpperCase()}</div>`;
         html += `
         <div class="p-3 border-b border-gray-100 hover:bg-emerald-50 cursor-pointer transition-all text-xs" onclick='pickAnggota(${JSON.stringify(a).replace(/'/g, "\\'")})'>
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                    ${(a.nama_lengkap || 'N').charAt(0).toUpperCase()}
-                </div>
+                ${fotoHtml}
                 <div class="flex-1 min-w-0">
                     <p class="font-semibold text-gray-900 truncate">${a.nama_lengkap || 'N/A'}</p>
                     <p class="text-gray-500">${a.nomor_anggota || ''} &bull; ${a.kelas || ''} &bull; <span class="font-semibold text-blue-600">${a.jumlah_peminjaman_aktif} peminjaman</span></p>
@@ -591,8 +596,16 @@ function pickAnggota(anggota) {
     document.getElementById('anggotaNomor').textContent = anggota.nomor_anggota || '';
     document.getElementById('anggotaKelas').textContent = (anggota.kelas || '') + ' - ' + (anggota.jenis_anggota || 'Siswa');
     document.getElementById('anggotaInfo').classList.remove('hidden');
-    document.getElementById('anggotaSearchResults').classList.add('hidden');
-    document.getElementById('searchAnggotaInput').value = '';
+    const fotoEl = document.getElementById('anggotaFoto');
+    const iconEl = document.getElementById('anggotaIcon');
+    if (anggota.foto) {
+        fotoEl.src = '/storage/anggota/' + anggota.foto;
+        fotoEl.classList.remove('hidden');
+        iconEl.classList.add('hidden');
+    } else {
+        fotoEl.classList.add('hidden');
+        iconEl.classList.remove('hidden');
+    }
 
     // Load peminjaman aktif
     if (anggota.memiliki_peminjaman_aktif && anggota.detail_peminjaman && anggota.detail_peminjaman.length > 0) {
@@ -1294,6 +1307,16 @@ function processScannedBarcode(barcode) {
                 : (a.kelas || 'N/A');
             document.getElementById('anggotaKelas').textContent = kelasName + ' - ' + (a.jenis_anggota || 'Siswa');
             document.getElementById('anggotaInfo').classList.remove('hidden');
+            const fotoEl = document.getElementById('anggotaFoto');
+            const iconEl = document.getElementById('anggotaIcon');
+            if (a.foto) {
+                fotoEl.src = '/storage/anggota/' + a.foto;
+                fotoEl.classList.remove('hidden');
+                iconEl.classList.add('hidden');
+            } else {
+                fotoEl.classList.add('hidden');
+                iconEl.classList.remove('hidden');
+            }
 
             // Load peminjaman
             if (data.data.peminjaman && data.data.peminjaman.length > 0) {

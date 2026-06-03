@@ -17,7 +17,6 @@ class Anggota extends Model
         'barcode_anggota',
         'nama_lengkap',
         'jenis_kelamin',
-        'nik',
         'alamat',
         'nomor_telepon',
         'email',
@@ -221,12 +220,6 @@ class Anggota extends Model
                 ->havingRaw('COUNT(*) > 1')
                 ->pluck('barcode_anggota');
 
-            // Find duplicates by NIK
-            $duplicateNIK = self::select('nik')
-                ->groupBy('nik')
-                ->havingRaw('COUNT(*) > 1')
-                ->pluck('nik');
-
             $cleaned = 0;
 
             // Clean nomor_anggota duplicates (keep the oldest record)
@@ -245,19 +238,6 @@ class Anggota extends Model
             // Clean barcode_anggota duplicates (keep the oldest record)
             foreach ($duplicateBarcode as $barcode) {
                 $duplicates = self::where('barcode_anggota', $barcode)
-                    ->orderBy('created_at', 'asc')
-                    ->get();
-                
-                // Keep the first one, delete the rest
-                for ($i = 1; $i < count($duplicates); $i++) {
-                    $duplicates[$i]->delete();
-                    $cleaned++;
-                }
-            }
-
-            // Clean NIK duplicates (keep the oldest record)
-            foreach ($duplicateNIK as $nik) {
-                $duplicates = self::where('nik', $nik)
                     ->orderBy('created_at', 'asc')
                     ->get();
                 
@@ -343,11 +323,6 @@ class Anggota extends Model
                 ->havingRaw('COUNT(*) > 1')
                 ->pluck('barcode_anggota');
 
-            $duplicateNIK = self::select('nik')
-                ->groupBy('nik')
-                ->havingRaw('COUNT(*) > 1')
-                ->pluck('nik');
-
             // Process nomor_anggota duplicates
             foreach ($duplicateNomor as $nomor) {
                 $duplicates = self::where('nomor_anggota', $nomor)
@@ -378,19 +353,6 @@ class Anggota extends Model
                         'nomor_anggota' => $newData['nomor_anggota'],
                         'barcode_anggota' => $newData['barcode_anggota']
                     ]);
-                    $processed++;
-                }
-            }
-
-            // Process NIK duplicates (keep oldest, delete others)
-            foreach ($duplicateNIK as $nik) {
-                $duplicates = self::where('nik', $nik)
-                    ->orderBy('created_at', 'asc')
-                    ->get();
-                
-                // Keep the first one, delete the rest
-                for ($i = 1; $i < count($duplicates); $i++) {
-                    $duplicates[$i]->delete();
                     $processed++;
                 }
             }

@@ -57,7 +57,7 @@ class PeminjamanExport implements FromCollection, WithHeadings, WithMapping, Wit
             $no++,
             $peminjaman->nomor_peminjaman,
             $peminjaman->anggota->nama_lengkap,
-            $peminjaman->anggota->nis ?: $peminjaman->anggota->nik,
+            $peminjaman->anggota->nis ?: $peminjaman->anggota->nomor_anggota,
             $kelasJurusan,
             $peminjaman->tanggal_pinjam ? $peminjaman->tanggal_pinjam->format('d/m/Y') : '-',
             $peminjaman->tanggal_kembali ? $peminjaman->tanggal_kembali->format('d/m/Y') : '-',

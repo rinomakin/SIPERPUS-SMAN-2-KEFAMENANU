@@ -155,8 +155,9 @@
             <div id="anggotaInfo" class="mt-3 hidden animate-fade-in">
                 <div class="relative bg-blue-50 rounded-xl p-3.5 border border-blue-100">
                     <div class="flex items-center gap-3">
-                        <div class="w-11 h-11 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
-                            <i class="fas fa-user text-white text-sm"></i>
+                        <div id="anggotaAvatarWrap" class="w-11 h-11 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm flex-shrink-0 overflow-hidden">
+                            <i id="anggotaAvatarIcon" class="fas fa-user text-white text-sm"></i>
+                            <img id="anggotaAvatarImg" src="" alt="" class="w-full h-full object-cover hidden">
                         </div>
                         <div class="flex-1 min-w-0">
                             <h4 id="anggotaNama" class="font-bold text-sm text-gray-900 truncate"></h4>
@@ -1190,7 +1191,7 @@ function processScannedBarcode(barcode) {
             if (currentScanType === 'anggota') {
                 const a = data.data;
                 const kelasName = (typeof a.kelas === 'object' && a.kelas !== null) ? (a.kelas.nama_kelas || 'N/A') : (a.kelas || 'N/A');
-                selectAnggota({ id: a.id, nama_lengkap: a.nama_lengkap, nomor_anggota: a.nomor_anggota, barcode_anggota: a.barcode_anggota, kelas: kelasName, jenis_anggota: a.jenis_anggota });
+                selectAnggota({ id: a.id, nama_lengkap: a.nama_lengkap, nomor_anggota: a.nomor_anggota, barcode_anggota: a.barcode_anggota, foto: a.foto, kelas: kelasName, jenis_anggota: a.jenis_anggota });
                 closeScanner();
                 showNotification(`Anggota ditemukan: ${a.nama_lengkap}`, 'success');
             } else {
@@ -1236,8 +1237,11 @@ const searchAnggota = debounce(function (query) {
                 item.setAttribute('data-index', idx);
                 item.innerHTML = `
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-user text-white text-xs"></i>
+                        <div class="w-8 h-8 rounded-lg flex-shrink-0 overflow-hidden ${anggota.foto ? '' : 'bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center'}">
+                            ${anggota.foto
+                                ? `<img src="/storage/anggota/${anggota.foto}" alt="" class="w-full h-full object-cover">`
+                                : `<i class="fas fa-user text-white text-xs"></i>`
+                            }
                         </div>
                         <div class="min-w-0">
                             <div class="font-semibold text-sm text-gray-900 truncate">${anggota.nama_lengkap}</div>
@@ -1268,6 +1272,19 @@ function selectAnggota(anggota) {
     try {
         document.getElementById('anggota_id').value = anggota.id;
         document.getElementById('anggotaNama').textContent = anggota.nama_lengkap;
+
+        // Set foto anggota
+        const avatarIcon = document.getElementById('anggotaAvatarIcon');
+        const avatarImg = document.getElementById('anggotaAvatarImg');
+        const avatarWrap = document.getElementById('anggotaAvatarWrap');
+        if (anggota.foto) {
+            avatarImg.src = '/storage/anggota/' + anggota.foto;
+            avatarImg.classList.remove('hidden');
+            avatarIcon.classList.add('hidden');
+        } else {
+            avatarImg.classList.add('hidden');
+            avatarIcon.classList.remove('hidden');
+        }
 
         const nomorEl  = document.getElementById('anggotaNomor');
         const kelasEl  = document.getElementById('anggotaKelas');
@@ -1349,6 +1366,10 @@ document.getElementById('clearAnggota').addEventListener('click', function () {
     document.getElementById('anggota_search').value = '';
     document.getElementById('anggotaDropdown').classList.add('hidden');
     selectedIndex = -1;
+
+    // Reset foto avatar
+    document.getElementById('anggotaAvatarImg').classList.add('hidden');
+    document.getElementById('anggotaAvatarIcon').classList.remove('hidden');
 
     // Reset overdue state
     anggotaHasOverdue = false;

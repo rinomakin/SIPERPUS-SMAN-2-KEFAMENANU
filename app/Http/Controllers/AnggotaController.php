@@ -157,7 +157,6 @@ class AnggotaController extends Controller
         $request->validate([
             'nama_lengkap' => 'required|string|max:255',
             'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
-            'nik' => 'required|string|unique:anggota,nik',
             'alamat' => 'required|string',
             'nomor_telepon' => 'required|string|max:20',
             'email' => 'nullable|email|max:255',
@@ -217,7 +216,6 @@ class AnggotaController extends Controller
         $request->validate([
             'nama_lengkap' => 'required|string|max:255',
             'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
-            'nik' => 'required|string|unique:anggota,nik,' . $id,
             'alamat' => 'required|string',
             'nomor_telepon' => 'required|string|max:20',
             'email' => 'nullable|email|max:255',
@@ -412,6 +410,38 @@ class AnggotaController extends Controller
         return view('admin.anggota.bulk-print-kartu', compact('anggotaList'));
     }
 
+    public function allIds(Request $request)
+    {
+        $query = Anggota::query();
+
+        if ($request->filled('filter_kelas_id')) {
+            $query->where('kelas_id', $request->filter_kelas_id);
+        }
+        if ($request->filled('filter_jurusan_id')) {
+            $query->whereHas('kelas', function($q) use ($request) {
+                $q->where('jurusan_id', $request->filter_jurusan_id);
+            });
+        }
+        if ($request->filled('filter_jenis_anggota')) {
+            $query->where('jenis_anggota', $request->filter_jenis_anggota);
+        }
+        if ($request->filled('filter_status')) {
+            $query->where('status', $request->filter_status);
+        }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                  ->orWhere('nomor_anggota', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $ids = $query->pluck('id')->toArray();
+
+        return response()->json(['ids' => $ids]);
+    }
+
     public function scanBarcode(Request $request)
     {
         try {
@@ -548,18 +578,12 @@ class AnggotaController extends Controller
                 ->havingRaw('COUNT(*) > 1')
                 ->count();
 
-            $duplicateNIK = Anggota::select('nik')
-                ->groupBy('nik')
-                ->havingRaw('COUNT(*) > 1')
-                ->count();
-
             return response()->json([
                 'success' => true,
                 'data' => [
                     'duplicate_nomor' => $duplicateNomor,
                     'duplicate_barcode' => $duplicateBarcode,
-                    'duplicate_nik' => $duplicateNIK,
-                    'total_duplicates' => $duplicateNomor + $duplicateBarcode + $duplicateNIK
+                    'total_duplicates' => $duplicateNomor + $duplicateBarcode
                 ]
             ]);
         } catch (\Exception $e) {
@@ -583,20 +607,14 @@ class AnggotaController extends Controller
                 ->groupBy('barcode_anggota')
                 ->havingRaw('COUNT(*) > 1')
                 ->count();
-            $duplicateNIK = Anggota::select('nik')
-                ->groupBy('nik')
-                ->havingRaw('COUNT(*) > 1')
-                ->count();
-
             return response()->json([
                 'success' => true,
                 'data' => [
                     'total_anggota' => $totalAnggota,
                     'duplicate_nomor' => $duplicateNomor,
                     'duplicate_barcode' => $duplicateBarcode,
-                    'duplicate_nik' => $duplicateNIK,
-                    'total_duplicates' => $duplicateNomor + $duplicateBarcode + $duplicateNIK,
-                    'clean_data' => $totalAnggota - ($duplicateNomor + $duplicateBarcode + $duplicateNIK)
+                    'total_duplicates' => $duplicateNomor + $duplicateBarcode,
+                    'clean_data' => $totalAnggota - ($duplicateNomor + $duplicateBarcode)
                 ]
             ]);
         } catch (\Exception $e) {

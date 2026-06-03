@@ -240,7 +240,7 @@
                                 <span class="font-medium text-gray-900">{{ $item->nama_lengkap }}</span>
                             </div>
                         </td>
-                        <td class="px-3 py-3 font-mono text-gray-600 text-xs">{{ $item->nis ?: $item->nik }}</td>
+                        <td class="px-3 py-3 font-mono text-gray-600 text-xs">{{ $item->nis ?: $item->nomor_anggota }}</td>
                         <td class="px-3 py-3 font-mono text-gray-600 text-xs">{{ $item->nomor_anggota }}</td>
                         <td class="px-3 py-3 text-center">
                             <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold

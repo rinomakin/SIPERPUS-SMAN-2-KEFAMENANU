@@ -32,7 +32,7 @@ class AnggotaExport implements FromCollection, WithHeadings, WithMapping, Should
                     $q->where('nama_lengkap', 'like', "%{$search}%")
                       ->orWhere('nomor_anggota', 'like', "%{$search}%")
                       ->orWhere('barcode_anggota', 'like', "%{$search}%")
-                      ->orWhere('nik', 'like', "%{$search}%")
+
                       ->orWhere('email', 'like', "%{$search}%");
                 });
             }
@@ -71,7 +71,6 @@ class AnggotaExport implements FromCollection, WithHeadings, WithMapping, Should
             'Barcode',
             'Nama Lengkap',
             'Jenis Kelamin',
-            'NIK',
             'Alamat',
             'Nomor Telepon',
             'Email',
@@ -95,7 +94,6 @@ class AnggotaExport implements FromCollection, WithHeadings, WithMapping, Should
             $anggota->barcode_anggota,
             $anggota->nama_lengkap,
             $anggota->jenis_kelamin ?? '-',
-            $anggota->nik,
             $anggota->alamat,
             $anggota->nomor_telepon,
             $anggota->email ?? '-',

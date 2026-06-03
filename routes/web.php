@@ -124,6 +124,7 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS'])->prefix('admin'
     Route::post('/anggota/bulk-delete', [AnggotaController::class, 'bulkDelete'])->name('anggota.bulk-delete');
     Route::get('/anggota/cetak-kartu/{id}', [AnggotaController::class, 'cetakKartu'])->name('anggota.cetak-kartu');
     Route::get('/anggota/bulk-print-kartu', [AnggotaController::class, 'bulkPrintKartu'])->name('anggota.bulk-print-kartu');
+    Route::get('/anggota/all-ids', [AnggotaController::class, 'allIds'])->name('anggota.all-ids');
     Route::post('/anggota/scan-barcode', [AnggotaController::class, 'scanBarcode'])->name('anggota.scan-barcode');
     Route::post('/anggota/generate-barcode', [AnggotaController::class, 'generateBarcode'])->name('anggota.generate-barcode');
     Route::post('/anggota/clean-duplicates', [AnggotaController::class, 'cleanDuplicateData'])->name('anggota.clean-duplicates');

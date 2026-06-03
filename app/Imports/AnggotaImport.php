@@ -14,7 +14,6 @@ class AnggotaImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
 {
     private $errors = [];
     private $imported = 0;
-    private $processedNiks = [];
     private $errorTracker = []; // Track unique errors to prevent duplicates
 
     public function model(array $row)
@@ -24,7 +23,7 @@ class AnggotaImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
             \Log::info('Import row data:', $row);
             
             // Check if this is a header row or empty row
-            if (empty($row['nama_lengkap']) && empty($row['nisn_nik']) && empty($row['nik'])) {
+            if (empty($row['nama_lengkap'])) {
                 \Log::info('Skipping empty or header row');
                 return null;
             }
@@ -32,7 +31,6 @@ class AnggotaImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
             // Convert data types and clean up
             $namaLengkap = trim((string)($row['nama_lengkap'] ?? ''));
             $jenisKelamin = trim((string)($row['jenis_kelamin'] ?? ''));
-            $nik = trim((string)($row['nisn_nik'] ?? $row['nik'] ?? ''));
             $alamat = trim((string)($row['alamat'] ?? ''));
             $nomorTelepon = trim((string)($row['nomor_telepon'] ?? ''));
             $email = trim((string)($row['email'] ?? ''));
@@ -40,50 +38,11 @@ class AnggotaImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
             $jabatan = trim((string)($row['jabatan'] ?? ''));
             $jenisAnggota = trim((string)($row['jenis_anggota'] ?? ''));
             $status = trim((string)($row['status'] ?? ''));
-            $tanggalBergabung = $this->parseDate($row['tanggal_bergabung'] ?? null);
-            
-            // Handle NIK format issues (scientific notation from Excel)
-            if (!empty($nik)) {
-                // Convert scientific notation to regular number
-                if (strpos($nik, 'E') !== false || strpos($nik, 'e') !== false) {
-                    $nik = number_format((float)$nik, 0, '', '');
-                }
-                
-                // Remove any non-numeric characters except dots and commas
-                $nik = preg_replace('/[^0-9.,]/', '', $nik);
-                
-                // Convert to string and remove leading zeros if it's a valid number
-                if (is_numeric($nik)) {
-                    $nik = (string)(int)$nik; // Convert to integer then string to remove leading zeros
-                }
-            }
+            $tanggalBergabung = now()->format('Y-m-d');
             
             // Manual validation
             if (empty($namaLengkap)) {
                 $this->addUniqueError("Baris " . ($this->imported + 1) . ": Nama lengkap wajib diisi");
-                return null;
-            }
-
-            if (empty($nik)) {
-                $this->addUniqueError("Baris " . ($this->imported + 1) . ": NIK wajib diisi");
-                return null;
-            }
-
-            // Validate NIK format (should be numeric and reasonable length)
-            if (!is_numeric($nik) || strlen($nik) < 10 || strlen($nik) > 20) {
-                $this->addUniqueError("Baris " . ($this->imported + 1) . ": Format NIK tidak valid (harus angka, 10-20 digit)");
-                return null;
-            }
-
-            // Check if NIK already exists in database
-            if (Anggota::where('nik', $nik)->exists()) {
-                $this->addUniqueError("Baris " . ($this->imported + 1) . ": NIK {$nik} sudah terdaftar di database");
-                return null;
-            }
-
-            // Check if NIK already processed in this import session
-            if (in_array($nik, $this->processedNiks)) {
-                $this->addUniqueError("Baris " . ($this->imported + 1) . ": NIK {$nik} duplikat dalam file import");
                 return null;
             }
 
@@ -117,9 +76,6 @@ class AnggotaImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
                 return null;
             }
 
-            // Add NIK to processed list
-            $this->processedNiks[] = $nik;
-
             // Generate unique nomor anggota dan barcode using the robust method
             $maxRetries = 5;
             $retryCount = 0;
@@ -152,7 +108,6 @@ class AnggotaImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
                 'barcode_anggota' => $generatedData['barcode_anggota'],
                 'nama_lengkap' => $namaLengkap,
                 'jenis_kelamin' => !empty($jenisKelamin) ? $jenisKelamin : null,
-                'nik' => $nik,
                 'alamat' => $alamat,
                 'nomor_telepon' => $nomorTelepon,
                 'email' => !empty($email) ? $email : null,
@@ -173,14 +128,13 @@ class AnggotaImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
         return [
             'nama_lengkap' => 'nullable',
             'jenis_kelamin' => 'nullable',
-            'nisn_nik' => 'nullable',
             'alamat' => 'nullable',
             'nomor_telepon' => 'nullable',
             'email' => 'nullable',
             'kelas' => 'nullable',
             'jenis_anggota' => 'nullable',
             'status' => 'nullable',
-            'tanggal_bergabung' => 'nullable',
+
         ];
     }
 
@@ -188,11 +142,10 @@ class AnggotaImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
     {
         return [
             'nama_lengkap.required' => 'Nama lengkap wajib diisi',
-            'nisn_nik.required' => 'NISN/NIK wajib diisi',
             'kelas.exists' => 'ID Kelas tidak valid',
             'jenis_anggota.in' => 'Jenis anggota harus salah satu dari: siswa, guru, staff',
             'status.in' => 'Status harus salah satu dari: aktif, nonaktif, ditangguhkan',
-            'tanggal_bergabung.date' => 'Format tanggal bergabung tidak valid',
+
         ];
     }
 

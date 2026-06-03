@@ -22,26 +22,22 @@ class AnggotaTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, 
             [
                 'John Doe',
                 'Laki-laki',
-                '1234567890123456',
                 'Jl. Contoh No. 123, Kota Contoh',
                 '081234567890',
                 'john.doe@example.com',
                 $kelas->first() ? $kelas->first()->id : '1',
                 'siswa',
-                'aktif',
-                '2024-01-01'
+                'aktif'
             ],
             [
                 'Jane Smith',
                 'Perempuan',
-                '9876543210987654',
                 'Jl. Sample No. 456, Kota Sample',
                 '089876543210',
                 'jane.smith@example.com',
                 $kelas->count() > 1 ? $kelas->get(1)->id : ($kelas->first() ? $kelas->first()->id : '1'),
                 'siswa',
-                'aktif',
-                '2024-01-15'
+                'aktif'
             ]
         ];
     }
@@ -51,14 +47,12 @@ class AnggotaTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, 
         return [
             'nama_lengkap',
             'jenis_kelamin',
-            'nisn_nik',
             'alamat',
             'nomor_telepon',
             'email',
             'kelas',
             'jenis_anggota',
-            'status',
-            'tanggal_bergabung'
+            'status'
         ];
     }
 
@@ -83,12 +77,14 @@ class AnggotaTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, 
                 $kelas = Kelas::with('jurusan')->get();
                 $listKelas = $kelas->map(fn($k) => "{$k->id} - {$k->nama_kelas} ({$k->jurusan->nama_jurusan})")->join(',');
                 $maxRow = 100;
-                $this->applyDropdownList($mainSheet, 'G', 2, $maxRow, $listKelas);
+                $this->applyDropdownList($mainSheet, 'F', 2, $maxRow, $listKelas, 'Pilih kelas', 'Pilih kelas dari daftar yang sudah disediakan');
+                $this->applyDropdownList($mainSheet, 'G', 2, $maxRow, 'siswa,guru,staff', 'Pilih jenis anggota', 'Pilih jenis anggota dari daftar yang tersedia');
+                $this->applyDropdownList($mainSheet, 'H', 2, $maxRow, 'aktif,nonaktif,ditangguhkan', 'Pilih status', 'Pilih status dari daftar yang tersedia');
             }
         ];
     }
 
-    private function applyDropdownList($sheet, string $column, int $startRow, int $endRow, string $list): void
+    private function applyDropdownList($sheet, string $column, int $startRow, int $endRow, string $list, string $promptTitle = 'Pilih', string $promptText = 'Silakan pilih dari daftar yang tersedia'): void
     {
         if (empty($list)) return;
 
@@ -104,8 +100,8 @@ class AnggotaTemplateExport implements FromArray, WithHeadings, ShouldAutoSize, 
             $validation->setErrorStyle(DataValidation::STYLE_STOP);
             $validation->setErrorTitle('Pilihan tidak valid');
             $validation->setError('Silakan pilih dari daftar yang tersedia');
-            $validation->setPromptTitle('Pilih kelas');
-            $validation->setPrompt('Pilih kelas dari daftar yang sudah disediakan');
+            $validation->setPromptTitle($promptTitle);
+            $validation->setPrompt($promptText);
         }
     }
 } 

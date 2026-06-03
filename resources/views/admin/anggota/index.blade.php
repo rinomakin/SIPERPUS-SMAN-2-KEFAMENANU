@@ -62,7 +62,7 @@
     }
     #anggota-table thead th {
         background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        font-size: 0.7rem;
+        font-size: 10px;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -71,6 +71,7 @@
     }
     #anggota-table tbody tr {
         transition: all 0.15s ease;
+        font-size: 10px;
     }
     #anggota-table tbody tr:hover {
         background-color: #f0f9ff !important;
@@ -108,11 +109,12 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
+        width: 20px;
+        height: 20px;
+        border-radius: 100%;
         transition: all 0.2s;
-        font-size: 0.8rem;
+        font-size: 10px;
+        gap: 2px;
     }
     .action-btn:hover {
         transform: translateY(-1px);
@@ -225,33 +227,40 @@
 <div class="space-y-5">
     <!-- Header Toolbar -->
     <div class="glass-card rounded-2xl shadow-sm border border-gray-100 p-4">
-        <div class="flex flex-col gap-3">
+        <div class="flex flex-col gap-1.5">
             <!-- Top row: Actions & Search -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5">
                 <!-- Left: Action buttons -->
                 <div class="flex items-center flex-wrap gap-2">
                     @if(Auth::user()->hasPermission('anggota.create') || Auth::user()->isAdmin())
-                    <a href="{{ route('anggota.create') }}" class="toolbar-btn bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md">
-                        <i class="fas fa-plus"></i>
-                        <span class="btn-text">Tambah Anggota</span>
+                    <a href="{{ route('anggota.create') }}" class="toolbar-btn  bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md">
+                        <i class="fas fa-plus text-[10px]"></i>
+                        <span class="btn-text text-[10px]">Tambah</span>
                     </a>
+                    @endif
+
+                    @if(Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
+                    <button onclick="printAllKartu()" class="toolbar-btn bg-white border border-purple-200 text-purple-700 hover:bg-purple-50">
+                        <i class="fas fa-print text-[10px]"></i>
+                        <span class="btn-text text-[10px]">Cetak Kartu</span>
+                    </button>
                     @endif
 
                     @if(Auth::user()->hasPermission('anggota.export') || Auth::user()->isAdmin())
                     <a href="{{ route('anggota.export', request()->query()) }}" class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">
-                        <i class="fas fa-file-excel text-emerald-500"></i>
-                        <span class="btn-text">Export</span>
+                        <i class="fas fa-file-excel text-emerald-500 text-[10px]"></i>
+                        <span class="btn-text text-[10px]">Export</span>
                     </a>
                     @endif
 
                     @if(Auth::user()->hasPermission('anggota.import') || Auth::user()->isAdmin())
                     <a href="{{ route('anggota.download-template') }}" class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">
-                        <i class="fas fa-download text-blue-500"></i>
-                        <span class="btn-text">Template</span>
+                        <i class="fas fa-download text-blue-500 text-[10px]"></i>
+                        <span class="btn-text text-[10px]">Template</span>
                     </a>
                     <button onclick="showImportModal()" class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">
-                        <i class="fas fa-upload text-amber-500"></i>
-                        <span class="btn-text">Import</span>
+                        <i class="fas fa-upload text-amber-500 text-[10px]"></i>
+                        <span class="btn-text text-[10px]">Import</span>
                     </button>
                     @endif
                 </div>
@@ -260,15 +269,15 @@
                 <div class="flex items-center gap-2">
                     <div class="relative flex-1 sm:flex-none">
                         <input type="text" id="searchInput" placeholder="Cari nama, NIK, email..."
-                               class="w-full sm:w-72 px-4 py-2.5 pl-10 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all duration-200">
+                               class="w-full sm:w-72 px-4 py-1 pl-10 text-[10px] bg-gray-50 border border-none border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all duration-200">
                         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                            <i class="fas fa-search text-gray-400 text-sm"></i>
+                            <i class="fas fa-search text-gray-400 text-[10px]"></i>
                         </div>
                     </div>
                     <button onclick="openFilterModal()" id="filterBtn"
                             class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 relative">
-                        <i class="fas fa-sliders-h"></i>
-                        <span class="btn-text">Filter</span>
+                        <i class="fas fa-sliders-h text-[10px]"></i>
+                        <span class="btn-text text-[10px]">Filter</span>
                         <span id="filterBadge" class="hidden absolute -top-1.5 -right-1.5 w-5 h-5 bg-blue-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
                     </button>
                 </div>
@@ -276,10 +285,10 @@
 
             <!-- Active filters row -->
             <div id="activeFilters" class="hidden flex items-center flex-wrap gap-2">
-                <span class="text-xs text-gray-500 font-medium">Filter aktif:</span>
+                <span class="text-[10px] text-gray-500 font-medium ">Filter aktif:</span>
                 <div id="filterChips" class="flex flex-wrap gap-1.5"></div>
-                <button onclick="resetFilters()" class="text-xs text-red-500 hover:text-red-700 font-medium ml-1">
-                    <i class="fas fa-times-circle mr-1"></i>Hapus semua
+                <button onclick="resetFilters()" class="text-[10px] text-red-500 hover:text-red-700 font-medium ml-1">
+                    <i class="fas fa-times-circle mr-1 text-[10px]"></i>Hapus semua
                 </button>
             </div>
         </div>
@@ -290,25 +299,25 @@
     <div id="bulkActionBar" class="bulk-bar">
         <div class="glass-card rounded-xl border border-blue-200 bg-blue-50/50 px-4 py-2.5 flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <i class="fas fa-check-double text-blue-600 text-sm"></i>
+                <div class="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <i class="fas fa-check-double text-blue-600 text-[10px]"></i>
                 </div>
-                <span id="selectedCount" class="text-sm font-medium text-blue-700">0 anggota dipilih</span>
+                <span id="selectedCount" class="text-[10px] font-medium text-blue-700">0 anggota dipilih</span>
             </div>
             <div class="flex items-center gap-2">
                 @if(Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
-                <button onclick="bulkPrintKartu()" class="toolbar-btn bg-white border border-purple-200 text-purple-700 hover:bg-purple-50 text-xs">
+                <button onclick="bulkPrintKartu()" class="toolbar-btn bg-white border border-purple-200 text-purple-700 hover:bg-purple-50 text-[10px]">
                     <i class="fas fa-print"></i>
                     <span class="btn-text">Cetak Kartu</span>
                 </button>
                 @endif
                 @if(Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin())
-                <button onclick="bulkDelete()" class="toolbar-btn bg-white border border-red-200 text-red-700 hover:bg-red-50 text-xs">
+                <button onclick="bulkDelete()" class="toolbar-btn bg-white border border-red-200 text-red-700 hover:bg-red-50 text-[10px]">
                     <i class="fas fa-trash-alt"></i>
                     <span class="btn-text">Hapus</span>
                 </button>
                 @endif
-                <button onclick="clearSelection()" class="toolbar-btn bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 text-xs">
+                <button onclick="clearSelection()" class="toolbar-btn bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 text-[10px]">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -317,27 +326,23 @@
     @endif
 
     <!-- Table Card -->
-    <div class="glass-card rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="overflow-x-auto">
+    <div class="glass-card rounded-2xl shadow-sm border border-gray-100 overflow-hidden w-full">
+        <div class="overflow-x-auto w-full">
             <table id="anggota-table" class="w-full" style="min-width: 850px;">
                 <thead>
                     <tr>
                         @if(Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
-                        <th class="px-4 py-3.5 text-left w-12">
-                            <div class="flex items-center justify-center">
-                                <input type="checkbox" id="selectAll" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer transition-all duration-200">
-                            </div>
-                        </th>
-                        @endif
-                        <th class="px-4 py-3.5 text-left w-14">No</th>
-                        <th class="px-4 py-3.5 text-left">Anggota</th>
-                        <th class="px-4 py-3.5 text-left">Gender</th>
-                        <th class="px-4 py-3.5 text-left">NIK</th>
-                        <th class="px-4 py-3.5 text-left">Kelas</th>
-                        <th class="px-4 py-3.5 text-left">Jenis</th>
-                        <th class="px-4 py-3.5 text-left">Status</th>
-                        @if(Auth::user()->hasPermission('anggota.view') || Auth::user()->hasPermission('anggota.edit') || Auth::user()->hasPermission('anggota.delete') || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
-                        <th class="px-4 py-3.5 text-center w-40">Aksi</th>
+                        <th class="px-2 py-2 text-left w-6">
+
+                        <th class="px-2 py-2 text-left text-[9px]">No</th>
+                        <th class="px-2 py-2 text-left text-[9px]">Anggota</th>
+                        <th class="px-2 py-2 text-left text-[9px]">Gender</th>
+                        <th class="px-2 py-2 text-left text-[9px] hidden">NIK</th>
+                        <th class="px-2 py-2 text-left text-[9px] hidden">Kelas</th>
+                        <th class="px-2 py-2 text-left text-[9px]">Jenis</th>
+                        <th class="px-2 py-2 text-left text-[9px]">Status</th>
+
+                        <th class="px-2 py-2 text-center text-[9px]">Aksi</th>
                         @endif
                     </tr>
                 </thead>
@@ -352,28 +357,28 @@
 <div id="filterModal" class="fixed inset-0 z-50 hidden" style="background:rgba(15,23,42,0.5);backdrop-filter:blur(4px);">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full transform transition-all duration-300 scale-95 opacity-0" id="filterModalContent">
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 rounded-t-2xl">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-3 py-2 rounded-t-2xl">
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                            <i class="fas fa-filter text-white"></i>
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-[10px] h-[10px] rounded-xl bg-white/20 flex items-center justify-center">
+                            <i class="fas fa-filter text-white text-[10px]"></i>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-white">Filter Anggota</h3>
-                            <p class="text-blue-100 text-xs">Saring data berdasarkan kriteria</p>
+                            <h3 class="text-[10px] font-semibold text-white">Filter Anggota</h3>
+                            <p class="text-blue-100 text-[10px]">Saring data berdasarkan kriteria</p>
                         </div>
                     </div>
-                    <button onclick="closeFilterModal()" class="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors">
-                        <i class="fas fa-times"></i>
+                    <button onclick="closeFilterModal()" class="w-[30px] h-[30px] rounded-lg bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors">
+                        <i class="fas fa-times text-[10px]"></i>
                     </button>
                 </div>
             </div>
 
-            <form id="filterForm" class="p-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form id="filterForm" class="p-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Kelas</label>
-                        <select name="kelas_id" id="filter_kelas_id" class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all">
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1.5  tracking-wider">Kelas</label>
+                        <select name="kelas_id" id="filter_kelas_id" class="w-full px-3 py-2.5 text-[10px] border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all">
                             <option value="">Semua Kelas</option>
                             @foreach($kelas as $k)
                                 <option value="{{ $k->id }}">{{ $k->nama_kelas }} - {{ $k->jurusan->nama_jurusan }}</option>
@@ -381,8 +386,8 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Jurusan</label>
-                        <select name="jurusan_id" id="filter_jurusan_id" class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all">
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1.5  tracking-wider">Jurusan</label>
+                        <select name="jurusan_id" id="filter_jurusan_id" class="w-full px-3 py-2.5 text-[10px] border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all">
                             <option value="">Semua Jurusan</option>
                             @foreach($jurusan as $j)
                                 <option value="{{ $j->id }}">{{ $j->nama_jurusan }}</option>
@@ -390,8 +395,8 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Jenis Anggota</label>
-                        <select name="jenis_anggota" id="filter_jenis_anggota" class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all">
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1.5  tracking-wider">Jenis Anggota</label>
+                        <select name="jenis_anggota" id="filter_jenis_anggota" class="w-full px-3 py-2.5 text-[10px] border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all">
                             <option value="">Semua Jenis</option>
                             <option value="siswa">Siswa</option>
                             <option value="guru">Guru</option>
@@ -399,8 +404,8 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Status</label>
-                        <select name="status" id="filter_status" class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all">
+                        <label class="block text-[10px] font-semibold text-gray-600 mb-1.5  tracking-wider">Status</label>
+                        <select name="status" id="filter_status" class="w-full px-3 py-2.5 text-[10px] border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all">
                             <option value="">Semua Status</option>
                             <option value="aktif">Aktif</option>
                             <option value="nonaktif">Nonaktif</option>
@@ -429,44 +434,43 @@
 <div id="importModal" class="fixed inset-0 z-50 hidden" style="background:rgba(15,23,42,0.5);backdrop-filter:blur(4px);">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full transform transition-all duration-300">
-            <div class="bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-4 rounded-t-2xl">
+            <div class=" px-3 py-2 rounded-t-2xl">
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                            <i class="fas fa-file-import text-white"></i>
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center">
+                            <i class="fas fa-file-import text-black"></i>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-white">Import Data Anggota</h3>
-                            <p class="text-emerald-100 text-xs">Upload file Excel/CSV</p>
+                            <h3 class="text-[10px] font-semibold text-black">Import Data Anggota</h3>
+                            <p class="text-black text-[10px]">Upload file Excel/CSV</p>
                         </div>
                     </div>
-                    <button onclick="closeImportModal()" class="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors">
-                        <i class="fas fa-times"></i>
+                    <button onclick="closeImportModal()" class="w-6 h-6 rounded-lg bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors">
+                        <i class="fas fa-times text-black"></i>
                     </button>
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('anggota.import') }}" enctype="multipart/form-data" class="p-6">
+            <form method="POST" action="{{ route('anggota.import') }}" enctype="multipart/form-data" class="p-3">
                 @csrf
                 <div class="mb-4">
-                    <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">
+                    <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">
                         File Excel/CSV <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
                         <input type="file" name="file" id="file" accept=".xlsx,.xls,.csv" required
-                               class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
+                               class="w-full px-3 py-2.5 text-[10px] border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 file:mr-1.5 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
                     </div>
-                    <p class="mt-1.5 text-[11px] text-gray-400">Format: Excel (.xlsx, .xls) atau CSV. Maksimal 2MB</p>
+                    <p class="mt-1.5 text-[10px] text-gray-400">Format: Excel (.xlsx, .xls) atau CSV. Maksimal 2MB</p>
                 </div>
 
                 <div class="p-3 bg-blue-50 rounded-xl border border-blue-100">
                     <div class="flex gap-2">
-                        <i class="fas fa-info-circle text-blue-500 mt-0.5 text-sm"></i>
-                        <div class="text-xs text-blue-700 space-y-0.5">
+                        <i class="fas fa-info-circle text-blue-500 mt-0.5 text-[10px]"></i>
+                        <div class="text-[10px] text-blue-700 space-y-0.5">
                             <p class="font-medium">Catatan Penting:</p>
                             <p>- Download template terlebih dahulu</p>
                             <p>- Pastikan format data sesuai template</p>
-                            <p>- NIK harus unik dan tidak boleh duplikat</p>
                             <p>- Nomor anggota & barcode akan digenerate otomatis</p>
                         </div>
                     </div>
@@ -489,9 +493,9 @@
 
 <!-- Loading Overlay -->
 <div id="loadingOverlay" class="fixed inset-0 flex items-center justify-center z-[60] hidden" style="background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);">
-    <div class="bg-white rounded-2xl p-6 flex flex-col items-center gap-3 shadow-2xl">
-        <div class="w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin"></div>
-        <span class="text-sm font-medium text-gray-700">Memproses...</span>
+    <div class="bg-white rounded-2xl p-3 flex flex-col items-center gap-1.5 shadow-2xl">
+        <div class="w-6 h-6 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin"></div>
+        <span class="text-[10px] font-medium text-gray-700">Memproses...</span>
     </div>
 </div>
 
@@ -539,30 +543,35 @@ $(document).ready(function() {
     if (hasCheckboxColumn) {
         columns.push({
             data: 'checkbox', name: 'checkbox', orderable: false, searchable: false,
-            className: 'px-4 py-3 whitespace-nowrap text-center'
+            className: 'px-1 py-1.5 whitespace-nowrap text-center'
         });
     }
 
     columns = columns.concat([
-        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, className: 'px-4 py-3 whitespace-nowrap text-sm text-gray-500 font-medium' },
-        { data: 'nama_info', name: 'nama_lengkap', className: 'px-4 py-3' },
-        { data: 'jenis_kelamin_badge', name: 'jenis_kelamin', className: 'px-4 py-3 whitespace-nowrap' },
-        { data: 'nik', name: 'nik', className: 'px-4 py-3 whitespace-nowrap text-sm text-gray-600 font-mono' },
-        { data: 'kelas_info', name: 'kelas', orderable: false, className: 'px-4 py-3 whitespace-nowrap' },
-        { data: 'jenis_badge', name: 'jenis_anggota', className: 'px-4 py-3 whitespace-nowrap' },
-        { data: 'status_badge', name: 'status', className: 'px-4 py-3 whitespace-nowrap' }
+        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, className: 'px-2 py-1.5 text-[9px] whitespace-nowrap text-gray-500 font-medium' },
+
+        { data: 'nama_info', name: 'nama_lengkap', className: 'px-2 py-1.5 whitespace-nowrap text-[9px]' },
+
+        { data: 'jenis_kelamin_badge', name: 'jenis_kelamin', className: 'px-2 py-1.5 whitespace-nowrap text-[9px] font-mono' },
+
+        { data: 'kelas_info', name: 'kelas', orderable: false, visible: false, className: 'px-2 py-1.5 whitespace-nowrap text-[9px]' },
+
+        { data: 'jenis_badge', name: 'jenis_anggota', className: 'px-2 py-1.5 whitespace-nowrap text-[9px]' },
+
+        { data: 'status_badge', name: 'status', className: 'px-2 py-1.5 whitespace-nowrap text-[9px]' }
     ]);
 
     if (hasActionColumn) {
         columns.push({
             data: 'action', name: 'action', orderable: false, searchable: false,
-            className: 'px-4 py-3 whitespace-nowrap text-center'
+            className: 'px-1 py-1.5 whitespace-nowrap text-center'
         });
     }
 
     anggotaTable = $('#anggota-table').DataTable({
         processing: true,
         serverSide: true,
+        autoWidth: false,
         ajax: {
             url: '/admin/anggota',
             data: function(d) {
@@ -574,9 +583,9 @@ $(document).ready(function() {
         },
         columns: columns,
         language: {
-            processing: '<div class="flex items-center justify-center py-6"><div class="w-8 h-8 rounded-full border-3 border-blue-200 border-t-blue-600 animate-spin"></div><span class="ml-3 text-sm text-gray-600">Memuat data...</span></div>',
+            processing: '<div class="flex items-center justify-center py-3"><div class="w-6 h-6 rounded-full border-3 border-blue-200 border-t-blue-600 animate-spin"></div><span class="ml-2 text-[10px] text-gray-600">Memuat data...</span></div>',
             lengthMenu: "Tampilkan _MENU_ data",
-            zeroRecords: '<div class="text-center py-12"><div class="mx-auto w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mb-4"><i class="fas fa-users text-2xl text-gray-400"></i></div><h3 class="text-base font-semibold text-gray-800 mb-1">Tidak ada data ditemukan</h3><p class="text-sm text-gray-500">Coba ubah kata kunci atau filter pencarian</p></div>',
+            zeroRecords: '<div class="text-center py-8"><div class="mx-auto w-14 h-14 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mb-3"><i class="fas fa-users text-[10px] text-gray-400"></i></div><h3 class="text-[10px] font-semibold text-gray-800 mb-1">Tidak ada data ditemukan</h3><p class="text-[10px] text-gray-500">Coba ubah kata kunci atau filter pencarian</p></div>',
             info: "Menampilkan _START_-_END_ dari _TOTAL_ anggota",
             infoEmpty: "Tidak ada data",
             infoFiltered: "(dari _MAX_ total)",
@@ -843,6 +852,32 @@ function bulkPrintKartu() {
 
     const url = '/admin/anggota/bulk-print-kartu?ids=' + ids.join(',');
     window.open(url, '_blank');
+}
+
+function printAllKartu() {
+    const checked = document.querySelectorAll('.member-checkbox:checked');
+    if (checked.length > 0) {
+        const ids = Array.from(checked).map(cb => cb.value);
+        const url = '/admin/anggota/bulk-print-kartu?ids=' + ids.join(',');
+        window.open(url, '_blank');
+        return;
+    }
+
+    $.ajax({
+        url: '/admin/anggota/all-ids',
+        data: anggotaTable.ajax.params(),
+        success: function(res) {
+            if (res.ids && res.ids.length > 0) {
+                const url = '/admin/anggota/bulk-print-kartu?ids=' + res.ids.join(',');
+                window.open(url, '_blank');
+            } else {
+                Toast.fire({ icon: 'warning', title: 'Tidak ada anggota untuk dicetak' });
+            }
+        },
+        error: function() {
+            Toast.fire({ icon: 'error', title: 'Gagal mengambil data anggota' });
+        }
+    });
 }
 
 function confirmDeleteAnggota(id) {

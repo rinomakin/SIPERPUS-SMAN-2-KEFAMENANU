@@ -111,26 +111,26 @@
 
         /* ============ SIDEBAR NAV ============ */
         .nav-section-label {
-            font-size: 0.65rem;
+            font-size: 10px;
             font-weight: 700;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.06em;
             text-transform: uppercase;
             color: rgba(255,255,255,0.35);
             padding: 0 16px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .nav-link {
             display: flex;
             align-items: center;
-            padding: 9px 16px;
-            border-radius: 10px;
-            font-size: 0.8rem;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 10px;
             font-weight: 500;
             color: rgba(255,255,255,0.7);
             transition: all 0.2s ease;
             position: relative;
-            gap: 12px;
+            gap: 10px;
         }
         .nav-link:hover {
             background: rgba(255,255,255,0.1);
@@ -154,9 +154,9 @@
             border-radius: 0 4px 4px 0;
         }
         .nav-link .nav-icon {
-            width: 20px;
+            width: 18px;
             text-align: center;
-            font-size: 0.75rem;
+            font-size: 10px;
             opacity: 0.8;
             flex-shrink: 0;
         }
@@ -186,23 +186,23 @@
         .dropdown-item {
             display: flex;
             align-items: center;
-            padding: 7px 16px 7px 48px;
-            border-radius: 8px;
-            font-size: 0.78rem;
+            padding: 5px 12px 5px 40px;
+            border-radius: 6px;
+            font-size: 10px;
             font-weight: 400;
             color: rgba(255,255,255,0.55);
             transition: all 0.2s ease;
-            gap: 10px;
+            gap: 8px;
             position: relative;
         }
         .dropdown-item::before {
             content: '';
             position: absolute;
-            left: 28px;
+            left: 24px;
             top: 50%;
             transform: translateY(-50%);
-            width: 5px;
-            height: 5px;
+            width: 4px;
+            height: 4px;
             border-radius: 50%;
             background: rgba(255,255,255,0.2);
             transition: all 0.2s;
@@ -297,14 +297,14 @@
         <!-- Sidebar -->
         <aside class="sidebar flex flex-col" id="sidebar" style="background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);">
             <!-- Sidebar Header -->
-            <div class="flex items-center justify-between h-16 px-5 flex-shrink-0 border-b border-white/10">
-                <a href="{{ url('/') }}" class="flex items-center gap-3 min-w-0">
-                    <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        <img src="{{ asset($pengaturan->logo ?? 'images/logo.png') }}" alt="Logo" class="h-6 w-6 object-contain">
+            <div class="flex items-center justify-between h-12 px-4 flex-shrink-0 border-b border-white/10">
+                <a href="{{ url('/') }}" class="flex items-center gap-2 min-w-0">
+                    <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <img src="{{ asset($pengaturan->logo ?? 'images/logo.png') }}" alt="Logo" class="h-5 w-5 object-contain">
                     </div>
                     <div class="min-w-0">
-                        <h1 class="font-bold text-sm text-white truncate">{{ $pengaturan->nama_website ?? 'SIPERPUS' }}</h1>
-                        <p class="text-[10px] text-white/40 font-medium">
+                        <h1 class="font-bold text-[10px] text-white truncate">{{ $pengaturan->nama_website ?? 'SIPERPUS' }}</h1>
+                        <p class="text-[9px] text-white/40 font-medium">
                             @if(Auth::user()->isPetugas()) Petugas Panel
                             @elseif(Auth::user()->isKepalaSekolah()) Kepsek Panel
                             @else Admin Panel
@@ -312,13 +312,13 @@
                         </p>
                     </div>
                 </a>
-                <button class="lg:hidden w-7 h-7 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 flex items-center justify-center transition-colors" onclick="closeSidebarMobile()">
-                    <i class="fas fa-times text-xs"></i>
+                <button class="lg:hidden w-6 h-6 rounded-lg bg-white/10 text-white/70 hover:text-white hover:bg-white/20 flex items-center justify-center transition-colors" onclick="closeSidebarMobile()">
+                    <i class="fas fa-times text-[10px]"></i>
                 </button>
             </div>
 
             <!-- Sidebar Navigation -->
-            <nav class="flex-1 px-3 py-5 overflow-y-auto custom-scrollbar min-h-0">
+            <nav class="flex-1 px-3 py-3 overflow-y-auto custom-scrollbar min-h-0">
                 <div class="space-y-1">
                     <!-- Dashboard -->
                     @if(Auth::user()->hasPermission('dashboard.view') || Auth::user()->isAdmin() || Auth::user()->isKepalaSekolah() || Auth::user()->isPetugas())
@@ -343,16 +343,16 @@
                 @endphp
 
                 @if($hasMasterPermission)
-                <div class="mt-6">
+                <div class="mt-4">
                     <div class="nav-section-label">Master Data</div>
-                    <div class="space-y-1">
+                    <div class="space-y-0.5">
                         <button onclick="toggleDropdown('masterDropdown', this)"
                                 class="dropdown-toggle nav-link w-full justify-between {{ $masterDataActive ? 'active open' : '' }}">
                             <div class="flex items-center gap-3">
                                 <i class="fas fa-database nav-icon"></i>
                                 <span>Data Master</span>
                             </div>
-                            <i class="fas fa-chevron-down chevron-icon text-[10px] opacity-50"></i>
+                            <i class="fas fa-chevron-down chevron-icon text-[9px] opacity-50"></i>
                         </button>
 
                         <div id="masterDropdown" class="dropdown-menu {{ $masterDataActive ? 'open' : '' }} space-y-0.5 mt-1">
@@ -417,9 +417,9 @@
                 @endif
 
                 <!-- Manajemen Data -->
-                <div class="mt-6">
+                <div class="mt-4">
                     <div class="nav-section-label">Manajemen Data</div>
-                    <div class="space-y-1">
+                    <div class="space-y-0.5">
                         @if(Auth::user()->hasAnyPermission(['user.view']) || Auth::user()->isAdmin())
                         <a href="{{ route('user.index') }}"
                            class="nav-link {{ request()->routeIs('user.*') ? 'active' : '' }}">
@@ -447,9 +447,9 @@
                 </div>
 
                 <!-- Transaksi -->
-                <div class="mt-6">
+                <div class="mt-4">
                     <div class="nav-section-label">Transaksi</div>
-                    <div class="space-y-1">
+                    <div class="space-y-0.5">
                         @if(Auth::user()->hasAnyPermission(['peminjaman.view']) || Auth::user()->isAdmin())
                         <a href="{{ route('peminjaman.index') }}"
                            class="nav-link {{ request()->routeIs('peminjaman.*') ? 'active' : '' }}">
@@ -510,9 +510,9 @@
                 @endphp
 
                 @if($hasLaporanPermission)
-                <div class="mt-6">
+                <div class="mt-4">
                     <div class="nav-section-label">Laporan</div>
-                    <div class="space-y-1">
+                    <div class="space-y-0.5">
                         <a href="{{ route('laporan.index') }}"
                            class="nav-link {{ request()->routeIs('laporan.*') ? 'active' : '' }}">
                             <i class="fas fa-chart-bar nav-icon"></i>
@@ -524,9 +524,9 @@
 
                 <!-- Pengaturan -->
                 @if(Auth::user()->hasAnyPermission(['pengaturan.view']) || Auth::user()->isAdmin())
-                <div class="mt-6">
+                <div class="mt-4">
                     <div class="nav-section-label">Pengaturan</div>
-                    <div class="space-y-1">
+                    <div class="space-y-0.5">
                         <a href="{{ route('admin.pengaturan') }}"
                            class="nav-link {{ request()->routeIs('admin.pengaturan') ? 'active' : '' }}">
                             <i class="fas fa-cogs nav-icon"></i>
@@ -540,9 +540,9 @@
             <!-- Sidebar Footer -->
             <div class="hidden lg:block border-t border-white/10 p-3 flex-shrink-0">
                 <button onclick="toggleSidebarDesktop()"
-                        class="w-full flex items-center justify-center gap-2 px-3 py-2 text-white/40 hover:text-white/70 hover:bg-white/5 rounded-lg transition-colors text-xs font-medium"
+                        class="w-full flex items-center justify-center gap-2 px-3 py-1.5 text-white/40 hover:text-white/70 hover:bg-white/5 rounded-lg transition-colors text-[10px] font-medium"
                         title="Sembunyikan sidebar">
-                    <i class="fas fa-chevron-left text-[10px] transition-transform duration-300" id="collapseIcon"></i>
+                    <i class="fas fa-chevron-left text-[9px] transition-transform duration-300" id="collapseIcon"></i>
                     <span>Tutup Sidebar</span>
                 </button>
             </div>
@@ -555,11 +555,11 @@
         <div class="flex-1 flex flex-col overflow-hidden main-content">
             <!-- Top Header -->
             <header class="header-bar border-b border-gray-200/80 flex-shrink-0 z-20">
-                <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex justify-between items-center h-16">
+                <div class="max-w-full mx-auto px-3 sm:px-4 lg:px-6">
+                    <div class="flex justify-between items-center h-12">
                         <!-- Left: Toggle + Title -->
-                        <div class="flex items-center gap-3">
-                            <button class="sidebar-toggle-btn p-2 rounded-lg flex flex-col justify-center items-center space-y-1"
+                        <div class="flex items-center gap-2">
+                            <button class="sidebar-toggle-btn p-1.5 rounded-lg flex flex-col justify-center items-center space-y-1"
                                     id="sidebarToggleBtn"
                                     onclick="toggleSidebar()"
                                     title="Toggle Sidebar">
@@ -569,12 +569,12 @@
                             </button>
 
                             <div>
-                                <h1 class="text-lg font-semibold text-gray-800">@yield('page-title', 'Dashboard')</h1>
+                                <h1 class="text-xs font-semibold text-gray-800">@yield('page-title', 'Dashboard')</h1>
                             </div>
                         </div>
 
                         <!-- Right: Dark Mode + Profile -->
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-1.5">
                             <!-- Dark Mode Toggle -->
                             <button id="adminThemeToggle" class="dark-toggle-btn" title="Toggle Dark Mode (Ctrl+Shift+D)">
                                 <i class="fas fa-moon icon-moon"></i>
@@ -583,43 +583,43 @@
                             <!-- Profile -->
                             <div class="relative" id="profileMenuContainer">
                                 <button onclick="toggleProfileDropdown(event)"
-                                        class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl hover:bg-gray-100 transition-all duration-200" id="profileBtn">
-                                    <div class="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0" style="background: linear-gradient(135deg, #3b82f6, #6366f1);">
+                                        class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-100 transition-all duration-200" id="profileBtn">
+                                    <div class="w-7 h-7 rounded-lg overflow-hidden flex-shrink-0" style="background: linear-gradient(135deg, #3b82f6, #6366f1);">
                                         @if(Auth::user()->foto && file_exists(public_path('storage/' . Auth::user()->foto)))
                                             <img src="{{ asset('storage/' . Auth::user()->foto) }}"
                                                  alt="Foto" class="w-full h-full object-cover">
                                         @else
-                                            <div class="w-full h-full flex items-center justify-center text-white text-sm font-bold">
+                                            <div class="w-full h-full flex items-center justify-center text-white text-[10px] font-bold">
                                                 {{ strtoupper(substr(Auth::user()->nama_lengkap ?? 'A', 0, 1)) }}
                                             </div>
                                         @endif
                                     </div>
                                     <div class="hidden sm:block text-left">
-                                        <div class="text-sm font-medium text-gray-800 leading-tight">{{ Auth::user()->nama_panggilan ?: Auth::user()->nama_lengkap }}</div>
-                                        <div class="text-[11px] text-gray-400 leading-tight">{{ Auth::user()->role->nama_peran ?? 'Admin' }}</div>
+                                        <div class="text-[10px] font-medium text-gray-800 leading-tight">{{ Auth::user()->nama_panggilan ?: Auth::user()->nama_lengkap }}</div>
+                                        <div class="text-[10px] text-gray-400 leading-tight">{{ Auth::user()->role->nama_peran ?? 'Admin' }}</div>
                                     </div>
-                                    <i class="fas fa-chevron-down text-[10px] text-gray-400 hidden sm:block transition-transform duration-200" id="profileChevron"></i>
+                                    <i class="fas fa-chevron-down text-[9px] text-gray-400 hidden sm:block transition-transform duration-200" id="profileChevron"></i>
                                 </button>
 
                                 <!-- Profile Dropdown -->
-                                <div class="profile-dropdown absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden" id="profileDropdown">
+                                <div class="profile-dropdown absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden" id="profileDropdown">
                                     <!-- User Info -->
-                                    <div class="p-4 bg-gradient-to-r from-gray-50 to-gray-100/50">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0" style="background: linear-gradient(135deg, #3b82f6, #6366f1);">
+                                    <div class="p-3 bg-gradient-to-r from-gray-50 to-gray-100/50">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0" style="background: linear-gradient(135deg, #3b82f6, #6366f1);">
                                                 @if(Auth::user()->foto && file_exists(public_path('storage/' . Auth::user()->foto)))
                                                     <img src="{{ asset('storage/' . Auth::user()->foto) }}"
                                                          alt="Foto" class="w-full h-full object-cover">
                                                 @else
-                                                    <div class="w-full h-full flex items-center justify-center text-white text-lg font-bold">
+                                                    <div class="w-full h-full flex items-center justify-center text-white text-xs font-bold">
                                                         {{ strtoupper(substr(Auth::user()->nama_lengkap ?? 'A', 0, 1)) }}
                                                     </div>
                                                 @endif
                                             </div>
                                             <div class="min-w-0">
-                                                <div class="font-semibold text-sm text-gray-900 truncate">{{ Auth::user()->nama_lengkap }}</div>
-                                                <div class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</div>
-                                                <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-100">
+                                                <div class="font-semibold text-[10px] text-gray-900 truncate">{{ Auth::user()->nama_lengkap }}</div>
+                                                <div class="text-[10px] text-gray-500 truncate">{{ Auth::user()->email }}</div>
+                                                <span class="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-blue-50 text-blue-700 border border-blue-100">
                                                     {{ Auth::user()->role->nama_peran ?? 'Admin' }}
                                                 </span>
                                             </div>
@@ -627,42 +627,42 @@
                                     </div>
 
                                     <!-- Menu Items -->
-                                    <div class="py-1.5">
+                                    <div class="py-1">
                                         <a href="{{ Auth::user()->isPetugas() ? route('petugas.profil') : route('admin.profil') }}"
-                                           class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                                            <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                                                <i class="fas fa-user text-blue-500 text-xs"></i>
+                                           class="flex items-center gap-2 px-3 py-2 text-[10px] text-gray-700 hover:bg-gray-50 transition-colors">
+                                            <div class="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
+                                                <i class="fas fa-user text-blue-500 text-[10px]"></i>
                                             </div>
                                             <div>
-                                                <div class="font-medium text-gray-800 text-xs">Profil Saya</div>
-                                                <div class="text-[10px] text-gray-400">Kelola informasi akun</div>
+                                                <div class="font-medium text-gray-800 text-[10px]">Profil Saya</div>
+                                                <div class="text-[9px] text-gray-400">Kelola informasi akun</div>
                                             </div>
                                         </a>
 
                                         @if(Auth::user()->isAdmin())
                                         <a href="{{ route('admin.pengaturan') }}"
-                                           class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                                            <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
-                                                <i class="fas fa-cog text-gray-500 text-xs"></i>
+                                           class="flex items-center gap-2 px-3 py-2 text-[10px] text-gray-700 hover:bg-gray-50 transition-colors">
+                                            <div class="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center">
+                                                <i class="fas fa-cog text-gray-500 text-[10px]"></i>
                                             </div>
                                             <div>
-                                                <div class="font-medium text-gray-800 text-xs">Pengaturan</div>
-                                                <div class="text-[10px] text-gray-400">Konfigurasi website</div>
+                                                <div class="font-medium text-gray-800 text-[10px]">Pengaturan</div>
+                                                <div class="text-[9px] text-gray-400">Konfigurasi website</div>
                                             </div>
                                         </a>
                                         @endif
                                     </div>
 
                                     <!-- Logout -->
-                                    <div class="border-t border-gray-100 p-2">
+                                    <div class="border-t border-gray-100 p-1.5">
                                         <form method="POST" action="{{ route('logout') }}" data-spa-ignore>
                                             @csrf
                                             <button type="submit"
-                                                    class="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-600 hover:bg-red-50 transition-colors">
-                                                <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center">
-                                                    <i class="fas fa-sign-out-alt text-red-500 text-xs"></i>
+                                                    class="flex w-full items-center gap-2 px-2.5 py-2 rounded-lg text-[10px] text-red-600 hover:bg-red-50 transition-colors">
+                                                <div class="w-7 h-7 rounded-lg bg-red-50 flex items-center justify-center">
+                                                    <i class="fas fa-sign-out-alt text-red-500 text-[10px]"></i>
                                                 </div>
-                                                <span class="font-medium text-xs">Keluar</span>
+                                                <span class="font-medium text-[10px]">Keluar</span>
                                             </button>
                                         </form>
                                     </div>
@@ -675,14 +675,14 @@
 
             <!-- Breadcrumb Navigation -->
             <div class="bg-white/60 border-b border-gray-200/60 flex-shrink-0" style="backdrop-filter:blur(8px);">
-                <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="py-2.5">
+                <div class="max-w-full mx-auto px-3 sm:px-4 lg:px-6">
+                    <div class="py-1.5">
                         <nav class="flex" aria-label="Breadcrumb">
-                            <ol class="inline-flex items-center space-x-1 md:space-x-2">
+                            <ol class="inline-flex items-center space-x-1">
                                 <li class="inline-flex items-center">
                                     <a href="{{ url('/') }}"
-                                       class="inline-flex items-center text-xs font-medium text-gray-500 hover:text-blue-600 transition-colors">
-                                        <i class="fas fa-home mr-1.5 text-[10px]"></i>
+                                       class="inline-flex items-center text-[10px] font-medium text-gray-500 hover:text-blue-600 transition-colors">
+                                        <i class="fas fa-home mr-1 text-[9px]"></i>
                                         Dashboard
                                     </a>
                                 </li>
@@ -690,7 +690,7 @@
                                 @if(Request::segment(2) && Request::segment(2) != 'dashboard')
                                 <li>
                                     <div class="flex items-center">
-                                        <i class="fas fa-chevron-right text-gray-300 text-[8px] mx-1.5"></i>
+                                        <i class="fas fa-chevron-right text-gray-300 text-[7px] mx-1"></i>
                                         @php
                                             $segment2 = Request::segment(2);
                                             $breadcrumbName = match($segment2) {
@@ -717,11 +717,11 @@
                                         @if(Request::segment(3))
                                             @php $breadcrumbBase = Auth::user()->isPetugas() ? 'petugas' : 'admin'; @endphp
                                             <a href="{{ url($breadcrumbBase . '/' . $segment2) }}"
-                                               class="text-xs font-medium text-gray-500 hover:text-blue-600 transition-colors">
+                                               class="text-[10px] font-medium text-gray-500 hover:text-blue-600 transition-colors">
                                                 {{ $breadcrumbName }}
                                             </a>
                                         @else
-                                            <span class="text-xs font-medium text-gray-400">{{ $breadcrumbName }}</span>
+                                            <span class="text-[10px] font-medium text-gray-400">{{ $breadcrumbName }}</span>
                                         @endif
                                     </div>
                                 </li>
@@ -730,7 +730,7 @@
                                 @if(Request::segment(3))
                                 <li>
                                     <div class="flex items-center">
-                                        <i class="fas fa-chevron-right text-gray-300 text-[8px] mx-1.5"></i>
+                                        <i class="fas fa-chevron-right text-gray-300 text-[7px] mx-1"></i>
                                         @php
                                             $segment3 = Request::segment(3);
                                             $actionName = match($segment3) {
@@ -742,7 +742,7 @@
                                                     : ucfirst(str_replace('-', ' ', $segment3))
                                             };
                                         @endphp
-                                        <span class="text-xs font-medium text-blue-600">{{ $actionName }}</span>
+                                        <span class="text-[10px] font-medium text-blue-600">{{ $actionName }}</span>
                                     </div>
                                 </li>
                                 @endif
@@ -754,7 +754,7 @@
 
             <!-- Page Content -->
             <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
-                <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="container mx-auto px-3 sm:px-4 lg:px-6 py-4">
                     @yield('content')
                 </div>
             </main>

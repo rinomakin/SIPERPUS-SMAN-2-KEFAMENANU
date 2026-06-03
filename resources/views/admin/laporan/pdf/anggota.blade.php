@@ -63,7 +63,7 @@
         <tr>
             <td class="text-center">{{ $index + 1 }}</td>
             <td class="font-bold">{{ $item->nama_lengkap }}</td>
-            <td>{{ $item->nis ?: $item->nik }}</td>
+            <td>{{ $item->nis ?: $item->nomor_anggota }}</td>
             <td>{{ $item->nomor_anggota }}</td>
             <td class="text-center">{{ $item->jenis_kelamin == 'Laki-laki' ? 'L' : 'P' }}</td>
             <td>

@@ -105,8 +105,10 @@ class BukuController extends Controller
                 ->addColumn('stok_info', function($row) {
                     $percentage = $row->jumlah_stok > 0 ? round(($row->stok_tersedia / $row->jumlah_stok) * 100) : 0;
                     $barColor = $percentage > 50 ? '#22c55e' : ($percentage > 20 ? '#f59e0b' : '#ef4444');
+                    $dipinjam = $row->jumlah_stok - $row->stok_tersedia;
                     return '<div class="min-w-[80px]">'
                         . '<div class="text-sm font-semibold text-gray-900">' . $row->stok_tersedia . ' <span class="text-gray-400 font-normal">/ ' . $row->jumlah_stok . '</span></div>'
+                        . '<div class="text-xs ' . ($dipinjam > 0 ? 'text-red-500 font-medium' : 'text-gray-400') . '">' . $dipinjam . ' dipinjam</div>'
                         . '<div class="w-full bg-gray-100 rounded-full h-1.5 mt-1"><div class="h-1.5 rounded-full" style="width:' . $percentage . '%;background:' . $barColor . ';"></div></div>'
                         . '</div>';
                 })

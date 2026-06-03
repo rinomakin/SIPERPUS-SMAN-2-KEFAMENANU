@@ -5,17 +5,17 @@
 @section('content')
 <div class="bg-white rounded-xl shadow-lg border border-gray-100">
     <!-- Header Section -->
-    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">
+    <div class="px-6 py-4 border-b ">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-                <h2 class="text-2xl font-bold text-gray-800">Data User</h2>
-                <p class="text-gray-600 text-sm mt-1">Kelola user dan akun sistem</p>
+                <h2 class="text-xl font-bold text-gray-800">Data User</h2>
+                <p class="text-gray-600 text-[11px] mt-1">Kelola user dan akun sistem</p>
             </div>
             @if(Auth::user()->hasPermission('user.create') || Auth::user()->isAdmin())
             <a href="{{ route('user.create') }}" 
-               class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
+               class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
                 <i class="fas fa-plus mr-2"></i>
-                Tambah User
+                Tambah
             </a>
             @endif
         </div>
@@ -32,18 +32,18 @@
                     <input type="text" 
                            id="searchInput"
                            placeholder="Cari user..." 
-                           class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm">
+                           class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-[11px]">
                 </div>
             </div>
             <div class="flex gap-2">
-                <select id="roleFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm">
+                <select id="roleFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-[11px]">
                     <option value="">Semua Role</option>
                     @foreach(\App\Models\Role::aktif()->get() as $role)
                         <option value="{{ $role->nama_peran }}">{{ $role->nama_peran }}</option>
                     @endforeach
                 </select>
-                <select id="statusFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm">
-                    <option value="">Semua Status</option>
+                <select id="statusFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-[11px]">
+                    <option value="" class="text-[11px]">Semua Status</option>
                     <option value="aktif">Aktif</option>
                     <option value="nonaktif">Nonaktif</option>
                 </select>
@@ -56,26 +56,26 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th class="px-6 py-3 text-left text-[9px] font-medium text-gray-500 uppercase tracking-wider">
                         No
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th class="px-6 py-3 text-left text-[9px] font-medium text-gray-500 uppercase tracking-wider">
                         User
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th class="px-6 py-3 text-left text-[9px] font-medium text-gray-500 uppercase tracking-wider">
                         Email
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th class="px-6 py-3 text-left text-[9px] font-medium text-gray-500 uppercase tracking-wider">
                         Role
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th class="px-6 py-3 text-left text-[9px] font-medium text-gray-500 uppercase tracking-wider">
                         Status
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th class="px-6 py-3 text-left text-[9px] font-medium text-gray-500 uppercase tracking-wider">
                         No. Telepon
                     </th>
                     @if(Auth::user()->hasAnyPermission(['user.view', 'user.edit', 'user.delete']) || Auth::user()->isAdmin())
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th class="px-6 py-3 text-left text-[9px] font-medium text-gray-500 uppercase tracking-wider">
                         Aksi
                     </th>
                     @endif
@@ -84,60 +84,60 @@
             <tbody class="bg-white divide-y divide-gray-200" id="tableBody">
                 @forelse($users as $index => $user)
                     <tr class="hover:bg-gray-50 transition-colors duration-150">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td class="px-6 py-4 whitespace-nowrap text-[10px] text-gray-900">
                             {{ $index + 1 + ($users->currentPage() - 1) * $users->perPage() }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
-                                <div class="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center mr-3">
-                                    <span class="text-white font-medium text-sm">
+                                <div class="w-9 h-9 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-white font-medium text-[10px]">
                                         {{ strtoupper(substr($user->nama_lengkap, 0, 2)) }}
                                     </span>
                                 </div>
                                 <div>
-                                    <div class="text-sm font-medium text-gray-900">{{ $user->nama_lengkap }}</div>
-                                    <div class="text-xs text-gray-500">{{ $user->email }}</div>
+                                    <div class="text-[10px] font-medium text-gray-900">{{ $user->nama_lengkap }}</div>
+                                    <div class="text-[11px] text-gray-500">{{ $user->email }}</div>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ $user->email }}</div>
+                            <div class="text-[10px] text-gray-900">{{ $user->email }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($user->role)
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium 
                                     @if($user->role->kode_peran === 'ADMIN') bg-red-100 text-red-800
                                     @elseif($user->role->kode_peran === 'KEPALA_SEKOLAH') bg-blue-100 text-blue-800
                                     @elseif($user->role->kode_peran === 'PETUGAS') bg-green-100 text-green-800
                                     @else bg-purple-100 text-purple-800 @endif">
-                                    <i class="fas fa-user-shield mr-1"></i>
+                                    <i class="fas fa-user-shield mr-1 text-[10px]"></i>
                                     {{ $user->role->nama_peran }}
                                 </span>
                             @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                    <i class="fas fa-question-circle mr-1"></i>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-800">
+                                    <i class="fas fa-question-circle mr-1 text-[10px]"></i>
                                     Role tidak ditemukan
                                 </span>
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($user->status === 'aktif')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    <i class="fas fa-check-circle mr-1"></i>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-green-100 text-green-800">
+                                    <i class="fas fa-check-circle mr-1 text-[10px]"></i>
                                     Aktif
                                 </span>
                             @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                    <i class="fas fa-times-circle mr-1"></i>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-100 text-red-800">
+                                    <i class="fas fa-times-circle mr-1 text-[10px]"></i>
                                     Nonaktif
                                 </span>
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">
+                            <div class="text-xs text-gray-900">
                                 @if($user->nomor_telepon)
                                     <span class="inline-flex items-center">
-                                        <i class="fas fa-phone mr-1 text-gray-400"></i>
+                                        <i class="fas fa-phone mr-1 text-gray-400 text-[10px]"></i>
                                         {{ $user->nomor_telepon }}
                                     </span>
                                 @else
@@ -146,42 +146,42 @@
                             </div>
                         </td>
                         @if(Auth::user()->hasAnyPermission(['user.view', 'user.edit', 'user.delete']) || Auth::user()->isAdmin())
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex items-center space-x-2">
+                        <td class="px-6 py-4 whitespace-nowrap text-xs font-medium">
+                            <div class="flex items-center space-x-1">
                                 @if(Auth::user()->hasPermission('user.view') || Auth::user()->isAdmin())
                                 <a href="{{ route('user.show', $user->id) }}" 
-                                   class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 transition-colors" 
+                                   class="text-blue-600 hover:text-blue-900 p-1.5 rounded hover:bg-blue-50 transition-colors" 
                                    title="Detail">
-                                    <i class="fas fa-eye"></i>
+                                    <i class="fas fa-eye text-[11px]"></i>
                                 </a>
                                 @endif
                                 @if(Auth::user()->hasPermission('user.edit') || Auth::user()->isAdmin())
                                 <a href="{{ route('user.edit', $user->id) }}" 
-                                   class="text-yellow-600 hover:text-yellow-900 p-1 rounded hover:bg-yellow-50 transition-colors" 
+                                   class="text-yellow-600 hover:text-yellow-900 p-1.5 rounded hover:bg-yellow-50 transition-colors" 
                                    title="Edit">
-                                    <i class="fas fa-edit"></i>
+                                    <i class="fas fa-edit text-[11px]"></i>
                                 </a>
                                 @endif
                                 @if(Auth::user()->hasPermission('user.delete') || Auth::user()->isAdmin())
                                 @if($user->id !== auth()->id())
                                     <button type="button" 
                                             onclick="confirmDeleteUser({{ $user->id }})"
-                                            class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors" 
+                                            class="text-red-600 hover:text-red-900 p-1.5 rounded hover:bg-red-50 transition-colors" 
                                             title="Hapus">
-                                        <i class="fas fa-trash"></i>
+                                        <i class="fas fa-trash text-[11px]"></i>
                                     </button>
                                 @endif
                                 @endif
                                 @if(Auth::user()->hasPermission('user.edit') || Auth::user()->isAdmin())
                                 <button type="button" 
                                         onclick="confirmResetPassword({{ $user->id }})"
-                                        class="text-purple-600 hover:text-purple-900 p-1 rounded hover:bg-purple-50 transition-colors" 
+                                        class="text-purple-600 hover:text-purple-900 p-1.5 rounded hover:bg-purple-50 transition-colors" 
                                         title="Reset Password">
-                                    <i class="fas fa-key"></i>
+                                    <i class="fas fa-key text-[11px]"></i>
                                 </button>
                                 @endif
                                 @if(!Auth::user()->hasAnyPermission(['user.view', 'user.edit', 'user.delete']) && !Auth::user()->isAdmin())
-                                <span class="text-gray-400 text-sm">Tidak ada aksi tersedia</span>
+                                <span class="text-gray-400 text-xs">Tidak ada aksi tersedia</span>
                                 @endif
                             </div>
                         </td>

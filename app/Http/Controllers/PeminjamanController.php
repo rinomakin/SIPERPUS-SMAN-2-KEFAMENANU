@@ -600,6 +600,7 @@ class PeminjamanController extends Controller
                 'nama_lengkap' => $anggota->nama_lengkap,
                 'nomor_anggota' => $anggota->nomor_anggota,
                 'barcode_anggota' => $anggota->barcode_anggota,
+                'foto' => $anggota->foto,
                 'kelas' => $anggota->kelas ? $anggota->kelas->nama_kelas : 'N/A',
                 'jenis_anggota' => $anggota->jenis_anggota
             ]
@@ -717,12 +718,13 @@ class PeminjamanController extends Controller
                               ->with('kelas')
                               ->take(10)
                               ->get()
-                              ->map(function($anggota) {
+                                      ->map(function($anggota) {
                                   return [
                                       'id' => $anggota->id,
                                       'nama_lengkap' => $anggota->nama_lengkap,
                                       'nomor_anggota' => $anggota->nomor_anggota,
                                       'barcode_anggota' => $anggota->barcode_anggota,
+                                      'foto' => $anggota->foto,
                                       'kelas' => $anggota->kelas ? $anggota->kelas->nama_kelas : 'N/A',
                                       'jenis_anggota' => $anggota->jenis_anggota
                                   ];

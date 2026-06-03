@@ -53,7 +53,7 @@ class KasExport implements FromCollection, WithHeadings, WithMapping, WithStyles
             'Denda Keterlambatan',
             $kas->peminjaman->nomor_peminjaman,
             $kas->peminjaman->anggota->nama_lengkap,
-            $kas->peminjaman->anggota->nis ?: $kas->peminjaman->anggota->nik,
+            $kas->peminjaman->anggota->nis ?: $kas->peminjaman->anggota->nomor_anggota,
             $kelasJurusan,
             'Pembayaran denda keterlambatan ' . $kas->jumlah_hari_terlambat . ' hari',
             'Rp ' . number_format($kas->total_denda, 0, ',', '.'),

@@ -6,18 +6,18 @@
 @section('content')
 <div class="space-y-6">
     <!-- Header Section -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-3">
         <div class="flex items-center justify-between">
             <div>
-                <h2 class="text-2xl font-bold text-gray-900">Data Anggota Perpustakaan</h2>
-                <p class="text-sm text-gray-600 mt-1">Kelola data anggota perpustakaan dengan mudah</p>
+                <h2 class="text-[10px] font-bold text-gray-900">Data Anggota Perpustakaan</h2>
+                <p class="text-[10px] text-gray-600 mt-1">Kelola data anggota perpustakaan dengan mudah</p>
             </div>
             
             <div class="flex items-center gap-2">
                 @if(Auth::user()->hasPermission('anggota.create') || Auth::user()->isAdmin())
                 <a href="{{ route('anggota.create') }}" 
                    class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl">
-                    <i class="fas fa-plus mr-2"></i>
+                    <i class="fas fa-plus mr-1"></i>
                     Tambah Anggota
                 </a>
                 @endif
@@ -27,7 +27,7 @@
 
     <!-- DataTables Section -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="overflow-x-auto p-6">
+        <div class="overflow-x-auto p-3">
             <table id="anggota-table" class="w-full table-auto display" style="width:100%">
                 <thead>
                     <tr>

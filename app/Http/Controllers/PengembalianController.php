@@ -70,8 +70,9 @@ class PengembalianController extends Controller
             'detailPengembalian'
         ]);
 
-        // Default: hanya tampilkan data pengembalian hari ini
-        $query->whereDate('tanggal_pengembalian', Carbon::today());
+        // Default: hanya tampilkan data pengembalian hari ini (range query for index)
+        $query->where('tanggal_pengembalian', '>=', Carbon::today()->startOfDay())
+              ->where('tanggal_pengembalian', '<=', Carbon::today()->endOfDay());
 
         // Apply filters from request
         if ($request->filled('filter_status')) {
@@ -107,11 +108,15 @@ class PengembalianController extends Controller
             })
             ->addColumn('anggota_info', function($row) {
                 if ($row->anggota) {
-                    return '<div class="flex items-center gap-2.5">
-                                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">' . strtoupper(substr($row->anggota->nama_lengkap, 0, 1)) . '</div>
-                                <div>
-                                    <div class="text-xs font-semibold text-gray-900">' . e($row->anggota->nama_lengkap) . '</div>
-                                    <div class="text-[11px] text-gray-400">' . e($row->anggota->nomor_anggota) . '</div>
+                    $fotoHtml = '';
+                    if ($row->anggota->foto) {
+                        $fotoHtml = '<img src="' . asset('storage/anggota/' . $row->anggota->foto) . '" alt="" class="w-8 h-8 rounded-lg object-cover shadow-sm" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">';
+                    }
+                    $fotoHtml .= '<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-xs font-bold shadow-sm"' . ($row->anggota->foto ? ' style="display:none"' : '') . '>' . strtoupper(substr($row->anggota->nama_lengkap, 0, 1)) . '</div>';
+                    return '<div class="flex items-center gap-2.5">'
+                                . '<div class="flex-shrink-0">' . $fotoHtml . '</div>'
+                                . '<div>'
+                                    . '<div class="text-xs font-semibold text-gray-900">' . e($row->anggota->nama_lengkap) . '</div>
                                 </div>
                             </div>';
                 }
@@ -160,22 +165,10 @@ class PengembalianController extends Controller
                 return '<span class="denda-badge no-denda"><i class="fas fa-check-circle" style="font-size:11px"></i>Tidak ada denda</span>';
             })
             ->addColumn('action', function($row) {
-                $actions = '<div class="flex items-center justify-center gap-1.5">';
-
                 if (auth()->user()->hasPermission('pengembalian.show') || auth()->user()->isAdmin()) {
-                    $actions .= '<a href="' . route('pengembalian.show', $row->id) . '" class="action-btn view" title="Detail"><i class="fas fa-eye"></i></a>';
+                    return '<div class="flex items-center justify-center gap-1.5"><a href="' . route('pengembalian.show', $row->id) . '" class="action-btn view" title="Detail"><i class="fas fa-eye"></i></a></div>';
                 }
-
-                if (auth()->user()->hasPermission('pengembalian.edit') || auth()->user()->isAdmin()) {
-                    $actions .= '<a href="' . route('pengembalian.edit', $row->id) . '" class="action-btn edit" title="Edit"><i class="fas fa-edit"></i></a>';
-                }
-
-                if (auth()->user()->hasPermission('pengembalian.delete') || auth()->user()->isAdmin()) {
-                    $actions .= '<button onclick="confirmDelete(' . $row->id . ')" class="action-btn delete" title="Hapus"><i class="fas fa-trash"></i></button>';
-                }
-
-                $actions .= '</div>';
-                return $actions;
+                return '';
             })
             ->addColumn('petugas_info', function($row) {
                 $name = e($row->user->name ?? '-');
@@ -344,12 +337,13 @@ class PengembalianController extends Controller
 
             DB::commit();
 
-            return redirect()->route('pengembalian.show', $pengembalian->id)
+            return redirect()->route('pengembalian.index')
                 ->with('success', 'Pengembalian berhasil diperbarui.');
 
         } catch (\Exception $e) {
             DB::rollback();
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
+            return redirect()->route('pengembalian.index')
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
@@ -404,8 +398,9 @@ class PengembalianController extends Controller
                 return [
                     'id' => $anggota->id,
                     'nama_lengkap' => $anggota->nama_lengkap ?: $anggota->nama,
-                    'nis' => $anggota->nik ?? 'N/A',
+                    'nis' => $anggota->nomor_anggota ?? 'N/A',
                     'nomor_anggota' => $anggota->nomor_anggota,
+                    'foto' => $anggota->foto,
                     'barcode_anggota' => $anggota->barcode_anggota,
                     'kelas' => $anggota->kelas ? $anggota->kelas->nama_kelas : 'N/A',
                     'jurusan' => $anggota->jurusan ? $anggota->jurusan->nama_jurusan : 'N/A',
@@ -666,6 +661,7 @@ class PengembalianController extends Controller
                         'id' => $anggota->id,
                         'nama_lengkap' => $anggota->nama_lengkap,
                         'nomor_anggota' => $anggota->nomor_anggota,
+                        'foto' => $anggota->foto,
                         'barcode_anggota' => $anggota->barcode_anggota,
                         'kelas' => $anggota->kelas ? $anggota->kelas->nama_kelas : 'N/A',
                         'jenis_anggota' => $anggota->jenis_anggota
@@ -910,7 +906,8 @@ class PengembalianController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return redirect()->route('pengembalian.index')
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
@@ -932,12 +929,20 @@ class PengembalianController extends Controller
      */
     private function getTodaySummaryData()
     {
-        $today = Carbon::today();
+        $start = Carbon::today()->startOfDay();
+        $end   = Carbon::today()->endOfDay();
+        $stats = Pengembalian::where('tanggal_pengembalian', '>=', $start)
+            ->where('tanggal_pengembalian', '<=', $end)
+            ->selectRaw('COUNT(*) as total')
+            ->selectRaw('SUM(CASE WHEN jumlah_hari_terlambat > 0 THEN 1 ELSE 0 END) as terlambat')
+            ->selectRaw('SUM(CASE WHEN jumlah_hari_terlambat <= 0 THEN 1 ELSE 0 END) as tepat_waktu')
+            ->selectRaw('COALESCE(SUM(total_denda), 0) as total_denda')
+            ->first();
         return [
-            'total' => Pengembalian::whereDate('tanggal_pengembalian', $today)->count(),
-            'terlambat' => Pengembalian::whereDate('tanggal_pengembalian', $today)->where('jumlah_hari_terlambat', '>', 0)->count(),
-            'tepat_waktu' => Pengembalian::whereDate('tanggal_pengembalian', $today)->where('jumlah_hari_terlambat', '<=', 0)->count(),
-            'total_denda' => Pengembalian::whereDate('tanggal_pengembalian', $today)->sum('total_denda'),
+            'total'       => (int) ($stats->total ?? 0),
+            'terlambat'   => (int) ($stats->terlambat ?? 0),
+            'tepat_waktu' => (int) ($stats->tepat_waktu ?? 0),
+            'total_denda' => (int) ($stats->total_denda ?? 0),
         ];
     }
 

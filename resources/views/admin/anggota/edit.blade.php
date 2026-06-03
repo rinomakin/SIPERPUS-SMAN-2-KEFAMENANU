@@ -27,10 +27,10 @@
 
     .form-input {
         width: 100%;
-        padding: 10px 14px;
+        padding: 6px 10px;
         border: 1.5px solid #e2e8f0;
-        border-radius: 10px;
-        font-size: 0.875rem;
+        border-radius: 8px;
+        font-size: 10px;
         color: #1e293b;
         background: #f8fafc;
         transition: all 0.2s ease;
@@ -50,10 +50,10 @@
     }
     .form-label {
         display: block;
-        font-size: 0.8rem;
+        font-size: 10px;
         font-weight: 600;
         color: #475569;
-        margin-bottom: 6px;
+        margin-bottom: 3px;
         letter-spacing: 0.01em;
     }
     .form-label .required {
@@ -61,14 +61,14 @@
         margin-left: 2px;
     }
     .form-hint {
-        font-size: 0.75rem;
+        font-size: 10px;
         color: #94a3b8;
-        margin-top: 4px;
+        margin-top: 2px;
     }
     .form-error {
-        font-size: 0.75rem;
+        font-size: 10px;
         color: #ef4444;
-        margin-top: 4px;
+        margin-top: 2px;
         display: flex;
         align-items: center;
         gap: 4px;
@@ -77,31 +77,31 @@
     .section-title {
         display: flex;
         align-items: center;
-        gap: 10px;
-        font-size: 0.9rem;
+        gap: 8px;
+        font-size: 10px;
         font-weight: 700;
         color: #1e293b;
-        margin-bottom: 20px;
-        padding-bottom: 12px;
+        margin-bottom: 12px;
+        padding-bottom: 6px;
         border-bottom: 2px solid #f1f5f9;
     }
     .section-title .icon-box {
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.8rem;
+        font-size: 10px;
         color: white;
         flex-shrink: 0;
     }
 
     .photo-upload-area {
-        width: 140px;
-        height: 140px;
+        width: 100px;
+        height: 100px;
         border: 2px dashed #cbd5e1;
-        border-radius: 16px;
+        border-radius: 12px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -130,12 +130,12 @@
         color: #94a3b8;
     }
     .photo-upload-area .upload-placeholder i {
-        font-size: 1.8rem;
-        margin-bottom: 6px;
+        font-size: 1.2rem;
+        margin-bottom: 4px;
         display: block;
     }
     .photo-upload-area .upload-placeholder span {
-        font-size: 0.7rem;
+        font-size: 10px;
         font-weight: 500;
     }
     .photo-upload-area .photo-overlay {
@@ -153,24 +153,24 @@
     }
     .photo-upload-area .photo-overlay i {
         color: white;
-        font-size: 1.5rem;
+        font-size: 1rem;
     }
 
     .info-badge {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-size: 0.75rem;
+        gap: 4px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 10px;
         font-weight: 600;
     }
 
     .jenis-anggota-option {
         flex: 1;
-        padding: 12px 16px;
+        padding: 8px 12px;
         border: 1.5px solid #e2e8f0;
-        border-radius: 10px;
+        border-radius: 8px;
         text-align: center;
         cursor: pointer;
         transition: all 0.2s ease;
@@ -186,24 +186,24 @@
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
     .jenis-anggota-option .option-icon {
-        font-size: 1.3rem;
-        margin-bottom: 4px;
+        font-size: 0.9rem;
+        margin-bottom: 2px;
         display: block;
     }
     .jenis-anggota-option .option-label {
-        font-size: 0.8rem;
+        font-size: 10px;
         font-weight: 600;
         color: #334155;
     }
 
     .gender-option {
         flex: 1;
-        padding: 10px 16px;
+        padding: 6px 12px;
         border: 1.5px solid #e2e8f0;
-        border-radius: 10px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
         cursor: pointer;
         transition: all 0.2s ease;
         background: #f8fafc;
@@ -218,25 +218,25 @@
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
     .gender-option .option-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.9rem;
+        font-size: 10px;
     }
     .gender-option .option-text {
-        font-size: 0.8rem;
+        font-size: 10px;
         font-weight: 600;
         color: #334155;
     }
 
     .status-option {
         flex: 1;
-        padding: 10px 14px;
+        padding: 6px 10px;
         border: 1.5px solid #e2e8f0;
-        border-radius: 10px;
+        border-radius: 8px;
         text-align: center;
         cursor: pointer;
         transition: all 0.2s ease;
@@ -268,9 +268,75 @@
         margin-right: 6px;
     }
     .status-option .status-label {
-        font-size: 0.8rem;
+        font-size: 10px;
         font-weight: 600;
         color: #334155;
+    }
+
+    .camera-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.85);
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+    .camera-overlay.active {
+        display: flex;
+    }
+    .camera-modal {
+        background: #1e293b;
+        border-radius: 16px;
+        overflow: hidden;
+        max-width: 480px;
+        width: 100%;
+    }
+    .camera-modal video {
+        width: 100%;
+        display: block;
+        aspect-ratio: 4/3;
+        object-fit: cover;
+        background: #000;
+    }
+    .camera-modal .camera-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        padding: 12px 16px;
+    }
+    .camera-modal .camera-toolbar button {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        transition: transform 0.15s;
+    }
+    .camera-modal .camera-toolbar button:active {
+        transform: scale(0.9);
+    }
+    .camera-modal .camera-toolbar .btn-capture {
+        width: 56px;
+        height: 56px;
+        background: white;
+        color: #1e293b;
+        font-size: 20px;
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+    }
+    .camera-modal .camera-toolbar .btn-close {
+        background: rgba(255,255,255,0.15);
+        color: white;
+    }
+    .camera-modal .camera-toolbar .btn-flip {
+        background: rgba(255,255,255,0.15);
+        color: white;
     }
 </style>
 @endpush
@@ -280,34 +346,34 @@
 
     {{-- Alert Sukses --}}
     @if(session('success'))
-    <div class="mb-5 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 fade-in">
+    <div class="mb-5 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-1.5 fade-in">
         <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-            <i class="fas fa-check text-green-600 text-sm"></i>
+            <i class="fas fa-check text-green-600 text-[10px]"></i>
         </div>
-        <p class="text-sm text-green-800 font-medium">{{ session('success') }}</p>
+        <p class="text-[10px] text-green-800 font-medium">{{ session('success') }}</p>
     </div>
     @endif
 
     {{-- Alert Error --}}
     @if(session('error'))
-    <div class="mb-5 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 fade-in">
+    <div class="mb-5 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-1.5 fade-in">
         <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-            <i class="fas fa-exclamation-triangle text-red-600 text-sm"></i>
+            <i class="fas fa-exclamation-triangle text-red-600 text-[10px]"></i>
         </div>
-        <p class="text-sm text-red-800 font-medium">{{ session('error') }}</p>
+        <p class="text-[10px] text-red-800 font-medium">{{ session('error') }}</p>
     </div>
     @endif
 
     {{-- Validation Errors --}}
     @if($errors->any())
     <div class="mb-5 p-4 bg-red-50 border border-red-200 rounded-xl fade-in">
-        <div class="flex items-start gap-3">
+        <div class="flex items-start gap-1.5">
             <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <i class="fas fa-exclamation-triangle text-red-600 text-sm"></i>
+                <i class="fas fa-exclamation-triangle text-red-600 text-[10px]"></i>
             </div>
             <div>
-                <h4 class="text-sm font-semibold text-red-800 mb-1">Terdapat kesalahan pada form</h4>
-                <ul class="text-sm text-red-700 space-y-0.5">
+                <h4 class="text-[10px] font-semibold text-red-800 mb-1">Terdapat kesalahan pada form</h4>
+                <ul class="text-[10px] text-red-700 space-y-0.5">
                     @foreach($errors->all() as $error)
                     <li class="flex items-center gap-1.5">
                         <i class="fas fa-circle text-red-400" style="font-size: 4px;"></i>
@@ -321,20 +387,20 @@
     @endif
 
     {{-- Member Info Header --}}
-    <div class="glass-card rounded-xl shadow-sm border border-gray-200 p-5 mb-5 fade-in">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div class="flex items-center gap-3">
+    <div class="glass-card rounded-xl shadow-sm border border-gray-200 p-3 mb-5 fade-in">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5">
+            <div class="flex items-center gap-1.5">
                 <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
                     <i class="fas fa-user-edit text-blue-600"></i>
                 </div>
                 <div>
-                    <h3 class="text-sm font-bold text-gray-800">{{ $anggota->nama_lengkap }}</h3>
-                    <p class="text-xs text-gray-500">No. Anggota: {{ $anggota->nomor_anggota }}</p>
+                    <h3 class="text-[10px] font-bold text-gray-800">{{ $anggota->nama_lengkap }}</h3>
+                    <p class="text-[10px] text-gray-500">No. Anggota: {{ $anggota->nomor_anggota }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
                 <span class="info-badge" style="background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd;">
-                    <i class="fas fa-barcode text-xs"></i> {{ $anggota->barcode_anggota }}
+                    <i class="fas fa-barcode text-[10px]"></i> {{ $anggota->barcode_anggota }}
                 </span>
                 @if($anggota->status == 'aktif')
                     <span class="info-badge" style="background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0;">
@@ -358,7 +424,7 @@
         @method('PUT')
 
         {{-- Section 1: Identitas & Foto --}}
-        <div class="glass-card rounded-xl shadow-sm border border-gray-200 p-6 mb-5 fade-in">
+        <div class="glass-card rounded-xl shadow-sm border border-gray-200 p-3 mb-5 fade-in">
             <div class="section-title">
                 <div class="icon-box" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
                     <i class="fas fa-id-card"></i>
@@ -366,7 +432,7 @@
                 Identitas Anggota
             </div>
 
-            <div class="flex flex-col md:flex-row gap-6">
+            <div class="flex flex-col md:flex-row gap-1.5">
                 {{-- Photo Upload --}}
                 <div class="flex flex-col items-center gap-2">
                     <div class="photo-upload-area {{ $anggota->foto ? 'has-photo' : '' }}" id="photoArea" onclick="document.getElementById('foto').click()">
@@ -387,14 +453,22 @@
                         @endif
                     </div>
                     <input type="file" name="foto" id="foto" accept="image/jpeg,image/png,image/jpg" class="hidden" onchange="previewPhoto(this)">
-                    <span class="text-xs text-gray-400">JPG/PNG, maks 2MB</span>
+                    <div class="flex items-center gap-1.5">
+                        <button type="button" onclick="document.getElementById('foto').click()" class="px-2.5 py-1 text-[10px] font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors">
+                            <i class="fas fa-upload mr-1"></i>Upload
+                        </button>
+                        <button type="button" onclick="openCamera()" class="px-2.5 py-1 text-[10px] font-medium bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors">
+                            <i class="fas fa-camera mr-1"></i>Kamera
+                        </button>
+                    </div>
+                    <span class="text-[10px] text-gray-400">JPG/PNG, maks 2MB</span>
                     @error('foto')
                         <span class="form-error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
                     @enderror
                 </div>
 
                 {{-- Identity Fields --}}
-                <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2">
                     {{-- Barcode --}}
                     <div>
                         <label class="form-label">Barcode Anggota</label>
@@ -404,8 +478,8 @@
                                    value="{{ old('barcode_anggota') }}"
                                    placeholder="Kosongkan jika tidak diubah">
                             <button type="button" onclick="generateBarcode()"
-                                    class="px-3.5 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-1.5 text-sm font-medium whitespace-nowrap">
-                                <i class="fas fa-sync-alt text-xs"></i> Generate
+                                    class="px-3.5 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-1.5 text-[10px] font-medium whitespace-nowrap">
+                                <i class="fas fa-sync-alt text-[10px]"></i> Generate
                             </button>
                         </div>
                         <span class="form-hint">Saat ini: {{ $anggota->barcode_anggota }}. Kosongkan jika tidak ingin mengubah.</span>
@@ -426,16 +500,25 @@
                         @enderror
                     </div>
 
-                    {{-- NIK --}}
+                    {{-- Jenis Kelamin --}}
                     <div>
-                        <label for="nik" class="form-label">NIK <span class="required">*</span></label>
-                        <input type="text" name="nik" id="nik"
-                               class="form-input @error('nik') is-invalid @enderror"
-                               value="{{ old('nik', $anggota->nik) }}"
-                               placeholder="Masukkan NIK (16 digit)" maxlength="16" required
-                               oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                        <span class="form-hint" id="nikCount">0/16 digit</span>
-                        @error('nik')
+                        <label class="form-label">Jenis Kelamin <span class="required">*</span></label>
+                        <input type="hidden" name="jenis_kelamin" id="jenis_kelamin" value="{{ old('jenis_kelamin', $anggota->jenis_kelamin) }}" required>
+                        <div class="flex gap-1.5">
+                            <div class="gender-option {{ old('jenis_kelamin', $anggota->jenis_kelamin) == 'Laki-laki' ? 'active' : '' }}" onclick="selectGender('Laki-laki', this)">
+                                <div class="option-icon" style="background: #eff6ff; color: #3b82f6;">
+                                    <i class="fas fa-mars"></i>
+                                </div>
+                                <span class="option-text">Laki-laki</span>
+                            </div>
+                            <div class="gender-option {{ old('jenis_kelamin', $anggota->jenis_kelamin) == 'Perempuan' ? 'active' : '' }}" onclick="selectGender('Perempuan', this)">
+                                <div class="option-icon" style="background: #fdf2f8; color: #ec4899;">
+                                    <i class="fas fa-venus"></i>
+                                </div>
+                                <span class="option-text">Perempuan</span>
+                            </div>
+                        </div>
+                        @error('jenis_kelamin')
                             <span class="form-error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
                         @enderror
                     </div>
@@ -454,8 +537,8 @@
             </div>
         </div>
 
-        {{-- Section 2: Jenis Kelamin & Jenis Anggota --}}
-        <div class="glass-card rounded-xl shadow-sm border border-gray-200 p-6 mb-5 fade-in">
+        {{-- Section 2: Jenis Anggota --}}
+        <div class="glass-card rounded-xl shadow-sm border border-gray-200 p-3 mb-5 fade-in">
             <div class="section-title">
                 <div class="icon-box" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
                     <i class="fas fa-users"></i>
@@ -463,35 +546,12 @@
                 Kategori Anggota
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {{-- Jenis Kelamin --}}
-                <div>
-                    <label class="form-label">Jenis Kelamin <span class="required">*</span></label>
-                    <input type="hidden" name="jenis_kelamin" id="jenis_kelamin" value="{{ old('jenis_kelamin', $anggota->jenis_kelamin) }}" required>
-                    <div class="flex gap-3">
-                        <div class="gender-option {{ old('jenis_kelamin', $anggota->jenis_kelamin) == 'Laki-laki' ? 'active' : '' }}" onclick="selectGender('Laki-laki', this)">
-                            <div class="option-icon" style="background: #eff6ff; color: #3b82f6;">
-                                <i class="fas fa-mars"></i>
-                            </div>
-                            <span class="option-text">Laki-laki</span>
-                        </div>
-                        <div class="gender-option {{ old('jenis_kelamin', $anggota->jenis_kelamin) == 'Perempuan' ? 'active' : '' }}" onclick="selectGender('Perempuan', this)">
-                            <div class="option-icon" style="background: #fdf2f8; color: #ec4899;">
-                                <i class="fas fa-venus"></i>
-                            </div>
-                            <span class="option-text">Perempuan</span>
-                        </div>
-                    </div>
-                    @error('jenis_kelamin')
-                        <span class="form-error"><i class="fas fa-exclamation-circle"></i> {{ $message }}</span>
-                    @enderror
-                </div>
-
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-1.5">
                 {{-- Jenis Anggota --}}
                 <div>
                     <label class="form-label">Jenis Anggota <span class="required">*</span></label>
                     <input type="hidden" name="jenis_anggota" id="jenis_anggota" value="{{ old('jenis_anggota', $anggota->jenis_anggota) }}" required>
-                    <div class="flex gap-3">
+                    <div class="flex gap-1.5">
                         <div class="jenis-anggota-option {{ old('jenis_anggota', $anggota->jenis_anggota) == 'siswa' ? 'active' : '' }}" onclick="selectJenisAnggota('siswa', this)">
                             <span class="option-icon"><i class="fas fa-user-graduate"></i></span>
                             <span class="option-label">Siswa</span>
@@ -513,7 +573,7 @@
         </div>
 
         {{-- Section 3: Kontak & Alamat --}}
-        <div class="glass-card rounded-xl shadow-sm border border-gray-200 p-6 mb-5 fade-in">
+        <div class="glass-card rounded-xl shadow-sm border border-gray-200 p-3 mb-5 fade-in">
             <div class="section-title">
                 <div class="icon-box" style="background: linear-gradient(135deg, #10b981, #059669);">
                     <i class="fas fa-address-book"></i>
@@ -521,12 +581,12 @@
                 Kontak & Alamat
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
                 {{-- Nomor Telepon --}}
                 <div>
                     <label for="nomor_telepon" class="form-label">Nomor Telepon <span class="required">*</span></label>
                     <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"><i class="fas fa-phone"></i></span>
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]"><i class="fas fa-phone"></i></span>
                         <input type="text" name="nomor_telepon" id="nomor_telepon"
                                class="form-input pl-9 @error('nomor_telepon') is-invalid @enderror"
                                value="{{ old('nomor_telepon', $anggota->nomor_telepon) }}"
@@ -542,7 +602,7 @@
                 <div>
                     <label for="email" class="form-label">Email</label>
                     <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"><i class="fas fa-envelope"></i></span>
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]"><i class="fas fa-envelope"></i></span>
                         <input type="email" name="email" id="email"
                                class="form-input pl-9 @error('email') is-invalid @enderror"
                                value="{{ old('email', $anggota->email) }}"
@@ -567,7 +627,7 @@
         </div>
 
         {{-- Section 4: Informasi Sekolah --}}
-        <div class="glass-card rounded-xl shadow-sm border border-gray-200 p-6 mb-5 fade-in">
+        <div class="glass-card rounded-xl shadow-sm border border-gray-200 p-3 mb-5 fade-in">
             <div class="section-title">
                 <div class="icon-box" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
                     <i class="fas fa-school"></i>
@@ -575,7 +635,7 @@
                 Informasi Sekolah
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {{-- Kelas --}}
                 <div>
                     <label for="kelas_id" class="form-label">Kelas</label>
@@ -610,7 +670,7 @@
         </div>
 
         {{-- Section 5: Status & Tanggal --}}
-        <div class="glass-card rounded-xl shadow-sm border border-gray-200 p-6 mb-5 fade-in">
+        <div class="glass-card rounded-xl shadow-sm border border-gray-200 p-3 mb-5 fade-in">
             <div class="section-title">
                 <div class="icon-box" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
                     <i class="fas fa-cog"></i>
@@ -618,12 +678,12 @@
                 Status Keanggotaan
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-1.5">
                 {{-- Status --}}
                 <div>
                     <label class="form-label">Status <span class="required">*</span></label>
                     <input type="hidden" name="status" id="status" value="{{ old('status', $anggota->status) }}" required>
-                    <div class="flex gap-3">
+                    <div class="flex gap-1.5">
                         <div class="status-option {{ old('status', $anggota->status) == 'aktif' ? 'active-aktif' : '' }}" onclick="selectStatus('aktif', this)">
                             <span class="status-dot" style="background: #22c55e;"></span>
                             <span class="status-label">Aktif</span>
@@ -646,7 +706,7 @@
                 <div>
                     <label for="tanggal_bergabung" class="form-label">Tanggal Bergabung <span class="required">*</span></label>
                     <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"><i class="fas fa-calendar-alt"></i></span>
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]"><i class="fas fa-calendar-alt"></i></span>
                         <input type="date" name="tanggal_bergabung" id="tanggal_bergabung"
                                class="form-input pl-9 @error('tanggal_bergabung') is-invalid @enderror"
                                value="{{ old('tanggal_bergabung', $anggota->tanggal_bergabung->format('Y-m-d')) }}" required>
@@ -659,33 +719,40 @@
         </div>
 
         {{-- Action Buttons --}}
-        <div class="flex items-center justify-between gap-3 mb-8">
+        <div class="flex items-center justify-between gap-1.5 mb-8">
             <a href="{{ route('anggota.index') }}"
-               class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium flex items-center gap-2">
-                <i class="fas fa-arrow-left text-xs"></i> Kembali
+               class="px-3 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors text-[10px] font-medium flex items-center gap-2">
+                <i class="fas fa-arrow-left text-[10px]"></i> Kembali
             </a>
             <button type="submit" id="submitBtn"
-                    class="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors text-sm font-semibold flex items-center gap-2 shadow-sm shadow-blue-200">
-                <i class="fas fa-save text-xs"></i> Simpan Perubahan
+                    class="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors text-[10px] font-semibold flex items-center gap-2 shadow-sm shadow-blue-200">
+                <i class="fas fa-save text-[10px]"></i> Simpan Perubahan
             </button>
         </div>
     </form>
 </div>
 
+{{-- Camera Modal --}}
+<div class="camera-overlay" id="cameraOverlay">
+    <div class="camera-modal">
+        <video id="cameraVideo" autoplay playsinline></video>
+        <div class="camera-toolbar">
+            <button type="button" class="btn-flip" onclick="flipCamera()" title="Balik Kamera">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            <button type="button" class="btn-capture" onclick="capturePhoto()" title="Ambil Foto">
+                <i class="fas fa-circle"></i>
+            </button>
+            <button type="button" class="btn-close" onclick="closeCamera()" title="Tutup">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // NIK character counter
-    const nikInput = document.getElementById('nik');
-    const nikCount = document.getElementById('nikCount');
-    function updateNikCount() {
-        const len = nikInput.value.length;
-        nikCount.textContent = len + '/16 digit';
-        nikCount.style.color = len === 16 ? '#22c55e' : '#94a3b8';
-    }
-    nikInput.addEventListener('input', updateNikCount);
-    updateNikCount();
-
     // Toggle kelas/jabatan visibility based on jenis anggota
     updateJenisAnggotaFields();
 
@@ -800,6 +867,67 @@ function previewPhoto(input) {
     }
 }
 
+// Camera
+let cameraStream = null;
+let facingMode = 'environment';
+
+function openCamera() {
+    document.getElementById('cameraOverlay').classList.add('active');
+    startCamera();
+}
+
+function closeCamera() {
+    stopCamera();
+    document.getElementById('cameraOverlay').classList.remove('active');
+}
+
+function startCamera() {
+    stopCamera();
+    const constraints = {
+        video: { facingMode, width: { ideal: 1280 }, height: { ideal: 960 } },
+        audio: false
+    };
+    navigator.mediaDevices.getUserMedia(constraints)
+        .then(stream => {
+            cameraStream = stream;
+            document.getElementById('cameraVideo').srcObject = stream;
+        })
+        .catch(() => {
+            showNotification('Tidak dapat mengakses kamera', 'error');
+            closeCamera();
+        });
+}
+
+function stopCamera() {
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+    }
+}
+
+function flipCamera() {
+    facingMode = facingMode === 'environment' ? 'user' : 'environment';
+    startCamera();
+}
+
+function capturePhoto() {
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+
+    canvas.toBlob(function(blob) {
+        const file = new File([blob], 'camera_photo.jpg', { type: 'image/jpeg' });
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        const input = document.getElementById('foto');
+        input.files = dataTransfer.files;
+        previewPhoto(input);
+        closeCamera();
+    }, 'image/jpeg', 0.92);
+}
+
 // Toast Notification
 function showNotification(message, type = 'info') {
     const colors = {
@@ -816,7 +944,7 @@ function showNotification(message, type = 'info') {
     };
 
     const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg ${colors[type]} text-white text-sm font-medium flex items-center gap-2 transition-all duration-300 transform translate-x-full`;
+    notification.className = `fixed top-4 right-4 z-50 px-4 py-1.5 rounded-xl shadow-lg ${colors[type]} text-white text-[10px] font-medium flex items-center gap-2 transition-all duration-300 transform translate-x-full`;
     notification.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
     document.body.appendChild(notification);
 
