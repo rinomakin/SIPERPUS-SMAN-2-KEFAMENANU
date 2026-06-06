@@ -435,22 +435,15 @@
             <div class="flex flex-col md:flex-row gap-1.5">
                 {{-- Photo Upload --}}
                 <div class="flex flex-col items-center gap-2">
-                    <div class="photo-upload-area {{ $anggota->foto ? 'has-photo' : '' }}" id="photoArea" onclick="document.getElementById('foto').click()">
+                    <div class="photo-upload-area has-photo" id="photoArea" onclick="document.getElementById('foto').click()" data-default-male="{{ asset('images/template_foto_laki_laki.jpg') }}" data-default-female="{{ asset('images/teplate_foto_perpempuan.jpg') }}">
                         @if($anggota->foto)
                             <img id="photoPreview" src="{{ asset('storage/anggota/' . $anggota->foto) }}" alt="Foto {{ $anggota->nama_lengkap }}">
+                        @else
+                            <img id="photoPreview" src="{{ $anggota->jenis_kelamin == 'Laki-laki' ? asset('images/template_foto_laki_laki.jpg') : asset('images/teplate_foto_perpempuan.jpg') }}" alt="Foto Default">
+                        @endif
                             <div class="photo-overlay">
                                 <i class="fas fa-camera"></i>
                             </div>
-                        @else
-                            <div class="upload-placeholder" id="uploadPlaceholder">
-                                <i class="fas fa-camera"></i>
-                                <span>Upload Foto</span>
-                            </div>
-                            <img id="photoPreview" src="" alt="Preview" style="display: none;">
-                            <div class="photo-overlay" style="display: none;">
-                                <i class="fas fa-camera"></i>
-                            </div>
-                        @endif
                     </div>
                     <input type="file" name="foto" id="foto" accept="image/jpeg,image/png,image/jpg" class="hidden" onchange="previewPhoto(this)">
                     <div class="flex items-center gap-1.5">
@@ -780,6 +773,16 @@ function selectGender(value, el) {
     document.getElementById('jenis_kelamin').value = value;
     document.querySelectorAll('.gender-option').forEach(opt => opt.classList.remove('active'));
     el.classList.add('active');
+
+    const fotoInput = document.getElementById('foto');
+    const hasExistingFoto = {{ $anggota->foto ? 'true' : 'false' }};
+    if ((!fotoInput.files || !fotoInput.files[0]) && !hasExistingFoto) {
+        const photoArea = document.getElementById('photoArea');
+        const defaultSrc = value === 'Laki-laki' ? photoArea.getAttribute('data-default-male') : photoArea.getAttribute('data-default-female');
+        const preview = document.getElementById('photoPreview');
+        preview.src = defaultSrc;
+        preview.style.display = 'block';
+    }
 }
 
 // Jenis Anggota Selection

@@ -158,6 +158,9 @@ class DendaController extends Controller
         $denda = Denda::findOrFail($id);
 
         if ($denda->status_pembayaran === 'sudah_dibayar') {
+            if (request()->wantsJson() || request()->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Denda ini sudah dibayar sebelumnya.']);
+            }
             return back()->with('error', 'Denda ini sudah dibayar sebelumnya.');
         }
 
@@ -167,7 +170,11 @@ class DendaController extends Controller
         ]);
 
         // Update status denda di pengembalian terkait
-        $this->syncPengembalianStatus($denda, 'sudah_dibayar', now());
+        $this->syncPengembalianStatus($denda, 'sudah_dibayar', now(), 0);
+
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Denda berhasil dibayar lunas.']);
+        }
 
         return redirect()->route('admin.denda.index')
             ->with('success', 'Denda berhasil dibayar lunas.');
@@ -232,34 +239,69 @@ class DendaController extends Controller
             'peminjaman_id' => 'required|exists:peminjaman,id',
             'jumlah_hari_terlambat' => 'required|integer|min:1',
             'jumlah_denda' => 'required|numeric|min:0',
+            'jumlah_bayar' => 'nullable|numeric|min:0|max:' . ($request->jumlah_denda ?? 0),
             'catatan' => 'nullable|string|max:500',
             'status_pembayaran' => 'required|in:belum_dibayar,sudah_dibayar',
             'tanggal_pembayaran' => 'nullable|date|required_if:status_pembayaran,sudah_dibayar',
         ]);
 
-        // Ambil data peminjaman
         $peminjaman = Peminjaman::findOrFail($request->peminjaman_id);
-        
-        // Cek apakah sudah ada denda untuk peminjaman ini
-        $existingDenda = Denda::where('peminjaman_id', $request->peminjaman_id)->first();
-        
-        if ($existingDenda) {
-            return back()->with('error', 'Denda untuk peminjaman ini sudah ada.')
-                ->withInput();
+
+        $jumlahDenda = (int) $request->jumlah_denda;
+        $jumlahBayar = (int) ($request->jumlah_bayar ?? 0);
+
+        if ($jumlahBayar >= $jumlahDenda) {
+            $sisaDenda = 0;
+            $status = 'sudah_dibayar';
+            $tglBayar = $request->tanggal_pembayaran ?? now();
+        } else {
+            $sisaDenda = $jumlahDenda - $jumlahBayar;
+            $status = $request->status_pembayaran;
+            $tglBayar = $status === 'sudah_dibayar' ? $request->tanggal_pembayaran : null;
         }
 
-        Denda::create([
+        // Cek apakah sudah ada denda untuk peminjaman ini
+        $existingDenda = Denda::where('peminjaman_id', $request->peminjaman_id)->first();
+
+        if ($existingDenda) {
+            $sisaDenda = max(0, $existingDenda->jumlah_denda - $jumlahBayar);
+            $existingDenda->update([
+                'jumlah_denda' => $sisaDenda,
+                'status_pembayaran' => $sisaDenda == 0 ? 'sudah_dibayar' : 'belum_dibayar',
+                'tanggal_pembayaran' => $sisaDenda == 0 ? ($request->tanggal_pembayaran ?? now()) : null,
+                'catatan' => $request->catatan,
+            ]);
+
+            $this->syncPengembalianStatus(
+                $existingDenda,
+                $sisaDenda == 0 ? 'sudah_dibayar' : 'belum_dibayar',
+                $sisaDenda == 0 ? ($request->tanggal_pembayaran ?? now()) : null,
+                $sisaDenda
+            );
+
+            return redirect()->route('admin.denda.index')
+                ->with('success', 'Pembayaran denda berhasil dicatat. Sisa: Rp ' . number_format($sisaDenda, 0, ',', '.'));
+        }
+
+        $dendaBaru = Denda::create([
             'peminjaman_id' => $request->peminjaman_id,
             'anggota_id' => $peminjaman->anggota_id,
             'jumlah_hari_terlambat' => $request->jumlah_hari_terlambat,
-            'jumlah_denda' => $request->jumlah_denda,
-            'status_pembayaran' => $request->status_pembayaran,
-            'tanggal_pembayaran' => $request->status_pembayaran === 'sudah_dibayar' ? $request->tanggal_pembayaran : null,
+            'jumlah_denda' => $sisaDenda,
+            'status_pembayaran' => $status,
+            'tanggal_pembayaran' => $tglBayar,
             'catatan' => $request->catatan,
         ]);
 
+        $this->syncPengembalianStatus($dendaBaru, $status, $tglBayar, $sisaDenda);
+
+        $msg = 'Data denda berhasil ditambahkan.';
+        if ($jumlahBayar > 0) {
+            $msg .= ' Dibayar: Rp ' . number_format($jumlahBayar, 0, ',', '.') . ', Sisa: Rp ' . number_format($sisaDenda, 0, ',', '.');
+        }
+
         return redirect()->route('admin.denda.index')
-            ->with('success', 'Data denda berhasil ditambahkan.');
+            ->with('success', $msg);
     }
 
     public function show($id)
@@ -274,12 +316,21 @@ class DendaController extends Controller
     {
         $denda = Denda::with(['peminjaman.detailPeminjaman.buku', 'anggota.kelas', 'anggota.jurusan'])
             ->findOrFail($id);
-            
-        $peminjamanTerlambat = Peminjaman::with(['anggota.kelas', 'anggota.jurusan', 'detailPeminjaman.buku'])
+
+        // Active overdue loans
+        $peminjamanAktif = Peminjaman::with(['anggota.kelas', 'anggota.jurusan', 'detailPeminjaman.buku'])
             ->where('status', 'dipinjam')
             ->where('tanggal_harus_kembali', '<', now())
             ->get();
 
+        // Returned loans without denda
+        $peminjamanKembali = Peminjaman::with(['anggota.kelas', 'anggota.jurusan', 'detailPeminjaman.buku'])
+            ->where('status', 'dikembalikan')
+            ->where('tanggal_harus_kembali', '<', \DB::raw('tanggal_kembali'))
+            ->whereDoesntHave('denda')
+            ->get();
+
+        $peminjamanTerlambat = $peminjamanAktif->merge($peminjamanKembali);
         $anggota = Anggota::where('status', 'aktif')->get();
         
         return view('admin.denda.edit', compact('denda', 'peminjamanTerlambat', 'anggota'));
@@ -293,26 +344,43 @@ class DendaController extends Controller
             'peminjaman_id' => 'required|exists:peminjaman,id',
             'jumlah_hari_terlambat' => 'required|integer|min:1',
             'jumlah_denda' => 'required|numeric|min:0',
+            'jumlah_bayar' => 'nullable|numeric|min:0|max:' . ($request->jumlah_denda ?? 0),
             'catatan' => 'nullable|string|max:500',
             'status_pembayaran' => 'required|in:belum_dibayar,sudah_dibayar',
             'tanggal_pembayaran' => 'nullable|date|required_if:status_pembayaran,sudah_dibayar',
         ]);
 
+        $jumlahDenda = (int) $request->jumlah_denda;
+        $jumlahBayar = (int) ($request->jumlah_bayar ?? 0);
+
+        if ($jumlahBayar >= $jumlahDenda) {
+            $sisaDenda = 0;
+            $status = 'sudah_dibayar';
+            $tglBayar = $request->tanggal_pembayaran ?? now();
+        } else {
+            $sisaDenda = $jumlahDenda - $jumlahBayar;
+            $status = $request->status_pembayaran;
+            $tglBayar = $status === 'sudah_dibayar' ? $request->tanggal_pembayaran : null;
+        }
+
         $denda->update([
             'peminjaman_id' => $request->peminjaman_id,
             'jumlah_hari_terlambat' => $request->jumlah_hari_terlambat,
-            'jumlah_denda' => $request->jumlah_denda,
-            'status_pembayaran' => $request->status_pembayaran,
-            'tanggal_pembayaran' => $request->status_pembayaran === 'sudah_dibayar' ? $request->tanggal_pembayaran : null,
+            'jumlah_denda' => $sisaDenda,
+            'status_pembayaran' => $status,
+            'tanggal_pembayaran' => $tglBayar,
             'catatan' => $request->catatan,
         ]);
 
-        // Update status denda di pengembalian terkait
-        $tanggalBayar = $request->status_pembayaran === 'sudah_dibayar' ? $request->tanggal_pembayaran : null;
-        $this->syncPengembalianStatus($denda, $request->status_pembayaran, $tanggalBayar);
+        $this->syncPengembalianStatus($denda, $status, $tglBayar, $sisaDenda);
+
+        $msg = 'Data denda berhasil diperbarui.';
+        if ($jumlahBayar > 0) {
+            $msg .= ' Dibayar: Rp ' . number_format($jumlahBayar, 0, ',', '.') . ', Sisa: Rp ' . number_format($sisaDenda, 0, ',', '.');
+        }
 
         return redirect()->route('admin.denda.index')
-            ->with('success', 'Data denda berhasil diperbarui.');
+            ->with('success', $msg);
     }
 
     public function destroy($id)
@@ -322,6 +390,111 @@ class DendaController extends Controller
         
         return redirect()->route('admin.denda.index')
             ->with('success', 'Data denda berhasil dihapus.');
+    }
+
+    /**
+     * Cari anggota dengan peminjaman terlambat (untuk form tambah denda)
+     */
+    public function searchPeminjaman(Request $request)
+    {
+        $query = $request->query('query');
+
+        if (!$query || strlen($query) < 1) {
+            return response()->json(['data' => []]);
+        }
+
+        $anggotas = Anggota::where(function ($q) use ($query) {
+            $q->where('nama_lengkap', 'like', '%' . $query . '%')
+              ->orWhere('nomor_anggota', 'like', '%' . $query . '%')
+              ->orWhere('barcode_anggota', 'like', '%' . $query . '%');
+        })->where('status', 'aktif')->get();
+
+        $result = [];
+        foreach ($anggotas as $anggota) {
+            $defaultFoto = $anggota->jenis_kelamin == 'Laki-laki'
+                ? asset('images/template_foto_laki_laki.jpg')
+                : asset('images/teplate_foto_perpempuan.jpg');
+
+            $foto = $anggota->foto
+                ? asset('storage/anggota/' . $anggota->foto)
+                : $defaultFoto;
+
+            $anggotaData = [
+                'id' => $anggota->id,
+                'nama_lengkap' => $anggota->nama_lengkap,
+                'nomor_anggota' => $anggota->nomor_anggota,
+                'foto' => $foto,
+                'kelas' => $anggota->kelas ? $anggota->kelas->nama_kelas : '-',
+                'jenis_kelamin' => $anggota->jenis_kelamin,
+            ];
+
+            // 1. Returned loans that don't have a denda record yet
+            $peminjamanKembaliTanpaDenda = Peminjaman::with(['detailPeminjaman.buku'])
+                ->where('anggota_id', $anggota->id)
+                ->where('status', 'dikembalikan')
+                ->where('tanggal_harus_kembali', '<', \DB::raw('tanggal_kembali'))
+                ->whereDoesntHave('denda')
+                ->get();
+
+            if ($peminjamanKembaliTanpaDenda->count() > 0) {
+                $result[] = [
+                    'anggota' => $anggotaData,
+                    'type' => 'returned_no_denda',
+                    'peminjaman' => $peminjamanKembaliTanpaDenda->map(function ($p) {
+                        $tanggalHarusKembali = \Carbon\Carbon::parse($p->tanggal_harus_kembali);
+                        $tanggalKembali = \Carbon\Carbon::parse($p->tanggal_kembali);
+                        $hariTerlambat = $tanggalKembali->diffInDays($tanggalHarusKembali, false);
+                        return [
+                            'id' => $p->id,
+                            'nomor_peminjaman' => $p->nomor_peminjaman,
+                            'tanggal_pinjam' => $p->tanggal_pinjam,
+                            'tanggal_harus_kembali' => $p->tanggal_harus_kembali,
+                            'tanggal_kembali' => $p->tanggal_kembali,
+                            'hari_terlambat' => max(0, (int) $hariTerlambat),
+                            'denda' => max(0, (int) $hariTerlambat) * 1000,
+                            'buku' => $p->detailPeminjaman->map(function ($dp) {
+                                return [
+                                    'judul' => $dp->buku->judul ?? '-',
+                                    'kode_buku' => $dp->buku->kode_buku ?? '-',
+                                ];
+                            }),
+                        ];
+                    }),
+                ];
+            }
+
+            // 2. Existing unpaid fines (belum_dibayar)
+            $dendaBelumBayar = Denda::with(['peminjaman.detailPeminjaman.buku'])
+                ->where('anggota_id', $anggota->id)
+                ->where('status_pembayaran', 'belum_dibayar')
+                ->get();
+
+            if ($dendaBelumBayar->count() > 0) {
+                $result[] = [
+                    'anggota' => $anggotaData,
+                    'type' => 'unpaid_denda',
+                    'denda' => $dendaBelumBayar->map(function ($d) {
+                        return [
+                            'id' => $d->id,
+                            'peminjaman_id' => $d->peminjaman_id,
+                            'jumlah_hari_terlambat' => $d->jumlah_hari_terlambat,
+                            'jumlah_denda' => $d->jumlah_denda,
+                            'tanggal_pembayaran' => $d->tanggal_pembayaran,
+                            'buku' => $d->peminjaman && $d->peminjaman->detailPeminjaman
+                                ? $d->peminjaman->detailPeminjaman->map(function ($dp) {
+                                    return [
+                                        'judul' => $dp->buku->judul ?? '-',
+                                        'kode_buku' => $dp->buku->kode_buku ?? '-',
+                                    ];
+                                })
+                                : [],
+                        ];
+                    }),
+                ];
+            }
+        }
+
+        return response()->json(['data' => $result]);
     }
 
     /**
@@ -454,7 +627,7 @@ class DendaController extends Controller
                 'status_pembayaran' => 'sudah_dibayar',
                 'tanggal_pembayaran' => now(),
             ]);
-            $this->syncPengembalianStatus($denda, 'sudah_dibayar', now());
+            $this->syncPengembalianStatus($denda, 'sudah_dibayar', now(), 0);
         }
 
         return response()->json([
@@ -468,7 +641,7 @@ class DendaController extends Controller
      * Sinkronisasi status denda ke pengembalian terkait.
      * Cari pengembalian via pengembalian_id, fallback ke peminjaman_id.
      */
-    private function syncPengembalianStatus(Denda $denda, string $statusDenda, $tanggalPembayaran = null)
+    private function syncPengembalianStatus(Denda $denda, string $statusDenda, $tanggalPembayaran = null, $totalDenda = null)
     {
         $pengembalian = null;
 
@@ -488,10 +661,14 @@ class DendaController extends Controller
         }
 
         if ($pengembalian) {
-            $pengembalian->update([
+            $updateData = [
                 'status_denda' => $statusDenda,
                 'tanggal_pembayaran_denda' => $tanggalPembayaran,
-            ]);
+            ];
+            if ($totalDenda !== null) {
+                $updateData['total_denda'] = $totalDenda;
+            }
+            $pengembalian->update($updateData);
         }
     }
 }

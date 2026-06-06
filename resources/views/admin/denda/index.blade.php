@@ -474,6 +474,12 @@
                         <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white text-red-600 text-[10px] font-extrabold">{{ $activeFilterCount }}</span>
                     @endif
                 </button>
+                {{-- Tambah --}}
+                <a href="{{ route('admin.denda.create') }}"
+                   class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white rounded-lg text-xs font-semibold transition-all shadow-sm">
+                    <i class="fas fa-plus"></i>
+                    <span class="hidden sm:inline">Tambah</span>
+                </a>
                 {{-- Scan (semua role) --}}
                 <button type="button" id="scanBarcodeBtn"
                         class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-semibold transition-all border border-indigo-100">
@@ -616,17 +622,7 @@
                                    class="action-btn view" title="Detail">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                @if(Auth::user()->isAdmin() || Auth::user()->isPetugas())
-                                <form action="{{ route('admin.denda.bayar-lunas', $item->id) }}"
-                                      method="POST" class="inline bayar-form"
-                                      data-nama="{{ $item->anggota ? $item->anggota->nama_lengkap : 'N/A' }}"
-                                      data-denda="Rp {{ number_format($item->jumlah_denda, 0, ',', '.') }}">
-                                    @csrf
-                                    <button type="submit" class="pay-btn" title="Bayar Lunas">
-                                        <i class="fas fa-check"></i>Bayar
-                                    </button>
-                                </form>
-                                @endif
+                                {{-- Bayar Lunas dipindah ke halaman Tambah Denda --}}
                             </div>
                         </td>
                     </tr>
@@ -988,32 +984,6 @@ $(document).ready(function () {
     @if($activeFilterCount > 0)
     // filters are active, don't auto-open — just show chips
     @endif
-
-    // ========================
-    // Bayar Lunas with SweetAlert
-    // ========================
-    document.querySelectorAll('.bayar-form').forEach(form => {
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const nama  = this.dataset.nama;
-            const denda = this.dataset.denda;
-            const formEl = this;
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    title: 'Konfirmasi Pembayaran',
-                    html: `Tandai denda <b>${denda}</b> atas nama <b>${nama}</b> sebagai <span style="color:#10b981;font-weight:700;">LUNAS</span>?`,
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#10b981',
-                    cancelButtonColor: '#6b7280',
-                    confirmButtonText: '<i class="fas fa-check mr-1"></i>Ya, Bayar Lunas',
-                    cancelButtonText: 'Batal',
-                }).then(result => { if (result.isConfirmed) formEl.submit(); });
-            } else {
-                if (confirm(`Tandai denda ${denda} atas nama ${nama} sebagai LUNAS?`)) formEl.submit();
-            }
-        });
-    });
 
     // ========================
     // Result Modal

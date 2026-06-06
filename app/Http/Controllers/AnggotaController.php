@@ -55,19 +55,18 @@ class AnggotaController extends Controller
                     return '<input type="checkbox" class="member-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 transition-all duration-200" value="' . $row->id . '">';
                 })
                 ->addColumn('nama_info', function($row) {
-                    $gradients = ['#f97316,#ef4444','#8b5cf6,#6366f1','#10b981,#059669','#3b82f6,#2563eb','#ec4899,#db2777'];
-                    $gradient = $gradients[($row->id ?? 0) % 5];
-                    $initial = strtoupper(substr($row->nama_lengkap ?? 'N', 0, 1));
+                    $defaultFoto = $row->jenis_kelamin == 'Laki-laki'
+                        ? asset('images/template_foto_laki_laki.jpg')
+                        : asset('images/teplate_foto_perpempuan.jpg');
 
                     if ($row->foto) {
                         $foto = '<div class="avatar-container">'
                             . '<img src="' . asset('storage/anggota/' . $row->foto) . '" alt="Foto" class="avatar-img"'
-                            . ' onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">'
-                            . '<div class="avatar-initial" style="display:none;background:linear-gradient(135deg,' . $gradient . ');">' . $initial . '</div>'
+                            . ' onerror="this.src=\'' . $defaultFoto . '\';this.onerror=null;">'
                             . '</div>';
                     } else {
                         $foto = '<div class="avatar-container">'
-                            . '<div class="avatar-initial" style="background:linear-gradient(135deg,' . $gradient . ');">' . $initial . '</div>'
+                            . '<img src="' . $defaultFoto . '" alt="Foto Default" class="avatar-img">'
                             . '</div>';
                     }
 
@@ -404,8 +403,12 @@ class AnggotaController extends Controller
 
     public function bulkPrintKartu(Request $request)
     {
-        $ids = explode(',', $request->ids);
-        $anggotaList = Anggota::whereIn('id', $ids)->get();
+        $anggotaList = collect();
+        
+        if ($request->filled('ids')) {
+            $ids = explode(',', $request->ids);
+            $anggotaList = Anggota::whereIn('id', $ids)->get();
+        }
         
         return view('admin.anggota.bulk-print-kartu', compact('anggotaList'));
     }

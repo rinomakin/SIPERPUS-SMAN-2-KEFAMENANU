@@ -239,12 +239,12 @@
                     </a>
                     @endif
 
-                    @if(Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
-                    <button onclick="printAllKartu()" class="toolbar-btn bg-white border border-purple-200 text-purple-700 hover:bg-purple-50">
+                    <!-- @if(Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
+                    <a href="{{ route('anggota.bulk-print-kartu') }}" class="toolbar-btn bg-white border border-purple-200 text-purple-700 hover:bg-purple-50">
                         <i class="fas fa-print text-[10px]"></i>
                         <span class="btn-text text-[10px]">Cetak Kartu</span>
-                    </button>
-                    @endif
+                    </a>
+                    @endif -->
 
                     @if(Auth::user()->hasPermission('anggota.export') || Auth::user()->isAdmin())
                     <a href="{{ route('anggota.export', request()->query()) }}" class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">
@@ -326,14 +326,15 @@
     @endif
 
     <!-- Table Card -->
-    <div class="glass-card rounded-2xl shadow-sm border border-gray-100 overflow-hidden w-full">
+    <div class="glass-card rounded-2xl shadow-sm border border-gray-100 overflow-hidden w-full ">
         <div class="overflow-x-auto w-full">
             <table id="anggota-table" class="w-full" style="min-width: 850px;">
                 <thead>
                     <tr>
                         @if(Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())
                         <th class="px-2 py-2 text-left w-6">
-
+                            <input type="checkbox" id="selectAll" class="member-checkbox-select-all">
+                        </th>
                         <th class="px-2 py-2 text-left text-[9px]">No</th>
                         <th class="px-2 py-2 text-left text-[9px]">Anggota</th>
                         <th class="px-2 py-2 text-left text-[9px]">Gender</th>
@@ -619,39 +620,15 @@ $(document).ready(function() {
     // Select all
     $('#selectAll').on('change', function() {
         const isChecked = $(this).is(':checked');
+        if (!isChecked) selectedIds = [];
         $('.member-checkbox').each(function() {
-            $(this).prop('checked', isChecked);
-            const row = $(this).closest('tr');
-            if (isChecked) {
-                row.addClass('selected-row');
-                if (!selectedIds.includes($(this).val())) {
-                    selectedIds.push($(this).val());
-                }
-            } else {
-                row.removeClass('selected-row');
-                selectedIds = [];
-            }
+            $(this).prop('checked', isChecked).trigger('change');
         });
-        updateSelectedCount();
     });
 });
 
 function attachCheckboxListeners() {
-    $('.member-checkbox').off('change').on('change', function() {
-        const id = $(this).val();
-        const row = $(this).closest('tr');
-
-        if ($(this).is(':checked')) {
-            row.addClass('selected-row');
-            if (!selectedIds.includes(id)) selectedIds.push(id);
-        } else {
-            row.removeClass('selected-row');
-            selectedIds = selectedIds.filter(item => item !== id);
-        }
-
-        updateSelectedCount();
-        updateSelectAllState();
-    });
+    // Delegated listener — survives DataTables redraws
 }
 
 function updateSelectedCount() {
@@ -683,11 +660,11 @@ function updateSelectAllState() {
 }
 
 function clearSelection() {
-    $('.member-checkbox').prop('checked', false);
-    $('#selectAll').prop('checked', false).prop('indeterminate', false);
-    $('tr').removeClass('selected-row');
     selectedIds = [];
-    updateSelectedCount();
+    $('.member-checkbox').each(function() {
+        $(this).prop('checked', false).trigger('change');
+    });
+    $('#selectAll').prop('checked', false).prop('indeterminate', false);
 }
 
 // Filter modal
@@ -922,5 +899,21 @@ function showLoadingOverlay() {
 function hideLoadingOverlay() {
     document.getElementById('loadingOverlay').classList.add('hidden');
 }
+
+$(document).on('change', '.member-checkbox', function() {
+    const id = $(this).val();
+    const row = $(this).closest('tr');
+
+    if ($(this).is(':checked')) {
+        row.addClass('selected-row');
+        if (!selectedIds.includes(id)) selectedIds.push(id);
+    } else {
+        row.removeClass('selected-row');
+        selectedIds = selectedIds.filter(item => item !== id);
+    }
+
+    updateSelectedCount();
+    updateSelectAllState();
+});
 </script>
 @endsection

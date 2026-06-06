@@ -406,7 +406,7 @@
             <div class="flex flex-col md:flex-row gap-6">
                 {{-- Photo Upload --}}
                 <div class="flex flex-col items-center gap-2">
-                    <div class="photo-upload-area" id="photoArea" onclick="document.getElementById('foto').click()">
+                    <div class="photo-upload-area" id="photoArea" onclick="document.getElementById('foto').click()" data-default-male="{{ asset('images/template_foto_laki_laki.jpg') }}" data-default-female="{{ asset('images/teplate_foto_perpempuan.jpg') }}">
                         <div class="upload-placeholder" id="uploadPlaceholder">
                             <i class="fas fa-camera"></i>
                             <span>Upload Foto</span>
@@ -743,6 +743,18 @@ function selectGender(value, el) {
     document.getElementById('jenis_kelamin').value = value;
     document.querySelectorAll('.gender-option').forEach(opt => opt.classList.remove('active'));
     el.classList.add('active');
+
+    const fotoInput = document.getElementById('foto');
+    if (!fotoInput.files || !fotoInput.files[0]) {
+        const photoArea = document.getElementById('photoArea');
+        const defaultSrc = value === 'Laki-laki' ? photoArea.getAttribute('data-default-male') : photoArea.getAttribute('data-default-female');
+        const preview = document.getElementById('photoPreview');
+        const placeholder = document.getElementById('uploadPlaceholder');
+        preview.src = defaultSrc;
+        preview.style.display = 'block';
+        placeholder.style.display = 'none';
+        document.getElementById('removePhoto').style.display = 'none';
+    }
 }
 
 // Jenis Anggota Selection
@@ -812,9 +824,20 @@ function previewPhoto(input) {
 
 function removePhotoPreview() {
     document.getElementById('foto').value = '';
-    document.getElementById('photoPreview').style.display = 'none';
-    document.getElementById('photoPreview').src = '';
-    document.getElementById('uploadPlaceholder').style.display = 'block';
+    const gender = document.getElementById('jenis_kelamin').value;
+    const preview = document.getElementById('photoPreview');
+    const placeholder = document.getElementById('uploadPlaceholder');
+
+    if (gender) {
+        const photoArea = document.getElementById('photoArea');
+        preview.src = gender === 'Laki-laki' ? photoArea.getAttribute('data-default-male') : photoArea.getAttribute('data-default-female');
+        preview.style.display = 'block';
+        placeholder.style.display = 'none';
+    } else {
+        preview.style.display = 'none';
+        preview.src = '';
+        placeholder.style.display = 'block';
+    }
     document.getElementById('removePhoto').style.display = 'none';
 }
 

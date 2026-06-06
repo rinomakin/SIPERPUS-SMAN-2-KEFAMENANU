@@ -232,6 +232,7 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS'])->prefix('admin'
     
     // CRUD Denda - Custom routes MUST come before resource route
     Route::get('/denda/scan-barcode', [DendaController::class, 'scanBarcodeDenda'])->name('admin.denda.scan-barcode');
+    Route::get('/denda/search-peminjaman', [DendaController::class, 'searchPeminjaman'])->name('admin.denda.search-peminjaman');
     Route::post('/denda/bayar-lunas-anggota', [DendaController::class, 'bayarLunasAnggota'])->name('admin.denda.bayar-lunas-anggota');
     Route::get('/denda/riwayat', [DendaController::class, 'riwayat'])->name('admin.denda.riwayat');
     Route::post('/denda/riwayat/bulk-destroy', [DendaController::class, 'bulkDestroyRiwayat'])->name('admin.denda.riwayat.bulk-destroy');

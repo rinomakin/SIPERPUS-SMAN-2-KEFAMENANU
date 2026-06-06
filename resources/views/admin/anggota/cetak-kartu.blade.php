@@ -69,7 +69,7 @@
                         <img src="{{ asset('storage/anggota/' . $anggota->foto) }}" 
                              alt="Foto" class="w-full h-full object-cover rounded">
                     @else
-                        <i class="fas fa-user text-gray-900 text-lg"></i>
+                        <img src="{{ $anggota->jenis_kelamin == 'Laki-laki' ? asset('images/template_foto_laki_laki.jpg') : asset('images/teplate_foto_perpempuan.jpg') }}" alt="Foto Default" class="w-full h-full object-cover rounded">
                     @endif
                 </div>
                 
