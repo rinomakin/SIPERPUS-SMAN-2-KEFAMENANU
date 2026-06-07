@@ -10,11 +10,20 @@
             font-size: 11px;
             color: #333;
             line-height: 1.4;
+            padding-top: 145px;
         }
-        .page { padding: 15px 25px; }
+        .page { padding: 0 25px 15px; }
 
-        /* Header */
-        .header { border-bottom: 3px double #333; padding-bottom: 12px; margin-bottom: 15px; }
+        /* Fixed header — direct child of body for DomPDF repeat on every page */
+        #page-header {
+            position: fixed;
+            top: 0;
+            left: 25px;
+            right: 25px;
+            background: white;
+            z-index: 1000;
+        }
+        #page-header .header { border-bottom: 3px double #333; padding-bottom: 12px; margin-bottom: 10px; }
         .header table { width: 100%; }
         .header .logo { width: 65px; vertical-align: middle; padding-right: 10px; }
         .header .logo img { width: 60px; height: 60px; object-fit: contain; }
@@ -100,19 +109,19 @@
     </style>
 </head>
 <body>
-    <div class="page">
-        {{-- Header --}}
-        @php
-            $logoSrc = null;
-            if ($pengaturan && $pengaturan->logo) {
-                $logoPath = public_path($pengaturan->logo);
-                if (file_exists($logoPath)) {
-                    $ext  = strtolower(pathinfo($logoPath, PATHINFO_EXTENSION));
-                    $mime = in_array($ext, ['jpg','jpeg']) ? 'image/jpeg' : 'image/png';
-                    $logoSrc = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($logoPath));
-                }
+    {{-- Fixed header — repeats on every page in DomPDF --}}
+    @php
+        $logoSrc = null;
+        if ($pengaturan && $pengaturan->logo) {
+            $logoPath = public_path($pengaturan->logo);
+            if (file_exists($logoPath)) {
+                $ext  = strtolower(pathinfo($logoPath, PATHINFO_EXTENSION));
+                $mime = in_array($ext, ['jpg','jpeg']) ? 'image/jpeg' : 'image/png';
+                $logoSrc = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($logoPath));
             }
-        @endphp
+        }
+    @endphp
+    <div id="page-header">
         <div class="header">
             <table>
                 <tr>
@@ -153,7 +162,9 @@
                 </div>
             @endif
         </div>
+    </div>
 
+    <div class="page">
         {{-- Stats --}}
         @yield('stats')
 

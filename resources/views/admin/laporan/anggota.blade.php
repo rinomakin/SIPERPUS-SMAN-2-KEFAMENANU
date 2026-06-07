@@ -217,7 +217,6 @@
                     <tr class="bg-gradient-to-r from-indigo-50 to-purple-50">
                         <th class="px-3 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wide whitespace-nowrap">No</th>
                         <th class="px-3 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wide whitespace-nowrap">Nama Lengkap</th>
-                        <th class="px-3 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wide whitespace-nowrap">NIS / NIK</th>
                         <th class="px-3 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wide whitespace-nowrap">No. Anggota</th>
                         <th class="px-3 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wide whitespace-nowrap">L/P</th>
                         <th class="px-3 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wide whitespace-nowrap">Kelas / Jurusan</th>
@@ -240,7 +239,6 @@
                                 <span class="font-medium text-gray-900">{{ $item->nama_lengkap }}</span>
                             </div>
                         </td>
-                        <td class="px-3 py-3 font-mono text-gray-600 text-xs">{{ $item->nis ?: $item->nomor_anggota }}</td>
                         <td class="px-3 py-3 font-mono text-gray-600 text-xs">{{ $item->nomor_anggota }}</td>
                         <td class="px-3 py-3 text-center">
                             <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold

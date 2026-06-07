@@ -43,8 +43,57 @@
         font-size: 0.875rem;
         color: #6b7280;
     }
-    #buku-table_wrapper .dataTables_filter {
-        display: none;
+    #buku-table_wrapper .dataTables_toolbar {
+        padding: 10px 16px;
+        border-bottom: 1px solid #e5e7eb;
+        background: #fafbfc;
+    }
+    #buku-table_wrapper .dataTables_toolbar_right {
+        margin-left: auto;
+    }
+    #buku-table_wrapper .dataTables_filter label {
+        position: relative;
+        margin-bottom: 0;
+    }
+    #buku-table_wrapper .dataTables_filter label::before {
+        content: '\f002';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        font-size: 0.7rem;
+        z-index: 1;
+        pointer-events: none;
+    }
+    #buku-table_wrapper .dataTables_filter input {
+        width: 16rem;
+        padding: 6px 12px 6px 32px;
+        font-size: 0.7rem;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        outline: none;
+        transition: all 0.2s;
+    }
+    #buku-table_wrapper .dataTables_filter input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        background: white;
+    }
+    #buku-table_wrapper .dataTables_length {
+        display: flex;
+        align-items: center;
+    }
+    #buku-table_wrapper .dataTables_length label {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.7rem;
+        color: #6b7280;
+        margin-bottom: 0;
     }
     #buku-table_wrapper .dataTables_length select {
         padding: 6px 32px 6px 12px;
@@ -209,81 +258,44 @@
 
     /* Mobile responsive */
     @media (max-width: 768px) {
-        .toolbar-btn span.btn-text {
-            display: none;
-        }
         .toolbar-btn {
-            padding: 8px 10px;
+            padding: 4px 5px;
+            font-size: 0.45rem;
         }
-        #searchInput {
-            width: 100% !important;
+        .toolbar-btn i,
+        .toolbar-btn span.btn-text {
+            font-size: inherit;
+        }
+        #buku-table_wrapper .dataTables_toolbar {
+            flex-wrap: nowrap;
+            gap: 3px;
+            padding: 6px 8px;
+        }
+        #buku-table_wrapper .dataTables_toolbar_left,
+        #buku-table_wrapper .dataTables_toolbar_right {
+            gap: 3px;
+        }
+        #buku-table_wrapper .dataTables_filter input {
+            width: 90px;
+            padding: 4px 6px 4px 22px;
+            font-size: 0.6rem;
+        }
+        #buku-table_wrapper .dataTables_filter label::before {
+            left: 8px;
+            font-size: 0.6rem;
+        }
+        #buku-table_wrapper .dataTables_length label {
+            font-size: 0.6rem;
+            gap: 2px;
+        }
+        #buku-table_wrapper .dataTables_length select {
+            padding: 3px 18px 3px 5px;
+            font-size: 0.6rem;
         }
     }
 </style>
 
 <div class="space-y-5">
-    <!-- Header Toolbar -->
-    <div class="glass-card rounded-2xl shadow-sm border border-gray-100 p-4">
-        <div class="flex flex-col gap-3">
-            <!-- Top row: Actions & Search -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <!-- Left: Action buttons -->
-                <div class="flex items-center flex-wrap gap-2">
-                    @if(Auth::user()->hasPermission('buku.create') || Auth::user()->isAdmin())
-                    <a href="{{ route('buku.create') }}" class="toolbar-btn bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md">
-                        <i class="fas fa-plus"></i>
-                        <span class="btn-text">Tambah Buku</span>
-                    </a>
-                    @endif
-
-                    <!-- @if(Auth::user()->hasPermission('buku.export') || Auth::user()->isAdmin())
-                    <a href="{{ route('buku.export', request()->query()) }}" class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">
-                        <i class="fas fa-file-excel text-emerald-500"></i>
-                        <span class="btn-text">Export</span>
-                    </a>
-                    @endif -->
-
-                    @if(Auth::user()->hasPermission('buku.import') || Auth::user()->isAdmin())
-                    <a href="{{ route('buku.download-template') }}" class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">
-                        <i class="fas fa-download text-blue-500"></i>
-                        <span class="btn-text">Template</span>
-                    </a>
-                    <button onclick="showImportModal()" class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">
-                        <i class="fas fa-upload text-amber-500"></i>
-                        <span class="btn-text">Import</span>
-                    </button>
-                    @endif
-                </div>
-
-                <!-- Right: Search & Filter -->
-                <div class="flex items-center gap-2">
-                    <div class="relative flex-1 sm:flex-none">
-                        <input type="text" id="searchInput" placeholder="Cari judul, ISBN, penulis..."
-                               class="w-full sm:w-72 px-4 py-2.5 pl-10 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all duration-200">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                            <i class="fas fa-search text-gray-400 text-sm"></i>
-                        </div>
-                    </div>
-                    <button onclick="openFilterModal()" id="filterBtn"
-                            class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 relative">
-                        <i class="fas fa-sliders-h"></i>
-                        <span class="btn-text">Filter</span>
-                        <span id="filterBadge" class="hidden absolute -top-1.5 -right-1.5 w-5 h-5 bg-blue-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Active filters row -->
-            <div id="activeFilters" class="hidden flex items-center flex-wrap gap-2">
-                <span class="text-xs text-gray-500 font-medium">Filter aktif:</span>
-                <div id="filterChips" class="flex flex-wrap gap-1.5"></div>
-                <button onclick="resetFilters()" class="text-xs text-red-500 hover:text-red-700 font-medium ml-1">
-                    <i class="fas fa-times-circle mr-1"></i>Hapus semua
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Bulk Action Bar -->
     @if(Auth::user()->hasPermission('buku.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('buku.print-barcode') || Auth::user()->isAdmin())
     <div id="bulkActionBar" class="bulk-bar">
@@ -316,8 +328,8 @@
     @endif
 
     <!-- Table Card -->
-    <div class="glass-card rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="overflow-x-auto">
+    <div class="glass-card rounded-2xl shadow-sm border border-gray-100 w-full">
+        <div class="w-full">
             <table id="buku-table" class="w-full" style="min-width: 900px;">
                 <thead>
                     <tr>
@@ -368,7 +380,7 @@
                 </div>
             </div>
 
-            <form id="filterForm" class="p-6">
+            <form id="filterForm" class="p-6" data-spa-ignore>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Kategori</label>
@@ -549,6 +561,8 @@ $(document).ready(function() {
     bukuTable = $('#buku-table').DataTable({
         processing: true,
         serverSide: true,
+        dom: '<"dataTables_toolbar flex items-center gap-2 flex-wrap"<"dataTables_toolbar_left flex items-center"l><"dataTables_toolbar_right flex items-center gap-2"f>>rt<"flex items-center justify-between"ip>',
+        searchDelay: 400,
         ajax: {
             url: '/admin/buku',
             data: function(d) {
@@ -561,12 +575,13 @@ $(document).ready(function() {
         columns: columns,
         language: {
             processing: '<div class="flex items-center justify-center py-6"><div class="w-8 h-8 rounded-full border-3 border-blue-200 border-t-blue-600 animate-spin"></div><span class="ml-3 text-sm text-gray-600">Memuat data...</span></div>',
-            lengthMenu: "Tampilkan _MENU_ data",
+            lengthMenu: "_MENU_",
             zeroRecords: '<div class="text-center py-12"><div class="mx-auto w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mb-4"><i class="fas fa-book text-2xl text-gray-400"></i></div><h3 class="text-base font-semibold text-gray-800 mb-1">Tidak ada buku ditemukan</h3><p class="text-sm text-gray-500">Coba ubah kata kunci atau filter pencarian</p></div>',
             info: "Menampilkan _START_-_END_ dari _TOTAL_ buku",
             infoEmpty: "Tidak ada data",
             infoFiltered: "(dari _MAX_ total)",
-            search: "Cari:",
+            search: "",
+            searchPlaceholder: "Cari judul, ISBN, penulis...",
             paginate: {
                 first: '<i class="fas fa-angle-double-left"></i>',
                 last: '<i class="fas fa-angle-double-right"></i>',
@@ -580,17 +595,21 @@ $(document).ready(function() {
         drawCallback: function() {
             attachCheckboxListeners();
             updateSelectedCount();
-        }
-    });
+        },
+        initComplete: function() {
+            var right = $('.dataTables_toolbar_right');
 
-    // Custom search with debounce
-    let searchTimeout;
-    $('#searchInput').on('input', function() {
-        clearTimeout(searchTimeout);
-        const val = this.value;
-        searchTimeout = setTimeout(() => {
-            bukuTable.search(val).draw();
-        }, 400);
+            right.append('<button onclick="openFilterModal()" id="filterBtn" class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 relative"><i class="fas fa-sliders-h"></i><span class="btn-text">Filter</span><span id="filterBadge" class="hidden absolute -top-1.5 -right-1.5 w-5 h-5 bg-blue-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span></button>');
+
+            @if(Auth::user()->hasPermission('buku.import') || Auth::user()->isAdmin())
+            right.append('<a href="{{ route('buku.download-template') }}" class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"><i class="fas fa-download text-blue-500"></i><span class="btn-text">Template</span></a>');
+            right.append('<button onclick="showImportModal()" class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"><i class="fas fa-upload text-amber-500"></i><span class="btn-text">Import</span></button>');
+            @endif
+
+            @if(Auth::user()->hasPermission('buku.create') || Auth::user()->isAdmin())
+            right.append('<a href="{{ route('buku.create') }}" class="toolbar-btn bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"><i class="fas fa-plus"></i><span class="btn-text">Tambah Buku</span></a>');
+            @endif
+        }
     });
 
     // Select all
@@ -697,10 +716,8 @@ function resetFilters() {
 }
 
 function updateFilterChips() {
-    const chipsContainer = document.getElementById('filterChips');
-    const activeFilters = document.getElementById('activeFilters');
     const filterBadge = document.getElementById('filterBadge');
-    chipsContainer.innerHTML = '';
+    if (!filterBadge) return;
     let count = 0;
 
     const selectFilters = [
@@ -711,32 +728,16 @@ function updateFilterChips() {
 
     selectFilters.forEach(f => {
         const el = document.getElementById(f.id);
-        if (el && el.value) {
-            count++;
-            const text = el.options[el.selectedIndex].text;
-            const chip = document.createElement('span');
-            chip.className = 'filter-chip';
-            chip.innerHTML = `${f.label}: ${text} <span class="remove" onclick="removeFilter('${f.id}')">&times;</span>`;
-            chipsContainer.appendChild(chip);
-        }
+        if (el && el.value) count++;
     });
 
-    // Tahun terbit (input field)
     const tahunEl = document.getElementById('filter_tahun_terbit');
-    if (tahunEl && tahunEl.value) {
-        count++;
-        const chip = document.createElement('span');
-        chip.className = 'filter-chip';
-        chip.innerHTML = `Tahun: ${tahunEl.value} <span class="remove" onclick="removeFilter('filter_tahun_terbit')">&times;</span>`;
-        chipsContainer.appendChild(chip);
-    }
+    if (tahunEl && tahunEl.value) count++;
 
     if (count > 0) {
-        activeFilters.classList.remove('hidden');
         filterBadge.classList.remove('hidden');
         filterBadge.textContent = count;
     } else {
-        activeFilters.classList.add('hidden');
         filterBadge.classList.add('hidden');
     }
 }
