@@ -1,17 +1,9 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="light">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $pengaturan->nama_website ?? 'SIPERPUS' }} - Login</title>
-
-    <!-- Anti-FOUC: apply saved theme before render -->
-    <script>
-        (function(){
-            var t = localStorage.getItem('theme');
-            if (t === 'dark') document.documentElement.setAttribute('data-theme','dark');
-        })();
-    </script>
 
     @if($pengaturan && $pengaturan->favicon)
         <link rel="icon" type="image/x-icon" href="{{ asset($pengaturan->favicon) }}">
@@ -21,80 +13,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* ── Base ── */
-        html[data-theme="dark"] body {
-            background-color: #0f172a;
-            color: #e2e8f0;
-        }
-
-        /* ── Card ── */
-        html[data-theme="dark"] .login-card {
-            background-color: #1e293b;
-            border-color: #334155;
-        }
-
-        /* ── Inputs ── */
-        html[data-theme="dark"] .login-input {
-            background-color: #0f172a;
-            border-color: #334155;
-            color: #f1f5f9;
-        }
-        html[data-theme="dark"] .login-input::placeholder {
-            color: #475569;
-        }
-        html[data-theme="dark"] .login-input:focus {
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
-            outline: none;
-        }
-
-        /* ── Labels & text ── */
-        html[data-theme="dark"] .login-label  { color: #94a3b8; }
-        html[data-theme="dark"] .login-title  { color: #f1f5f9; }
-        html[data-theme="dark"] .login-footer { color: #475569; }
-        html[data-theme="dark"] .login-divider { border-color: #334155; }
-
-        /* ── Toggle button ── */
-        .theme-toggle-btn {
-            position: fixed; top: 1rem; right: 1rem;
-            width: 2.25rem; height: 2.25rem;
-            border-radius: 0.625rem;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; border: 1px solid;
-            transition: all 0.2s ease;
-        }
-        html:not([data-theme="dark"]) .theme-toggle-btn {
-            background: #fff;
-            border-color: #e2e8f0;
-            color: #475569;
-        }
-        html:not([data-theme="dark"]) .theme-toggle-btn:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
-        }
-        html[data-theme="dark"] .theme-toggle-btn {
-            background: #1e293b;
-            border-color: #334155;
-            color: #94a3b8;
-        }
-        html[data-theme="dark"] .theme-toggle-btn:hover {
-            background: #334155;
-            border-color: #475569;
-            color: #cbd5e1;
-        }
-        .icon-moon { display: block; }
-        .icon-sun  { display: none; }
-        html[data-theme="dark"] .icon-moon { display: none; }
-        html[data-theme="dark"] .icon-sun  { display: block; }
+        .login-card { transition: colors 0.2s; }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center transition-colors duration-200">
-
-    <!-- Dark Mode Toggle -->
-    <button id="loginThemeToggle" class="theme-toggle-btn" title="Toggle Dark Mode">
-        <i class="fas fa-moon icon-moon text-sm"></i>
-        <i class="fas fa-sun icon-sun text-sm"></i>
-    </button>
 
     <div class="login-card bg-white rounded-2xl shadow-xl border border-gray-100 p-8 w-full max-w-md mx-4 transition-colors duration-200">
 
@@ -138,8 +60,8 @@
                     <i class="fas fa-envelope mr-1.5 text-indigo-400 text-xs"></i>Email
                 </label>
                 <input type="email" id="email" name="email" value="{{ old('email') }}"
-                       class="login-input w-full px-4 py-3 border border-gray-300 rounded-xl text-sm
-                              focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all"
+                       class="login-input outline-none w-full px-4 py-3 border border-gray-300 rounded-xl text-sm
+                              focus:ring-2 focus:ring-indigo-400  transition-all"
                        placeholder="Masukkan email Anda" required autofocus>
             </div>
 
@@ -149,8 +71,8 @@
                 </label>
                 <div class="relative">
                     <input type="password" id="password" name="password"
-                           class="login-input w-full px-4 py-3 pr-11 border border-gray-300 rounded-xl text-sm
-                                  focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all"
+                           class="login-input outline-none w-full px-4 py-3 pr-11 border border-gray-300 rounded-xl text-sm
+                                  focus:ring-2 focus:ring-indigo-400  transition-all"
                            placeholder="Masukkan password Anda" required>
                     <button type="button" id="togglePassword"
                             class="absolute inset-y-0 right-0 px-3.5 flex items-center text-gray-400 hover:text-gray-600 transition-colors">
@@ -188,16 +110,6 @@
 
     <script>
     (function () {
-        var btn  = document.getElementById('loginThemeToggle');
-        var html = document.documentElement;
-
-        btn.addEventListener('click', function () {
-            var current = html.getAttribute('data-theme') || 'light';
-            var next    = current === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
-        });
-
         // Password toggle
         var pwBtn  = document.getElementById('togglePassword');
         var pwInput = document.getElementById('password');

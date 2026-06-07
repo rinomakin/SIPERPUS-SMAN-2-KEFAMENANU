@@ -18,6 +18,10 @@
     .animate-slide-up { animation: slideUp 0.3s ease-out forwards; }
     @media (max-width: 767px) {
         .modal-mobile { animation: slideUp 0.3s ease-out forwards; border-radius: 1rem 1rem 0 0; }
+        .stats-cards { display: none !important; }
+        .header-right { flex-direction: row !important; align-items: center !important; }
+        .header-right .search-wrap { min-width: 0 !important; flex: 1 1 auto !important; }
+        .header-right .btn-group { flex-wrap: nowrap !important; }
     }
     .visitor-card { transition: all 0.2s ease; }
     .visitor-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
@@ -35,9 +39,9 @@
                 </p>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2 header-right">
                 {{-- Search --}}
-                <div class="relative flex-1 min-w-[140px] max-w-full md:max-w-[200px]">
+                <div class="relative flex-1 min-w-[140px] max-w-full md:max-w-[200px] search-wrap">
                     <input type="text" id="searchInput" placeholder="Cari tamu..." value="{{ request('search') }}"
                            class="w-full px-4 py-2.5 pl-10 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-white/70 transition-all">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -45,7 +49,7 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 flex-wrap">
+                <div class="flex items-center gap-2 flex-wrap btn-group">
                     {{-- Filter Button --}}
                     <button type="button" onclick="openFilterModal()"
                             class="px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white/70 hover:bg-violet-50 hover:border-violet-300 transition-all flex items-center gap-2 @if(request()->hasAny(['status','tipe_tamu'])) text-violet-700 border-violet-300 bg-violet-50 @else text-gray-600 @endif">
@@ -75,7 +79,7 @@
     </div>
 
     {{-- Stats Cards --}}
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 stats-cards">
         <div class="glass-card rounded-2xl p-3 md:p-4 animate-fade" style="animation-delay:0.05s">
             <div class="flex items-center gap-2 md:gap-3">
                 <div class="w-8 h-8 md:w-10 md:h-10 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">

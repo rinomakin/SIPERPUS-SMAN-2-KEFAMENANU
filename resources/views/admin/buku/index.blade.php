@@ -293,6 +293,41 @@
             font-size: 0.6rem;
         }
     }
+    /* Very small screens — icons only, tighter spacing */
+    @media (max-width: 380px) {
+        .toolbar-btn {
+            padding: 3px 4px;
+            font-size: 0.4rem;
+        }
+        .toolbar-btn span.btn-text {
+            display: none;
+        }
+        #buku-table_wrapper .dataTables_toolbar {
+            gap: 2px;
+            padding: 4px 6px;
+        }
+        #buku-table_wrapper .dataTables_toolbar_left,
+        #buku-table_wrapper .dataTables_toolbar_right {
+            gap: 2px;
+        }
+        #buku-table_wrapper .dataTables_filter input {
+            width: 60px;
+            font-size: 0.5rem;
+            padding: 3px 4px 3px 18px;
+        }
+        #buku-table_wrapper .dataTables_filter label::before {
+            left: 6px;
+            font-size: 0.5rem;
+        }
+        #buku-table_wrapper .dataTables_length select {
+            font-size: 0.5rem;
+            padding: 2px 14px 2px 4px;
+        }
+        #buku-table_wrapper .dataTables_length label {
+            font-size: 0.5rem;
+            gap: 1px;
+        }
+    }
 </style>
 
 <div class="space-y-5">
@@ -561,6 +596,7 @@ $(document).ready(function() {
     bukuTable = $('#buku-table').DataTable({
         processing: true,
         serverSide: true,
+        autoWidth: false,
         dom: '<"dataTables_toolbar flex items-center gap-2 flex-wrap"<"dataTables_toolbar_left flex items-center"l><"dataTables_toolbar_right flex items-center gap-2"f>>rt<"flex items-center justify-between"ip>',
         searchDelay: 400,
         ajax: {
@@ -609,6 +645,9 @@ $(document).ready(function() {
             @if(Auth::user()->hasPermission('buku.create') || Auth::user()->isAdmin())
             right.append('<a href="{{ route('buku.create') }}" class="toolbar-btn bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"><i class="fas fa-plus"></i><span class="btn-text">Tambah Buku</span></a>');
             @endif
+
+            /* Wrap table in scrollable div so toolbar stays fixed */
+            $('#buku-table').wrap('<div class="buku-table-scroll" style="overflow-x:auto;-webkit-overflow-scrolling:touch;"></div>');
         }
     });
 

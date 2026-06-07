@@ -3,12 +3,28 @@
 @section('title', 'Profil')
 
 @section('content')
-<div class="container mx-auto px-4 py-6">
-    <!-- Single Modern Card -->
+<style>
+    @media (max-width: 768px) {
+        .profile-wrap  { padding: 0 !important; }
+        .profile-card  { border-radius: 0 !important; box-shadow: none !important; border-left: none !important; border-right: none !important; }
+        .profile-card  .profile-header { padding: 16px !important; }
+        .profile-card  .profile-body  { padding: 12px !important; }
+        .profile-card  .profile-body input,
+        .profile-card  .profile-body textarea,
+        .profile-card  .profile-body select { font-size: 0.75rem !important; padding: 8px 10px !important; }
+        .profile-card  .profile-body label { font-size: 0.7rem !important; }
+        .profile-card  .profile-body .text-sm { font-size: 0.65rem !important; }
+        .profile-card  .profile-body .text-xs  { font-size: 0.6rem !important; }
+        .profile-card  .profile-body h3 { font-size: 0.8rem !important; }
+        .profile-card  .profile-body button:not(.tab-btn) { font-size: 0.65rem !important; padding: 6px 10px !important; }
+        .profile-card  .tab-btn { font-size: 0.65rem !important; padding: 8px 10px !important; }
+        .profile-card  .tab-btn i { font-size: 0.6rem !important; margin-right: 4px !important; }
+    }
+</style>
+<div class="container mx-auto px-4 py-6 profile-wrap">
     <div class="max-w-4xl mx-auto">
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-            <!-- Header dengan Gradient -->
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-6">
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden profile-card">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-6 profile-header">
                 <div class="flex items-center">
                     <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 overflow-hidden">
                         @if($user->foto && file_exists(public_path('storage/' . $user->foto)))
@@ -36,11 +52,10 @@
             </div>
 
             <!-- Content -->
-            <div class="p-8">
-                <!-- Tabs Navigation -->
+            <div class="p-8 profile-body">
                 <div class="flex border-b border-gray-200 mb-8">
                     <button onclick="switchTab('profile')" id="profile-tab" 
-                            class="flex items-center px-6 py-3 text-sm font-medium border-b-2 border-blue-600 text-blue-600 focus:outline-none">
+                            class="tab-btn flex items-center px-6 py-3 text-sm font-medium border-b-2 border-blue-600 text-blue-600 focus:outline-none">
                         <i class="fas fa-user mr-2"></i>
                         Informasi Profil
                     </button>
@@ -260,7 +275,7 @@
 
                 <!-- Security Tab Content -->
                 <div id="security-content" class="hidden">
-                    <form action="{{ route('kepsek.profil.ganti-password') }}" method="POST" class="space-y-6">
+                    <form action="{{ route('kepsek.profil.ganti-password') }}" method="POST" class="space-y-6" data-spa-ignore onsubmit="return confirmPasswordChange(event)">
                         @csrf
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -380,13 +395,28 @@
 </div>
 
 <!-- JavaScript untuk tabs dan password toggle -->
+@if(session('success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        switchTab('security');
+        Swal.fire({ icon:'success', title:'Berhasil', text:'{{ session('success') }}', timer:2500, showConfirmButton:false });
+    });
+</script>
+@endif
+@if(session('error'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        switchTab('security');
+        Swal.fire({ icon:'error', title:'Gagal', text:'{{ session('error') }}', timer:2500, showConfirmButton:false });
+    });
+</script>
+@endif
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize tabs
     switchTab('profile');
 });
 
-// Function untuk switch tabs
 function switchTab(tabName) {
     // Hide all content
     document.getElementById('profile-content').classList.add('hidden');
@@ -424,6 +454,25 @@ function togglePassword(fieldId) {
         icon.classList.remove('fa-eye-slash');
         icon.classList.add('fa-eye');
     }
+}
+
+// Konfirmasi ganti password
+function confirmPasswordChange(e) {
+    e.preventDefault();
+    const form = e.target;
+    Swal.fire({
+        title: 'Konfirmasi Ubah Password',
+        text: 'Apakah Anda yakin ingin mengubah password?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#059669',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: 'Ya, ubah password!',
+        cancelButtonText: 'Batal'
+    }).then(result => {
+        if (result.isConfirmed) form.submit();
+    });
+    return false;
 }
 
 // Add smooth transitions
