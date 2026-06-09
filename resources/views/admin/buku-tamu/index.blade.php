@@ -17,7 +17,6 @@
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     .animate-slide-up { animation: slideUp 0.3s ease-out forwards; }
     @media (max-width: 767px) {
-        .modal-mobile { animation: slideUp 0.3s ease-out forwards; border-radius: 1rem 1rem 0 0; }
         .stats-cards { display: none !important; }
         .header-right { flex-direction: row !important; align-items: center !important; }
         .header-right .search-wrap { min-width: 0 !important; flex: 1 1 auto !important; }
@@ -43,7 +42,7 @@
                 {{-- Search --}}
                 <div class="relative flex-1 min-w-[140px] max-w-full md:max-w-[200px] search-wrap">
                     <input type="text" id="searchInput" placeholder="Cari tamu..." value="{{ request('search') }}"
-                           class="w-full px-4 py-2.5 pl-10 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-white/70 transition-all">
+                           class="w-full px-4 py-2.5 pl-10 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/70 transition-all">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400 text-sm"></i>
                     </div>
@@ -52,25 +51,25 @@
                 <div class="flex items-center gap-2 flex-wrap btn-group">
                     {{-- Filter Button --}}
                     <button type="button" onclick="openFilterModal()"
-                            class="px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white/70 hover:bg-violet-50 hover:border-violet-300 transition-all flex items-center gap-2 @if(request()->hasAny(['status','tipe_tamu'])) text-violet-700 border-violet-300 bg-violet-50 @else text-gray-600 @endif">
+                            class="px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white/70 hover:bg-blue-50 hover:border-blue-300 transition-all flex items-center gap-2 @if(request()->hasAny(['status','tipe_tamu'])) text-blue-700 border-blue-300 bg-blue-50 @else text-gray-600 @endif">
                         <i class="fas fa-filter text-xs"></i>
                         <span class="hidden sm:inline">Filter</span>
                         @if(request()->hasAny(['status','tipe_tamu']))
-                            <span class="w-2 h-2 rounded-full bg-violet-500"></span>
+                            <span class="w-2 h-2 rounded-full bg-blue-600"></span>
                         @endif
                     </button>
 
                     {{-- Tambah --}}
                     @if(Auth::user()->hasPermission('buku-tamu.create'))
                     <a href="{{ route('admin.buku-tamu.create') }}"
-                       class="px-4 py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 text-white text-sm font-medium rounded-xl shadow-md hover:shadow-lg transition-all whitespace-nowrap">
+                       class="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-medium rounded-xl shadow-md hover:shadow-lg transition-all whitespace-nowrap">
                         <i class="fas fa-plus mr-1.5"></i> Tambah
                     </a>
                     @endif
 
                     {{-- Riwayat --}}
                     <a href="{{ route('admin.buku-tamu.history') }}"
-                       class="px-4 py-2.5 bg-white border border-gray-200 hover:border-violet-300 hover:bg-violet-50 text-gray-700 text-sm font-medium rounded-xl transition-all whitespace-nowrap">
+                       class="px-4 py-2.5 bg-white border border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-700 text-sm font-medium rounded-xl transition-all whitespace-nowrap">
                         <i class="fas fa-history mr-1.5"></i> Riwayat
                     </a>
                 </div>
@@ -82,8 +81,8 @@
     <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 stats-cards">
         <div class="glass-card rounded-2xl p-3 md:p-4 animate-fade" style="animation-delay:0.05s">
             <div class="flex items-center gap-2 md:gap-3">
-                <div class="w-8 h-8 md:w-10 md:h-10 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-users text-violet-600 text-sm md:text-base"></i>
+                <div class="w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-users text-blue-600 text-sm md:text-base"></i>
                 </div>
                 <div class="min-w-0">
                     <p class="text-[10px] md:text-xs text-gray-500 truncate">Total Hari Ini</p>
@@ -126,8 +125,8 @@
         </div>
         <div class="glass-card rounded-2xl p-3 md:p-4 animate-fade col-span-2 md:col-span-1" style="animation-delay:0.25s">
             <div class="flex items-center gap-2 md:gap-3">
-                <div class="w-8 h-8 md:w-10 md:h-10 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-user-friends text-purple-600 text-sm md:text-base"></i>
+                <div class="w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-user-friends text-blue-600 text-sm md:text-base"></i>
                 </div>
                 <div class="min-w-0">
                     <p class="text-[10px] md:text-xs text-gray-500 truncate">Tamu Umum</p>
@@ -141,12 +140,12 @@
     <div class="glass-card rounded-2xl shadow-lg overflow-hidden animate-fade" style="animation-delay:0.15s">
         <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
             <h2 class="text-sm font-semibold text-gray-800 flex items-center gap-2">
-                <i class="fas fa-list text-violet-500"></i>
+                <i class="fas fa-list text-blue-600"></i>
                 Daftar Tamu
-                <span class="px-2 py-0.5 bg-violet-100 text-violet-700 text-xs font-bold rounded-lg">{{ $kunjunganHariIni->count() }}</span>
+                <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-bold rounded-lg">{{ $kunjunganHariIni->count() }}</span>
             </h2>
             @if(request()->hasAny(['search', 'status', 'tipe_tamu']))
-                <a href="/admin/buku-tamu" class="text-xs text-violet-600 hover:text-violet-800 font-medium">
+                <a href="/admin/buku-tamu" class="text-xs text-blue-600 hover:text-blue-800 font-medium">
                     <i class="fas fa-times mr-1"></i> Reset Filter
                 </a>
             @endif
@@ -161,7 +160,7 @@
                 <p class="text-sm text-gray-500 mb-4">Klik tombol "Tambah" untuk mencatat kunjungan baru</p>
                 @if(Auth::user()->hasPermission('buku-tamu.create'))
                 <a href="/admin/buku-tamu/create"
-                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white text-sm font-medium rounded-xl shadow-md hover:shadow-lg transition-all">
+                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-medium rounded-xl shadow-md hover:shadow-lg transition-all">
                     <i class="fas fa-plus mr-1.5"></i> Tambah Tamu
                 </a>
                 @endif
@@ -169,7 +168,7 @@
         @else
             <div class="divide-y divide-gray-100">
                 @foreach($kunjunganHariIni as $kunjungan)
-                <div class="visitor-card px-4 md:px-5 py-3 md:py-4 hover:bg-violet-50/30 transition-colors">
+                <div class="visitor-card px-4 md:px-5 py-3 md:py-4 hover:bg-blue-50/30 transition-colors">
                     {{-- Main Row --}}
                     <div class="flex items-start justify-between gap-3">
                         {{-- Left: Avatar + Info --}}
@@ -187,11 +186,11 @@
                                     <h4 class="text-sm font-semibold text-gray-900 truncate max-w-[140px] md:max-w-none">{{ $kunjungan->nama_tamu ?? ($kunjungan->anggota ? $kunjungan->anggota->nama_lengkap : '-') }}</h4>
                                     @if($kunjungan->anggota_id)
                                         <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10px] md:text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 whitespace-nowrap">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Anggota
+                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span> Anggota
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10px] md:text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200 whitespace-nowrap">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> Umum
+                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10px] md:text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 whitespace-nowrap">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span> Umum
                                         </span>
                                     @endif
                                 </div>
@@ -221,7 +220,7 @@
                                     @endif
                                 </div>
                                 @if($kunjungan->keperluan)
-                                    <p class="text-[11px] md:text-xs text-violet-600 mt-0.5 truncate">
+                                    <p class="text-[11px] md:text-xs text-blue-600 mt-0.5 truncate">
                                         <i class="fas fa-tag mr-1"></i>{{ $kunjungan->keperluan }}
                                     </p>
                                 @endif
@@ -292,9 +291,9 @@
 </div>
 {{-- Filter Modal --}}
 <div id="filterModal" class="fixed inset-0 z-50 hidden" style="background:rgba(15,23,42,0.5);backdrop-filter:blur(4px);">
-    <div class="flex items-end md:items-center justify-center min-h-screen p-0 md:p-4">
-        <div class="bg-white rounded-t-2xl md:rounded-2xl shadow-2xl max-w-sm w-full transform transition-all duration-300 modal-mobile animate-fade md:animate-fade">
-            <div class="bg-gradient-to-r from-violet-500 to-purple-600 px-4 md:px-5 py-3 md:py-4 rounded-t-2xl">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full transform transition-all duration-300 animate-fade">
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-4 md:px-5 py-3 md:py-4 rounded-t-2xl">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
@@ -312,7 +311,7 @@
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1.5">Status Kunjungan</label>
                     <select id="filterStatus"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">Semua Status</option>
                         <option value="berkunjung" {{ request('status') == 'berkunjung' ? 'selected' : '' }}>Sedang Berkunjung</option>
                         <option value="pulang" {{ request('status') == 'pulang' ? 'selected' : '' }}>Sudah Pulang</option>
@@ -322,7 +321,7 @@
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1.5">Tipe Tamu</label>
                     <select id="filterTipe"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">Semua Tipe</option>
                         <option value="anggota" {{ request('tipe_tamu') == 'anggota' ? 'selected' : '' }}>Anggota</option>
                         <option value="umum" {{ request('tipe_tamu') == 'umum' ? 'selected' : '' }}>Tamu Umum</option>
@@ -337,7 +336,7 @@
                     </a>
                 @endif
                 <button type="button" onclick="applyFilter()"
-                        class="px-5 py-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all">
+                        class="px-5 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all">
                     <i class="fas fa-check mr-1"></i> Terapkan
                 </button>
             </div>

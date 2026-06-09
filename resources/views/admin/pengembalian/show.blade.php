@@ -70,11 +70,11 @@
     .status-pill.selesai   { background: rgba(255,255,255,.2); color: white; border: 1px solid rgba(255,255,255,.3); }
     .status-pill.terlambat { background: rgba(239,68,68,.25); color: #fecaca; border: 1px solid rgba(239,68,68,.3); }
     .status-dot { width: 7px; height: 7px; border-radius: 50%; }
-    .status-dot.green { background: #4ade80; animation: pulse-dot 2s infinite; }
+    .status-dot.green { background: #3b82f6; animation: pulse-dot 2s infinite; }
     .status-dot.red   { background: #f87171; animation: pulse-dot 2s infinite; }
 
     /* ── Kondisi badge ─────────────────────────────── */
-    .kondisi-baik    { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+    .kondisi-baik    { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
     .kondisi-rusak   { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
     .kondisi-sedang  { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
     .kondisi-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; }
@@ -135,9 +135,9 @@
     html[data-theme="dark"] .book-table tbody td { border-color: #1e293b !important; }
     html[data-theme="dark"] .book-table tbody tr:hover { background: rgba(99,102,241,0.07) !important; }
     html[data-theme="dark"] .kondisi-baik {
-        background: rgba(16,185,129,0.15) !important;
-        border-color: rgba(16,185,129,0.3) !important;
-        color: #34d399 !important;
+        background: rgba(59,130,246,0.15) !important;
+        border-color: rgba(59,130,246,0.3) !important;
+        color: #93c5fd !important;
     }
     html[data-theme="dark"] .kondisi-rusak {
         background: rgba(239,68,68,0.15) !important;
@@ -181,7 +181,7 @@
     {{-- ─── Breadcrumb + Actions ──────────────────── --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 anim-up d1 no-print">
         <div class="flex items-center gap-2 text-sm text-gray-500">
-            <a href="{{ route('pengembalian.index') }}" class="hover:text-emerald-600 transition-colors font-medium">Pengembalian</a>
+            <a href="{{ route('pengembalian.index') }}" class="hover:text-blue-600 transition-colors font-medium">Pengembalian</a>
             <i class="fas fa-chevron-right text-[10px] text-gray-300"></i>
             <span class="text-gray-800 font-semibold">{{ $pengembalian->nomor_pengembalian }}</span>
         </div>
@@ -196,7 +196,7 @@
             </button>
             @if(Auth::user()->isAdmin() && $pengembalian->total_denda > 0)
             <button onclick="openStatusPembayaranModal()"
-                    class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl text-sm font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all shadow-md">
+                    class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl text-sm font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-md">
                 <i class="fas fa-money-bill-wave text-xs"></i>
                 {{ $pengembalian->status_denda === 'belum_dibayar' ? 'Bayar Denda' : 'Update Denda' }}
             </button>
@@ -209,8 +209,8 @@
         $isLate       = $pengembalian->jumlah_hari_terlambat > 0;
         $dendaPaid    = $pengembalian->status_denda === 'sudah_dibayar';
         $hasDenda     = $pengembalian->total_denda > 0;
-        $gradientFrom = $isLate ? 'from-red-500' : 'from-emerald-500';
-        $gradientTo   = $isLate ? 'to-rose-600'  : 'to-teal-600';
+        $gradientFrom = $isLate ? 'from-red-500' : 'from-blue-600';
+        $gradientTo   = $isLate ? 'to-rose-600'  : 'to-blue-700';
     @endphp
     <div class="rounded-2xl overflow-hidden shadow-lg anim-up d1 bg-gradient-to-r {{ $gradientFrom }} {{ $gradientTo }}">
         <!-- Top row: title + status -->
@@ -239,7 +239,7 @@
                 @if($hasDenda)
                     @if($dendaPaid)
                     <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white/20 text-white border border-white/25">
-                        <i class="fas fa-check-double text-emerald-300"></i> Denda Lunas
+                        <i class="fas fa-check-double text-blue-300"></i> Denda Lunas
                     </span>
                     @else
                     <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-red-400/30 text-red-100 border border-red-300/30">
@@ -280,209 +280,212 @@
         {{-- Left Column (2/3) --}}
         <div class="lg:col-span-2 space-y-5">
 
-            {{-- Informasi Pengembalian --}}
+            {{-- Combined Informasi --}}
             <div class="section-card anim-up d2">
-                <div class="section-header bg-gradient-to-r from-blue-500 to-indigo-600">
-                    <div class="section-header-icon" style="background:rgba(255,255,255,.2);">
-                        <i class="fas fa-undo-alt text-white"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-bold text-white">Informasi Pengembalian</h3>
-                        <p class="text-blue-100 text-xs">Data transaksi pengembalian</p>
-                    </div>
-                </div>
-                <div class="section-body">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
-                        <div class="info-row">
-                            <span class="info-label">Nomor Pengembalian</span>
-                            <span class="info-value">
-                                <span class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg text-[11px] font-bold border border-blue-200">
-                                    <i class="fas fa-hashtag" style="font-size:9px;opacity:.7"></i>{{ $pengembalian->nomor_pengembalian }}
-                                </span>
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Tanggal Pengembalian</span>
-                            <span class="info-value">
-                                <i class="far fa-calendar-alt mr-1.5 text-gray-400"></i>{{ $pengembalian->tanggal_pengembalian->format('d F Y') }}
-                            </span>
-                            <span class="text-xs text-gray-400">
-                                <i class="far fa-clock mr-1"></i>
-                                {{ $pengembalian->jam_pengembalian
-                                    ? (is_string($pengembalian->jam_pengembalian)
-                                        ? substr($pengembalian->jam_pengembalian, 0, 5)
-                                        : $pengembalian->jam_pengembalian->format('H:i'))
-                                    : '-' }} WIB
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Status Keterlambatan</span>
-                            <span class="info-value">
-                                @if($isLate)
-                                    <span class="inline-flex items-center gap-1.5 bg-red-50 text-red-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-red-200">
-                                        <i class="fas fa-clock text-red-500"></i>Terlambat {{ $pengembalian->jumlah_hari_terlambat }} Hari
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-emerald-200">
-                                        <i class="fas fa-check-circle text-emerald-500"></i>Tepat Waktu
-                                    </span>
-                                @endif
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Petugas</span>
-                            <div class="flex items-center gap-2 mt-1">
-                                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-slate-400 to-slate-500 flex items-center justify-center text-white text-[10px] font-bold">
-                                    {{ strtoupper(substr($pengembalian->user->name ?? 'P', 0, 1)) }}
-                                </div>
-                                <span class="info-value">{{ $pengembalian->user->name ?? '-' }}</span>
-                            </div>
-                        </div>
-                        @if($pengembalian->status)
-                        <div class="info-row sm:col-span-2">
-                            <span class="info-label">Status</span>
-                            <span class="info-value capitalize">{{ $pengembalian->status }}</span>
-                        </div>
-                        @endif
-                        @if($pengembalian->catatan)
-                        <div class="info-row sm:col-span-2">
-                            <span class="info-label">Catatan</span>
-                            <p class="text-sm text-gray-700 bg-gray-50 rounded-xl px-4 py-3 mt-1 border border-gray-100">{{ $pengembalian->catatan }}</p>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            {{-- Informasi Anggota --}}
-            <div class="section-card anim-up d3">
-                <div class="section-header bg-gradient-to-r from-emerald-500 to-teal-600">
-                    <div class="section-header-icon" style="background:rgba(255,255,255,.2);">
-                        <i class="fas fa-user text-white"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-bold text-white">Informasi Anggota</h3>
-                        <p class="text-emerald-100 text-xs">Data peminjam buku</p>
-                    </div>
-                </div>
-                <div class="section-body">
-                    <div class="flex items-center gap-4 mb-5 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border border-emerald-100">
-                        @php
-                            $gradients = ['#10b981,#059669','#3b82f6,#2563eb','#8b5cf6,#7c3aed','#f59e0b,#d97706','#ef4444,#dc2626'];
-                            $grad = $gradients[$pengembalian->anggota->id % 5];
-                        @endphp
-                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-md flex-shrink-0"
-                             style="background:linear-gradient(135deg,{{ $grad }});">
-                            {{ strtoupper(substr($pengembalian->anggota->nama_lengkap, 0, 1)) }}
+                {{-- Informasi Pengembalian --}}
+                <div>
+                    <div class="section-header bg-gradient-to-r from-blue-500 to-indigo-600">
+                        <div class="section-header-icon" style="background:rgba(255,255,255,.2);">
+                            <i class="fas fa-undo-alt text-white"></i>
                         </div>
                         <div>
-                            <p class="text-base font-bold text-gray-900">{{ $pengembalian->anggota->nama_lengkap }}</p>
-                            <p class="text-sm text-gray-500">{{ $pengembalian->anggota->nomor_anggota }}</p>
-                            @if($pengembalian->anggota->kelas)
-                            <span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-lg mt-1">
-                                <i class="fas fa-graduation-cap text-[9px]"></i>{{ $pengembalian->anggota->kelas->nama_kelas }}
-                            </span>
+                            <h3 class="text-sm font-bold text-white">Informasi Pengembalian</h3>
+                            <p class="text-blue-100 text-xs">Data transaksi pengembalian</p>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
+                            <div class="info-row">
+                                <span class="info-label">Nomor Pengembalian</span>
+                                <span class="info-value">
+                                    <span class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg text-[11px] font-bold border border-blue-200">
+                                        <i class="fas fa-hashtag" style="font-size:9px;opacity:.7"></i>{{ $pengembalian->nomor_pengembalian }}
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Tanggal Pengembalian</span>
+                                <span class="info-value">
+                                    <i class="far fa-calendar-alt mr-1.5 text-gray-400"></i>{{ $pengembalian->tanggal_pengembalian->format('d F Y') }}
+                                </span>
+                                <span class="text-xs text-gray-400">
+                                    <i class="far fa-clock mr-1"></i>
+                                    {{ $pengembalian->jam_pengembalian
+                                        ? (is_string($pengembalian->jam_pengembalian)
+                                            ? substr($pengembalian->jam_pengembalian, 0, 5)
+                                            : $pengembalian->jam_pengembalian->format('H:i'))
+                                        : '-' }} WIB
+                                </span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Status Keterlambatan</span>
+                                <span class="info-value">
+                                    @if($isLate)
+                                        <span class="inline-flex items-center gap-1.5 bg-red-50 text-red-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-red-200">
+                                            <i class="fas fa-clock text-red-500"></i>Terlambat {{ $pengembalian->jumlah_hari_terlambat }} Hari
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-blue-200">
+                                            <i class="fas fa-check-circle text-blue-500"></i>Tepat Waktu
+                                        </span>
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Petugas</span>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-slate-400 to-slate-500 flex items-center justify-center text-white text-[10px] font-bold">
+                                        {{ strtoupper(substr($pengembalian->user->name ?? 'P', 0, 1)) }}
+                                    </div>
+                                    <span class="info-value">{{ $pengembalian->user->name ?? '-' }}</span>
+                                </div>
+                            </div>
+                            @if($pengembalian->status)
+                            <div class="info-row sm:col-span-2">
+                                <span class="info-label">Status</span>
+                                <span class="info-value capitalize">{{ $pengembalian->status }}</span>
+                            </div>
+                            @endif
+                            @if($pengembalian->catatan)
+                            <div class="info-row sm:col-span-2">
+                                <span class="info-label">Catatan</span>
+                                <p class="text-sm text-gray-700 bg-gray-50 rounded-xl px-4 py-3 mt-1 border border-gray-100">{{ $pengembalian->catatan }}</p>
+                            </div>
                             @endif
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-x-8">
-                        <div class="info-row">
-                            <span class="info-label">Nomor Anggota</span>
-                            <span class="info-value">{{ $pengembalian->anggota->nomor_anggota }}</span>
+                </div>
+                <div class="border-t border-gray-100"></div>
+                {{-- Informasi Anggota --}}
+                <div>
+                    <div class="section-header bg-gradient-to-r from-blue-600 to-blue-700">
+                        <div class="section-header-icon" style="background:rgba(255,255,255,.2);">
+                            <i class="fas fa-user text-white"></i>
                         </div>
-                        <div class="info-row">
-                            <span class="info-label">Kelas</span>
-                            <span class="info-value">{{ $pengembalian->anggota->kelas->nama_kelas ?? 'N/A' }}</span>
+                        <div>
+                            <h3 class="text-sm font-bold text-white">Informasi Anggota</h3>
+                            <p class="text-blue-100 text-xs">Data peminjam buku</p>
                         </div>
-                        <div class="info-row">
-                            <span class="info-label">Jenis Anggota</span>
-                            <span class="info-value capitalize">{{ $pengembalian->anggota->jenis_anggota ?? '-' }}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Status</span>
-                            <span class="info-value">
-                                <span class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-lg {{ $pengembalian->anggota->status === 'aktif' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600' }}">
-                                    {{ ucfirst($pengembalian->anggota->status ?? '-') }}
+                    </div>
+                    <div class="section-body">
+                        <div class="flex items-center gap-4 mb-5 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100">
+                            @php
+                                $gradients = ['#10b981,#059669','#3b82f6,#2563eb','#8b5cf6,#7c3aed','#f59e0b,#d97706','#ef4444,#dc2626'];
+                                $grad = $gradients[$pengembalian->anggota->id % 5];
+                            @endphp
+                            <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-md flex-shrink-0"
+                                 style="background:linear-gradient(135deg,{{ $grad }});">
+                                {{ strtoupper(substr($pengembalian->anggota->nama_lengkap, 0, 1)) }}
+                            </div>
+                            <div>
+                                <p class="text-base font-bold text-gray-900">{{ $pengembalian->anggota->nama_lengkap }}</p>
+                                <p class="text-sm text-gray-500">{{ $pengembalian->anggota->nomor_anggota }}</p>
+                                @if($pengembalian->anggota->kelas)
+                                <span class="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-lg mt-1">
+                                    <i class="fas fa-graduation-cap text-[9px]"></i>{{ $pengembalian->anggota->kelas->nama_kelas }}
                                 </span>
-                            </span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-x-8">
+                            <div class="info-row">
+                                <span class="info-label">Nomor Anggota</span>
+                                <span class="info-value">{{ $pengembalian->anggota->nomor_anggota }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Kelas</span>
+                                <span class="info-value">{{ $pengembalian->anggota->kelas->nama_kelas ?? 'N/A' }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Jenis Anggota</span>
+                                <span class="info-value capitalize">{{ $pengembalian->anggota->jenis_anggota ?? '-' }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Status</span>
+                                <span class="info-value">
+                                    <span class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-lg {{ $pengembalian->anggota->status === 'aktif' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600' }}">
+                                        {{ ucfirst($pengembalian->anggota->status ?? '-') }}
+                                    </span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            {{-- Detail Buku Dikembalikan --}}
-            <div class="section-card anim-up d4">
-                <div class="section-header bg-gradient-to-r from-violet-500 to-purple-600">
-                    <div class="section-header-icon" style="background:rgba(255,255,255,.2);">
-                        <i class="fas fa-book text-white"></i>
+                <div class="border-t border-gray-100"></div>
+                {{-- Detail Buku Dikembalikan --}}
+                <div>
+                    <div class="section-header bg-gradient-to-r from-blue-500 to-indigo-600">
+                        <div class="section-header-icon" style="background:rgba(255,255,255,.2);">
+                            <i class="fas fa-book text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-sm font-bold text-white">Detail Buku Dikembalikan</h3>
+                            <p class="text-blue-100 text-xs">{{ $pengembalian->detailPengembalian->sum('jumlah_dikembalikan') }} buku dikembalikan</p>
+                        </div>
                     </div>
-                    <div class="flex-1">
-                        <h3 class="text-sm font-bold text-white">Detail Buku Dikembalikan</h3>
-                        <p class="text-violet-100 text-xs">{{ $pengembalian->detailPengembalian->sum('jumlah_dikembalikan') }} buku dikembalikan</p>
+                    <div class="overflow-x-auto">
+                        <table class="book-table w-full" style="min-width:520px;">
+                            <thead>
+                                <tr>
+                                    <th class="text-left">Judul Buku</th>
+                                    <th class="text-left">Kategori</th>
+                                    <th class="text-center" style="width:70px;">Jml</th>
+                                    <th class="text-center">Kondisi</th>
+                                    <th class="text-right">Denda</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($pengembalian->detailPengembalian as $i => $detail)
+                                <tr>
+                                    <td>
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 flex items-center justify-center flex-shrink-0">
+                                                <i class="fas fa-book text-blue-500" style="font-size:11px;"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-semibold text-gray-900 leading-tight">{{ $detail->buku->judul_buku }}</p>
+                                                @if($detail->buku->pengarang)
+                                                <p class="text-[11px] text-gray-400 mt-0.5">{{ $detail->buku->pengarang }}</p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="text-xs text-gray-600 font-medium bg-gray-100 px-2.5 py-1 rounded-lg">
+                                            {{ $detail->buku->kategoriBuku->nama_kategori ?? 'N/A' }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold">
+                                            {{ $detail->jumlah_dikembalikan }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        @php
+                                            $kondisiMap = [
+                                                'baik'          => ['kondisi-baik',   'fa-check-circle', 'Baik'],
+                                                'sedikit_rusak' => ['kondisi-sedang', 'fa-minus-circle', 'Sedikit Rusak'],
+                                                'rusak'         => ['kondisi-rusak',  'fa-times-circle', 'Rusak'],
+                                            ];
+                                            $kondisi = $kondisiMap[$detail->kondisi_buku ?? 'baik'] ?? $kondisiMap['baik'];
+                                        @endphp
+                                        <span class="kondisi-badge {{ $kondisi[0] }}">
+                                            <i class="fas {{ $kondisi[1] }}" style="font-size:9px;"></i>
+                                            {{ $kondisi[2] }}
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        @if(isset($detail->denda_buku) && $detail->denda_buku > 0)
+                                            <span class="text-sm font-bold text-red-600">Rp {{ number_format($detail->denda_buku, 0, ',', '.') }}</span>
+                                        @else
+                                            <span class="text-xs text-gray-300 font-medium">—</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="book-table w-full" style="min-width:520px;">
-                        <thead>
-                            <tr>
-                                <th class="text-left">Judul Buku</th>
-                                <th class="text-left">Kategori</th>
-                                <th class="text-center" style="width:70px;">Jml</th>
-                                <th class="text-center">Kondisi</th>
-                                <th class="text-right">Denda</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($pengembalian->detailPengembalian as $i => $detail)
-                            <tr>
-                                <td>
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-100 to-purple-100 border border-violet-200 flex items-center justify-center flex-shrink-0">
-                                            <i class="fas fa-book text-violet-500" style="font-size:11px;"></i>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-semibold text-gray-900 leading-tight">{{ $detail->buku->judul_buku }}</p>
-                                            @if($detail->buku->pengarang)
-                                            <p class="text-[11px] text-gray-400 mt-0.5">{{ $detail->buku->pengarang }}</p>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="text-xs text-gray-600 font-medium bg-gray-100 px-2.5 py-1 rounded-lg">
-                                        {{ $detail->buku->kategoriBuku->nama_kategori ?? 'N/A' }}
-                                    </span>
-                                </td>
-                                <td class="text-center">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-violet-50 border border-violet-200 text-violet-700 text-xs font-bold">
-                                        {{ $detail->jumlah_dikembalikan }}
-                                    </span>
-                                </td>
-                                <td class="text-center">
-                                    @php
-                                        $kondisiMap = [
-                                            'baik'          => ['kondisi-baik',   'fa-check-circle', 'Baik'],
-                                            'sedikit_rusak' => ['kondisi-sedang', 'fa-minus-circle', 'Sedikit Rusak'],
-                                            'rusak'         => ['kondisi-rusak',  'fa-times-circle', 'Rusak'],
-                                        ];
-                                        $kondisi = $kondisiMap[$detail->kondisi_buku ?? 'baik'] ?? $kondisiMap['baik'];
-                                    @endphp
-                                    <span class="kondisi-badge {{ $kondisi[0] }}">
-                                        <i class="fas {{ $kondisi[1] }}" style="font-size:9px;"></i>
-                                        {{ $kondisi[2] }}
-                                    </span>
-                                </td>
-                                <td class="text-right">
-                                    @if(isset($detail->denda_buku) && $detail->denda_buku > 0)
-                                        <span class="text-sm font-bold text-red-600">Rp {{ number_format($detail->denda_buku, 0, ',', '.') }}</span>
-                                    @else
-                                        <span class="text-xs text-gray-300 font-medium">—</span>
-                                    @endif
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
@@ -493,7 +496,7 @@
             {{-- Denda Card --}}
             <div class="section-card anim-up d2">
                 @if($dendaPaid)
-                    <div class="section-header bg-gradient-to-r from-emerald-500 to-teal-600">
+                    <div class="section-header bg-gradient-to-r from-blue-600 to-blue-700">
                 @elseif($hasDenda)
                     <div class="section-header bg-gradient-to-r from-red-500 to-rose-600">
                 @else
@@ -515,24 +518,24 @@
                     <div class="text-center py-5 rounded-2xl
                         {{ $hasDenda
                             ? ($dendaPaid
-                                ? 'bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100'
+                                ? 'bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100'
                                 : 'bg-gradient-to-br from-red-50 to-rose-50 border border-red-100')
                             : 'bg-gradient-to-br from-gray-50 to-slate-50 border border-gray-100' }}">
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Total Denda</p>
-                        <p class="denda-big {{ $hasDenda ? ($dendaPaid ? 'text-emerald-600' : 'text-red-600') : 'text-gray-300' }}">
+                        <p class="denda-big {{ $hasDenda ? ($dendaPaid ? 'text-blue-600' : 'text-red-600') : 'text-gray-300' }}">
                             Rp&nbsp;{{ number_format($pengembalian->total_denda, 0, ',', '.') }}
                         </p>
                     </div>
 
                     <!-- Status Pembayaran -->
                     @if($hasDenda && $dendaPaid)
-                    <div class="payment-card bg-emerald-50 border border-emerald-200">
-                        <div class="payment-icon bg-gradient-to-br from-emerald-500 to-teal-600 shadow-md shadow-emerald-200">
+                    <div class="payment-card bg-blue-50 border border-blue-200">
+                        <div class="payment-icon bg-gradient-to-br from-blue-600 to-blue-700 shadow-md shadow-blue-200">
                             <i class="fas fa-check-double"></i>
                         </div>
                         <div>
-                            <p class="text-sm font-bold text-emerald-700">Lunas</p>
-                            <p class="text-xs text-emerald-500">Denda telah dibayar</p>
+                            <p class="text-sm font-bold text-blue-700">Lunas</p>
+                            <p class="text-xs text-blue-500">Denda telah dibayar</p>
                         </div>
                     </div>
                     @elseif($hasDenda)
@@ -589,7 +592,7 @@
                             class="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all
                             {{ $dendaPaid
                                 ? 'bg-gradient-to-r from-gray-100 to-slate-100 text-gray-600 hover:from-gray-200 border border-gray-200'
-                                : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25 hover:from-emerald-600 hover:to-teal-700 hover:shadow-xl hover:-translate-y-0.5' }}">
+                                : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/25 hover:from-blue-700 hover:to-blue-800 hover:shadow-xl hover:-translate-y-0.5' }}">
                         <i class="fas {{ $dendaPaid ? 'fa-edit' : 'fa-money-bill-wave' }}"></i>
                         {{ $dendaPaid ? 'Ubah Status Denda' : 'Bayar Denda Sekarang' }}
                     </button>
@@ -657,14 +660,14 @@
     <div class="modal-backdrop absolute inset-0" onclick="closeStatusPembayaranModal()"></div>
     <div class="flex items-center justify-center min-h-screen p-4 relative z-10">
         <div class="modal-anim bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-            <div class="bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-4 flex items-center justify-between">
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                         <i class="fas fa-money-bill-wave text-white"></i>
                     </div>
                     <div>
                         <h3 class="text-base font-bold text-white">Update Pembayaran Denda</h3>
-                        <p class="text-emerald-100 text-xs">Total: Rp {{ number_format($pengembalian->total_denda, 0, ',', '.') }}</p>
+                        <p class="text-blue-100 text-xs">Total: Rp {{ number_format($pengembalian->total_denda, 0, ',', '.') }}</p>
                     </div>
                 </div>
                 <button onclick="closeStatusPembayaranModal()" class="w-8 h-8 bg-white/15 hover:bg-white/25 rounded-lg flex items-center justify-center text-white transition-all">
@@ -674,10 +677,10 @@
             <form id="statusPembayaranForm" class="p-6 space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                        <i class="fas fa-flag mr-1 text-emerald-500"></i>Status Pembayaran
+                        <i class="fas fa-flag mr-1 text-blue-500"></i>Status Pembayaran
                     </label>
                     <select id="modal_status_pembayaran" name="status_pembayaran"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-emerald-400 focus:border-transparent text-sm font-medium transition-all">
+                            class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:border-transparent text-sm font-medium transition-all">
                         <option value="belum_dibayar" {{ $pengembalian->status_denda === 'belum_dibayar' ? 'selected' : '' }}>Belum Dibayar</option>
                         <option value="sudah_dibayar" {{ $pengembalian->status_denda === 'sudah_dibayar' ? 'selected' : '' }}>Sudah Dibayar (Lunas)</option>
                     </select>
@@ -688,7 +691,7 @@
                     </label>
                     <input type="date" id="modal_tanggal_pembayaran" name="tanggal_pembayaran"
                            value="{{ $pengembalian->tanggal_pembayaran_denda ? $pengembalian->tanggal_pembayaran_denda->format('Y-m-d') : date('Y-m-d') }}"
-                           class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-emerald-400 focus:border-transparent text-sm transition-all">
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:border-transparent text-sm transition-all">
                 </div>
                 <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
                     <button type="button" onclick="closeStatusPembayaranModal()"
@@ -696,7 +699,7 @@
                         Batal
                     </button>
                     <button type="submit"
-                            class="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl text-sm font-semibold shadow-md transition-all">
+                            class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl text-sm font-semibold shadow-md transition-all">
                         <i class="fas fa-check mr-1.5"></i>Simpan
                     </button>
                 </div>

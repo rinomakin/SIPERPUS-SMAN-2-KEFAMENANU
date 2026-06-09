@@ -25,36 +25,21 @@
     .anim-up.d4 { animation-delay: .2s; }
     .anim-up.d5 { animation-delay: .25s; }
 
-    /* Stat Cards */
-    .stat-card {
-        background: white; border-radius: 16px; padding: 20px;
-        border: 1px solid #f1f5f9; transition: all .3s ease;
-        position: relative; overflow: hidden;
-    }
-    .stat-card::before {
-        content: ''; position: absolute; top: 0; left: 0; right: 0;
-        height: 3px; border-radius: 16px 16px 0 0;
-    }
-    .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -8px rgba(0,0,0,.1); }
-    .stat-card.emerald::before { background: linear-gradient(90deg, #10b981, #34d399); }
-    .stat-card.rose::before    { background: linear-gradient(90deg, #f43f5e, #fb7185); }
-    .stat-card.amber::before   { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-    .stat-card.blue::before    { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
-    .stat-icon {
-        width: 44px; height: 44px; border-radius: 12px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 18px; color: white;
-    }
-    .stat-icon.emerald { background: linear-gradient(135deg, #10b981, #059669); }
-    .stat-icon.rose    { background: linear-gradient(135deg, #f43f5e, #e11d48); }
-    .stat-icon.amber   { background: linear-gradient(135deg, #f59e0b, #d97706); }
-    .stat-icon.blue    { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-
     /* DataTables custom */
     #riwayat-table_wrapper .dataTables_filter { display: none; }
+    #riwayat-table_wrapper .dataTables_length {
+        padding: 0; font-size: 11px; color: #6b7280;
+        display: flex; align-items: center; gap: 4px; white-space: nowrap;
+    }
+    #riwayat-table_wrapper .dataTables_length label {
+        display: flex; align-items: center; gap: 4px; font-size: 11px; margin: 0;
+    }
     #riwayat-table_wrapper .dataTables_length select {
-        padding: 6px 28px 6px 12px; border-radius: 8px;
-        border: 1px solid #e2e8f0; font-size: 13px; background-color: #f8fafc;
+        padding: 3px 24px 3px 8px; border-radius: 6px;
+        border: 1px solid #e2e8f0; font-size: 11px; background-color: #f8fafc;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 6px center;
+        background-size: 10px; cursor: pointer;
     }
     #riwayat-table thead th {
         background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
@@ -71,9 +56,9 @@
     #riwayat-table tbody tr.selected-row { background: #ecfdf5 !important; }
 
     .dataTables_wrapper .dataTables_paginate .paginate_button {
-        padding: 6px 12px !important; margin: 0 2px !important;
-        border-radius: 8px !important; border: 1px solid #e2e8f0 !important;
-        font-size: 13px !important; transition: all .2s ease !important;
+        padding: 4px 10px !important; margin: 0 1px !important;
+        border-radius: 6px !important; border: 1px solid #e2e8f0 !important;
+        font-size: 11px !important; transition: all .2s ease !important;
     }
     .dataTables_wrapper .dataTables_paginate .paginate_button.current {
         background: linear-gradient(135deg, #10b981, #059669) !important;
@@ -83,8 +68,7 @@
     .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
         background: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #1e293b !important;
     }
-    .dataTables_wrapper .dataTables_info { font-size: 13px; color: #64748b; padding-top: 12px; }
-    .dataTables_wrapper .dataTables_length { padding-top: 12px; font-size: 13px; color: #64748b; }
+    .dataTables_wrapper .dataTables_info { font-size: 11px; color: #64748b; padding: 0; }
 
     /* Action buttons */
     .action-btn {
@@ -186,10 +170,6 @@
     /* ══════════════════════════════════════════════
        DARK MODE OVERRIDES — Riwayat Pengembalian
     ══════════════════════════════════════════════ */
-    html[data-theme="dark"] .stat-card {
-        background: #1e293b !important;
-        border-color: #334155 !important;
-    }
     html[data-theme="dark"] .filter-chip {
         background: #1e293b !important;
         border-color: #334155 !important;
@@ -213,8 +193,8 @@
         border-color: #334155 !important;
         color: #f1f5f9 !important;
     }
-    html[data-theme="dark"] .dataTables_wrapper .dataTables_info,
-    html[data-theme="dark"] .dataTables_wrapper .dataTables_length { color: #64748b !important; }
+    html[data-theme="dark"] #riwayat-table_wrapper .dataTables_length { color: #64748b !important; }
+    html[data-theme="dark"] .dataTables_wrapper .dataTables_info { color: #64748b !important; }
     html[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
         background: #1e293b !important;
         border-color: #475569 !important;
@@ -269,6 +249,23 @@
         border-color: #334155 !important;
     }
     html[data-theme="dark"] .modal-content .border-t { border-color: #334155 !important; }
+
+    /* ── Responsive: compact riwayat page ────────── */
+    @media (max-width: 639px) {
+        #riwayat-table_wrapper .dataTables_length { font-size: 10px !important; }
+        #riwayat-table_wrapper .dataTables_length select { font-size: 10px !important; padding: 2px 20px 2px 6px !important; }
+        #riwayat-table_wrapper .dataTables_length label { font-size: 10px !important; }
+        .dataTables_wrapper .dataTables_paginate .paginate_button { font-size: 10px !important; padding: 3px 7px !important; min-width: 26px !important; height: 26px !important; }
+        .dataTables_wrapper .dataTables_info { font-size: 10px !important; }
+        #riwayat-table thead th { font-size: 9px !important; padding: 8px 10px !important; }
+        #riwayat-table tbody td { font-size: 11px !important; padding: 8px 10px !important; }
+        #riwayat-actions-container .inline-flex { font-size: 10px !important; padding: 2px 6px !important; gap: 2px !important; }
+        #riwayat-actions-container .inline-flex i { font-size: 9px !important; }
+    }
+    @media (min-width: 640px) and (max-width: 1023px) {
+        #riwayat-table thead th { font-size: 10px !important; padding: 10px 12px !important; }
+        #riwayat-table tbody td { font-size: 12px !important; padding: 10px 12px !important; }
+    }
 </style>
 @endpush
 
@@ -286,81 +283,26 @@
     </div>
     @endif
 
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="stat-card emerald anim-up d1">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-gray-500 mb-1">Total Pengembalian</p>
-                    <p class="text-2xl font-bold text-gray-900" id="stat-total">{{ number_format($summary['total']) }}</p>
-                </div>
-                <div class="stat-icon emerald"><i class="fas fa-check-circle"></i></div>
-            </div>
-        </div>
-        <div class="stat-card rose anim-up d2">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-gray-500 mb-1">Terlambat</p>
-                    <p class="text-2xl font-bold text-gray-900" id="stat-terlambat">{{ number_format($summary['terlambat']) }}</p>
-                </div>
-                <div class="stat-icon rose"><i class="fas fa-exclamation-triangle"></i></div>
-            </div>
-        </div>
-        <div class="stat-card amber anim-up d3">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-gray-500 mb-1">Total Denda</p>
-                    <p class="text-xl font-bold text-gray-900" id="stat-denda">Rp {{ number_format($summary['total_denda'], 0, ',', '.') }}</p>
-                </div>
-                <div class="stat-icon amber"><i class="fas fa-coins"></i></div>
-            </div>
-        </div>
-        <div class="stat-card blue anim-up d4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-gray-500 mb-1">Hari Ini</p>
-                    <p class="text-2xl font-bold text-gray-900" id="stat-hariini">{{ number_format($summary['hari_ini']) }}</p>
-                </div>
-                <div class="stat-icon blue"><i class="fas fa-calendar-day"></i></div>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Main Table Card -->
     <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden anim-up d5">
 
         <!-- Card Header -->
         <div class="bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-5">
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <h3 class="text-sm sm:text-lg font-bold text-white flex items-center gap-2">
                         <i class="fas fa-history"></i> Riwayat Pengembalian
                     </h3>
-                    <p class="text-emerald-100 text-xs mt-1">Seluruh data pengembalian buku</p>
+                    <p class="text-emerald-100 text-[10px] sm:text-xs mt-0.5 sm:mt-1">Seluruh data pengembalian buku</p>
                 </div>
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full lg:w-auto">
-                    <!-- Search -->
-                    <div class="relative w-full sm:w-auto">
-                        <input type="text" id="searchInput" placeholder="Cari nama, nomor pengembalian..."
-                               class="w-full sm:w-72 px-4 py-2.5 pl-10 text-sm bg-white/15 backdrop-blur-sm text-white placeholder-emerald-100 rounded-xl border border-white/20 focus:bg-white/25 focus:ring-2 focus:ring-white/30 focus:outline-none transition-all duration-200">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                            <i class="fas fa-search text-emerald-100"></i>
-                        </div>
-                    </div>
-                    <!-- Actions -->
-                    <div class="flex flex-wrap gap-2">
-                        <button onclick="openFilterModal()"
-                                class="bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white px-4 py-2.5 rounded-xl font-semibold text-xs border border-white/20 transition-all duration-200">
-                            <i class="fas fa-sliders-h mr-1.5"></i>Filter
-                        </button>
-                        <a href="{{ route('riwayat-pengembalian.export') }}"
-                           class="bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white px-4 py-2.5 rounded-xl font-semibold text-xs border border-white/20 transition-all duration-200">
-                            <i class="fas fa-file-csv mr-1.5"></i>Export CSV
-                        </a>
-                        <a href="{{ route('pengembalian.index') }}"
-                           class="bg-white hover:bg-emerald-50 text-emerald-700 px-4 py-2.5 rounded-xl font-semibold text-xs transition-all duration-200 shadow-lg shadow-white/20">
-                            <i class="fas fa-arrow-left mr-1.5"></i>Kembali
-                        </a>
+                <!-- Search -->
+                <div class="relative w-full sm:w-auto">
+                    <input type="text" id="searchInput" placeholder="Cari nama, nomor pengembalian..."
+                           class="w-full sm:w-56 lg:w-72 px-3 sm:px-4 py-2 sm:py-2.5 pl-8 sm:pl-10 text-xs sm:text-sm bg-white/15 backdrop-blur-sm text-white placeholder-emerald-100 rounded-xl border border-white/20 focus:bg-white/25 focus:ring-2 focus:ring-white/30 focus:outline-none transition-all duration-200">
+                    <div class="absolute inset-y-0 left-0 pl-2.5 sm:pl-3.5 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-emerald-100 text-xs sm:text-sm"></i>
                     </div>
                 </div>
             </div>
@@ -378,6 +320,22 @@
             <button class="filter-chip" onclick="setQuickFilter('terlambat', this)" data-filter="terlambat">
                 <i class="fas fa-exclamation-circle mr-1"></i>Terlambat
             </button>
+        </div>
+
+        {{-- Table Actions (hidden, injected into length bar) --}}
+        <div id="riwayatActions" class="hidden">
+            <button onclick="openFilterModal()"
+                    class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white rounded-lg font-semibold text-[10px] sm:text-xs border border-white/20 transition-all duration-200">
+                <i class="fas fa-sliders-h text-[9px] sm:text-xs"></i><span>Filter</span>
+            </button>
+            <a href="{{ route('riwayat-pengembalian.export') }}"
+               class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white rounded-lg font-semibold text-[10px] sm:text-xs border border-white/20 transition-all duration-200">
+                <i class="fas fa-file-csv text-[9px] sm:text-xs"></i><span>Export CSV</span>
+            </a>
+            <a href="{{ route('pengembalian.index') }}"
+               class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white hover:bg-emerald-50 text-emerald-700 rounded-lg font-semibold text-[10px] sm:text-xs transition-all duration-200 shadow-lg shadow-white/20">
+                <i class="fas fa-arrow-left text-[9px] sm:text-xs"></i><span>Kembali</span>
+            </a>
         </div>
 
         @if($canDelete)
@@ -580,6 +538,10 @@ $(document).ready(function () {
     riwayatTable = $('#riwayat-table').DataTable({
         processing : true,
         serverSide : true,
+        dom:
+            '<"flex flex-wrap items-center gap-2 px-4 py-2.5 border-b border-gray-100 bg-gray-50/50"<"mr-auto text-xs text-gray-500"l><"flex items-center gap-1.5 flex-wrap"<"#riwayat-actions-container">>>' +
+            'rt' +
+            '<"flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 px-4 py-2.5 border-t border-gray-100"<"text-xs text-gray-400"i><"dt-pager"p>>',
         ajax: {
             url : '/admin/riwayat-pengembalian/data',
             type: 'GET',
@@ -592,9 +554,16 @@ $(document).ready(function () {
                 d.search_keyword      = $('#searchInput').val();
             },
             dataSrc: function (json) {
-                if (json && json.summary) updateSummaryCards(json.summary);
                 clearSelection();
                 return json.data || [];
+            }
+        },
+        initComplete: function () {
+            var actions = document.getElementById('riwayatActions');
+            var container = document.getElementById('riwayat-actions-container');
+            if (actions && container) {
+                container.appendChild(actions);
+                actions.classList.remove('hidden');
             }
         },
         columns: [
@@ -737,18 +706,6 @@ document.getElementById('filterForm').addEventListener('submit', function (e) {
     riwayatTable.draw();
     closeFilterModal();
 });
-
-// ─── Summary Cards ────────────────────────────────────────────────────────
-function updateSummaryCards(s) {
-    setElText('stat-total',   s.total       ? s.total.toLocaleString('id-ID') : '0');
-    setElText('stat-terlambat', s.terlambat ? s.terlambat.toLocaleString('id-ID') : '0');
-    setElText('stat-hariini', s.hari_ini    ? s.hari_ini.toLocaleString('id-ID') : '0');
-    setElText('stat-denda',   'Rp ' + (s.total_denda ? new Intl.NumberFormat('id-ID').format(s.total_denda) : '0'));
-}
-function setElText(id, val) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = val;
-}
 
 // ─── Delete Single ────────────────────────────────────────────────────────
 function confirmDelete(id, nomor) {

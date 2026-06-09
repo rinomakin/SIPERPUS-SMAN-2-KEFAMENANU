@@ -633,7 +633,7 @@ $(document).ready(function() {
             infoEmpty: "Tidak ada data",
             infoFiltered: "(dari _MAX_ total)",
             search: "",
-            searchPlaceholder: "Cari nama, NIK, email...",
+            searchPlaceholder: "Cari nama, email...",
             paginate: {
                 first: '<i class="fas fa-angle-double-left"></i>',
                 last: '<i class="fas fa-angle-double-right"></i>',

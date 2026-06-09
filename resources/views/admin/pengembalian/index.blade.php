@@ -92,52 +92,46 @@
     }
     .filter-chip:hover { border-color: #94a3b8; color: #334155; background: #f8fafc; }
     .filter-chip.active       { background: linear-gradient(135deg,#64748b,#475569); color: white; border-color: transparent; box-shadow: 0 3px 10px -2px rgba(71,85,105,.35); }
-    .filter-chip.active-green { background: linear-gradient(135deg,#10b981,#059669); color: white; border-color: transparent; box-shadow: 0 3px 10px -2px rgba(16,185,129,.4); }
+    .filter-chip.active-blue { background: linear-gradient(135deg,#3b82f6,#2563eb); color: white; border-color: transparent; box-shadow: 0 3px 10px -2px rgba(59,130,246,.4); }
     .filter-chip.active-red   { background: linear-gradient(135deg,#f43f5e,#e11d48); color: white; border-color: transparent; box-shadow: 0 3px 10px -2px rgba(244,63,94,.4); }
 
     /* ── DataTables ───────────────────────────────── */
-    #pengembalian-table_wrapper .dataTables_filter { display: none; }
+    #pengembalian-table_wrapper .dataTables_filter { 
+        display: none; 
+    }
+    #pengembalian-table_wrapper .dataTables_length { 
+        display: flex; 
+        align-items: center;
+        gap: 2px; }
+    #pengembalian-table_wrapper .dataTables_length label { 
+        display: flex; 
+        align-items: center; 
+        gap: 2px; 
+        margin: 0;
+        white-space: nowrap; }
     #pengembalian-table_wrapper .dataTables_length select {
-        padding: 6px 28px 6px 12px; border-radius: 8px;
+        padding: 4px 22px 4px 8px; border-radius: 6px;
         border: 1px solid #e2e8f0; font-size: 13px; background: #f8fafc;
-        outline: none; cursor: pointer;
+        outline: none; cursor: pointer; margin: 0 1px;
     }
 
     #pengembalian-table thead th {
         background: linear-gradient(135deg,#f8fafc 0%,#f1f5f9 100%);
-        font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+        font-size: 9px; font-weight: 700; text-transform: uppercase;
         letter-spacing: .06em; color: #64748b; padding: 13px 16px;
         border-bottom: 2px solid #e2e8f0; white-space: nowrap;
     }
     #pengembalian-table tbody td {
-        padding: 11px 14px; font-size: 13px;
+        padding: 8px 10px; font-size: 9px;
         vertical-align: middle; border-bottom: 1px solid #f1f5f9;
     }
     #pengembalian-table tbody td:nth-child(5),
     #pengembalian-table tbody td:nth-child(6) {
-        font-size: 11.5px;
+        padding: 4px 6px; font-size: 9px;
     }
     #pengembalian-table tbody tr { transition: background .12s ease; }
     #pengembalian-table tbody tr:hover { background: #f0fdf4 !important; }
     #pengembalian-table tbody tr:nth-child(even) { background: #fafafa; }
-    .dataTables_wrapper .dataTables_paginate .paginate_button {
-        padding: 6px 13px !important; margin: 0 2px !important;
-        border-radius: 9px !important; border: 1px solid #e2e8f0 !important;
-        font-size: 13px !important; transition: all .2s !important;
-        color: #475569 !important;
-    }
-    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-        background: linear-gradient(135deg,#10b981,#059669) !important;
-        color: white !important; border-color: transparent !important;
-        box-shadow: 0 2px 8px rgba(16,185,129,.35) !important;
-    }
-    .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
-        background: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #1e293b !important;
-    }
-    .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
-        color: #cbd5e1 !important; cursor: default !important;
-    }
-
     /* ── Action Buttons ───────────────────────────── */
     .action-btn {
         width: 32px; height: 32px;
@@ -154,42 +148,104 @@
 
     /* ── Badges ───────────────────────────────────── */
     .badge-status {
-        display: inline-flex; align-items: center; gap: 5px;
-        padding: 4px 11px; border-radius: 20px; font-size: 11px;
-        font-weight: 600; border: 1px solid; white-space: nowrap;
+        display: inline-flex; 
+        align-items: center; 
+        gap: 4px;
+        padding: 2px 4px; 
+        font-size: 9px;
+        font-weight: 600; 
+        /* border: 1px solid;  */
+        white-space: nowrap;
     }
-    .badge-tepat    { background: #ecfdf5; color: #059669; border-color: #a7f3d0; }
-    .badge-terlambat { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
-    .badge-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-    .badge-dot.green { background: #10b981; }
-    .badge-dot.red   { background: #ef4444; animation: pulse-dot 2s infinite; }
+    .badge-tepat    {  color: #2563eb; border-color: #bfdbfe; }
+    .badge-terlambat {  color: #dc2626; border-color: #fecaca; }
+    .badge-dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .badge-dot.green { background: #3b82f6; }
+    .badge-dot.red   { background: ; animation: pulse-dot 2s infinite; }
 
     .nomor-badge {
-        display: inline-flex; align-items: center; gap: 4px;
-        background: #ecfdf5; color: #059669;
-        padding: 3px 9px; border-radius: 7px; font-size: 11px; font-weight: 600;
-        border: 1px solid #a7f3d0; white-space: nowrap;
+        display: inline-flex; 
+        align-items: center;
+        gap: 4px;
+        background: #eff6ff; 
+        color: #2563eb;
+        padding: 3px 9px; 
+        border-radius: 7px; 
+        font-size: 9px; 
+        font-weight: 600;
+        border: 1px solid #bfdbfe;
+        white-space: nowrap;
+    }
+
+    /* ── Pagination ────────────────────────────────── */
+    #pengembalian-paginate {
+        display: flex; justify-content: flex-end;
+    }
+    #pengembalian-paginate .dataTables_paginate {
+        display: flex; flex-wrap: wrap; gap: 2px;
+        float: none !important; padding: 0 !important; margin: 0 !important;
+    }
+    #pengembalian-paginate .paginate_button {
+        padding: 6px 10px !important; margin: 0 2px !important;
+        border-radius: 9px !important; border: 1px solid #e2e8f0 !important;
+        font-size: 8px !important; transition: all .2s !important;
+        color: #475569 !important; cursor: pointer; user-select: none;
+    }
+    #pengembalian-paginate .paginate_button.current {
+        background: linear-gradient(135deg,#10b981,#059669) !important;
+        color: white !important; border-color: transparent !important;
+        box-shadow: 0 2px 8px rgba(16,185,129,.35) !important;
+    }
+    #pengembalian-paginate .paginate_button:hover:not(.current) {
+        background: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #1e293b !important;
+    }
+    #pengembalian-paginate .paginate_button.disabled {
+        color: #cbd5e1 !important; cursor: default !important;
+    }
+    #pengembalian-table_wrapper > .dataTables_paginate,
+    #pengembalian-table_wrapper > .dataTables_info {
+        display: none !important;
     }
 
     /* ── Denda ────────────────────────────────────── */
-    .denda-card { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 5px; padding: 7px 11px; border-radius: 11px; min-width: 110px; }
-    .denda-card.has-denda { background: linear-gradient(135deg,#fef2f2,#fff1f2); border: 1px solid #fecdd3; }
-    .denda-card.paid      { background: linear-gradient(135deg,#ecfdf5,#f0fdf4); border: 1px solid #bbf7d0; }
-    .denda-amount { font-size: 13px; font-weight: 700; }
+    .denda-card { 
+        display: inline-flex; 
+        flex-direction: column; 
+        align-items: flex-start; 
+        gap: 3px; 
+        padding: 4px 8px; 
+        border-radius: 8px; 
+        min-width: 80px; }
+    .denda-amount { 
+        font-size: 9px; 
+        font-weight: 500; }
     .denda-amount.red   { color: #dc2626; }
-    .denda-amount.green { color: #059669; }
+    .denda-amount.green { color: #2563eb; }
     .denda-status-chip {
-        display: inline-flex; align-items: center; gap: 3px;
-        padding: 2px 7px; border-radius: 20px; font-size: 10px;
-        font-weight: 700; text-transform: uppercase;
+        display: inline-flex; 
+        align-items: center; 
+        gap: 2px;
+        padding: 1px 5px; 
+        border-radius: 12px; 
+        font-size: 9px;
+        font-weight: 500; 
+        /* text-transform: uppercase; */
     }
-    .denda-status-chip.lunas { background: #d1fae5; color: #065f46; }
-    .denda-status-chip.belum { background: #fee2e2; color: #991b1b; animation: pulse-belum 2.5s infinite; }
+    .denda-status-chip.lunas { 
+        color: #1e40af; }
+    .denda-status-chip.belum {
+        color: #991b1b; 
+        animation: pulse-belum 2.5s infinite; }
     .denda-badge.no-denda {
-        display: inline-flex; align-items: center; gap: 5px;
-        padding: 5px 12px; border-radius: 9px; font-size: 12px; font-weight: 600;
-        background: linear-gradient(135deg,#f0fdf4,#ecfdf5);
-        color: #059669; border: 1px solid #bbf7d0;
+        display: inline-flex; 
+        align-items: center; 
+        gap: 3px;
+        padding: 2px 6px; 
+        border-radius: 7px; 
+        font-size: 9px; 
+        font-weight: 600;
+        background: linear-gradient(135deg,#f0f5ff,#eff6ff);
+        color: #2563eb; border: 1px solid #bfdbfe;
     }
 
     /* ── Modal ────────────────────────────────────── */
@@ -211,9 +267,9 @@
         background: #1e293b !important;
         border-color: #334155 !important;
     }
-    html[data-theme="dark"] .bg-emerald-50.border.border-emerald-200 {
-        background: rgba(16,185,129,0.1) !important;
-        border-color: rgba(16,185,129,0.25) !important;
+    html[data-theme="dark"] .bg-blue-50.border.border-blue-200 {
+        background: rgba(59,130,246,0.1) !important;
+        border-color: rgba(59,130,246,0.25) !important;
     }
 
     /* Quick filter chips */
@@ -256,12 +312,12 @@
     html[data-theme="dark"] #pengembalian-table_wrapper .dataTables_info {
         color: #64748b !important;
     }
-    html[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button:not(.current) {
+    html[data-theme="dark"] #pengembalian-paginate .paginate_button:not(.current) {
         background: transparent !important;
         border-color: #334155 !important;
         color: #64748b !important;
     }
-    html[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
+    html[data-theme="dark"] #pengembalian-paginate .paginate_button:hover:not(.current) {
         background: #1e293b !important;
         border-color: #475569 !important;
         color: #a5b4fc !important;
@@ -269,14 +325,14 @@
 
     /* Badges & number pill */
     html[data-theme="dark"] .nomor-badge {
-        background: rgba(16,185,129,0.15) !important;
-        border-color: rgba(16,185,129,0.3) !important;
-        color: #34d399 !important;
+        background: rgba(59,130,246,0.15) !important;
+        border-color: rgba(59,130,246,0.3) !important;
+        color: #93c5fd !important;
     }
     html[data-theme="dark"] .badge-tepat {
-        background: rgba(16,185,129,0.15) !important;
-        border-color: rgba(16,185,129,0.3) !important;
-        color: #34d399 !important;
+        background: rgba(59,130,246,0.15) !important;
+        border-color: rgba(59,130,246,0.3) !important;
+        color: #93c5fd !important;
     }
     html[data-theme="dark"] .badge-terlambat {
         background: rgba(239,68,68,0.15) !important;
@@ -290,21 +346,21 @@
         border-color: rgba(239,68,68,0.25) !important;
     }
     html[data-theme="dark"] .denda-card.paid {
-        background: rgba(16,185,129,0.12) !important;
-        border-color: rgba(16,185,129,0.25) !important;
+        background: rgba(59,130,246,0.12) !important;
+        border-color: rgba(59,130,246,0.25) !important;
     }
     html[data-theme="dark"] .denda-status-chip.belum {
         background: rgba(239,68,68,0.2) !important;
         color: #fca5a5 !important;
     }
     html[data-theme="dark"] .denda-status-chip.lunas {
-        background: rgba(16,185,129,0.2) !important;
-        color: #6ee7b7 !important;
+        background: rgba(59,130,246,0.2) !important;
+        color: #93c5fd !important;
     }
     html[data-theme="dark"] .denda-badge.no-denda {
-        background: rgba(16,185,129,0.12) !important;
-        border-color: rgba(16,185,129,0.25) !important;
-        color: #34d399 !important;
+        background: rgba(59,130,246,0.12) !important;
+        border-color: rgba(59,130,246,0.25) !important;
+        color: #93c5fd !important;
     }
 
     /* Filter modal */
@@ -314,9 +370,9 @@
         border-color: #334155 !important;
     }
     html[data-theme="dark"] .modal-content .border-t { border-color: #334155 !important; }
-    html[data-theme="dark"] .bg-emerald-50.rounded-xl.border.border-emerald-100 {
-        background: rgba(16,185,129,0.08) !important;
-        border-color: rgba(16,185,129,0.2) !important;
+    html[data-theme="dark"] .bg-blue-50.rounded-xl.border.border-blue-100 {
+        background: rgba(59,130,246,0.08) !important;
+        border-color: rgba(59,130,246,0.2) !important;
     }
 </style>
 @endpush
@@ -329,12 +385,12 @@
     <div class="flex items-center justify-between anim-up d1">
         <div class="flex items-center gap-3">
             <div class="flex items-center gap-2.5 px-4 py-2.5 bg-white border border-gray-200 rounded-xl shadow-sm">
-                <i class="fas fa-calendar-day text-emerald-500 text-sm"></i>
+                <i class="fas fa-calendar-day text-blue-500 text-sm"></i>
                 <span class="text-sm font-semibold text-gray-700">{{ \Carbon\Carbon::today()->translatedFormat('l, d F Y') }}</span>
             </div>
-            <div class="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl">
-                <span class="live-dot"></span>
-                <span class="text-xs font-bold text-emerald-700 uppercase tracking-wider">Live</span>
+            <div class="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-xl">
+
+                <span class="text-xs font-bold text-blue-700 uppercase tracking-wider">Live</span>
             </div>
         </div>
     </div>
@@ -402,7 +458,7 @@
             <div class="flex items-center gap-2 w-full sm:w-auto">
                 <div class="relative flex-1 sm:flex-none sm:w-72">
                     <input type="text" id="searchInput" placeholder="Cari..."
-                           class="w-full px-3 sm:px-5 py-3 pl-9 sm:pl-11 text-sm bg-gray-50 border border-gray-200 text-gray-700 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all">
+                           class="w-full px-3 sm:px-5 py-3 pl-9 sm:pl-11 text-sm bg-gray-50 border border-gray-200 text-gray-700 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all">
                     <div class="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400"></i>
                     </div>
@@ -419,33 +475,32 @@
                 @endif
                 @if(Auth::user()->hasPermission('pengembalian.create') || Auth::user()->isAdmin())
                 <a href="{{ route('pengembalian.create') }}"
-                   class="flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white w-11 h-11 sm:w-auto sm:px-5 sm:py-3 rounded-xl font-semibold text-sm transition-all shadow-md">
+                   class="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white w-11 h-11 sm:w-auto sm:px-5 sm:py-3 rounded-xl font-semibold text-sm transition-all shadow-md">
                     <i class="fas fa-plus sm:mr-2"></i><span class="hidden sm:inline">Tambah</span>
                 </a>
                 @endif
             </div>
         </div>
         <!-- Table -->
-        <div class="p-6 pb-2">
-            <div class="overflow-x-auto">
-                <table id="pengembalian-table" class="min-w-full w-full">
-                    <thead>
-                        <tr>
-                            <th class="text-center" style="width:48px;">No</th>
-                            <th class="text-left">Anggota</th>
-                            <th class="text-center">Buku</th>
-                            <th class="text-left">Tanggal Kembali</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-left">Denda</th>
-                            @if(Auth::user()->hasPermission('pengembalian.show') || Auth::user()->isAdmin() || Auth::user()->hasPermission('pengembalian.edit') || Auth::user()->isAdmin() || Auth::user()->hasPermission('pengembalian.delete') || Auth::user()->isAdmin())
-                            <th class="text-center" style="width:50px;">Aksi</th>
-                            @endif
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
+        <div class="p-6 pb-0">
+            <table id="pengembalian-table" class="min-w-full w-full">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width:48px;">No</th>
+                        <th class="text-left">Anggota</th>
+                        <th class="text-center">Buku</th>
+                        <th class="text-left">Tanggal Kembali</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-left">Denda</th>
+                        @if(Auth::user()->hasPermission('pengembalian.show') || Auth::user()->isAdmin() || Auth::user()->hasPermission('pengembalian.edit') || Auth::user()->isAdmin() || Auth::user()->hasPermission('pengembalian.delete') || Auth::user()->isAdmin())
+                        <th class="text-center" style="width:50px;">Aksi</th>
+                        @endif
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
+        <div id="pengembalian-paginate" class="px-6 py-3"></div>
 
       
     </div>
@@ -456,7 +511,7 @@
     <div class="modal-backdrop absolute inset-0" onclick="closeFilterModal()"></div>
     <div class="flex items-center justify-center min-h-screen p-4 relative z-10">
         <div class="modal-content bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-            <div class="bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-4">
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
@@ -472,9 +527,9 @@
             <form id="filterForm" class="p-6 space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                        <i class="fas fa-flag mr-1 text-emerald-500"></i>Status Pengembalian
+                        <i class="fas fa-flag mr-1 text-blue-500"></i>Status Pengembalian
                     </label>
-                    <select id="filter_status" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all">
+                    <select id="filter_status" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all">
                         <option value="">Semua Status</option>
                         <option value="tepat_waktu">Tepat Waktu</option>
                         <option value="terlambat">Terlambat</option>
@@ -484,22 +539,22 @@
                     <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
                         <i class="fas fa-coins mr-1 text-amber-500"></i>Status Denda
                     </label>
-                    <select id="filter_status_denda" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all">
+                    <select id="filter_status_denda" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all">
                         <option value="">Semua Status Denda</option>
                         <option value="tidak_ada">Tidak Ada Denda</option>
                         <option value="belum_dibayar">Belum Dibayar</option>
                         <option value="sudah_dibayar">Sudah Dibayar</option>
                     </select>
                 </div>
-                <div class="flex items-center gap-2 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
-                    <i class="fas fa-info-circle text-emerald-500 text-sm flex-shrink-0"></i>
-                    <p class="text-xs text-emerald-700">Halaman ini hanya menampilkan data pengembalian <strong>hari ini</strong>. Lihat <strong>Riwayat</strong> untuk data lengkap.</p>
+                <div class="flex items-center gap-2 p-3 bg-blue-50 rounded-xl border border-blue-100">
+                    <i class="fas fa-info-circle text-blue-500 text-sm flex-shrink-0"></i>
+                    <p class="text-xs text-blue-700">Halaman ini hanya menampilkan data pengembalian <strong>hari ini</strong>. Lihat <strong>Riwayat</strong> untuk data lengkap.</p>
                 </div>
                 <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
                     <button type="button" onclick="resetFilters()" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold transition-all">
                         <i class="fas fa-undo mr-1.5"></i>Reset
                     </button>
-                    <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl text-sm font-semibold shadow-md transition-all">
+                    <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl text-sm font-semibold shadow-md transition-all">
                         <i class="fas fa-check mr-1.5"></i>Terapkan
                     </button>
                 </div>
@@ -525,7 +580,7 @@ $(document).ready(function () {
         { data: 'anggota_info', name: 'anggota_id',   orderable: false, searchable: false },
         { data: 'jumlah_badge', name: 'jumlah_badge', orderable: false, searchable: false, className: 'text-left ' },
         { data: 'tanggal_info', name: 'tanggal_pengembalian', orderable: false, searchable: false },
-        { data: 'status_badge', name: 'status',       orderable: false, searchable: false, className: 'text-left' },
+        { data: 'status_badge', name: 'status',       orderable: false, searchable: false, className: 'text-left text-[11px]' },
         { data: 'denda_info',   name: 'total_denda',  orderable: false, searchable: false, className: 'text-left' },
         // { data: 'petugas_info', name: 'user_id',      orderable: false, searchable: false },
     ];
@@ -536,7 +591,7 @@ $(document).ready(function () {
     pengembalianTable = $('#pengembalian-table').DataTable({
         processing: true,
         serverSide: true,
-        dom: 'rtip',
+        dom: 'r<"overflow-x-auto"t>ip',
         initComplete: function () {
             var len = $('<select class="px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 cursor-pointer outline-none">' +
                 '<option value="10">10</option>' +
@@ -547,8 +602,6 @@ $(document).ready(function () {
                 pengembalianTable.page.len(this.value).draw();
             });
             $('#tableLengthPlaceholder').html('Tampilkan ').append(len).append(' ');
-            var infoEl = $('.dataTables_info').detach();
-            
         },
         ajax: {
             url : '/admin/pengembalian/data',
@@ -568,9 +621,9 @@ $(document).ready(function () {
         },
         columns: columns,
         language: {
-            processing  : '<div class="flex items-center justify-center py-8"><div class="animate-spin rounded-full h-8 w-8 border-[3px] border-emerald-200 border-t-emerald-500 mr-3"></div><span class="text-gray-500 text-sm">Memuat data...</span></div>',
+            processing  : '<div class="flex items-center justify-center py-8"><div class="animate-spin rounded-full h-8 w-8 border-[3px] border-blue-200 border-t-blue-500 mr-3"></div><span class="text-gray-500 text-sm">Memuat data...</span></div>',
             lengthMenu  : 'Tampilkan _MENU_ data',
-            zeroRecords : '<div class="text-center py-14"><div class="mx-auto w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mb-4"><i class="fas fa-undo-alt text-2xl text-emerald-300"></i></div><p class="text-sm font-semibold text-gray-700 mb-1">Belum ada pengembalian hari ini</p><p class="text-xs text-gray-400">Coba ubah filter atau cari data lain</p></div>',
+            zeroRecords : '<div class="text-center py-14"><div class="mx-auto w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-4"><i class="fas fa-undo-alt text-2xl text-blue-300"></i></div><p class="text-sm font-semibold text-gray-700 mb-1">Belum ada pengembalian hari ini</p><p class="text-xs text-gray-400">Coba ubah filter atau cari data lain</p></div>',
             info        : 'Menampilkan _START_–_END_ dari _TOTAL_ data',
             infoEmpty   : 'Tidak ada data',
             infoFiltered: '(filter dari _MAX_ total)',
@@ -583,6 +636,10 @@ $(document).ready(function () {
             $('#pengembalian-table tbody tr').each(function (i) {
                 $(this).css({ animation: 'fadeInUp .3s ease both', animationDelay: (i * 0.025) + 's' });
             });
+            var $info = $('#pengembalian-table_wrapper > .dataTables_info').detach();
+            if ($info.length) $('#tableInfoText').empty().append($info);
+            var $paginate = $('#pengembalian-table_wrapper > .dataTables_paginate').detach();
+            if ($paginate.length) $('#pengembalian-paginate').empty().append($paginate);
         }
     });
 
@@ -616,7 +673,7 @@ function animateCount(id, target) {
 function setQuickFilter(filter, btn) {
     currentQuickFilter = filter;
     document.querySelectorAll('.filter-chip').forEach(c => c.className = 'filter-chip');
-    btn.classList.add(filter === 'all' ? 'active' : filter === 'tepat_waktu' ? 'active-green' : 'active-red');
+    btn.classList.add(filter === 'all' ? 'active' : filter === 'tepat_waktu' ? 'active-blue' : 'active-red');
     $('#filter_status').val('');
     pengembalianTable.draw();
 }

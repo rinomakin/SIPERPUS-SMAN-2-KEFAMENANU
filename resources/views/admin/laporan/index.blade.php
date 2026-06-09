@@ -75,34 +75,10 @@
         </div>
     </div>
 
-    {{-- Global Date Filter --}}
-    <div class="glass-card rounded-2xl shadow-lg p-5">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-calendar-alt text-indigo-600"></i>
-                </div>
-                <span>Periode Laporan:</span>
-            </div>
-            <div class="flex items-center gap-2 flex-1">
-                <input type="date" id="globalStartDate"
-                       class="px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/70">
-                <span class="text-gray-400 text-sm">s/d</span>
-                <input type="date" id="globalEndDate"
-                       class="px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/70">
-            </div>
-            <button onclick="applyGlobalDateFilter()"
-                    class="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-sm font-medium rounded-xl transition-all shadow-md hover:shadow-lg">
-                <i class="fas fa-check mr-2"></i>Terapkan
-            </button>
-        </div>
-    </div>
-
-    {{-- Report Cards Grid --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {{-- Laporan Anggota --}}
         @if(Auth::user()->hasPermission('laporan.anggota') || Auth::user()->isAdmin())
-        <div class="report-item glass-card rounded-2xl p-6 cursor-pointer animate-item" style="animation-delay: 0.05s" onclick="openReportModal('anggota')">
+        <div class="report-item glass-card rounded-2xl p-6 cursor-pointer animate-item" style="animation-delay: 0.05s" onclick="window.location.href='/admin/laporan/anggota'">
             <div class="flex items-start justify-between">
                 <div class="flex items-start gap-4">
                     <div class="report-icon bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-200">
@@ -111,17 +87,6 @@
                     <div>
                         <h3 class="text-base font-bold text-gray-900">Laporan Anggota</h3>
                         <p class="text-sm text-gray-500 mt-1">Data anggota perpustakaan, status keanggotaan, dan informasi detail</p>
-                        <div class="flex items-center gap-2 mt-3">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
-                                <i class="fas fa-eye text-[10px]"></i> Lihat
-                            </span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                <i class="fas fa-file-excel text-[10px]"></i> Excel
-                            </span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-red-50 text-red-600 border border-red-100">
-                                <i class="fas fa-file-pdf text-[10px]"></i> PDF
-                            </span>
-                        </div>
                     </div>
                 </div>
                 <div class="report-arrow text-gray-400">
@@ -133,7 +98,7 @@
 
         {{-- Laporan Buku --}}
         @if(Auth::user()->hasPermission('laporan.buku') || Auth::user()->isAdmin())
-        <div class="report-item glass-card rounded-2xl p-6 cursor-pointer animate-item" style="animation-delay: 0.1s" onclick="openReportModal('buku')">
+        <div class="report-item glass-card rounded-2xl p-6 cursor-pointer animate-item" style="animation-delay: 0.1s" onclick="window.location.href='/admin/laporan/buku'">
             <div class="flex items-start justify-between">
                 <div class="flex items-start gap-4">
                     <div class="report-icon bg-gradient-to-br from-pink-500 to-rose-600 text-white shadow-lg shadow-pink-200">
@@ -142,17 +107,6 @@
                     <div>
                         <h3 class="text-base font-bold text-gray-900">Laporan Buku</h3>
                         <p class="text-sm text-gray-500 mt-1">Data koleksi buku, stok, kategori, dan status ketersediaan</p>
-                        <div class="flex items-center gap-2 mt-3">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-pink-50 text-pink-700 border border-pink-100">
-                                <i class="fas fa-eye text-[10px]"></i> Lihat
-                            </span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                <i class="fas fa-file-excel text-[10px]"></i> Excel
-                            </span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-red-50 text-red-600 border border-red-100">
-                                <i class="fas fa-file-pdf text-[10px]"></i> PDF
-                            </span>
-                        </div>
                     </div>
                 </div>
                 <div class="report-arrow text-gray-400">
@@ -164,7 +118,7 @@
 
         {{-- Laporan Peminjaman --}}
         @if(Auth::user()->hasPermission('laporan.peminjaman') || Auth::user()->isAdmin())
-        <div class="report-item glass-card rounded-2xl p-6 cursor-pointer animate-item" style="animation-delay: 0.15s" onclick="openReportModal('peminjaman')">
+        <div class="report-item glass-card rounded-2xl p-6 cursor-pointer animate-item" style="animation-delay: 0.15s" onclick="window.location.href='/admin/laporan/peminjaman'">
             <div class="flex items-start justify-between">
                 <div class="flex items-start gap-4">
                     <div class="report-icon bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-200">
@@ -173,17 +127,6 @@
                     <div>
                         <h3 class="text-base font-bold text-gray-900">Laporan Peminjaman</h3>
                         <p class="text-sm text-gray-500 mt-1">Data transaksi peminjaman buku dan status peminjaman</p>
-                        <div class="flex items-center gap-2 mt-3">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-sky-50 text-sky-700 border border-sky-100">
-                                <i class="fas fa-eye text-[10px]"></i> Lihat
-                            </span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                <i class="fas fa-file-excel text-[10px]"></i> Excel
-                            </span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-red-50 text-red-600 border border-red-100">
-                                <i class="fas fa-file-pdf text-[10px]"></i> PDF
-                            </span>
-                        </div>
                     </div>
                 </div>
                 <div class="report-arrow text-gray-400">
@@ -195,7 +138,7 @@
 
         {{-- Laporan Pengembalian --}}
         @if(Auth::user()->hasPermission('laporan.pengembalian') || Auth::user()->isAdmin())
-        <div class="report-item glass-card rounded-2xl p-6 cursor-pointer animate-item" style="animation-delay: 0.2s" onclick="openReportModal('pengembalian')">
+        <div class="report-item glass-card rounded-2xl p-6 cursor-pointer animate-item" style="animation-delay: 0.2s" onclick="window.location.href='/admin/laporan/pengembalian'">
             <div class="flex items-start justify-between">
                 <div class="flex items-start gap-4">
                     <div class="report-icon bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-200">
@@ -204,17 +147,6 @@
                     <div>
                         <h3 class="text-base font-bold text-gray-900">Laporan Pengembalian</h3>
                         <p class="text-sm text-gray-500 mt-1">Data transaksi pengembalian buku dan keterlambatan</p>
-                        <div class="flex items-center gap-2 mt-3">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                <i class="fas fa-eye text-[10px]"></i> Lihat
-                            </span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                <i class="fas fa-file-excel text-[10px]"></i> Excel
-                            </span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-red-50 text-red-600 border border-red-100">
-                                <i class="fas fa-file-pdf text-[10px]"></i> PDF
-                            </span>
-                        </div>
                     </div>
                 </div>
                 <div class="report-arrow text-gray-400">
@@ -226,7 +158,7 @@
 
         {{-- Laporan Denda --}}
         @if(Auth::user()->hasPermission('laporan.denda') || Auth::user()->isAdmin())
-        <div class="report-item glass-card rounded-2xl p-6 cursor-pointer animate-item" style="animation-delay: 0.25s" onclick="openReportModal('denda')">
+        <div class="report-item glass-card rounded-2xl p-6 cursor-pointer animate-item" style="animation-delay: 0.25s" onclick="window.location.href='/admin/laporan/denda'">
             <div class="flex items-start justify-between">
                 <div class="flex items-start gap-4">
                     <div class="report-icon bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-200">
@@ -235,17 +167,6 @@
                     <div>
                         <h3 class="text-base font-bold text-gray-900">Laporan Denda</h3>
                         <p class="text-sm text-gray-500 mt-1">Data denda keterlambatan dan status pembayaran</p>
-                        <div class="flex items-center gap-2 mt-3">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">
-                                <i class="fas fa-eye text-[10px]"></i> Lihat
-                            </span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                <i class="fas fa-file-excel text-[10px]"></i> Excel
-                            </span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-red-50 text-red-600 border border-red-100">
-                                <i class="fas fa-file-pdf text-[10px]"></i> PDF
-                            </span>
-                        </div>
                     </div>
                 </div>
                 <div class="report-arrow text-gray-400">
@@ -257,7 +178,7 @@
 
         {{-- Laporan Buku Tamu --}}
         @if(Auth::user()->hasPermission('laporan.buku-tamu') || Auth::user()->isAdmin())
-        <div class="report-item glass-card rounded-2xl p-6 cursor-pointer animate-item" style="animation-delay: 0.3s" onclick="openReportModal('buku-tamu')">
+        <div class="report-item glass-card rounded-2xl p-6 cursor-pointer animate-item" style="animation-delay: 0.3s" onclick="window.location.href='/admin/laporan/buku-tamu'">
             <div class="flex items-start justify-between">
                 <div class="flex items-start gap-4">
                     <div class="report-icon bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-200">
@@ -266,17 +187,6 @@
                     <div>
                         <h3 class="text-base font-bold text-gray-900">Laporan Buku Tamu</h3>
                         <p class="text-sm text-gray-500 mt-1">Data kunjungan tamu perpustakaan</p>
-                        <div class="flex items-center gap-2 mt-3">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-violet-50 text-violet-700 border border-violet-100">
-                                <i class="fas fa-eye text-[10px]"></i> Lihat
-                            </span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                <i class="fas fa-file-excel text-[10px]"></i> Excel
-                            </span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-red-50 text-red-600 border border-red-100">
-                                <i class="fas fa-file-pdf text-[10px]"></i> PDF
-                            </span>
-                        </div>
                     </div>
                 </div>
                 <div class="report-arrow text-gray-400">
@@ -288,33 +198,6 @@
 
         {{-- Laporan Kas --}}
         @if(Auth::user()->hasPermission('laporan.kas') || Auth::user()->isAdmin())
-        <!-- <div class="report-item glass-card rounded-2xl p-6 cursor-pointer animate-item" style="animation-delay: 0.35s" onclick="openReportModal('kas')">
-            <div class="flex items-start justify-between">
-                <div class="flex items-start gap-4">
-                    <div class="report-icon bg-gradient-to-br from-teal-500 to-cyan-600 text-white shadow-lg shadow-teal-200">
-                        <i class="fas fa-wallet"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-base font-bold text-gray-900">Laporan Kas</h3>
-                        <p class="text-sm text-gray-500 mt-1">Data pemasukan kas dari pembayaran denda</p>
-                        <div class="flex items-center gap-2 mt-3">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-teal-50 text-teal-700 border border-teal-100">
-                                <i class="fas fa-eye text-[10px]"></i> Lihat
-                            </span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                <i class="fas fa-file-excel text-[10px]"></i> Excel
-                            </span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-red-50 text-red-600 border border-red-100">
-                                <i class="fas fa-file-pdf text-[10px]"></i> PDF
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="report-arrow text-gray-400">
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </div>
-        </div> -->
         @endif
     </div>
 </div>

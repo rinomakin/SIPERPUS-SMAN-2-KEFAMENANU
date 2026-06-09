@@ -43,6 +43,16 @@
     .input-field[readonly] { background: #f9fafb; color: #6b7280; }
     .live-clock { font-variant-numeric: tabular-nums; }
 
+    @media (max-width: 640px) {
+        .create-card { padding: 12px !important; }
+        .create-card .tab-btn { font-size: 0.65rem !important; padding: 8px 6px !important; }
+        .create-card .tab-btn i { font-size: 0.6rem !important; margin-right: 3px !important; }
+        .create-card .input-field { font-size: 0.75rem !important; padding: 8px 10px !important; }
+        .create-card label { font-size: 0.65rem !important; }
+        .create-card h2, .create-card h3 { font-size: 0.75rem !important; }
+        .create-card p.text-sm { font-size: 0.6rem !important; }
+    }
+
     /* Scan button pulse */
     .scan-btn-pulse { position:relative; overflow:hidden; }
     .scan-btn-pulse::after {
@@ -104,7 +114,7 @@
     </div> -->
 
     {{-- Tab Selector: Anggota / Tamu Umum --}}
-    <div class="glass-card rounded-2xl shadow-lg p-5 animate-fade" style="animation-delay:0.05s">
+    <div class="glass-card rounded-2xl shadow-lg p-5 animate-fade create-card" style="animation-delay:0.05s">
         <p class="text-sm font-medium text-gray-600 mb-3">Pilih jenis tamu:</p>
         <div class="flex gap-3">
             <button type="button" id="tab-anggota" class="tab-btn active flex-1 py-3 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2" onclick="switchTab('anggota')">
@@ -118,9 +128,9 @@
 
     {{-- Panel Anggota: Search & Scan --}}
     <div id="panel-anggota" class="space-y-5">
-        <div class="glass-card rounded-2xl shadow-lg p-5 animate-fade" style="animation-delay:0.1s">
+        <div class="glass-card rounded-2xl shadow-lg p-5 animate-fade create-card" style="animation-delay:0.1s">
             <h2 class="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <div class="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center"><i class="fas fa-search text-violet-600 text-xs"></i></div>
+                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-search text-blue-600 text-xs"></i></div>
                 Cari atau Scan Anggota
             </h2>
             <div class="flex gap-2">
@@ -133,26 +143,26 @@
                     </div> -->
                 </div>
                 <button type="button" id="search-btn"
-                        class="px-4 py-2.5 bg-violet-100 hover:bg-violet-200 text-violet-700 rounded-xl font-medium transition-colors text-sm">
+                        class="px-4 py-2.5 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-xl font-medium transition-colors text-sm">
                     <i class="fas fa-search"></i>
                 </button>
                 <button type="button" id="scan-btn"
-                        class="scan-btn-pulse px-4 py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white rounded-xl font-medium shadow-md hover:shadow-lg transition-all text-sm flex items-center gap-1.5">
+                        class="scan-btn-pulse px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl font-medium shadow-md hover:shadow-lg transition-all text-sm flex items-center gap-1.5">
                     <i class="fas fa-barcode"></i> Scan
                 </button>
             </div>
             <div id="search-loading" class="text-center mt-3 hidden">
-                <div class="inline-flex items-center gap-2 px-4 py-2 bg-violet-50 rounded-xl">
-                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-violet-600"></div>
-                    <span class="text-sm text-violet-700">Mencari anggota...</span>
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-xl">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    <span class="text-sm text-blue-700">Mencari anggota...</span>
                 </div>
             </div>
         </div>
 
         {{-- Search Results --}}
-        <div id="search-results" class="glass-card rounded-2xl shadow-lg p-5" style="display: none;">
+        <div id="search-results" class="glass-card rounded-2xl shadow-lg p-5 create-card" style="display: none;">
             <h3 class="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <i class="fas fa-users text-violet-500"></i> Hasil Pencarian
+                <i class="fas fa-users text-blue-600"></i> Hasil Pencarian
             </h3>
             <div id="members-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </div>
@@ -199,7 +209,7 @@
         </div>
 
         {{-- Form Kunjungan --}}
-        <div class="glass-card rounded-2xl shadow-lg p-5 animate-fade">
+        <div class="glass-card rounded-2xl shadow-lg p-5 animate-fade create-card">
             <div class="flex items-center gap-2 mb-5">
                 <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center"><i class="fas fa-pen text-emerald-600 text-xs"></i></div>
                 <h3 class="text-sm font-semibold text-gray-800">Form Kunjungan</h3>
@@ -265,7 +275,7 @@
                 {{-- Actions --}}
                 <div class="flex items-center gap-3 pt-4 border-t border-gray-200">
                     <button type="submit"
-                            class="px-6 py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white text-sm font-semibold rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2">
+                            class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-semibold rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2">
                         <i class="fas fa-save"></i> Catat Kunjungan
                     </button>
                     <button type="button" id="reset-form"
@@ -761,7 +771,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <p class="text-sm text-white/70 mb-1">Kamera tidak tersedia</p>
             <p class="text-xs text-white/40 mb-4">Gunakan input barcode manual</p>
             <button type="button" onclick="showManualInputDialog()"
-                    class="px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-semibold text-xs transition-colors">
+                    class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-xs transition-colors">
                 <i class="fas fa-keyboard mr-1.5"></i>Input Manual
             </button>
         </div>`;
@@ -1004,7 +1014,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <p class="text-xs text-gray-500">${member.nomor_anggota} &middot; ${member.kelas}</p>
                                     <p class="text-xs text-gray-400">${member.jurusan}</p>
                                 </div>
-                                <button class="select-member px-3 py-1.5 bg-violet-100 hover:bg-violet-200 text-violet-700 text-xs font-semibold rounded-lg transition-colors flex-shrink-0">
+                                <button class="select-member px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-semibold rounded-lg transition-colors flex-shrink-0">
                                     <i class="fas fa-check mr-1"></i>Pilih
                                 </button>
                             </div>
@@ -1111,7 +1121,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         showToast(message, type = 'info') {
-            const colors = { success: 'bg-emerald-500', warning: 'bg-amber-500', error: 'bg-red-500', info: 'bg-blue-500' };
+            const colors = { success: 'bg-emerald-500', warning: 'bg-amber-500', error: 'bg-red-500', info: 'bg-blue-600' };
             const icons = { success: 'fa-check-circle', warning: 'fa-exclamation-triangle', error: 'fa-times-circle', info: 'fa-info-circle' };
             const el = document.createElement('div');
             el.className = `${colors[type] || colors.info} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 text-sm animate-fade`;

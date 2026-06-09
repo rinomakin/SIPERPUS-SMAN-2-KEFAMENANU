@@ -5,7 +5,6 @@
 
 @push('styles')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
 <style>
     .glass-card {
         background: rgba(255,255,255,0.9);
@@ -31,45 +30,23 @@
     }
     #tabelAnggota_wrapper .dataTables_filter input:focus {
         box-shadow: 0 0 0 3px rgba(99,102,241,.2);
-        border-color: #6366f1;
-    }
-    #tabelAnggota_wrapper .dataTables_info,
-    #tabelAnggota_wrapper .dataTables_length,
-    #tabelAnggota_wrapper .dataTables_filter { font-size: 0.82rem; color: #6b7280; }
-    #tabelAnggota_wrapper .dataTables_paginate .paginate_button {
-        border-radius: .5rem !important;
-        font-size: .8rem !important;
-        padding: .3rem .65rem !important;
-        margin: 0 2px !important;
-        border: 1px solid transparent !important;
-        transition: all .2s !important;
+        border-color: #3b82f6;
     }
     #tabelAnggota_wrapper .dataTables_paginate .paginate_button.current {
-        background: linear-gradient(135deg,#6366f1,#8b5cf6) !important;
-        color: #fff !important;
-        border-color: transparent !important;
+        background: linear-gradient(135deg,#3b82f6,#2563eb) !important;
     }
     #tabelAnggota_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
-        background: #eef2ff !important;
-        color: #4f46e5 !important;
-        border-color: #c7d2fe !important;
+        background: #eff6ff !important;
+        color: #2563eb !important;
+        border-color: #bfdbfe !important;
     }
     table.dataTable thead th {
-        border-bottom: 2px solid #e0e7ff !important;
+        border-bottom: 2px solid #dbeafe !important;
     }
-    table.dataTable tbody tr:hover { background: #f5f3ff !important; }
-    table.dataTable.no-footer { border-bottom: none !important; }
-
-    /* ── Modal backdrop ── */
-    #filterModal { transition: opacity .25s ease; }
-    #filterModalBox { transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .25s ease; }
-
-    /* ── Active filter badge ── */
+    table.dataTable tbody tr:hover { background: #eff6ff !important; }
     .filter-badge {
-        display: inline-flex; align-items: center; gap: 4px;
-        padding: 2px 8px; border-radius: 9999px; font-size: 0.72rem;
-        font-weight: 600; background: #eef2ff; color: #4f46e5;
-        border: 1px solid #c7d2fe;
+        font-weight: 600; background: #eff6ff; color: #2563eb;
+        border: 1px solid #bfdbfe;
     }
 </style>
 @endpush
@@ -93,8 +70,8 @@
                     <h1 class="text-xl font-bold text-gray-900 leading-tight">Laporan Anggota</h1>
                     <p class="text-sm text-gray-500 mt-0.5">
                         Total:
-                        <span class="font-semibold text-indigo-600">{{ $anggota->count() }}</span> anggota
-                        @if(request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','jurusan_id','kelas_id']))
+                        <span class="font-semibold text-blue-600">{{ $totalAnggota }}</span> anggota
+                        @if(request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','kelas_id']))
                         <span class="filter-badge ml-2"><i class="fas fa-filter text-[10px]"></i> Difilter</span>
                         @endif
                     </p>
@@ -106,20 +83,20 @@
                 {{-- Filter Modal Trigger --}}
                 <button onclick="openFilterModal()"
                         class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all
-                               {{ request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','jurusan_id','kelas_id'])
-                                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-200'
-                                  : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-400 hover:text-indigo-600' }}">
+                               {{ request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','kelas_id'])
+                                  ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200'
+                                  : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-600' }}">
                     <i class="fas fa-sliders-h"></i>
                     Filter
-                    @if(request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','jurusan_id','kelas_id']))
+                    @if(request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','kelas_id']))
                     <span class="w-5 h-5 rounded-full bg-white/30 text-xs font-bold flex items-center justify-center">
-                        {{ collect(['tanggal_mulai','jenis_anggota','status','jurusan_id','kelas_id'])->filter(fn($k)=>request()->filled($k))->count() }}
+                        {{ collect(['tanggal_mulai','jenis_anggota','status','kelas_id'])->filter(fn($k)=>request()->filled($k))->count() }}
                     </span>
                     @endif
                 </button>
 
                 {{-- Reset Filter --}}
-                @if(request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','jurusan_id','kelas_id']))
+                @if(request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','kelas_id']))
                 <a href="{{ route('admin.laporan.anggota') }}"
                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 transition-all">
                     <i class="fas fa-times"></i> Reset
@@ -141,7 +118,7 @@
         </div>
 
         {{-- Active filter pills --}}
-        @if(request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','jurusan_id','kelas_id']))
+        @if(request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','kelas_id']))
         <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100">
             @if(request('tanggal_mulai') && request('tanggal_akhir'))
             <span class="filter-badge"><i class="fas fa-calendar-alt text-[10px]"></i> {{ request('tanggal_mulai') }} – {{ request('tanggal_akhir') }}</span>
@@ -151,9 +128,6 @@
             @endif
             @if(request('status'))
             <span class="filter-badge"><i class="fas fa-circle text-[10px]"></i> {{ ucfirst(request('status')) }}</span>
-            @endif
-            @if(request('jurusan_id'))
-            <span class="filter-badge"><i class="fas fa-graduation-cap text-[10px]"></i> {{ $jurusan->firstWhere('id', request('jurusan_id'))?->nama_jurusan ?? 'Jurusan' }}</span>
             @endif
             @if(request('kelas_id'))
             <span class="filter-badge"><i class="fas fa-door-open text-[10px]"></i> {{ $kelas->firstWhere('id', request('kelas_id'))?->nama_kelas ?? 'Kelas' }}</span>
@@ -165,20 +139,12 @@
     {{-- ══════════════════════════════════════════
          STATS CARDS
     ══════════════════════════════════════════ --}}
-    @php
-        $totalAnggota = $anggota->count();
-        $siswa        = $anggota->where('jenis_anggota', 'siswa')->count();
-        $guru         = $anggota->where('jenis_anggota', 'guru')->count();
-        $staff        = $anggota->where('jenis_anggota', 'staff')->count();
-        $aktif        = $anggota->where('status', 'aktif')->count();
-        $nonaktif     = $anggota->where('status', 'nonaktif')->count();
-    @endphp
     <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
         @foreach([
-            ['icon'=>'fas fa-users',              'color'=>'indigo',  'label'=>'Total',      'val'=>$totalAnggota,  'delay'=>'0s'],
+            ['icon'=>'fas fa-users',              'color'=>'blue',  'label'=>'Total',      'val'=>$totalAnggota,  'delay'=>'0s'],
             ['icon'=>'fas fa-user-graduate',       'color'=>'blue',    'label'=>'Siswa',      'val'=>$siswa,         'delay'=>'.05s'],
-            ['icon'=>'fas fa-chalkboard-teacher',  'color'=>'violet',  'label'=>'Guru',       'val'=>$guru,          'delay'=>'.1s'],
-            ['icon'=>'fas fa-briefcase',           'color'=>'purple',  'label'=>'Staff',      'val'=>$staff,         'delay'=>'.15s'],
+            ['icon'=>'fas fa-chalkboard-teacher',  'color'=>'blue',  'label'=>'Guru',       'val'=>$guru,          'delay'=>'.1s'],
+            ['icon'=>'fas fa-briefcase',           'color'=>'blue',  'label'=>'Staff',      'val'=>$staff,         'delay'=>'.15s'],
             ['icon'=>'fas fa-check-circle',        'color'=>'emerald', 'label'=>'Aktif',      'val'=>$aktif,         'delay'=>'.2s'],
             ['icon'=>'fas fa-times-circle',        'color'=>'rose',    'label'=>'Nonaktif',   'val'=>$nonaktif,      'delay'=>'.25s'],
         ] as $card)
@@ -203,8 +169,8 @@
     <div class="glass-card rounded-2xl shadow-lg overflow-hidden animate-fade" style="animation-delay:.3s">
         <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-table text-indigo-600 text-sm"></i>
+                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-table text-blue-600 text-sm"></i>
                 </div>
                 <span class="font-semibold text-gray-800 text-sm">Data Anggota</span>
             </div>
@@ -214,82 +180,18 @@
         <div class="p-4 overflow-x-auto">
             <table id="tabelAnggota" class="w-full no-footer" style="width:100%">
                 <thead>
-                    <tr class="bg-gradient-to-r from-indigo-50 to-purple-50">
-                        <th class="px-3 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wide whitespace-nowrap">No</th>
-                        <th class="px-3 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wide whitespace-nowrap">Nama Lengkap</th>
-                        <th class="px-3 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wide whitespace-nowrap">No. Anggota</th>
-                        <th class="px-3 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wide whitespace-nowrap">L/P</th>
-                        <th class="px-3 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wide whitespace-nowrap">Kelas / Jurusan</th>
-                        <th class="px-3 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wide whitespace-nowrap">Jenis</th>
-                        <th class="px-3 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wide whitespace-nowrap">Status</th>
-                        <th class="px-3 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wide whitespace-nowrap">Tgl Daftar</th>
+                    <tr class="bg-gradient-to-r from-blue-50 to-blue-100">
+                        <th class="px-3 py-3 text-left text-xs font-semibold text-blue-700 uppercase tracking-wide whitespace-nowrap">No</th>
+                        <th class="px-3 py-3 text-left text-xs font-semibold text-blue-700 uppercase tracking-wide whitespace-nowrap">Nama Lengkap</th>
+                        <th class="px-3 py-3 text-left text-xs font-semibold text-blue-700 uppercase tracking-wide whitespace-nowrap">No. Anggota</th>
+                        <th class="px-3 py-3 text-center text-xs font-semibold text-blue-700 uppercase tracking-wide whitespace-nowrap">L/P</th>
+                        <th class="px-3 py-3 text-left text-xs font-semibold text-blue-700 uppercase tracking-wide whitespace-nowrap">Kelas / Jurusan</th>
+                        <th class="px-3 py-3 text-center text-xs font-semibold text-blue-700 uppercase tracking-wide whitespace-nowrap">Jenis</th>
+                        <th class="px-3 py-3 text-center text-xs font-semibold text-blue-700 uppercase tracking-wide whitespace-nowrap">Status</th>
+                        <th class="px-3 py-3 text-left text-xs font-semibold text-blue-700 uppercase tracking-wide whitespace-nowrap">Tgl Daftar</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-sm">
-                    @forelse($anggota as $index => $item)
-                    <tr class="hover:bg-indigo-50/40 transition-colors">
-                        <td class="px-3 py-3 text-gray-500 text-center w-10">{{ $index + 1 }}</td>
-                        <td class="px-3 py-3">
-                            <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0
-                                    {{ $item->jenis_anggota == 'siswa' ? 'bg-blue-100 text-blue-700' :
-                                       ($item->jenis_anggota == 'guru' ? 'bg-violet-100 text-violet-700' : 'bg-purple-100 text-purple-700') }}">
-                                    {{ strtoupper(substr($item->nama_lengkap, 0, 1)) }}
-                                </div>
-                                <span class="font-medium text-gray-900">{{ $item->nama_lengkap }}</span>
-                            </div>
-                        </td>
-                        <td class="px-3 py-3 font-mono text-gray-600 text-xs">{{ $item->nomor_anggota }}</td>
-                        <td class="px-3 py-3 text-center">
-                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold
-                                {{ $item->jenis_kelamin == 'Laki-laki' ? 'bg-sky-100 text-sky-700' : 'bg-pink-100 text-pink-700' }}">
-                                {{ $item->jenis_kelamin == 'Laki-laki' ? 'L' : 'P' }}
-                            </span>
-                        </td>
-                        <td class="px-3 py-3 text-gray-600 text-xs">
-                            @if($item->kelas)
-                                <span class="font-medium">{{ $item->kelas->nama_kelas }}</span>
-                                @if($item->kelas->jurusan)
-                                <br><span class="text-gray-400">{{ $item->kelas->jurusan->nama_jurusan }}</span>
-                                @endif
-                            @else
-                                <span class="text-gray-400">—</span>
-                            @endif
-                        </td>
-                        <td class="px-3 py-3 text-center">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border
-                                {{ $item->jenis_anggota == 'siswa'  ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                   ($item->jenis_anggota == 'guru'  ? 'bg-violet-50 text-violet-700 border-violet-200'
-                                                                     : 'bg-purple-50 text-purple-700 border-purple-200') }}">
-                                {{ ucfirst($item->jenis_anggota) }}
-                            </span>
-                        </td>
-                        <td class="px-3 py-3 text-center">
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border
-                                {{ $item->status == 'aktif'       ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                                   ($item->status == 'nonaktif'   ? 'bg-red-50 text-red-700 border-red-200'
-                                                                  : 'bg-amber-50 text-amber-700 border-amber-200') }}">
-                                <span class="w-1.5 h-1.5 rounded-full
-                                    {{ $item->status == 'aktif' ? 'bg-emerald-500' : ($item->status == 'nonaktif' ? 'bg-red-500' : 'bg-amber-500') }}">
-                                </span>
-                                {{ ucfirst($item->status) }}
-                            </span>
-                        </td>
-                        <td class="px-3 py-3 text-gray-500 text-xs whitespace-nowrap">
-                            {{ $item->created_at ? $item->created_at->format('d/m/Y') : '—' }}
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="9" class="px-6 py-16 text-center">
-                            <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                <i class="fas fa-users text-2xl text-gray-400"></i>
-                            </div>
-                            <h3 class="text-base font-semibold text-gray-900 mb-1">Tidak ada data</h3>
-                            <p class="text-sm text-gray-500">Tidak ada anggota yang sesuai dengan filter</p>
-                        </td>
-                    </tr>
-                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -311,14 +213,14 @@
          class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden scale-95 opacity-0">
 
         {{-- Modal Header --}}
-        <div class="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600">
+        <div class="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                     <i class="fas fa-sliders-h text-white text-sm"></i>
                 </div>
                 <div>
                     <h3 class="text-base font-bold text-white">Filter Laporan</h3>
-                    <p class="text-xs text-indigo-200">Sesuaikan data yang ditampilkan</p>
+                    <p class="text-xs text-blue-200">Sesuaikan data yang ditampilkan</p>
                 </div>
             </div>
             <button onclick="closeFilterModal()"
@@ -333,27 +235,27 @@
 
                 {{-- Rentang Tanggal --}}
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-2">
-                        <i class="fas fa-calendar-alt text-indigo-500 mr-1"></i> Rentang Tanggal Daftar
+                    <label class="block text-xs font-semibold text-gray-900 mb-2">
+                        <i class="fas fa-calendar-alt text-blue-500 mr-1"></i> Rentang Tanggal Daftar
                     </label>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs text-gray-500 mb-1">Dari</label>
+                            <label class="block text-xs text-gray-900 mb-1">Dari</label>
                             <input type="date" name="tanggal_mulai" value="{{ request('tanggal_mulai') }}"
-                                   class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400 outline-none transition">
+                                   class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-400 outline-none transition">
                         </div>
                         <div>
-                            <label class="block text-xs text-gray-500 mb-1">Sampai</label>
-                            <input type="date" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}"
-                                   class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400 outline-none transition">
+                            <label class="block text-xs text-gray-900 mb-1">Sampai</label>
+                            <input type="date" name="tanggal_akhir" value="{{ request('tanggal_akhir') ?: date('Y-m-d') }}"
+                                   class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-400 outline-none transition">
                         </div>
                     </div>
                 </div>
 
                 {{-- Jenis Anggota --}}
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-2">
-                        <i class="fas fa-id-badge text-indigo-500 mr-1"></i> Jenis Anggota
+                    <label class="block text-xs font-semibold text-gray-900 mb-2">
+                        <i class="fas fa-id-badge text-blue-500 mr-1"></i> Jenis Anggota
                     </label>
                     <div class="grid grid-cols-4 gap-2">
                         @foreach(['' => 'Semua', 'siswa' => 'Siswa', 'guru' => 'Guru', 'staff' => 'Staff'] as $val => $label)
@@ -362,8 +264,8 @@
                                    {{ request('jenis_anggota', '') === $val ? 'checked' : '' }}
                                    class="sr-only peer">
                             <div class="text-center px-2 py-2 rounded-xl border text-xs font-medium transition-all
-                                        peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
-                                        border-gray-200 text-gray-600 hover:border-indigo-400 hover:text-indigo-600">
+                                        peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600
+                                        border-gray-200 text-gray-900 hover:border-blue-400 hover:text-blue-600">
                                 {{ $label }}
                             </div>
                         </label>
@@ -373,8 +275,8 @@
 
                 {{-- Status --}}
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-2">
-                        <i class="fas fa-toggle-on text-indigo-500 mr-1"></i> Status Anggota
+                    <label class="block text-xs font-semibold text-gray-900 mb-2">
+                        <i class="fas fa-toggle-on text-blue-500 mr-1"></i> Status Anggota
                     </label>
                     <div class="grid grid-cols-4 gap-2">
                         @foreach(['' => 'Semua', 'aktif' => 'Aktif', 'nonaktif' => 'Nonaktif', 'ditangguhkan' => 'Tangguh'] as $val => $label)
@@ -383,8 +285,8 @@
                                    {{ request('status', '') === $val ? 'checked' : '' }}
                                    class="sr-only peer">
                             <div class="text-center px-2 py-2 rounded-xl border text-xs font-medium transition-all
-                                        peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
-                                        border-gray-200 text-gray-600 hover:border-indigo-400 hover:text-indigo-600">
+                                        peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600
+                                        border-gray-200 text-gray-900 hover:border-blue-400 hover:text-blue-600">
                                 {{ $label }}
                             </div>
                         </label>
@@ -392,32 +294,14 @@
                     </div>
                 </div>
 
-                {{-- Jurusan --}}
-                @if($jurusan->count())
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-2">
-                        <i class="fas fa-graduation-cap text-indigo-500 mr-1"></i> Jurusan
-                    </label>
-                    <select name="jurusan_id"
-                            class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400 outline-none transition">
-                        <option value="">Semua Jurusan</option>
-                        @foreach($jurusan as $j)
-                        <option value="{{ $j->id }}" {{ request('jurusan_id') == $j->id ? 'selected' : '' }}>
-                            {{ $j->nama_jurusan }}
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
-                @endif
-
                 {{-- Kelas --}}
                 @if($kelas->count())
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-2">
-                        <i class="fas fa-door-open text-indigo-500 mr-1"></i> Kelas
+                    <label class="block text-xs font-semibold text-gray-900 mb-2">
+                        <i class="fas fa-door-open text-blue-500 mr-1"></i> Kelas
                     </label>
                     <select name="kelas_id"
-                            class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400 outline-none transition">
+                            class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-400 outline-none transition">
                         <option value="">Semua Kelas</option>
                         @foreach($kelas as $k)
                         <option value="{{ $k->id }}" {{ request('kelas_id') == $k->id ? 'selected' : '' }}>
@@ -437,7 +321,7 @@
                     <i class="fas fa-undo text-xs"></i> Reset Filter
                 </a>
                 <button type="submit"
-                        class="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-md shadow-indigo-200 hover:shadow-lg hover:opacity-90 transition-all">
+                        class="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 shadow-md shadow-blue-200 hover:shadow-lg hover:opacity-90 transition-all">
                     <i class="fas fa-filter text-xs"></i> Terapkan Filter
                 </button>
             </div>
@@ -449,21 +333,66 @@
 @push('scripts')
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 <script>
 $(document).ready(function () {
     $('#tabelAnggota').DataTable({
-        responsive: true,
-        language: {
-            url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/id.json',
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '{{ route("admin.laporan.anggota") }}',
+            type: 'GET',
+            data: function(d) {
+                var params = new URLSearchParams(window.location.search);
+                d.tanggal_mulai = params.get('tanggal_mulai') || '';
+                d.tanggal_akhir = params.get('tanggal_akhir') || '';
+                d.jenis_anggota = params.get('jenis_anggota') || '';
+                d.status = params.get('status') || '';
+                d.kelas_id = params.get('kelas_id') || '';
+            }
         },
+        columns: [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+            { data: 'nama_lengkap', name: 'nama_lengkap' },
+            { data: 'nomor_anggota', name: 'nomor_anggota' },
+            { data: 'jenis_kelamin_label', name: 'jenis_kelamin' },
+            { data: 'kelas_jurusan', name: 'kelas.nama_kelas' },
+            { data: 'jenis_anggota_label', name: 'jenis_anggota' },
+            { data: 'status_label', name: 'status' },
+            { data: 'tanggal_daftar', name: 'created_at' },
+        ],
+        language: {
+            processing: '<div class="flex items-center justify-center py-3"><div class="w-5 h-5 rounded-full border-2 border-blue-200 border-t-blue-600 animate-spin"></div><span class="ml-2 text-xs text-gray-500">Memuat...</span></div>',
+            paginate: {
+                previous: '<i class="fas fa-angle-left"></i>',
+                next: '<i class="fas fa-angle-right"></i>',
+            },
+            info: 'Menampilkan _START_–_END_ dari <b>_TOTAL_</b>',
+            infoEmpty: 'Tidak ada data',
+            infoFiltered: '(difilter dari _MAX_)',
+            lengthMenu: '_MENU_',
+            search: 'Cari:',
+            zeroRecords: 'Tidak ada data ditemukan',
+            emptyTable: 'Tidak ada data',
+        },
+        pagingType: 'simple_numbers',
         pageLength: 25,
         lengthMenu: [10, 25, 50, 100],
-        order: [],
-        columnDefs: [
-            { orderable: false, targets: [0] },
-        ],
-        dom: '<"flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4"lf>t<"flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4"ip>',
+        order: [[1, 'asc']],
+        dom: '<"flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4"lf>t<"flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4"<"text-xs text-gray-400"i><"dt-pager"p>>',
+        drawCallback: function () {
+            var api = this.api();
+            var info = api.page.info();
+            var current = info.page + 1;
+            var total = info.pages;
+            var start = current;
+            var end = Math.min(current + 1, total);
+            $('#tabelAnggota_wrapper').find('.paginate_button')
+                .not('.previous, .next')
+                .each(function () {
+                    var num = parseInt($(this).text());
+                    $(this).toggle(num >= start && num <= end);
+                });
+        },
     });
 });
 
@@ -474,6 +403,15 @@ function openFilterModal() {
     modal.classList.remove('opacity-0', 'pointer-events-none');
     box.classList.remove('scale-95', 'opacity-0');
     document.body.style.overflow = 'hidden';
+
+    var akhirInput = document.querySelector('[name="tanggal_akhir"]');
+    if (akhirInput && !akhirInput.value) {
+        var today = new Date();
+        var yyyy = today.getFullYear();
+        var mm = String(today.getMonth() + 1).padStart(2, '0');
+        var dd = String(today.getDate()).padStart(2, '0');
+        akhirInput.value = yyyy + '-' + mm + '-' + dd;
+    }
 }
 
 function closeFilterModal() {
@@ -494,7 +432,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 // Auto-open modal if filter was active but returned empty
-@if(request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','jurusan_id','kelas_id']) && $anggota->isEmpty())
+@if(request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','kelas_id']) && $totalAnggota < 1)
 openFilterModal();
 @endif
 </script>

@@ -9,7 +9,6 @@ use App\Models\Denda;
 use App\Models\Peminjaman;
 use App\Models\Pengembalian;
 use App\Models\BukuTamu;
-use App\Models\Jurusan;
 use App\Models\KategoriBuku;
 use App\Models\JenisBuku;
 use App\Models\Kelas;
@@ -66,26 +65,97 @@ class LaporanController extends Controller
             $query->where('status', $request->status);
         }
 
-        if ($request->filled('jurusan_id')) {
+        if ($request->filled('kelas_id')) {
             $query->whereHas('kelas', function($q) use ($request) {
-                $q->where('jurusan_id', $request->jurusan_id);
+                $q->where('id', $request->kelas_id);
             });
         }
 
-        $anggota = $query->orderBy('created_at', 'desc')->get();
-        $jurusan = Jurusan::all();
+        // DataTables server-side
+        if ($request->ajax() && $request->filled('draw')) {
+            $columns = $request->columns ?? [];
+            $orderColName = $columns[$request->order[0]['column']]['name'] ?? 'created_at';
+            $orderDir = $request->order[0]['dir'] ?? 'desc';
+
+            $orderMap = [
+                'nama_lengkap' => 'nama_lengkap',
+                'nomor_anggota' => 'nomor_anggota',
+                'jenis_kelamin' => 'jenis_kelamin',
+                'jenis_anggota' => 'jenis_anggota',
+                'status' => 'status',
+                'created_at' => 'created_at',
+            ];
+            $orderColumn = $orderMap[$orderColName] ?? 'created_at';
+
+            $recordsTotal = $query->count();
+
+            if ($search = $request->search['value']) {
+                $query->where(function($q) use ($search) {
+                    $q->where('nama_lengkap', 'like', "%{$search}%")
+                      ->orWhere('nomor_anggota', 'like', "%{$search}%")
+                      ->orWhere('jenis_kelamin', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+
+            $recordsFiltered = $query->count();
+
+            $data = $query->orderBy($orderColumn, $orderDir)
+                ->skip($request->start)
+                ->take($request->length)
+                ->get()
+                ->map(function($item, $index) use ($request) {
+                    $rowIndex = $request->start + $index + 1;
+                    $jk = $item->jenis_kelamin == 'Laki-laki' ? 'L' : 'P';
+                    $jkClass = $item->jenis_kelamin == 'Laki-laki' ? 'bg-sky-100 text-sky-700' : 'bg-pink-100 text-pink-700';
+                    return [
+                        'DT_RowIndex' => $rowIndex,
+                        'nama_lengkap' => '<span class="font-medium text-gray-900">' . e($item->nama_lengkap) . '</span>',
+                        'nomor_anggota' => '<span class="font-mono text-gray-600 text-xs">' . e($item->nomor_anggota) . '</span>',
+                        'jenis_kelamin_label' => '<span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ' . $jkClass . '">' . $jk . '</span>',
+                        'kelas_jurusan' => $item->kelas
+                            ? '<span class="font-medium text-xs text-gray-600">' . e($item->kelas->nama_kelas) . '</span>' . ($item->kelas->jurusan ? '<br><span class="text-gray-400 text-xs">' . e($item->kelas->jurusan->nama_jurusan) . '</span>' : '')
+                            : '<span class="text-gray-400 text-xs">—</span>',
+                        'jenis_anggota_label' => '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border bg-blue-50 text-blue-700 border-blue-200">' . ucfirst(e($item->jenis_anggota)) . '</span>',
+                        'status_label' => '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ' .
+                            ($item->status == 'aktif' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ($item->status == 'nonaktif' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-amber-50 text-amber-700 border-amber-200')) .
+                            '"><span class="w-1.5 h-1.5 rounded-full ' .
+                            ($item->status == 'aktif' ? 'bg-emerald-500' : ($item->status == 'nonaktif' ? 'bg-red-500' : 'bg-amber-500')) .
+                            '"></span> ' . ucfirst(e($item->status)) . '</span>',
+                        'tanggal_daftar' => $item->created_at
+                            ? '<span class="text-gray-500 text-xs whitespace-nowrap">' . $item->created_at->format('d/m/Y') . '</span>'
+                            : '<span class="text-xs text-gray-400">—</span>',
+                    ];
+                });
+
+            return response()->json([
+                'draw' => (int) $request->draw,
+                'recordsTotal' => $recordsTotal,
+                'recordsFiltered' => $recordsFiltered,
+                'data' => $data,
+            ]);
+        }
+
         $kelas = Kelas::with('jurusan')->get();
 
         if ($request->filled('export') && $request->export === 'excel') {
+            $anggota = $query->orderBy('created_at', 'desc')->get();
             return Excel::download(new AnggotaExport($anggota), 'laporan-anggota-' . date('Y-m-d') . '.xlsx');
         }
 
         if ($request->filled('export') && $request->export === 'pdf') {
+            $anggota = $query->orderBy('created_at', 'desc')->get();
             return $this->generatePdf('admin.laporan.pdf.anggota', compact('anggota'), 'laporan-anggota-' . date('Y-m-d') . '.pdf');
         }
 
+        $totalAnggota = $query->count();
+        $siswa = (clone $query)->where('jenis_anggota', 'siswa')->count();
+        $guru = (clone $query)->where('jenis_anggota', 'guru')->count();
+        $staff = (clone $query)->where('jenis_anggota', 'staff')->count();
+        $aktif = (clone $query)->where('status', 'aktif')->count();
+        $nonaktif = (clone $query)->where('status', 'nonaktif')->count();
         $pengaturan = $this->getPengaturan();
-        return view('admin.laporan.anggota', compact('anggota', 'jurusan', 'kelas', 'pengaturan'));
+        return view('admin.laporan.anggota', compact('totalAnggota', 'siswa', 'guru', 'staff', 'aktif', 'nonaktif', 'kelas', 'pengaturan'));
     }
 
     public function buku(Request $request)

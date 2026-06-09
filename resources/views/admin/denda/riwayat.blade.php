@@ -5,9 +5,6 @@
 @push('styles')
 <style>
 /* ===== Dark Mode Overrides: Denda Riwayat ===== */
-html[data-theme="dark"] .stat-card .stat-icon {
-    filter: brightness(0.65) saturate(1.4);
-}
 html[data-theme="dark"] .modal-box {
     background: #1e293b !important;
     border-color: #334155 !important;
@@ -28,16 +25,6 @@ html[data-theme="dark"] .filter-select {
     border-color: #334155 !important;
     color: #f1f5f9 !important;
 }
-/* DataTables ID-based overrides */
-html[data-theme="dark"] #riwayat-table_wrapper .dataTables_length {
-    border-color: #334155 !important;
-    color: #94a3b8 !important;
-}
-html[data-theme="dark"] #riwayat-table_wrapper .dataTables_length select {
-    background-color: #0f172a !important;
-    border-color: #334155 !important;
-    color: #f1f5f9 !important;
-}
 html[data-theme="dark"] #riwayat-table_wrapper .dataTables_info { color: #64748b !important; }
 html[data-theme="dark"] #riwayat-table_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
     background: #1e293b !important;
@@ -52,7 +39,6 @@ html[data-theme="dark"] .riwayat-table tbody td { border-color: #1e293b !importa
 html[data-theme="dark"] .riwayat-table tbody tr:hover { background: rgba(99,102,241,0.06) !important; }
 html[data-theme="dark"] .riwayat-table tbody tr.selected-row { background: rgba(59,130,246,0.12) !important; }
 html[data-theme="dark"] .dt-bottom-bar { border-color: #334155 !important; }
-html[data-theme="dark"] .glass-card > .border-b { border-color: #334155 !important; }
 html[data-theme="dark"] .avatar-img { border-color: #334155 !important; }
 /* Active filter bar */
 html[data-theme="dark"] .bg-emerald-50\/60 { background-color: rgba(16,185,129,0.08) !important; }
@@ -65,32 +51,6 @@ html[data-theme="dark"] .border-emerald-100 { border-color: rgba(16,185,129,0.2)
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
 
 <style>
-/* ===== Stat Cards ===== */
-.stat-card {
-    background: white; border-radius: 16px; padding: 20px; position: relative; overflow: hidden;
-    border: 1px solid rgba(0,0,0,0.04);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
-    transition: all 0.3s ease;
-}
-.stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-.stat-card .stat-icon {
-    width: 48px; height: 48px; border-radius: 14px;
-    display: flex; align-items: center; justify-content: center; font-size: 18px;
-}
-.stat-card .stat-bg {
-    position: absolute; top: -20px; right: -20px;
-    width: 90px; height: 90px; border-radius: 50%; opacity: 0.06;
-}
-.stat-card .stat-value { font-size: 22px; font-weight: 800; line-height: 1.2; }
-.stat-card .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #9ca3af; }
-
-/* ===== Glass Card ===== */
-.glass-card {
-    background: rgba(255,255,255,0.97); backdrop-filter: blur(20px);
-    border-radius: 16px; border: 1px solid rgba(255,255,255,0.8);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.06); overflow: hidden;
-}
-
 /* ===== Animations ===== */
 @keyframes fadeInUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 .anim-up  { animation: fadeInUp 0.4s ease forwards; }
@@ -163,23 +123,70 @@ html[data-theme="dark"] .border-emerald-100 { border-color: rgba(16,185,129,0.2)
     border-radius: 20px; font-size: 11px; font-weight: 600; transition: all 0.2s;
 }
 
+/* ===== Header Buttons ===== */
+.riwayat-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 8px;
+    font-size: 12px; font-weight: 600;
+    transition: all 0.2s ease; cursor: pointer;
+    border: 1px solid #e5e7eb; text-decoration: none;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.riwayat-btn i { font-size: 11px; }
+.riwayat-btn-filter {
+    background: white; color: #374151;
+}
+.riwayat-btn-filter:hover {
+    background: #ecfdf5; color: #059669;
+    border-color: #a7f3d0; box-shadow: 0 1px 4px rgba(16,185,129,0.15);
+}
+.riwayat-btn-filter.active {
+    background: #10b981; color: white;
+    border-color: #10b981; box-shadow: 0 2px 6px rgba(16,185,129,0.25);
+}
+.riwayat-btn-filter.active:hover {
+    background: #059669; border-color: #059669;
+}
+/* ===== Table Scroll ===== */
+.table-scroll-wrap .dataTables_scrollBody {
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db transparent;
+}
+.table-scroll-wrap .dataTables_scrollBody::-webkit-scrollbar {
+    height: 4px;
+}
+.table-scroll-wrap .dataTables_scrollBody::-webkit-scrollbar-track {
+    background: transparent;
+}
+.table-scroll-wrap .dataTables_scrollBody::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+}
+.table-scroll-wrap .dataTables_scrollBody::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
 /* ===== DataTables Override ===== */
 #riwayat-table_wrapper .dataTables_filter { display: none !important; }
 #riwayat-table_wrapper { overflow: visible !important; }
-#riwayat-table_wrapper .dataTables_length {
-    padding: 14px 20px; font-size: 12px; color: #6b7280;
-    display: flex; align-items: center; gap: 8px;
+
+/* Responsive */
+@media (max-width: 639px) {
+    .riwayat-btn { font-size: 10px !important; padding: 5px 10px !important; gap: 4px !important; }
+    .riwayat-btn i { font-size: 9px !important; }
+    #riwayat-table_wrapper .dataTables_info { font-size: 10px !important; padding: 8px 8px 8px 12px !important; }
+    #riwayat-table_wrapper .dataTables_paginate {
+        padding: 8px 12px 8px 8px !important;
+    }
+    #riwayat-table_wrapper .dataTables_paginate .paginate_button {
+        min-width: 22px !important; height: 22px !important; font-size: 9px !important; padding: 0 3px !important; margin: 0 1px !important;
+    }
+    #riwayat-table_wrapper .dataTables_paginate .paginate_button.previous,
+    #riwayat-table_wrapper .dataTables_paginate .paginate_button.next {
+        min-width: 18px !important; height: 22px !important; padding: 0 2px !important;
+    }
+    .dt-bottom-bar { padding: 0 !important; }
 }
-#riwayat-table_wrapper .dataTables_length label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #6b7280; }
-#riwayat-table_wrapper .dataTables_length select {
-    padding: 5px 28px 5px 10px; border-radius: 8px; border: 1px solid #e5e7eb;
-    background: #f9fafb; font-size: 12px; cursor: pointer; outline: none;
-    -webkit-appearance: none; appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 8px center;
-    transition: all 0.2s;
-}
-#riwayat-table_wrapper .dataTables_length select:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
 #riwayat-table_wrapper .dataTables_info { padding: 14px 20px; font-size: 12px; color: #9ca3af; }
 #riwayat-table_wrapper .dataTables_paginate { padding: 10px 20px; }
 #riwayat-table_wrapper .dataTables_paginate .paginate_button {
@@ -283,89 +290,45 @@ html[data-theme="dark"] .border-emerald-100 { border-color: rgba(16,185,129,0.2)
 .filter-select:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); background: white; }
 </style>
 
-@php $canDelete = Auth::user()->isAdmin() || Auth::user()->isPetugas(); @endphp
+@php
+    $canDelete = Auth::user()->isAdmin() || Auth::user()->isPetugas();
+    $activeFilterCount = collect([request('search'), request('tanggal_mulai'), request('tanggal_selesai'), request('kelas_id'), request('jurusan_id')])->filter()->count();
+@endphp
 <div class="max-w-7xl mx-auto pb-24">
 
-    {{-- ===== Statistics Cards ===== --}}
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="stat-card anim-up anim-d1">
-            <div class="stat-bg" style="background:#10b981;"></div>
-            <div class="flex items-center gap-3 mb-3">
-                <div class="stat-icon" style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);color:#10b981;">
-                    <i class="fas fa-check-double"></i>
-                </div>
+    {{-- ===== White Header ===== --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 mb-3 sm:mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 anim-up anim-d1">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
+                <i class="fas fa-history text-[10px] sm:text-sm"></i>
             </div>
-            <p class="stat-label mb-1">Total Dibayar</p>
-            <p class="stat-value text-emerald-600">Rp {{ number_format($totalDendaDibayar, 0, ',', '.') }}</p>
+            <div>
+                <h2 class="text-xs sm:text-sm font-bold text-gray-900">Riwayat Pembayaran Denda</h2>
+                <p class="text-[10px] sm:text-[11px] text-gray-400">{{ $riwayat->count() }} transaksi denda lunas tercatat</p>
+            </div>
         </div>
-        <div class="stat-card anim-up anim-d2">
-            <div class="stat-bg" style="background:#3b82f6;"></div>
-            <div class="flex items-center gap-3 mb-3">
-                <div class="stat-icon" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);color:#3b82f6;">
-                    <i class="fas fa-receipt"></i>
-                </div>
+        <div class="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+            <div class="relative flex-1 gap-2 sm:flex-none">
+                <span class="absolute inset-y-0 right-2 pl-2.5 sm:pl-3 flex items-center text-gray-400 pointer-events-none">
+                    <i class="fas fa-search text-[9px] sm:text-[14px]"></i>
+                </span>
+                <input type="text" id="riwayatSearchInput"
+                       placeholder="Cari anggota..."
+                       class="pl-1 sm:pl-9 pr-3 sm:pr-4 py-2.5 sm:py-2 rounded-lg text-[10px] sm:text-xs border border-gray-200 bg-gray placeholder:text-black hover:bg-gray-200 hover:border-gray-300 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all duration-200 w-full sm:w-44">
             </div>
-            <p class="stat-label mb-1">Jumlah Transaksi</p>
-            <p class="stat-value text-blue-600">{{ number_format($jumlahTransaksi, 0, ',', '.') }}</p>
-        </div>
-        <div class="stat-card anim-up anim-d3">
-            <div class="stat-bg" style="background:#8b5cf6;"></div>
-            <div class="flex items-center gap-3 mb-3">
-                <div class="stat-icon" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);color:#8b5cf6;">
-                    <i class="fas fa-calendar-alt"></i>
-                </div>
-            </div>
-            <p class="stat-label mb-1">Bulan Ini</p>
-            <p class="stat-value text-violet-600">Rp {{ number_format($dendaBulanIni, 0, ',', '.') }}</p>
-        </div>
-        <div class="stat-card anim-up anim-d4">
-            <div class="stat-bg" style="background:#f59e0b;"></div>
-            <div class="flex items-center gap-3 mb-3">
-                <div class="stat-icon" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);color:#f59e0b;">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-            </div>
-            <p class="stat-label mb-1">Rata-rata Denda</p>
-            <p class="stat-value text-amber-600">Rp {{ number_format($rataRataDenda, 0, ',', '.') }}</p>
+            <button type="button" id="openFilterModal"
+                    class="riwayat-btn riwayat-btn-filter {{ $activeFilterCount > 0 ? 'active' : '' }}">
+                <i class="fas fa-sliders-h"></i>
+                <span>Filter</span>
+                @if($activeFilterCount > 0)
+                    <span class="inline-flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white/20 text-white text-[8px] sm:text-[10px] font-extrabold">{{ $activeFilterCount }}</span>
+                @endif
+            </button>
         </div>
     </div>
 
-    {{-- ===== Main Card ===== --}}
-    <div class="glass-card anim-up" style="animation-delay:0.25s;opacity:0;">
-
-        {{-- Header --}}
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between px-5 py-4 border-b border-gray-100">
-            <div class="flex items-center gap-3 mb-3 sm:mb-0">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white">
-                    <i class="fas fa-history text-xs"></i>
-                </div>
-                <div>
-                    <h2 class="text-sm font-bold text-gray-900">Riwayat Pembayaran Denda</h2>
-                    <p class="text-[11px] text-gray-400">{{ $riwayat->count() }} transaksi denda lunas tercatat</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 flex-wrap">
-                {{-- Filter Button --}}
-                @php
-                    $activeFilterCount = collect([request('search'), request('tanggal_mulai'), request('tanggal_selesai'), request('kelas_id'), request('jurusan_id')])->filter()->count();
-                @endphp
-                <button type="button" id="openFilterModal"
-                        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all border
-                               {{ $activeFilterCount > 0 ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm' : 'bg-gray-50 hover:bg-emerald-50 text-gray-600 hover:text-emerald-600 border-gray-200 hover:border-emerald-200' }}">
-                    <i class="fas fa-sliders-h"></i>
-                    <span>Filter</span>
-                    @if($activeFilterCount > 0)
-                        <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white text-emerald-600 text-[10px] font-extrabold">{{ $activeFilterCount }}</span>
-                    @endif
-                </button>
-                {{-- Kembali --}}
-                <a href="{{ route('admin.denda.index') }}"
-                   class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-xs font-semibold transition-all border border-gray-200">
-                    <i class="fas fa-arrow-left"></i>
-                    <span class="hidden sm:inline">Kembali</span>
-                </a>
-            </div>
-        </div>
+    {{-- ===== Table Card ===== --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden anim-up" style="animation-delay:0.10s;opacity:0;">
 
         {{-- Active Filter Chips --}}
         @if($activeFilterCount > 0)
@@ -413,7 +376,7 @@ html[data-theme="dark"] .border-emerald-100 { border-color: rgba(16,185,129,0.2)
         @endif
 
         {{-- DataTables Table --}}
-        <div>
+        <div class="table-scroll-wrap">
             <table id="riwayat-table" class="riwayat-table">
                 <thead>
                     <tr>
@@ -521,7 +484,7 @@ html[data-theme="dark"] .border-emerald-100 { border-color: rgba(16,185,129,0.2)
             </table>
         </div>
 
-    </div>{{-- end glass-card --}}
+    </div>{{-- end table card --}}
 
 </div>{{-- end max-w-7xl --}}
 
@@ -655,11 +618,9 @@ $(document).ready(function () {
     // ========================
     var riwayatTable = $('#riwayat-table').DataTable({
         dom:
-            '<"flex items-center justify-between px-5 py-3 border-b border-gray-50 bg-gray-50/30"<"text-xs text-gray-500"l>>' +
             'rt' +
-            '<"dt-bottom-bar px-5 py-3"<"text-xs text-gray-400"i><"dt-pager"p>>',
+            '<"dt-bottom-bar px-4 py-2.5"<"text-xs text-gray-400"i><"dt-pager"p>>',
         language: {
-            lengthMenu: 'Tampilkan _MENU_ entri',
             info: 'Menampilkan _START_–_END_ dari <b>_TOTAL_</b> data',
             infoEmpty: 'Tidak ada data',
             infoFiltered: '(difilter dari _MAX_ total data)',
@@ -680,9 +641,28 @@ $(document).ready(function () {
                 <p style="font-size:11px;color:#9ca3af;">Coba ubah kata kunci atau filter pencarian</p>
             </div>`,
         },
+        scrollX: true,
+        pagingType: 'simple_numbers',
         pageLength: 10,
-        lengthMenu: [[10, 25, 50, 100, -1], ['10', '25', '50', '100', 'Semua']],
         order: [[5, 'desc']],
+        drawCallback: function () {
+            if (window.innerWidth < 640) {
+                var api = this.api();
+                var info = api.page.info();
+                var current = info.page + 1;
+                var total = info.pages;
+                var start = current;
+                var end = Math.min(current + 1, total);
+                api.paginate().container.find('.paginate_button')
+                    .not('.previous, .next')
+                    .each(function () {
+                        var num = parseInt($(this).text());
+                        $(this).toggle(num >= start && num <= end);
+                    });
+            } else {
+                $(this.api().paginate().container).find('.paginate_button').not('.previous, .next').show();
+            }
+        },
         columns: [
             { orderable: false, searchable: false }, // checkbox
             { orderable: true  },                    // anggota
@@ -804,6 +784,17 @@ $(document).ready(function () {
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') filterModal.classList.remove('active');
+    });
+
+    // ========================
+    // Search Input
+    // ========================
+    var searchTimer;
+    $('#riwayatSearchInput').on('keyup', function () {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function () {
+            riwayatTable.search($('#riwayatSearchInput').val()).draw();
+        }, 400);
     });
 
 });

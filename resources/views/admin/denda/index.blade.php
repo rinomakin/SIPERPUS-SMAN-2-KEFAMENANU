@@ -72,11 +72,13 @@
 [data-theme="dark"] .glass-card .border-green-100 { border-color: rgba(16,185,129,0.2) !important; }
 [data-theme="dark"] .glass-card .text-green-700   { color: #6ee7b7 !important; }
 
-/* DataTables length bar */
+/* DataTables length bar & wrapper */
 [data-theme="dark"] #denda-table_wrapper .dataTables_length {
-    border-bottom-color: #334155 !important;
     color: #64748b !important;
+}
+[data-theme="dark"] #denda-table_wrapper .flex.flex-wrap.items-center {
     background: #1e293b !important;
+    border-color: #334155 !important;
 }
 [data-theme="dark"] #denda-table_wrapper .dataTables_length label { color: #64748b !important; }
 [data-theme="dark"] #denda-table_wrapper .dataTables_length select {
@@ -179,22 +181,24 @@
 <style>
 /* ===== Stat Cards ===== */
 .stat-card {
-    background: white; border-radius: 16px; padding: 20px; position: relative; overflow: hidden;
+    background: white; border-radius: 12px; padding: 12px; position: relative; overflow: hidden;
     border: 1px solid rgba(0,0,0,0.04);
     box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
     transition: all 0.3s ease;
 }
 .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
 .stat-card .stat-icon {
-    width: 48px; height: 48px; border-radius: 14px;
-    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    width: 32px; height: 32px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; font-size: 13px;
 }
 .stat-card .stat-bg {
-    position: absolute; top: -20px; right: -20px; width: 90px; height: 90px;
-    border-radius: 50%; opacity: 0.06;
+    position: absolute; top: 0; right: 0; width: 80px; height: 80px;
+    border-radius: 50%; filter: blur(40px); opacity: 0.12;
+    transform: translate(30px, -30px); pointer-events: none;
 }
-.stat-card .stat-value { font-size: 22px; font-weight: 800; line-height: 1.2; }
-.stat-card .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #9ca3af; }
+@media (max-width: 767px) { .denda-stats { display: none !important; } }
+.stat-card .stat-value { font-size: 16px; font-weight: 800; line-height: 1.2; }
+.stat-card .stat-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #9ca3af; }
 
 /* ===== Glass Card ===== */
 .glass-card {
@@ -280,27 +284,45 @@
 /* ===== DataTables Override ===== */
 #denda-table_wrapper .dataTables_filter { display: none !important; }
 #denda-table_wrapper { overflow: visible !important; }
-#denda-table_wrapper .dataTables_scrollBody { overflow-x: auto; }
 
 #denda-table_wrapper .dataTables_length {
-    padding: 14px 20px;
-    border-bottom: 1px solid #f1f5f9;
-    font-size: 12px;
+    padding: 0;
+    border-bottom: none;
+    font-size: 11px;
     color: #6b7280;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
+    white-space: nowrap;
 }
-#denda-table_wrapper .dataTables_length label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #6b7280; }
+#denda-table_wrapper .dataTables_length label { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #6b7280; margin: 0; }
 #denda-table_wrapper .dataTables_length select {
-    padding: 5px 28px 5px 10px; border-radius: 8px; border: 1px solid #e5e7eb;
-    background: #f9fafb; font-size: 12px; cursor: pointer; outline: none;
+    padding: 3px 24px 3px 8px; border-radius: 6px; border: 1px solid #e5e7eb;
+    background: #f9fafb; font-size: 11px; cursor: pointer; outline: none;
     -webkit-appearance: none; -moz-appearance: none; appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 8px center;
-    transition: all 0.2s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 6px center;
+    background-size: 10px; transition: all 0.2s;
 }
 #denda-table_wrapper .dataTables_length select:focus { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
+
+/* Responsive: compact table actions on mobile */
+@media (max-width: 639px) {
+    #table-actions-container .inline-flex,
+    #table-actions-container a {
+        font-size: 10px !important;
+        padding: 2px 6px !important;
+        gap: 2px !important;
+    }
+    #table-actions-container .inline-flex i,
+    #table-actions-container a i {
+        font-size: 9px !important;
+    }
+    #table-actions-container .inline-flex span,
+    #table-actions-container a span {
+        display: none !important;
+    }
+}
 
 #denda-table_wrapper .dataTables_info {
     padding: 14px 20px; font-size: 12px; color: #9ca3af;
@@ -403,97 +425,94 @@
 <div class="max-w-7xl mx-auto">
 
     {{-- ===== Statistics Cards ===== --}}
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-4 denda-stats">
         <div class="stat-card anim-up anim-d1">
             <div class="stat-bg" style="background:#ef4444;"></div>
-            <div class="flex items-center gap-3 mb-3">
+            <div class="flex items-center gap-2 mb-2">
                 <div class="stat-icon" style="background:linear-gradient(135deg,#fef2f2,#fee2e2);color:#ef4444;">
                     <i class="fas fa-coins"></i>
                 </div>
             </div>
-            <p class="stat-label mb-1">Total Denda</p>
+            <p class="stat-label mb-0.5">Total Denda</p>
             <p class="stat-value text-gray-900">Rp {{ number_format($totalDenda, 0, ',', '.') }}</p>
         </div>
         <div class="stat-card anim-up anim-d2">
             <div class="stat-bg" style="background:#f59e0b;"></div>
-            <div class="flex items-center gap-3 mb-3">
+            <div class="flex items-center gap-2 mb-2">
                 <div class="stat-icon" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);color:#f59e0b;">
                     <i class="fas fa-hourglass-half"></i>
                 </div>
             </div>
-            <p class="stat-label mb-1">Belum Dibayar</p>
+            <p class="stat-label mb-0.5">Belum Dibayar</p>
             <p class="stat-value text-amber-600">Rp {{ number_format($dendaBelumDibayar, 0, ',', '.') }}</p>
         </div>
         <div class="stat-card anim-up anim-d3">
             <div class="stat-bg" style="background:#10b981;"></div>
-            <div class="flex items-center gap-3 mb-3">
+            <div class="flex items-center gap-2 mb-2">
                 <div class="stat-icon" style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);color:#10b981;">
                     <i class="fas fa-check-double"></i>
                 </div>
             </div>
-            <p class="stat-label mb-1">Sudah Dibayar</p>
+            <p class="stat-label mb-0.5">Sudah Dibayar</p>
             <p class="stat-value text-emerald-600">Rp {{ number_format($dendaSudahDibayar, 0, ',', '.') }}</p>
         </div>
         <div class="stat-card anim-up anim-d4">
             <div class="stat-bg" style="background:#6366f1;"></div>
-            <div class="flex items-center gap-3 mb-3">
+            <div class="flex items-center gap-2 mb-2">
                 <div class="stat-icon" style="background:linear-gradient(135deg,#eef2ff,#e0e7ff);color:#6366f1;">
                     <i class="fas fa-calendar-day"></i>
                 </div>
             </div>
-            <p class="stat-label mb-1">Denda Hari Ini</p>
+            <p class="stat-label mb-0.5">Denda Hari Ini</p>
             <p class="stat-value text-indigo-600">Rp {{ number_format($totalDendaHariIni, 0, ',', '.') }}</p>
         </div>
     </div>
 
-    {{-- ===== Main Card ===== --}}
-    <div class="glass-card anim-up" style="animation-delay:0.25s;opacity:0;">
-
-        {{-- Header --}}
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between px-5 py-4 border-b border-gray-100">
-            <div class="flex items-center gap-3 mb-3 sm:mb-0">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center text-white">
-                    <i class="fas fa-list text-xs"></i>
-                </div>
-                <div>
-                    <h2 class="text-sm font-bold text-gray-900">Daftar Denda Belum Dibayar</h2>
-                    <p class="text-[11px] text-gray-400">{{ $jumlahBelumBayar }} anggota memiliki denda aktif</p>
-                </div>
+    {{-- ===== White Header ===== --}}
+    @php $activeFilterCount = collect([request('search'), request('kelas_id'), request('jurusan_id'), request('jenis_anggota')])->filter()->count(); @endphp
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 mb-3 sm:mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 anim-up anim-d1">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
+                <i class="fas fa-list text-[10px] sm:text-sm"></i>
             </div>
-            <div class="flex items-center gap-2 flex-wrap">
-                {{-- Filter Button --}}
-                @php
-                    $activeFilterCount = collect([request('search'), request('kelas_id'), request('jurusan_id'), request('jenis_anggota')])->filter()->count();
-                @endphp
-                <button type="button" id="openFilterModal"
-                        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all border
-                               {{ $activeFilterCount > 0 ? 'bg-red-500 text-white border-red-500 shadow-sm' : 'bg-gray-50 hover:bg-red-50 text-gray-600 hover:text-red-600 border-gray-200 hover:border-red-200' }}">
-                    <i class="fas fa-sliders-h"></i>
-                    <span>Filter</span>
-                    @if($activeFilterCount > 0)
-                        <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white text-red-600 text-[10px] font-extrabold">{{ $activeFilterCount }}</span>
-                    @endif
-                </button>
-                {{-- Tambah --}}
-                <a href="{{ route('admin.denda.create') }}"
-                   class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white rounded-lg text-xs font-semibold transition-all shadow-sm">
-                    <i class="fas fa-plus"></i>
-                    <span class="hidden sm:inline">Tambah</span>
-                </a>
-                {{-- Scan (semua role) --}}
-                <button type="button" id="scanBarcodeBtn"
-                        class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-semibold transition-all border border-indigo-100">
-                    <i class="fas fa-barcode"></i>
-                    <span class="hidden sm:inline">Scan</span>
-                </button>
-                {{-- Riwayat --}}
-                <a href="{{ route('admin.denda.riwayat') }}"
-                   class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-lg text-xs font-semibold transition-all shadow-sm">
-                    <i class="fas fa-history"></i>
-                    <span class="hidden sm:inline">Riwayat</span>
-                </a>
+            <div>
+                <h2 class="text-xs sm:text-sm font-bold text-gray-900">Daftar Denda Belum Dibayar</h2>
+                <p class="text-[10px] sm:text-[11px] text-gray-400">{{ $denda->count() }} data denda aktif</p>
             </div>
         </div>
+        <div class="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+            <div class="relative flex-1 sm:flex-none">
+                <span class="absolute inset-y-0 left-0 pl-2.5 sm:pl-3 flex items-center text-gray-400 pointer-events-none">
+                    <i class="fas fa-search text-[9px] sm:text-[11px]"></i>
+                </span>
+                <input type="text" id="dendaSearchInput"
+                       placeholder="Cari anggota..."
+                       class="pl-8 sm:pl-9 pr-3 sm:pr-4 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-xs border border-gray-200 bg-gray-100 placeholder:text-gray-400 hover:bg-gray-200 hover:border-gray-300 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all duration-200 w-full sm:w-44">
+            </div>
+            <button type="button" id="openFilterModal"
+                    class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold transition-all border shadow-sm
+                           {{ $activeFilterCount > 0 ? 'bg-red-500 text-white border-red-500 shadow-sm' : 'bg-white hover:bg-red-50 text-gray-600 hover:text-red-600 border-gray-200 hover:border-red-200' }}">
+                <i class="fas fa-sliders-h"></i>
+                <span>Filter</span>
+                @if($activeFilterCount > 0)
+                    <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white text-red-600 text-[8px] sm:text-[10px] font-extrabold">{{ $activeFilterCount }}</span>
+                @endif
+            </button>
+            <a href="{{ route('admin.denda.create') }}"
+               class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm">
+                <i class="fas fa-plus"></i>
+                <span class="hidden sm:inline">Tambah</span>
+            </a>
+            <a href="{{ route('admin.denda.riwayat') }}"
+               class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 transition-all shadow-sm">
+                <i class="fas fa-history"></i>
+                <span class="hidden sm:inline">Riwayat</span>
+            </a>
+        </div>
+    </div>
+
+    {{-- ===== Table Card ===== --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden anim-up" style="animation-delay:0.10s;opacity:0;">
 
         {{-- Active Filter Chips --}}
         @if($activeFilterCount > 0)
@@ -539,7 +558,7 @@
         @endif
 
         {{-- DataTables Table --}}
-        <div>
+        <div class="overflow-x-auto">
             <table id="denda-table" class="denda-table">
                 <thead>
                     <tr>
@@ -631,7 +650,7 @@
             </table>
         </div>
 
-    </div>{{-- end glass-card --}}
+    </div>{{-- end table card --}}
 
 </div>{{-- end max-w-7xl --}}
 
@@ -640,7 +659,7 @@
 <div id="filterModal" class="modal-overlay">
     <div class="modal-box">
         {{-- Modal Header --}}
-        <div class="modal-header bg-gradient-to-r from-red-500 to-rose-600">
+        <div class="modal-header bg-gradient-to-r from-blue-500 to-blue-600">
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
                     <i class="fas fa-sliders-h text-white text-sm"></i>
@@ -925,11 +944,11 @@ $(document).ready(function () {
     // ========================
     var dendaTable = $('#denda-table').DataTable({
         dom:
-            '<"flex items-center justify-between px-5 py-3 border-b border-gray-50 bg-gray-50/30"<"text-xs text-gray-500"l>>' +
+            '<"flex items-center gap-2 px-4 py-2 border-b border-gray-100 bg-gray-50/30"<"text-xs text-gray-500"l>>' +
             'rt' +
-            '<"dt-bottom-bar px-5 py-3"<"text-xs text-gray-400"i><"dt-pager"p>>',
+            '<"dt-bottom-bar px-4 py-2.5"<"text-xs text-gray-400"i><"dt-pager"p>>',
         language: {
-            lengthMenu: 'Tampilkan _MENU_ entri',
+            lengthMenu: '_MENU_',
             info: 'Menampilkan _START_–_END_ dari <b>_TOTAL_</b> data',
             infoEmpty: 'Tidak ada data',
             infoFiltered: '(difilter dari _MAX_ total data)',
@@ -953,7 +972,7 @@ $(document).ready(function () {
             </div>`,
         },
         pageLength: 10,
-        lengthMenu: [[10, 25, 50, 100, -1], ['10', '25', '50', '100', 'Semua']],
+        lengthMenu: [[10, 25, 50], [10, 25, 50]],
         order: [[4, 'desc']],
         columns: [
             { orderable: true },
@@ -964,9 +983,19 @@ $(document).ready(function () {
             { orderable: false, searchable: false },
         ],
         initComplete: function () {
-            // Style the paginate wrapper
             $('.dt-pager').css({ display: 'flex', alignItems: 'center', gap: '2px' });
         }
+    });
+
+    // ========================
+    // Search Input
+    // ========================
+    var searchTimer;
+    $('#dendaSearchInput').on('keyup', function () {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function () {
+            dendaTable.search($('#dendaSearchInput').val()).draw();
+        }, 400);
     });
 
     // ========================
@@ -976,7 +1005,9 @@ $(document).ready(function () {
     const openFilter   = document.getElementById('openFilterModal');
     const closeFilter  = document.getElementById('closeFilterModal');
 
-    openFilter.addEventListener('click', () => filterModal.classList.add('active'));
+    [openFilter].forEach(function(btn) {
+        if (btn) btn.addEventListener('click', function() { filterModal.classList.add('active'); });
+    });
     closeFilter.addEventListener('click', () => filterModal.classList.remove('active'));
     filterModal.addEventListener('click', (e) => { if (e.target === filterModal) filterModal.classList.remove('active'); });
 
@@ -988,7 +1019,9 @@ $(document).ready(function () {
     // ========================
     // Result Modal
     // ========================
-    document.getElementById('scanBarcodeBtn').addEventListener('click', openScannerModal);
+    [document.getElementById('scanBarcodeBtn')].forEach(function(btn) {
+        if (btn) btn.addEventListener('click', openScannerModal);
+    });
     document.getElementById('closeResultModal').addEventListener('click', closeResultModal);
     document.getElementById('resultModal').addEventListener('click', (e) => { if (e.target === document.getElementById('resultModal')) closeResultModal(); });
 

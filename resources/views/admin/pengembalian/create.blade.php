@@ -9,22 +9,6 @@
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 <style>
-/* Step Indicator */
-.step-indicator { display: flex; align-items: center; justify-content: center; gap: 0; }
-.step-item { display: flex; align-items: center; gap: 8px; }
-.step-circle {
-    width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 700; transition: all 0.3s ease;
-    background: #e5e7eb; color: #9ca3af;
-}
-.step-circle.active { background: linear-gradient(135deg, #10b981, #059669); color: white; box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
-.step-circle.completed { background: linear-gradient(135deg, #10b981, #059669); color: white; }
-.step-label { font-size: 12px; font-weight: 600; color: #9ca3af; transition: color 0.3s; }
-.step-label.active { color: #065f46; }
-.step-label.completed { color: #059669; }
-.step-line { width: 60px; height: 3px; background: #e5e7eb; margin: 0 8px; border-radius: 2px; transition: background 0.3s; }
-.step-line.active { background: linear-gradient(90deg, #10b981, #059669); }
-
 /* Glass Card */
 .glass-card {
     background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);
@@ -39,8 +23,8 @@
     border: 2px solid #e5e7eb; border-radius: 12px; padding: 14px;
     transition: all 0.25s ease; cursor: pointer; background: white;
 }
-.book-check-card:hover { border-color: #a7f3d0; background: #f0fdf4; transform: translateY(-1px); }
-.book-check-card.selected { border-color: #10b981; background: #ecfdf5; box-shadow: 0 0 0 3px rgba(16,185,129,0.15); }
+.book-check-card:hover { border-color: #93c5fd; background: #eff6ff; transform: translateY(-1px); }
+.book-check-card.selected { border-color: #3b82f6; background: #eff6ff; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
 .book-check-card.already-returned { border-color: #d1d5db; background: #f9fafb; opacity: 0.6; cursor: not-allowed; }
 
 /* Peminjaman card */
@@ -48,7 +32,7 @@
     border: 2px solid #e5e7eb; border-radius: 14px; padding: 16px;
     transition: all 0.3s ease; background: white;
 }
-.peminjaman-card.active { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.12); }
+.peminjaman-card.active { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
 .peminjaman-card.late { border-left: 4px solid #ef4444; }
 
 /* Modal scanner */
@@ -82,25 +66,15 @@
 }
 .scan-region {
     width: 72%; max-width: 280px; aspect-ratio: 4/3;
-    border: 2px solid rgba(16,185,129,0.85); border-radius: 12px;
+    border: 2px solid rgba(59,130,246,0.85); border-radius: 12px;
     position: relative;
 }
 .scan-line {
     position: absolute; left: 5%; right: 5%; height: 2px;
-    background: linear-gradient(90deg, transparent, #10b981, transparent);
+    background: linear-gradient(90deg, transparent, #3b82f6, transparent);
     border-radius: 2px; animation: scanLine 2s ease-in-out infinite;
 }
 @keyframes scanLine { 0%,100% { top: 10%; } 50% { top: 85%; } }
-
-/* Summary bar */
-.summary-bar {
-    position: sticky; bottom: 0; z-index: 40;
-    background: linear-gradient(135deg, #065f46, #047857);
-    border-radius: 16px 16px 0 0; padding: 16px 24px;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
-    display: none;
-}
-.summary-bar.visible { display: flex; }
 
 /* Animations */
 @keyframes fadeInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
@@ -116,8 +90,8 @@
     cursor: pointer; transition: all 0.2s;
     border: 1.5px solid #d1d5db; color: #6b7280; background: white;
 }
-.select-all-btn:hover { border-color: #10b981; color: #059669; background: #f0fdf4; }
-.select-all-btn.all-selected { border-color: #10b981; color: white; background: #10b981; }
+.select-all-btn:hover { border-color: #3b82f6; color: #2563eb; background: #eff6ff; }
+.select-all-btn.all-selected { border-color: #3b82f6; color: white; background: #3b82f6; }
 
 /* ══════════════════════════════════════════════
    DARK MODE OVERRIDES — Pengembalian Create
@@ -126,25 +100,17 @@ html[data-theme="dark"] .glass-card {
     background: rgba(30,41,59,0.95) !important;
     border-color: #334155 !important;
 }
-html[data-theme="dark"] .step-circle {
-    background: #334155 !important;
-    color: #94a3b8 !important;
-}
-html[data-theme="dark"] .step-line { background: #334155 !important; }
-html[data-theme="dark"] .step-label { color: #64748b !important; }
-html[data-theme="dark"] .step-label.active { color: #34d399 !important; }
-
 html[data-theme="dark"] .book-check-card {
     background: #1e293b !important;
     border-color: #334155 !important;
 }
 html[data-theme="dark"] .book-check-card:hover {
-    background: rgba(16,185,129,0.08) !important;
-    border-color: rgba(16,185,129,0.4) !important;
+    background: rgba(59,130,246,0.08) !important;
+    border-color: rgba(59,130,246,0.4) !important;
 }
 html[data-theme="dark"] .book-check-card.selected {
-    background: rgba(16,185,129,0.12) !important;
-    border-color: rgba(16,185,129,0.5) !important;
+    background: rgba(59,130,246,0.12) !important;
+    border-color: rgba(59,130,246,0.5) !important;
 }
 html[data-theme="dark"] .book-check-card.already-returned {
     background: #0f172a !important;
@@ -162,9 +128,9 @@ html[data-theme="dark"] .select-all-btn {
     color: #94a3b8 !important;
 }
 html[data-theme="dark"] .select-all-btn:hover {
-    background: rgba(16,185,129,0.1) !important;
-    border-color: rgba(16,185,129,0.4) !important;
-    color: #34d399 !important;
+    background: rgba(59,130,246,0.1) !important;
+    border-color: rgba(59,130,246,0.4) !important;
+    color: #60a5fa !important;
 }
 
 html[data-theme="dark"] #anggotaSearchResults {
@@ -179,31 +145,11 @@ html[data-theme="dark"] #anggotaSearchResults > * {
 <div class="min-h-screen py-6">
     <div class="px-4 sm:px-6 lg:px-8 max-w-14xl mx-auto">
 
-        <!-- Step Indicator -->
-        <!-- <div class="mb-6 fade-in-up">
-            <div class="step-indicator">
-                <div class="step-item">
-                    <div class="step-circle active" id="step1Circle">1</div>
-                    <span class="step-label active" id="step1Label">Anggota</span>
-                </div>
-                <div class="step-line" id="stepLine1"></div>
-                <div class="step-item">
-                    <div class="step-circle" id="step2Circle">2</div>
-                    <span class="step-label" id="step2Label">Pilih Buku</span>
-                </div>
-                <div class="step-line" id="stepLine2"></div>
-                <div class="step-item">
-                    <div class="step-circle" id="step3Circle">3</div>
-                    <span class="step-label" id="step3Label">Konfirmasi</span>
-                </div>
-            </div>
-        </div> -->
-
         <!-- Section 1: Pilih Anggota -->
         <div class="glass-card mb-5 fade-in-up delay-1" id="sectionAnggota">
-            <div class="bg-gradient-to-r from-emerald-500 to-green-600 px-5 py-3.5">
+            <div class="bg-blue-500 px-5 py-3.5">
                 <h3 class="text-[13px] font-bold text-white flex items-center gap-2">
-                    <i class="fas fa-user-check"></i> Langkah 1: Pilih Anggota
+                    <i class="fas fa-user-check"></i> Pilih Anggota
                 </h3>
             </div>
             <div class="p-5">
@@ -211,10 +157,10 @@ html[data-theme="dark"] #anggotaSearchResults > * {
                     <div class="flex-1 relative">
                         <input type="text" id="searchAnggotaInput"
                                placeholder="Ketik nama / nomor anggota untuk mencari..."
-                               class="w-full px-4 py-3 text-xs border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none transition-all"
+                               class="w-full px-4 py-3 text-xs border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all"
                                autocomplete="off">
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 hidden" id="searchSpinner">
-                            <i class="fas fa-spinner fa-spin text-emerald-500"></i>
+                            <i class="fas fa-spinner fa-spin text-black"></i>
                         </div>
                     </div>
                     <div class="flex gap-2">
@@ -223,7 +169,7 @@ html[data-theme="dark"] #anggotaSearchResults > * {
                             <i class="fas fa-sync mr-1"></i>Refresh
                         </button>
                         <button type="button" id="scanAnggotaBtn"
-                                class="px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold transition-all">
+                                class="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-semibold transition-all">
                             <i class="fas fa-barcode mr-1"></i>Scan
                         </button>
                     </div>
@@ -233,12 +179,12 @@ html[data-theme="dark"] #anggotaSearchResults > * {
                 <div id="anggotaSearchResults" class="max-h-60 overflow-y-auto border border-gray-200 rounded-xl hidden"></div>
 
                 <!-- Selected Anggota Info -->
-                <div id="anggotaInfo" class="mt-4 p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-200 hidden">
+                <div id="anggotaInfo" class="mt-4 p-4 bg-white rounded-xl border hidden">
                     <div class="flex items-center gap-4">
                         <div class="anggota-photo-wrapper w-14 h-14 rounded-full flex-shrink-0 shadow-lg relative">
                             <img id="anggotaFoto" src="" alt="" class="w-14 h-14 rounded-full object-cover hidden"
                                  onerror="this.classList.add('hidden');document.getElementById('anggotaIcon').classList.remove('hidden')">
-                            <div id="anggotaIcon" class="w-14 h-14 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center">
+                            <div id="anggotaIcon" class="w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center">
                                 <i class="fas fa-user text-white text-lg"></i>
                             </div>
                         </div>
@@ -256,163 +202,109 @@ html[data-theme="dark"] #anggotaSearchResults > * {
             </div>
         </div>
 
-        <!-- Section 2: Pilih Buku untuk Dikembalikan -->
-        <div class="glass-card mb-5 fade-in-up delay-2 hidden" id="sectionPilihBuku">
-            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-5 py-3.5">
-                <h3 class="text-[13px] font-bold text-white flex items-center gap-2">
-                    <i class="fas fa-book-open"></i> Langkah 2: Pilih Buku yang Dikembalikan
-                </h3>
-            </div>
-            <div class="p-5">
-                <div id="peminjamanContainer" class="space-y-5">
-                    <!-- Peminjaman cards will be rendered here -->
-                </div>
-                <div id="noPeminjamanMsg" class="text-center py-8 hidden">
-                    <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
-                    <p class="text-sm text-gray-500">Tidak ada peminjaman aktif untuk anggota ini</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section 3: Form Pengembalian -->
-        <form id="pengembalianForm" action="{{ route('pengembalian.store') }}" method="POST" class="hidden" onsubmit="return validateAndSubmit(event)">
+        <!-- Section 2: Pilih Buku & Pengembalian -->
+        <form id="pengembalianForm" action="{{ route('pengembalian.store') }}" method="POST" onsubmit="return validateAndSubmit(event)">
             @csrf
             <input type="hidden" name="peminjaman_id" id="selectedPeminjamanId">
             <input type="hidden" name="selected_detail_ids" id="selectedDetailIds">
+            <input type="hidden" name="tanggal_kembali" id="tanggal_kembali">
+            <input type="hidden" name="jam_kembali" id="jam_kembali">
+            <input type="hidden" name="hari_terlambat" id="hari_terlambat" value="0">
+            <input type="hidden" name="jumlah_denda" id="jumlah_denda" value="0">
 
-            <div class="glass-card mb-5 fade-in-up delay-3" id="sectionKonfirmasi">
-                <div class="bg-gradient-to-r from-purple-500 to-violet-600 px-5 py-3.5">
+            <div class="glass-card mb-5 fade-in-up delay-2 hidden" id="sectionPilihBuku">
+                <div class="bg-blue-600 px-5 py-3.5">
                     <h3 class="text-[13px] font-bold text-white flex items-center gap-2">
-                        <i class="fas fa-clipboard-check"></i> Langkah 3: Detail & Konfirmasi Pengembalian
+                        <i class="fas fa-book-open"></i> Pilih Buku yang Dikembalikan
                     </h3>
                 </div>
                 <div class="p-5">
-                    <!-- Date/Time fields -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                                <i class="fas fa-calendar mr-1 text-purple-400"></i>Tanggal Pengembalian
-                            </label>
-                            <input type="date" name="tanggal_kembali" id="tanggal_kembali"
-                                   value="{{ date('Y-m-d') }}" required
-                                   class="w-full text-xs px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-purple-400 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                                <i class="fas fa-clock mr-1 text-purple-400"></i>Jam Pengembalian
-                            </label>
-                            <input type="time" name="jam_kembali" id="jam_kembali"
-                                   value="{{ date('H:i') }}"
-                                   class="w-full text-xs px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-purple-400 outline-none">
-                        </div>
+                    <div id="peminjamanContainer" class="space-y-5">
+                        <!-- Peminjaman cards will be rendered here -->
+                    </div>
+                    <div id="noPeminjamanMsg" class="text-center py-8 hidden">
+                        <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-sm text-gray-500">Tidak ada peminjaman aktif untuk anggota ini</p>
                     </div>
 
-                    <!-- Per-book kondisi & denda section -->
-                    <div class="mb-5">
-                        <h5 class="text-xs font-bold text-gray-800 mb-3 flex items-center gap-2">
-                            <i class="fas fa-book text-purple-500"></i> Kondisi & Rincian Denda per Buku
-                        </h5>
-                        <div id="kondisiBukuList" class="space-y-3">
-                            <p class="text-xs text-gray-400 italic">Pilih buku terlebih dahulu di Langkah 2</p>
+                    <!-- Daftar buku yang dikembalikan & denda -->
+                    <div id="returnFormContent" class="hidden mt-6 pt-6 border-t border-gray-200 space-y-5">
+                        <!-- Per-book denda section -->
+                        <div>
+                            <h5 class="text-xs font-bold text-gray-800 flex items-center gap-2">
+                                <i class="fas fa-book text-purple-500"></i> Rincian Denda per Buku
+                            </h5>
+                            <div id="dendaList" class="space-y-3 mt-3">
+                                <p class="text-xs text-gray-400 italic">Pilih buku terlebih dahulu</p>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Total denda & payment section (shown when there's denda) -->
-                    <div id="dendaFieldsSection" class="hidden mb-5">
-                        <!-- Total summary bar -->
-                        <div class="flex items-center justify-between px-4 py-3 bg-red-50 border border-red-200 rounded-xl mb-4">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-coins text-red-400 text-sm"></i>
-                                <span class="text-xs font-bold text-red-800">Total Denda Keseluruhan</span>
-                            </div>
-                            <span id="totalDendaDisplay" class="text-sm font-extrabold text-red-600">Rp 0</span>
-                        </div>
-                        <!-- Hidden fields for form submission -->
-                        <input type="hidden" name="hari_terlambat" id="hari_terlambat" value="0">
-                        <input type="hidden" name="jumlah_denda" id="jumlah_denda" value="0">
-                        <!-- Payment status -->
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                                    <i class="fas fa-check-circle mr-1 text-green-400"></i>Status Pembayaran
-                                </label>
-                                <select name="status_pembayaran_denda" id="status_pembayaran_denda"
-                                        onchange="toggleTanggalPembayaran(this.value)"
-                                        class="w-full text-xs px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-400 outline-none">
-                                    <option value="belum_dibayar">Belum Dibayar</option>
-                                    <option value="sudah_dibayar">Sudah Dibayar</option>
-                                </select>
-                            </div>
-                        </div>
-                        <!-- Tanggal pembayaran -->
-                        <div id="tanggalPembayaranSection" class="hidden mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                                        <i class="fas fa-calendar-check mr-1 text-green-500"></i>Tanggal Pembayaran Denda
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <input type="date" name="tanggal_pembayaran_denda" id="tanggal_pembayaran_denda"
-                                           value="{{ date('Y-m-d') }}"
-                                           class="w-full text-xs px-3 py-2.5 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none bg-white">
+                        <!-- Total denda & payment section -->
+                        <div id="dendaFieldsSection" class="hidden">
+                            <div class="flex items-center justify-between px-4 py-3 bg-red-50 border border-red-200 rounded-xl">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-coins text-red-400 text-sm"></i>
+                                    <span class="text-xs font-bold text-red-800">Total Denda Keseluruhan</span>
                                 </div>
+                                <span id="totalDendaDisplay" class="text-sm font-extrabold text-red-600">Rp 0</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
                                 <div>
                                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                                        <i class="fas fa-sticky-note mr-1 text-green-400"></i>Catatan Pembayaran (opsional)
+                                        <i class="fas fa-check-circle mr-1 text-blue-400"></i>Status Pembayaran
                                     </label>
-                                    <input type="text" name="catatan_pembayaran_denda" id="catatan_pembayaran_denda"
-                                           placeholder="Keterangan pembayaran denda..."
-                                           class="w-full text-xs px-3 py-2.5 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none bg-white">
+                                    <select name="status_pembayaran_denda" id="status_pembayaran_denda"
+                                            onchange="toggleTanggalPembayaran(this.value)"
+                                            class="w-full text-xs px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none">
+                                        <option value="belum_dibayar">Belum Dibayar</option>
+                                        <option value="sudah_dibayar">Sudah Dibayar</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="tanggalPembayaranSection" class="hidden mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                                            <i class="fas fa-calendar-check mr-1 text-blue-500"></i>Tanggal Pembayaran Denda <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="date" name="tanggal_pembayaran_denda" id="tanggal_pembayaran_denda"
+                                               value="{{ date('Y-m-d') }}"
+                                               class="w-full text-xs px-3 py-2.5 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none bg-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                                            <i class="fas fa-sticky-note mr-1 text-blue-400"></i>Catatan Pembayaran (opsional)
+                                        </label>
+                                        <input type="text" name="catatan_pembayaran_denda" id="catatan_pembayaran_denda"
+                                               placeholder="Keterangan pembayaran denda..."
+                                               class="w-full text-xs px-3 py-2.5 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none bg-white">
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Catatan -->
-                    <div class="mb-5">
-                        <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                            <i class="fas fa-sticky-note mr-1 text-yellow-400"></i>Catatan Pengembalian
-                        </label>
-                        <textarea name="catatan_pengembalian" id="catatan_pengembalian" rows="2"
-                                  class="w-full text-xs px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none resize-none"
-                                  placeholder="Catatan tambahan (opsional)..."></textarea>
-                    </div>
+                        <!-- Catatan -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                                <i class="fas fa-sticky-note mr-1 text-yellow-400"></i>Catatan Pengembalian
+                            </label>
+                            <textarea name="catatan_pengembalian" id="catatan_pengembalian" rows="2"
+                                      class="w-full text-xs px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none resize-none"
+                                      placeholder="Catatan tambahan (opsional)..."></textarea>
+                        </div>
 
-                    <!-- Action Buttons -->
-                    <div class="flex justify-end gap-3 pt-3 border-t border-gray-100">
-                        <button type="button" onclick="resetForm()"
-                                class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-semibold transition-all">
-                            <i class="fas fa-undo mr-1"></i>Reset
-                        </button>
-                        <button type="submit" id="submitBtn"
-                                class="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-200">
-                            <i class="fas fa-check-circle mr-1"></i>Proses Pengembalian
-                        </button>
+                        <!-- Action Buttons -->
+                        <div class="flex justify-end gap-3 pt-3 border-t border-gray-100">
+                            
+                            <button type="submit" id="submitBtn"
+                                    class="px-6 py-3 w-full bg-blue-600 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-blue-200">
+                                <i class="fas fa-check-circle mr-1"></i>Proses Pengembalian
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </form>
-
-        <!-- Summary Bar -->
-        <div class="summary-bar" id="summaryBar">
-            <div class="flex items-center justify-between w-full text-white">
-                <div class="flex items-center gap-4">
-                    <div>
-                        <p class="text-[10px] text-emerald-200 uppercase tracking-wider">Buku Dipilih</p>
-                        <p class="text-lg font-bold" id="summaryBookCount">0</p>
-                    </div>
-                    <div class="w-px h-8 bg-emerald-400/30"></div>
-                    <div>
-                        <p class="text-[10px] text-emerald-200 uppercase tracking-wider">Peminjaman</p>
-                        <p class="text-sm font-semibold" id="summaryPeminjamanNo">-</p>
-                    </div>
-                </div>
-                <button type="button" onclick="scrollToForm()"
-                        class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-xs font-semibold transition-all backdrop-blur">
-                    <i class="fas fa-arrow-down mr-1"></i>Ke Form
-                </button>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -422,7 +314,7 @@ html[data-theme="dark"] #anggotaSearchResults > * {
         <!-- Header -->
         <div class="scanner-modal-header">
             <div>
-                <p class="text-white text-xs font-semibold"><i class="fas fa-barcode mr-1.5 text-emerald-400"></i>Scan Kartu Anggota</p>
+                <p class="text-white text-xs font-semibold"><i class="fas fa-barcode mr-1.5 text-black"></i>Scan Kartu Anggota</p>
                 <p class="text-gray-400 text-[10px] mt-0.5" id="scannerStatusText">Menginisialisasi...</p>
             </div>
             <button type="button" id="closeScannerBtn"
@@ -474,7 +366,7 @@ let lastScanTime = 0;
 // ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
-    startRealTimeUpdate();
+    autoCaptureDateTime();
     // Check native barcode support
     if ('BarcodeDetector' in window) {
         BarcodeDetector.getSupportedFormats().then(formats => {
@@ -485,38 +377,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function startRealTimeUpdate() {
-    updateDateTime();
-    setInterval(updateDateTime, 1000);
-}
-
-function updateDateTime() {
+function autoCaptureDateTime() {
     const now = new Date();
-    const d = document.getElementById('tanggal_kembali');
-    const t = document.getElementById('jam_kembali');
-    if (d) {
-        const year  = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day   = String(now.getDate()).padStart(2, '0');
-        d.value = `${year}-${month}-${day}`;
-    }
-    if (t) t.value = now.toTimeString().slice(0, 5);
-}
-
-// ==================== STEP INDICATOR ====================
-function updateSteps(step) {
-    for (let i = 1; i <= 3; i++) {
-        const circle = document.getElementById(`step${i}Circle`);
-        const label = document.getElementById(`step${i}Label`);
-        if (!circle || !label) continue;
-        circle.classList.remove('active', 'completed');
-        label.classList.remove('active', 'completed');
-        if (i < step) { circle.classList.add('completed'); label.classList.add('completed'); circle.innerHTML = '<i class="fas fa-check text-xs"></i>'; }
-        else if (i === step) { circle.classList.add('active'); label.classList.add('active'); circle.textContent = i; }
-        else { circle.textContent = i; }
-    }
-    if (document.getElementById('stepLine1')) document.getElementById('stepLine1').classList.toggle('active', step >= 2);
-    if (document.getElementById('stepLine2')) document.getElementById('stepLine2').classList.toggle('active', step >= 3);
+    const year  = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day   = String(now.getDate()).padStart(2, '0');
+    document.getElementById('tanggal_kembali').value = `${year}-${month}-${day}`;
+    document.getElementById('jam_kembali').value = now.toTimeString().slice(0, 5);
 }
 
 // ==================== EVENT LISTENERS ====================
@@ -574,10 +441,10 @@ function renderAnggotaList(list) {
     list.forEach(a => {
         const safeJson = JSON.stringify(a).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
         const fotoHtml = a.foto
-            ? `<img src="/storage/anggota/${a.foto}" alt="" class="w-9 h-9 rounded-full object-cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="w-9 h-9 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold" style="display:none">${(a.nama_lengkap || 'N').charAt(0).toUpperCase()}</div>`
-            : `<div class="w-9 h-9 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">${(a.nama_lengkap || 'N').charAt(0).toUpperCase()}</div>`;
+            ? `<img src="/storage/anggota/${a.foto}" alt="" class="w-9 h-9 rounded-full object-cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="w-9 h-9 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold" style="display:none">${(a.nama_lengkap || 'N').charAt(0).toUpperCase()}</div>`
+            : `<div class="w-9 h-9 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">${(a.nama_lengkap || 'N').charAt(0).toUpperCase()}</div>`;
         html += `
-        <div class="p-3 border-b border-gray-100 hover:bg-emerald-50 cursor-pointer transition-all text-xs" onclick='pickAnggota(${JSON.stringify(a).replace(/'/g, "\\'")})'>
+        <div class="p-3 border-b border-gray-100 hover:bg-blue-50 cursor-pointer transition-all text-xs" onclick='pickAnggota(${JSON.stringify(a).replace(/'/g, "\\'")})'>
             <div class="flex items-center gap-3">
                 ${fotoHtml}
                 <div class="flex-1 min-w-0">
@@ -644,7 +511,6 @@ function pickAnggota(anggota) {
         .catch(() => showNoPeminjaman());
     }
 
-    updateSteps(2);
     showNotification(`Anggota dipilih: ${anggota.nama_lengkap}`, 'success');
 }
 
@@ -662,9 +528,7 @@ function clearAnggota() {
     activePeminjamanId = null;
     document.getElementById('anggotaInfo').classList.add('hidden');
     document.getElementById('sectionPilihBuku').classList.add('hidden');
-    document.getElementById('pengembalianForm').classList.add('hidden');
-    document.getElementById('summaryBar').classList.remove('visible');
-    updateSteps(1);
+    document.getElementById('returnFormContent').classList.add('hidden');
 }
 
 // ==================== PEMINJAMAN & BOOK SELECTION ====================
@@ -682,7 +546,7 @@ function loadPeminjamanData(peminjamanList) {
         const lateClass = p.is_late ? 'late' : '';
         const lateBadge = p.is_late
             ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-bold"><i class="fas fa-exclamation-triangle"></i>Terlambat ${p.days_late} hari</span>`
-            : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold"><i class="fas fa-check-circle"></i>Tepat waktu</span>`;
+            : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold"><i class="fas fa-check-circle"></i>Tepat waktu</span>`;
 
         let booksHtml = '';
         if (p.detail_peminjaman && p.detail_peminjaman.length > 0) {
@@ -692,15 +556,15 @@ function loadPeminjamanData(peminjamanList) {
                 <div class="book-check-card" id="bookCard_${bookKey}" onclick="toggleBook('${bookKey}', ${p.id}, ${d.id}, '${(d.judul_buku||'').replace(/'/g,"\\'")}', ${d.jumlah||1}, '${d.tanggal_harus_kembali_raw||''}')">
                     <div class="flex items-center gap-3">
                         <div class="flex-shrink-0">
-                            <div class="w-5 h-5 border-2 border-gray-300 rounded flex items-center justify-center transition-all" id="checkIcon_${bookKey}">
+                            <div class="w-5 h-5 border-2 border-blue-300 rounded flex items-center justify-center transition-all" id="checkIcon_${bookKey}">
                             </div>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-xs font-semibold text-gray-900 truncate">${d.judul_buku || 'N/A'}</p>
-                            <p class="text-[10px] text-gray-500">Jumlah: ${d.jumlah || 1} buku</p>
+                            <p class="text-xs font-semibold text-blue-900 truncate">${d.judul_buku || 'N/A'}</p>
+                            <p class="text-[10px] text-blue-500">Jumlah: ${d.jumlah || 1} buku</p>
                         </div>
                         <div class="flex-shrink-0">
-                            <i class="fas fa-book text-gray-300 text-lg"></i>
+                            <i class="fas fa-book text-blue-300 text-lg"></i>
                         </div>
                     </div>
                 </div>`;
@@ -711,10 +575,10 @@ function loadPeminjamanData(peminjamanList) {
         <div class="peminjaman-card ${lateClass}" id="peminjamanCard_${p.id}">
             <div class="flex items-start justify-between mb-3">
                 <div>
-                    <h4 class="text-xs font-bold text-gray-900 flex items-center gap-2">
+                    <h4 class="text-xs font-bold text-blue-900 flex items-center gap-2">
                         <i class="fas fa-file-alt text-blue-500"></i>${p.nomor_peminjaman}
                     </h4>
-                    <div class="flex flex-wrap items-center gap-2 mt-1 text-[10px] text-gray-500">
+                    <div class="flex flex-wrap items-center gap-2 mt-1 text-[10px] text-blue-500">
                         <span><i class="fas fa-calendar mr-1"></i>Pinjam: ${p.tanggal_peminjaman}</span>
                         <span>&bull;</span>
                         <span><i class="fas fa-calendar-check mr-1"></i>Batas: ${p.tanggal_harus_kembali}</span>
@@ -726,7 +590,7 @@ function loadPeminjamanData(peminjamanList) {
             </div>
 
             <div class="flex items-center justify-between mb-3">
-                <p class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">Daftar Buku</p>
+                <p class="text-[10px] text-blue-500 font-semibold uppercase tracking-wider">Daftar Buku</p>
                 <button type="button" class="select-all-btn" id="selectAllBtn_${p.id}" onclick="toggleSelectAll(${p.id}, event)">
                     <i class="fas fa-check-double text-[10px]"></i> Pilih Semua
                 </button>
@@ -760,11 +624,11 @@ function toggleBook(bookKey, peminjamanId, detailId, judul, jumlah, tglKembali) 
         checkIcon.style.background = 'transparent';
     } else {
         // Select
-        selectedBooks[bookKey] = { peminjamanId, detailId, judul, jumlah, kondisi: 'baik', tanggal_harus_kembali: tglKembali || null };
+        selectedBooks[bookKey] = { peminjamanId, detailId, judul, jumlah, tanggal_harus_kembali: tglKembali || null };
         card.classList.add('selected');
         checkIcon.innerHTML = '<i class="fas fa-check text-white text-[9px]"></i>';
-        checkIcon.style.borderColor = '#10b981';
-        checkIcon.style.background = '#10b981';
+        checkIcon.style.borderColor = '#add8e6';
+        checkIcon.style.background = '#add8e6';
     }
 
     updateSelectAllState(peminjamanId);
@@ -795,11 +659,11 @@ function toggleSelectAll(peminjamanId, event) {
         // Select all
         peminjaman.detail_peminjaman.forEach(d => {
             const key = `${peminjamanId}_${d.id}`;
-            selectedBooks[key] = { peminjamanId, detailId: d.id, judul: d.judul_buku || 'N/A', jumlah: d.jumlah || 1, kondisi: 'baik', tanggal_harus_kembali: d.tanggal_harus_kembali_raw || null };
+            selectedBooks[key] = { peminjamanId, detailId: d.id, judul: d.judul_buku || 'N/A', jumlah: d.jumlah || 1, tanggal_harus_kembali: d.tanggal_harus_kembali_raw || null };
             const card = document.getElementById(`bookCard_${key}`);
             const check = document.getElementById(`checkIcon_${key}`);
             if (card) card.classList.add('selected');
-            if (check) { check.innerHTML = '<i class="fas fa-check text-white text-[9px]"></i>'; check.style.borderColor = '#10b981'; check.style.background = '#10b981'; }
+            if (check) { check.innerHTML = '<i class="fas fa-check text-white text-[9px]"></i>'; check.style.borderColor = '#ADD8E6'; check.style.background = '#ADD8E6'; }
         });
     }
 
@@ -820,24 +684,6 @@ function updateFormState() {
     const selected = Object.values(selectedBooks);
     const count = selected.length;
 
-    // Summary bar
-    const bar = document.getElementById('summaryBar');
-    if (count > 0) {
-        bar.classList.add('visible');
-        document.getElementById('summaryBookCount').textContent = count;
-        // Get unique peminjaman IDs
-        const pIds = [...new Set(selected.map(s => s.peminjamanId))];
-        // We only support 1 peminjaman at a time for the store endpoint
-        if (pIds.length === 1) {
-            const p = allPeminjaman.find(pm => pm.id === pIds[0]);
-            document.getElementById('summaryPeminjamanNo').textContent = p ? p.nomor_peminjaman : '-';
-        } else {
-            document.getElementById('summaryPeminjamanNo').textContent = `${pIds.length} peminjaman`;
-        }
-    } else {
-        bar.classList.remove('visible');
-    }
-
     // Show/hide form
     if (count > 0) {
         // Determine the peminjaman(s) involved
@@ -854,28 +700,25 @@ function updateFormState() {
         document.getElementById('selectedPeminjamanId').value = activePeminjamanId;
         document.getElementById('selectedDetailIds').value = JSON.stringify(selected.map(s => s.detailId));
 
-        // Show form
-        document.getElementById('pengembalianForm').classList.remove('hidden');
-        updateSteps(3);
+        // Show return content
+        document.getElementById('returnFormContent').classList.remove('hidden');
 
         // Reset status pembayaran ke default saat peminjaman pertama dipilih
         const statusSelect = document.getElementById('status_pembayaran_denda');
         if (statusSelect) { statusSelect.value = 'belum_dibayar'; toggleTanggalPembayaran('belum_dibayar'); }
 
-        // Render kartu kondisi per buku dulu, lalu hitung denda
-        renderKondisiBuku(selected);
+        renderDendaBuku(selected);
         recalculateDenda();
     } else {
-        document.getElementById('pengembalianForm').classList.add('hidden');
+        document.getElementById('returnFormContent').classList.add('hidden');
         activePeminjamanId = null;
-        updateSteps(2);
     }
 }
 
-function renderKondisiBuku(selected) {
-    const list = document.getElementById('kondisiBukuList');
+function renderDendaBuku(selected) {
+    const list = document.getElementById('dendaList');
     if (selected.length === 0) {
-        list.innerHTML = '<p class="text-xs text-gray-400 italic">Pilih buku terlebih dahulu di Langkah 2</p>';
+        list.innerHTML = '<p class="text-xs text-blue-400 italic">Pilih buku terlebih dahulu</p>';
         return;
     }
     const _now1 = new Date();
@@ -884,7 +727,6 @@ function renderKondisiBuku(selected) {
     let html = '';
     selected.forEach(s => {
         const key = `${s.peminjamanId}_${s.detailId}`;
-        const kondisi = s.kondisi || 'baik';
 
         // Hitung per-book denda keterlambatan
         let daysLate = 0;
@@ -896,78 +738,54 @@ function renderKondisiBuku(selected) {
             if (diff > 0) { daysLate = diff; dendaLate = diff * 1000; }
         }
 
-        // Denda kondisi buku
-        const dendaKondisiMap = { baik: 0, sedikit_rusak: 5000, rusak: 25000, hilang: 100000 };
-        const dendaKondisi = dendaKondisiMap[kondisi] || 0;
-        const subTotal = dendaLate + dendaKondisi;
+        const subTotal = dendaLate;
 
         const lateChip = daysLate > 0
             ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[9px] font-bold"><i class="fas fa-clock"></i>Terlambat ${daysLate} hari</span>`
-            : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-bold"><i class="fas fa-check"></i>Tepat Waktu</span>`;
+            : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[9px] font-bold"><i class="fas fa-check"></i>Tepat Waktu</span>`;
 
         const dueDateDisplay = s.tanggal_harus_kembali
             ? new Date(s.tanggal_harus_kembali).toLocaleDateString('id-ID', {day:'2-digit',month:'short',year:'numeric'})
             : '-';
 
-        const subTotalClass = subTotal > 0 ? 'text-red-600 font-extrabold' : 'text-emerald-600 font-bold';
+        const subTotalClass = subTotal > 0 ? 'text-red-600 font-extrabold' : 'text-black font-bold';
         const subTotalText  = subTotal > 0 ? `Rp ${subTotal.toLocaleString('id-ID')}` : 'Tidak ada denda';
 
         html += `
-        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm" id="dendaCard_${key}">
+        <div class="bg-white border border-blue-200 rounded-xl overflow-hidden shadow-sm" id="dendaCard_${key}">
             <!-- Book header -->
-            <div class="flex items-center gap-3 px-4 py-3 bg-gray-50 border-b border-gray-100">
+            <div class="flex items-center gap-3 px-4 py-3 bg-blue-50 border-b border-blue-100">
                 <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-book text-purple-500 text-xs"></i>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs font-semibold text-gray-900 truncate">${s.judul}</p>
-                    <p class="text-[10px] text-gray-500">Qty: ${s.jumlah} &bull; Batas: ${dueDateDisplay}</p>
+                    <p class="text-xs font-semibold text-blue-900 truncate">${s.judul}</p>
+                    <p class="text-[10px] text-blue-500">Qty: ${s.jumlah} &bull; Batas: ${dueDateDisplay}</p>
                 </div>
                 ${lateChip}
             </div>
             <!-- Denda detail rows -->
             <div class="px-4 py-3 space-y-2.5">
-                <!-- Kondisi -->
-                <div class="flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-2 text-[10px] text-gray-500 font-semibold uppercase tracking-wide">
-                        <i class="fas fa-eye text-purple-400"></i>Kondisi Buku
-                    </div>
-                    <select name="kondisi_kembali[${s.detailId}]" required
-                            onchange="updateBookKondisi('${key}', this.value)"
-                            class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none bg-white">
-                        <option value="baik" ${kondisi==='baik'?'selected':''}>Baik</option>
-                        <option value="sedikit_rusak" ${kondisi==='sedikit_rusak'?'selected':''}>Sedikit Rusak (+Rp 5.000)</option>
-                        <option value="rusak" ${kondisi==='rusak'?'selected':''}>Rusak (+Rp 25.000)</option>
-                        <option value="hilang" ${kondisi==='hilang'?'selected':''}>Hilang (+Rp 100.000)</option>
-                    </select>
-                </div>
                 <!-- Jumlah Dikembalikan -->
                 <div class="flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-2 text-[10px] text-gray-500 font-semibold uppercase tracking-wide">
+                    <div class="flex items-center gap-2 text-[10px] text-blue-500 font-semibold uppercase tracking-wide">
                         <i class="fas fa-sort-amount-up-alt text-blue-400"></i>Jumlah Dikembalikan
                     </div>
                     <input type="number" name="jumlah_dikembalikan[${s.detailId}]"
                            value="${s.jumlah}" min="1" max="${s.jumlah}"
-                           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none bg-white w-20 text-center"
+                           class="text-xs px-3 py-1.5 border border-blue-200 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none bg-white w-20 text-center"
                            onchange="updateBookJumlah('${key}', this.value)">
                 </div>
                 <!-- Denda keterlambatan -->
                 <div class="flex items-center justify-between text-xs">
-                    <span class="text-gray-500 flex items-center gap-1.5"><i class="fas fa-calendar-times text-red-400 text-[10px]"></i>Denda keterlambatan</span>
-                    <span id="dendaLate_${key}" class="${daysLate > 0 ? 'text-red-600 font-semibold' : 'text-gray-400'}">
+                    <span class="text-blue-500 flex items-center gap-1.5"><i class="fas fa-calendar-times text-red-400 text-[10px]"></i>Denda keterlambatan</span>
+                    <span id="dendaLate_${key}" class="${daysLate > 0 ? 'text-red-600 font-semibold' : 'text-blue-400'}">
                         ${daysLate > 0 ? `${daysLate} hari &times; Rp 1.000 = Rp ${dendaLate.toLocaleString('id-ID')}` : 'Rp 0'}
                     </span>
                 </div>
-                <!-- Denda kondisi -->
-                <div class="flex items-center justify-between text-xs">
-                    <span class="text-gray-500 flex items-center gap-1.5"><i class="fas fa-exclamation-circle text-orange-400 text-[10px]"></i>Denda kondisi</span>
-                    <span id="dendaKondisi_${key}" class="${dendaKondisi > 0 ? 'text-orange-600 font-semibold' : 'text-gray-400'}">
-                        ${dendaKondisi > 0 ? `Rp ${dendaKondisi.toLocaleString('id-ID')}` : 'Rp 0'}
-                    </span>
-                </div>
                 <!-- Sub-total -->
-                <div class="flex items-center justify-between pt-2 border-t border-gray-100 text-xs">
-                    <span class="font-semibold text-gray-700">Sub-total buku ini</span>
+                <div class="flex items-center justify-between pt-2 border-t border-blue-100 text-xs">
+                    <span class="font-semibold text-blue-700">Sub-total buku ini</span>
                     <span id="subTotal_${key}" class="${subTotalClass}">${subTotalText}</span>
                 </div>
             </div>
@@ -979,13 +797,6 @@ function renderKondisiBuku(selected) {
 function updateBookJumlah(key, value) {
     if (selectedBooks[key]) {
         selectedBooks[key].jumlahDikembalikan = parseInt(value) || 1;
-    }
-}
-
-function updateBookKondisi(key, kondisi) {
-    if (selectedBooks[key]) {
-        selectedBooks[key].kondisi = kondisi;
-        recalculateDenda();
     }
 }
 
@@ -1005,7 +816,6 @@ function recalculateDenda() {
 
     selected.forEach(s => {
         const key = `${s.peminjamanId}_${s.detailId}`;
-        const kondisi = s.kondisi || 'baik';
 
         // Per-book denda keterlambatan
         let daysLate = 0;
@@ -1018,15 +828,12 @@ function recalculateDenda() {
         }
         if (daysLate > maxDaysLate) maxDaysLate = daysLate;
 
-        const dendaKondisiMap = { baik: 0, sedikit_rusak: 5000, rusak: 25000, hilang: 100000 };
-        const dendaKondisi = dendaKondisiMap[kondisi] || 0;
-        const subTotal = dendaLate + dendaKondisi;
+        const subTotal = dendaLate;
         totalDenda += subTotal;
 
         // Update per-book display if card exists
-        const lateEl    = document.getElementById(`dendaLate_${key}`);
-        const kondisiEl = document.getElementById(`dendaKondisi_${key}`);
-        const subEl     = document.getElementById(`subTotal_${key}`);
+        const lateEl = document.getElementById(`dendaLate_${key}`);
+        const subEl  = document.getElementById(`subTotal_${key}`);
 
         if (lateEl) {
             lateEl.className = daysLate > 0 ? 'text-red-600 font-semibold' : 'text-gray-400';
@@ -1034,19 +841,15 @@ function recalculateDenda() {
                 ? `${daysLate} hari &times; Rp 1.000 = Rp ${dendaLate.toLocaleString('id-ID')}`
                 : 'Rp 0';
         }
-        if (kondisiEl) {
-            kondisiEl.className = dendaKondisi > 0 ? 'text-orange-600 font-semibold' : 'text-gray-400';
-            kondisiEl.textContent = dendaKondisi > 0 ? `Rp ${dendaKondisi.toLocaleString('id-ID')}` : 'Rp 0';
-        }
         if (subEl) {
-            subEl.className = subTotal > 0 ? 'text-red-600 font-extrabold' : 'text-emerald-600 font-bold';
+            subEl.className = subTotal > 0 ? 'text-red-600 font-extrabold' : 'text-black font-bold';
             subEl.textContent = subTotal > 0 ? `Rp ${subTotal.toLocaleString('id-ID')}` : 'Tidak ada denda';
         }
     });
 
-    // Re-render kondisi cards if not yet rendered (first call)
+    // Re-render denda cards if not yet rendered (first call)
     if (selected.length > 0 && !document.getElementById(`dendaCard_${Object.keys(selectedBooks)[0]}`)) {
-        renderKondisiBuku(selected);
+        renderDendaBuku(selected);
         return;
     }
 
@@ -1069,10 +872,6 @@ function recalculateDenda() {
     }
 }
 
-function scrollToForm() {
-    document.getElementById('sectionKonfirmasi').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
 // ==================== FORM VALIDATION & SUBMIT ====================
 function validateAndSubmit(event) {
     event.preventDefault();
@@ -1091,15 +890,6 @@ function validateAndSubmit(event) {
         return false;
     }
 
-    // Validate kondisi
-    const kondisiInputs = document.querySelectorAll('select[name^="kondisi_kembali"]');
-    let allValid = true;
-    kondisiInputs.forEach(i => { if (!i.value) allValid = false; });
-    if (!allValid) {
-        showNotification('Pilih kondisi untuk semua buku!', 'error');
-        return false;
-    }
-
     // Validate tanggal pembayaran denda jika status sudah_dibayar
     const statusDenda = document.getElementById('status_pembayaran_denda');
     const tanggalPembayaran = document.getElementById('tanggal_pembayaran_denda');
@@ -1108,6 +898,9 @@ function validateAndSubmit(event) {
         tanggalPembayaran.focus();
         return false;
     }
+
+    // Auto-capture current date/time before submit
+    autoCaptureDateTime();
 
     // Update hidden field
     document.getElementById('selectedDetailIds').value = JSON.stringify(selected.map(s => s.detailId));
@@ -1128,7 +921,7 @@ function validateAndSubmit(event) {
             html: confirmMsg,
             icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#10b981',
+            confirmButtonColor: '#3b82f6',
             cancelButtonColor: '#6b7280',
             confirmButtonText: '<i class="fas fa-check mr-1"></i>Ya, Proses',
             cancelButtonText: 'Batal',
@@ -1324,7 +1117,6 @@ function processScannedBarcode(barcode) {
             } else {
                 showNoPeminjaman();
             }
-            updateSteps(2);
             showNotification(`Anggota ditemukan: ${a.nama_lengkap}`, 'success');
         } else {
             showNotification(data.message || 'Anggota tidak ditemukan', 'error');
