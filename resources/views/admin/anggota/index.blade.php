@@ -584,8 +584,6 @@ $(document).ready(function() {
     anggotaTable = $('#anggota-table').DataTable({
         processing: true,
         serverSide: true,
-        autoWidth: false,
-        scrollX: true,
         dom: '<"flex flex-row items-center justify-between gap-2 mb-2 dt-toolbar"<"dt-length-wrap"l><"flex flex-row items-center gap-2 dt-actions"<"dt-search-wrap"f><"dt-buttons-wrap">>><"anggota-table-scroll"rt><"flex flex-row items-center justify-between gap-2 mt-2 dt-bottom"<"text-xs text-gray-400 dt-info"i><"dt-pager"p>>',
         searchDelay: 400,
         ajax: {

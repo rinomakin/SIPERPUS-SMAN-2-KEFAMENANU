@@ -372,7 +372,6 @@ $(document).ready(function () {
             emptyTable: 'Tidak ada data',
         },
         scrollX: true,
-        autoWidth: false,
         pagingType: 'simple_numbers',
         pageLength: 25,
         lengthMenu: [10, 25, 50, 100],
