@@ -37,7 +37,8 @@
         color: #6b7280;
     }
     #peminjaman-table_wrapper .dataTables_filter {
-        display: none;
+        float: none;
+        text-align: inherit;
     }
     #peminjaman-table_wrapper .dataTables_length select {
         padding: 6px 28px 6px 12px;
@@ -103,6 +104,50 @@
     .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
         opacity: .4 !important;
         cursor: default !important;
+    }
+
+    /* ── DT toolbar left/right layout ── */
+    #peminjaman-table_wrapper { max-width: 100%; width: 100%; }
+    .dt-toolbar .dt-length-wrap .dataTables_length { float: none; }
+    .dt-toolbar .dt-length-wrap .dataTables_length label { display: flex; align-items: center; gap: 0.25rem; white-space: nowrap; margin: 0; }
+    .dt-toolbar .dt-search-wrap .dataTables_filter { float: none; text-align: inherit; }
+    .dt-toolbar .dt-search-wrap .dataTables_filter input {
+        width: 200px; padding: 6px 12px; border-radius: 0.75rem;
+        border: 1px solid #e5e7eb; font-size: 0.85rem; outline: none;
+        background: #f9fafb; transition: all 0.2s;
+    }
+    .dt-toolbar .dt-search-wrap .dataTables_filter input:focus {
+        border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); background: white;
+    }
+    .dt-toolbar .dt-actions { flex-shrink: 0; }
+    .dt-toolbar .dt-buttons-wrap { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .dt-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .dt-bottom .dt-info { white-space: nowrap; }
+    .dt-bottom .dt-pager { white-space: nowrap; }
+    @media (max-width: 480px) {
+        #peminjaman-table_wrapper .dt-toolbar .dataTables_filter input { width: 100px; font-size: 0.7rem !important; padding: 0.2rem 0.4rem !important; }
+        #peminjaman-table_wrapper .dt-toolbar .dataTables_length select { padding: 0.2rem 1.25rem 0.2rem 0.35rem !important; font-size: 0.7rem !important; }
+        .dt-toolbar .dt-buttons-wrap a,
+        .dt-toolbar .dt-buttons-wrap button { font-size: 0.7rem !important; padding: 0.25rem 0.4rem !important; }
+        .dt-toolbar .dt-buttons-wrap { gap: 4px; }
+        .dt-bottom { font-size: 0.7rem; }
+    }
+    @media (max-width: 370px) {
+        #peminjaman-table_wrapper .dt-toolbar .dataTables_length select,
+        #peminjaman-table_wrapper .dt-toolbar .dataTables_filter input,
+        .dt-toolbar .dt-buttons-wrap a,
+        .dt-toolbar .dt-buttons-wrap button {
+            font-size: 7px !important;
+            padding: 2px 3px !important;
+        }
+        #peminjaman-table_wrapper .dt-toolbar .dataTables_filter input { width: 60px !important; }
+        #peminjaman-table_wrapper .dt-toolbar .dataTables_length select { padding: 0.15rem 0.8rem 0.15rem 0.2rem !important; }
+        .dt-toolbar .dt-buttons-wrap a,
+        .dt-toolbar .dt-buttons-wrap button { gap: 2px !important; }
+        .dt-toolbar .dt-buttons-wrap { gap: 2px; }
+        .dt-toolbar .dt-buttons-wrap .btn-text { display: none; }
+        .dt-toolbar .dt-buttons-wrap a:last-child .btn-text { display: inline; }
+        .dt-bottom { font-size: 0.5rem; }
     }
 
     /* ===== Action Buttons ===== */
@@ -324,19 +369,6 @@
             <p class="text-sm text-gray-500 mt-1">Kelola data peminjaman buku perpustakaan</p>
         </div>
         <div class="flex items-center gap-2.5 flex-wrap">
-            @if(Auth::user()->hasPermission('riwayat-transaksi.view') || Auth::user()->isAdmin())
-            <a href="{{ route('riwayat-peminjaman.index') }}"
-               class="inline-flex items-center px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
-                <i class="fas fa-history mr-2 text-gray-400"></i>Riwayat
-            </a>
-            @endif
-
-            @if(Auth::user()->hasPermission('peminjaman.create') || Auth::user()->isAdmin())
-            <a href="{{ route('peminjaman.create') }}"
-               class="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-medium transition-all shadow-md shadow-blue-500/25">
-                <i class="fas fa-plus mr-2"></i>Tambah Peminjaman
-            </a>
-            @endif
         </div>
     </div>
 
@@ -390,48 +422,8 @@
 
     <!-- Table Card -->
     <div id="pinjam-table-card" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden anim-up" style="animation-delay:.25s">
-        <!-- Toolbar -->
-        <div class="px-5 py-4 border-b border-gray-100">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                <!-- Search -->
-                <div class="relative max-w-sm w-full">
-                    <input type="text" id="searchInput" placeholder="Cari nomor, anggota, buku..."
-                           class="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all outline-none">
-                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                        <i class="fas fa-search text-gray-400 text-xs"></i>
-                    </div>
-                </div>
-
-                <!-- Quick Filters + Filter Button -->
-                <div class="flex items-center gap-2 flex-wrap">
-                    <button onclick="setQuickFilter('')"
-                            class="filter-chip px-3 py-1.5 text-xs font-medium rounded-lg border transition-all active bg-blue-50 border-blue-200 text-blue-700"
-                            data-filter="" id="chip-all">
-                        Semua
-                    </button>
-                    <button onclick="setQuickFilter('dipinjam')"
-                            class="filter-chip px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 bg-white hover:bg-amber-50 hover:border-amber-200 hover:text-amber-700 transition-all"
-                            data-filter="dipinjam" id="chip-dipinjam">
-                        <span class="status-dot bg-amber-400"></span>Dipinjam
-                    </button>
-                    <button onclick="setQuickFilter('terlambat')"
-                            class="filter-chip px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 bg-white hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 transition-all"
-                            data-filter="terlambat" id="chip-terlambat">
-                        <span class="status-dot bg-rose-400"></span>Terlambat
-                    </button>
-
-                    <div class="w-px h-6 bg-gray-200 mx-1 hidden sm:block"></div>
-
-                    <button onclick="openFilterModal()"
-                            class="inline-flex items-center px-3.5 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all">
-                        <i class="fas fa-sliders-h mr-1.5"></i>Filter Lanjutan
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <!-- Table -->
-        <div class="overflow-x-auto">
+        <div>
             <table id="peminjaman-table" class="w-full">
                 <thead>
                     <tr>
@@ -524,7 +516,6 @@
 
 <script>
 let peminjamanTable;
-let currentQuickFilter = '';
 
 $(document).ready(function() {
     // Initialize DataTable
@@ -534,7 +525,7 @@ $(document).ready(function() {
         ajax: {
             url: '/admin/peminjaman',
             data: function(d) {
-                d.filter_status = currentQuickFilter || $('#filter_status').val();
+                d.filter_status = $('#filter_status').val();
                 d.filter_tanggal_dari = $('#filter_tanggal_dari').val();
                 d.filter_tanggal_sampai = $('#filter_tanggal_sampai').val();
             },
@@ -561,7 +552,9 @@ $(document).ready(function() {
         ],
         language: {
             processing: '<div class="flex items-center justify-center py-6"><div class="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div><span class="ml-3 text-sm text-gray-500">Memuat data...</span></div>',
-            lengthMenu: "Tampilkan _MENU_ data",
+            lengthMenu: '_MENU_',
+            search: '',
+            searchPlaceholder: 'Cari...',
             zeroRecords: '<div class="text-center py-12"><div class="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-3"><i class="fas fa-inbox text-gray-400 text-xl"></i></div><p class="text-gray-500 text-sm font-medium">Tidak ada data peminjaman</p><p class="text-gray-400 text-xs mt-1">Coba ubah filter atau kata kunci pencarian</p></div>',
             info: "Menampilkan _START_-_END_ dari _TOTAL_ data",
             infoEmpty: "Tidak ada data",
@@ -573,20 +566,28 @@ $(document).ready(function() {
                 previous: '<i class="fas fa-angle-left"></i>'
             }
         },
+        scrollX: true,
+        autoWidth: false,
         pageLength: 10,
         lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
         order: [[4, 'desc']],
+        dom: '<"flex flex-row items-center justify-between gap-2 mb-2 dt-toolbar"<"dt-length-wrap"l><"flex flex-row items-center gap-2 dt-actions"<"dt-search-wrap"f><"dt-buttons-wrap">>><"dt-table-scroll"t><"flex flex-row items-center justify-between gap-2 mt-2 dt-bottom"<"text-xs text-gray-400 dt-info"i><"dt-pager"p>>',
+        initComplete: function() {
+            var btnWrap = $('.dt-buttons-wrap');
+
+            btnWrap.append('<button onclick="openFilterModal()" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all"><i class="fas fa-sliders-h"></i><span class="btn-text">Filter</span></button>');
+
+            @if(Auth::user()->hasPermission('riwayat-transaksi.view') || Auth::user()->isAdmin())
+            btnWrap.append('<a href="{{ route('riwayat-peminjaman.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all"><i class="fas fa-history text-gray-400"></i><span class="btn-text">Riwayat</span></a>');
+            @endif
+
+            @if(Auth::user()->hasPermission('peminjaman.create') || Auth::user()->isAdmin())
+            btnWrap.append('<a href="{{ route('peminjaman.create') }}" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-sm hover:from-blue-700 hover:to-indigo-700 transition-all"><i class="fas fa-plus"></i><span class="btn-text">Tambah</span></a>');
+            @endif
+        },
         drawCallback: function() {
             // Re-apply tooltips or animations after draw if needed
         }
-    });
-
-    // Debounced search
-    let searchTimeout;
-    $('#searchInput').on('input', function() {
-        clearTimeout(searchTimeout);
-        const val = this.value;
-        searchTimeout = setTimeout(() => peminjamanTable.search(val).draw(), 400);
     });
 
     // Load summary on init
@@ -626,30 +627,6 @@ function animateCount(elId, target) {
     requestAnimationFrame(step);
 }
 
-// ===== Quick Filters =====
-function setQuickFilter(status) {
-    currentQuickFilter = status;
-    // Update chip styles
-    document.querySelectorAll('.filter-chip').forEach(chip => {
-        const f = chip.dataset.filter;
-        chip.classList.remove('active', 'bg-blue-50', 'border-blue-200', 'text-blue-700', 'bg-amber-50', 'border-amber-200', 'text-amber-700', 'bg-rose-50', 'border-rose-200', 'text-rose-700');
-        chip.classList.add('bg-white', 'border-gray-200', 'text-gray-600');
-        if (f === status) {
-            chip.classList.remove('bg-white', 'border-gray-200', 'text-gray-600');
-            if (status === '') {
-                chip.classList.add('active', 'bg-blue-50', 'border-blue-200', 'text-blue-700');
-            } else if (status === 'dipinjam') {
-                chip.classList.add('active', 'bg-amber-50', 'border-amber-200', 'text-amber-700');
-            } else if (status === 'terlambat') {
-                chip.classList.add('active', 'bg-rose-50', 'border-rose-200', 'text-rose-700');
-            }
-        }
-    });
-    // Sync dropdown
-    $('#filter_status').val(status);
-    peminjamanTable.draw();
-}
-
 // ===== Filter Modal =====
 function openFilterModal() {
     const modal = document.getElementById('filterModal');
@@ -668,16 +645,13 @@ function resetFilters() {
     $('#filter_status').val('');
     $('#filter_tanggal_dari').val('');
     $('#filter_tanggal_sampai').val('');
-    currentQuickFilter = '';
-    setQuickFilter('');
     peminjamanTable.draw();
     closeFilterModal();
 }
 
 document.getElementById('filterForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    currentQuickFilter = $('#filter_status').val();
-    setQuickFilter(currentQuickFilter);
+    peminjamanTable.draw();
     closeFilterModal();
 });
 

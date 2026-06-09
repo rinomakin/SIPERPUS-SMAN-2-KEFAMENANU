@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Anggota;
+use App\Models\Kelas;
 use App\Models\Buku;
 use App\Models\Denda;
 use App\Models\Peminjaman;
@@ -11,7 +12,6 @@ use App\Models\Pengembalian;
 use App\Models\BukuTamu;
 use App\Models\KategoriBuku;
 use App\Models\JenisBuku;
-use App\Models\Kelas;
 use App\Models\User;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AnggotaExport;
@@ -136,8 +136,6 @@ class LaporanController extends Controller
             ]);
         }
 
-        $kelas = Kelas::with('jurusan')->get();
-
         if ($request->filled('export') && $request->export === 'excel') {
             $anggota = $query->orderBy('created_at', 'desc')->get();
             return Excel::download(new AnggotaExport($anggota), 'laporan-anggota-' . date('Y-m-d') . '.xlsx');
@@ -154,6 +152,7 @@ class LaporanController extends Controller
         $staff = (clone $query)->where('jenis_anggota', 'staff')->count();
         $aktif = (clone $query)->where('status', 'aktif')->count();
         $nonaktif = (clone $query)->where('status', 'nonaktif')->count();
+        $kelas = Kelas::with('jurusan')->get();
         $pengaturan = $this->getPengaturan();
         return view('admin.laporan.anggota', compact('totalAnggota', 'siswa', 'guru', 'staff', 'aktif', 'nonaktif', 'kelas', 'pengaturan'));
     }

@@ -43,34 +43,12 @@
         font-size: 0.875rem;
         color: #6b7280;
     }
-    #anggota-table_wrapper .dataTables_toolbar {
-        padding: 10px 16px;
-        border-bottom: 1px solid #e5e7eb;
-        background: #fafbfc;
-    }
-    #anggota-table_wrapper .dataTables_toolbar_right {
-        margin-left: auto;
-    }
     #anggota-table_wrapper .dataTables_filter label {
-        position: relative;
         margin-bottom: 0;
-    }
-    #anggota-table_wrapper .dataTables_filter label::before {
-        content: '\f002';
-        font-family: 'Font Awesome 6 Free';
-        font-weight: 900;
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #9ca3af;
-        font-size: 0.7rem;
-        z-index: 1;
-        pointer-events: none;
     }
     #anggota-table_wrapper .dataTables_filter input {
         width: 16rem;
-        padding: 6px 12px 6px 32px;
+        padding: 6px 12px;
         font-size: 0.7rem;
         background: #f9fafb;
         border: 1px solid #e5e7eb;
@@ -259,6 +237,17 @@
         font-size: 0.6rem;
     }
 
+    /* ── DT toolbar left/right layout (like laporan) ── */
+    #anggota-table_wrapper { max-width: 100%; width: 100%; }
+    .dt-toolbar .dt-length-wrap .dataTables_length { float: none; }
+    .dt-toolbar .dt-length-wrap .dataTables_length label { display: flex; align-items: center; gap: 0.25rem; white-space: nowrap; margin: 0; }
+    .dt-toolbar .dt-search-wrap .dataTables_filter { float: none; text-align: inherit; }
+    .dt-toolbar .dt-actions { flex-shrink: 0; }
+    .dt-toolbar .dt-buttons-wrap { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .anggota-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .dt-bottom .dt-info { white-space: nowrap; }
+    .dt-bottom .dt-pager { white-space: nowrap; }
+
     /* Mobile responsive */
     @media (max-width: 768px) {
         .toolbar-btn {
@@ -269,35 +258,20 @@
         .toolbar-btn span.btn-text {
             font-size: inherit;
         }
-        #anggota-table_wrapper .dataTables_toolbar {
-            flex-wrap: nowrap;
-            gap: 3px;
-            padding: 6px 8px;
-        }
-        #anggota-table_wrapper .dataTables_toolbar_left,
-        #anggota-table_wrapper .dataTables_toolbar_right {
-            gap: 3px;
-        }
-        #anggota-table_wrapper .dataTables_filter input {
-            width: 90px;
-            padding: 4px 6px 4px 22px;
-            font-size: 0.6rem;
-        }
-        #anggota-table_wrapper .dataTables_filter label::before {
-            left: 8px;
-            font-size: 0.6rem;
-        }
-        #anggota-table_wrapper .dataTables_length label {
-            font-size: 0.6rem;
-            gap: 2px;
-        }
-        #anggota-table_wrapper .dataTables_length select {
-            padding: 3px 18px 3px 5px;
-            font-size: 0.6rem;
-        }
+        .dt-toolbar .dt-search-wrap .dataTables_filter input { width: 90px; padding: 4px 6px; font-size: 0.6rem; }
+        .dt-toolbar .dt-length-wrap .dataTables_length label { font-size: 0.6rem; gap: 2px; }
+        .dt-toolbar .dt-length-wrap .dataTables_length select { padding: 3px 18px 3px 5px; font-size: 0.6rem; }
     }
-    /* Very small screens — icons only, tighter spacing */
-    @media (max-width: 380px) {
+    @media (max-width: 480px) {
+        .dt-toolbar .dt-search-wrap .dataTables_filter input { width: 90px; font-size: 0.7rem; }
+        .dt-toolbar .dt-length-wrap .dataTables_length select { padding: 0.2rem 1.25rem 0.2rem 0.35rem; font-size: 0.7rem; }
+        .dt-toolbar .dt-buttons-wrap a,
+        .dt-toolbar .dt-buttons-wrap button { font-size: 0.7rem !important; padding: 0.25rem 0.4rem !important; }
+        .dt-toolbar .dt-buttons-wrap { gap: 4px; }
+        .dt-bottom { font-size: 0.7rem; }
+    }
+    /* Very small screens — tighter spacing */
+    @media (max-width: 370px) {
         .toolbar-btn {
             padding: 3px 4px;
             font-size: 0.4rem;
@@ -305,31 +279,29 @@
         .toolbar-btn span.btn-text {
             display: none;
         }
-        #anggota-table_wrapper .dataTables_toolbar {
-            gap: 2px;
-            padding: 4px 6px;
+        .toolbar-btn.bg-gradient-to-r span.btn-text {
+            display: inline;
         }
-        #anggota-table_wrapper .dataTables_toolbar_left,
-        #anggota-table_wrapper .dataTables_toolbar_right {
-            gap: 2px;
+        /* Bulk action bar buttons — match DT toolbar size */
+        .bulk-bar .toolbar-btn {
+            font-size: 8px !important;
+            padding: 4px 6px !important;
         }
-        #anggota-table_wrapper .dataTables_filter input {
-            width: 60px;
-            font-size: 0.5rem;
-            padding: 3px 4px 3px 18px;
+        #anggota-table_wrapper .dt-toolbar .dataTables_length select,
+        #anggota-table_wrapper .dt-toolbar .dataTables_filter input,
+        .dt-toolbar .dt-buttons-wrap a,
+        .dt-toolbar .dt-buttons-wrap button {
+            font-size: 7px !important;
+            padding: 2px 3px !important;
         }
-        #anggota-table_wrapper .dataTables_filter label::before {
-            left: 6px;
-            font-size: 0.5rem;
+        #anggota-table_wrapper .dt-toolbar .dataTables_filter input { width: 60px !important; }
+        #anggota-table_wrapper .dt-toolbar .dataTables_length select { padding: 0.15rem 0.8rem 0.15rem 0.2rem !important; }
+        .dt-toolbar .dt-buttons-wrap a,
+        .dt-toolbar .dt-buttons-wrap button {
+            gap: 2px !important;
         }
-        #anggota-table_wrapper .dataTables_length select {
-            font-size: 0.5rem;
-            padding: 2px 14px 2px 4px;
-        }
-        #anggota-table_wrapper .dataTables_length label {
-            font-size: 0.5rem;
-            gap: 1px;
-        }
+        .dt-toolbar .dt-buttons-wrap { gap: 2px; }
+        .dt-bottom { font-size: 0.5rem; }
     }
 </style>
 
@@ -595,7 +567,7 @@ $(document).ready(function() {
 
         { data: 'jenis_kelamin_badge', name: 'jenis_kelamin', className: 'px-2 py-1.5 whitespace-nowrap text-[9px] font-mono' },
 
-        { data: 'kelas_info', name: 'kelas', orderable: false, visible: false, className: 'px-2 py-1.5 whitespace-nowrap text-[9px]' },
+        { data: 'kelas_info', name: 'kelas', orderable: false, searchable: false, visible: false, className: 'px-2 py-1.5 whitespace-nowrap text-[9px]' },
 
         { data: 'jenis_badge', name: 'jenis_anggota', className: 'px-2 py-1.5 whitespace-nowrap text-[9px]' },
 
@@ -613,7 +585,8 @@ $(document).ready(function() {
         processing: true,
         serverSide: true,
         autoWidth: false,
-        dom: '<"dataTables_toolbar flex items-center gap-2 flex-wrap"<"dataTables_toolbar_left flex items-center"l><"dataTables_toolbar_right flex items-center gap-2"f>>rt<"flex items-center justify-between"ip>',
+        scrollX: true,
+        dom: '<"flex flex-row items-center justify-between gap-2 mb-2 dt-toolbar"<"dt-length-wrap"l><"flex flex-row items-center gap-2 dt-actions"<"dt-search-wrap"f><"dt-buttons-wrap">>><"anggota-table-scroll"rt><"flex flex-row items-center justify-between gap-2 mt-2 dt-bottom"<"text-xs text-gray-400 dt-info"i><"dt-pager"p>>',
         searchDelay: 400,
         ajax: {
             url: '/admin/anggota',
@@ -627,7 +600,7 @@ $(document).ready(function() {
         columns: columns,
         language: {
             processing: '<div class="flex items-center justify-center py-3"><div class="w-6 h-6 rounded-full border-3 border-blue-200 border-t-blue-600 animate-spin"></div><span class="ml-2 text-[10px] text-gray-600">Memuat data...</span></div>',
-            lengthMenu: "_MENU_",
+            lengthMenu: '_MENU_',
             zeroRecords: '<div class="text-center py-8"><div class="mx-auto w-14 h-14 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mb-3"><i class="fas fa-users text-[10px] text-gray-400"></i></div><h3 class="text-[10px] font-semibold text-gray-800 mb-1">Tidak ada data ditemukan</h3><p class="text-[10px] text-gray-500">Coba ubah kata kunci atau filter pencarian</p></div>',
             info: "Menampilkan _START_-_END_ dari _TOTAL_ anggota",
             infoEmpty: "Tidak ada data",
@@ -649,7 +622,7 @@ $(document).ready(function() {
             updateSelectedCount();
         },
         initComplete: function() {
-            var right = $('.dataTables_toolbar_right');
+            var right = $('.dt-buttons-wrap');
 
             right.append('<button onclick="openFilterModal()" id="filterBtn" class="toolbar-btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 relative"><i class="fas fa-sliders-h text-[10px]"></i><span class="btn-text text-[10px]">Filter</span><span id="filterBadge" class="hidden absolute -top-1.5 -right-1.5 w-5 h-5 bg-blue-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span></button>');
 
@@ -661,9 +634,6 @@ $(document).ready(function() {
             @if(Auth::user()->hasPermission('anggota.create') || Auth::user()->isAdmin())
             right.append('<a href="{{ route('anggota.create') }}" class="toolbar-btn bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"><i class="fas fa-plus text-[10px]"></i><span class="btn-text text-[10px]">Tambah</span></a>');
             @endif
-
-            /* Wrap table in scrollable div so toolbar stays fixed */
-            $('#anggota-table').wrap('<div class="anggota-table-scroll" style="overflow-x:auto;-webkit-overflow-scrolling:touch;"></div>');
         }
     });
 

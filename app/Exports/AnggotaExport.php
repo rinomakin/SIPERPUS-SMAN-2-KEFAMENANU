@@ -13,50 +13,62 @@ use Illuminate\Http\Request;
 
 class AnggotaExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
 {
-    protected $request;
+    protected $data;
 
-    public function __construct(Request $request = null)
+    public function __construct($data = null)
     {
-        $this->request = $request;
+        $this->data = $data;
     }
 
     public function collection()
     {
+        // If data is already a Collection (pre-filtered), return it directly
+        if ($this->data instanceof \Illuminate\Support\Collection) {
+            return $this->data;
+        }
+
+        // Otherwise build query from Request
         $query = Anggota::with(['kelas.jurusan']);
 
-        if ($this->request) {
+        if ($this->data instanceof Request) {
+            $req = $this->data;
+
+            // Apply date range filter
+            if ($req->filled('tanggal_mulai') && $req->filled('tanggal_akhir')) {
+                $query->whereBetween('created_at', [$req->tanggal_mulai, $req->tanggal_akhir]);
+            }
+
             // Apply search filter
-            if ($this->request->filled('search')) {
-                $search = $this->request->search;
+            if ($req->filled('search')) {
+                $search = $req->search;
                 $query->where(function($q) use ($search) {
                     $q->where('nama_lengkap', 'like', "%{$search}%")
                       ->orWhere('nomor_anggota', 'like', "%{$search}%")
                       ->orWhere('barcode_anggota', 'like', "%{$search}%")
-
                       ->orWhere('email', 'like', "%{$search}%");
                 });
             }
 
             // Apply kelas filter
-            if ($this->request->filled('kelas_id')) {
-                $query->where('kelas_id', $this->request->kelas_id);
+            if ($req->filled('kelas_id')) {
+                $query->where('kelas_id', $req->kelas_id);
             }
 
             // Apply jurusan filter
-            if ($this->request->filled('jurusan_id')) {
-                $query->whereHas('kelas', function($q) {
-                    $q->where('jurusan_id', $this->request->jurusan_id);
+            if ($req->filled('jurusan_id')) {
+                $query->whereHas('kelas', function($q) use ($req) {
+                    $q->where('jurusan_id', $req->jurusan_id);
                 });
             }
 
             // Apply jenis anggota filter
-            if ($this->request->filled('jenis_anggota')) {
-                $query->where('jenis_anggota', $this->request->jenis_anggota);
+            if ($req->filled('jenis_anggota')) {
+                $query->where('jenis_anggota', $req->jenis_anggota);
             }
 
             // Apply status filter
-            if ($this->request->filled('status')) {
-                $query->where('status', $this->request->status);
+            if ($req->filled('status')) {
+                $query->where('status', $req->status);
             }
         }
 

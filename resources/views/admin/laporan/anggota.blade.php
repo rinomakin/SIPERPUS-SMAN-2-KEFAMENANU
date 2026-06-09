@@ -21,9 +21,9 @@
     /* ── DataTables overrides ── */
     #tabelAnggota_wrapper .dataTables_length select,
     #tabelAnggota_wrapper .dataTables_filter input {
-        border: 1px solid #e5e7eb;
+        /* border: 1px solid #e5e7eb; */
         border-radius: 0.5rem;
-        padding: 0.35rem 0.65rem;
+        padding: 0.40rem 0.70rem;
         font-size: 0.85rem;
         outline: none;
         transition: box-shadow .2s;
@@ -33,7 +33,9 @@
         border-color: #3b82f6;
     }
     #tabelAnggota_wrapper .dataTables_paginate .paginate_button.current {
-        background: linear-gradient(135deg,#3b82f6,#2563eb) !important;
+        /* background: #3b82f6; */
+        text:white !important;
+        /* border-color: #3b82f6; */
     }
     #tabelAnggota_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
         background: #eff6ff !important;
@@ -48,98 +50,54 @@
         font-weight: 600; background: #eff6ff; color: #2563eb;
         border: 1px solid #bfdbfe;
     }
+
+    /* ── Sticky toolbar & pagination ── */
+    .dt-toolbar { position: sticky; left: 0; z-index: 5; }
+    .dt-bottom  { position: sticky; left: 0; z-index: 5; }
+    .dt-table-scroll { -webkit-overflow-scrolling: touch; }
+    #tabelAnggota_wrapper { max-width: 100%; width: 100%; }
+    .dt-length-wrap, .dt-search-wrap { flex-shrink: 0; }
+    .dt-actions { gap: 6px; }
+    .dt-buttons-wrap { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .dt-search-wrap .dataTables_filter { float: none; text-align: inherit; }
+    .dt-length-wrap .dataTables_length { float: none; }
+    .dt-length-wrap .dataTables_length label { display: flex; align-items: center; gap: 0.25rem; white-space: nowrap; }
+    .dt-search-wrap .dataTables_filter input { width: 160px; }
+    @media (max-width: 480px) {
+        #tabelAnggota_wrapper .dt-toolbar .dataTables_filter input { width: 90px; font-size: 0.7rem !important; padding: 0.2rem 0.4rem !important; }
+        #tabelAnggota_wrapper .dt-toolbar .dataTables_length select { padding: 0.2rem 1.25rem 0.2rem 0.35rem !important; font-size: 0.7rem !important; }
+        .dt-toolbar .dt-buttons-wrap a,
+        .dt-toolbar .dt-buttons-wrap button { font-size: 0.7rem !important; padding: 0.25rem 0.4rem !important; }
+        .dt-toolbar .dt-buttons-wrap { gap: 4px; }
+        .dt-bottom { font-size: 0.7rem; }
+    }
+    @media (max-width: 370px) {
+        #tabelAnggota_wrapper .dt-toolbar .dataTables_length select,
+        #tabelAnggota_wrapper .dt-toolbar .dataTables_filter input,
+        .dt-toolbar .dt-buttons-wrap a,
+        .dt-toolbar .dt-buttons-wrap button {
+            font-size: 7px !important;
+            padding: 2px 3px !important;
+        }
+        .dt-toolbar .dt-buttons-wrap a,
+        .dt-toolbar .dt-buttons-wrap button {
+            gap: 2px !important;
+        }
+        .dt-toolbar .dt-buttons-wrap { gap: 2px; }
+        #tabelAnggota_wrapper .dt-toolbar .dataTables_filter input { width: 60px !important; }
+        #tabelAnggota_wrapper .dt-toolbar .dataTables_length select { padding: 0.15rem 0.8rem 0.15rem 0.2rem !important; }
+        .dt-bottom { font-size: 0.5rem; }
+    }
 </style>
 @endpush
 
 @section('content')
 <div class="space-y-5">
 
-    {{-- ══════════════════════════════════════════
-         HEADER BAR
+{{-- ══════════════════════════════════════════
+     STATS CARDS
     ══════════════════════════════════════════ --}}
-    <div class="glass-card rounded-2xl shadow-lg p-5 animate-fade">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-
-            {{-- Back + Title --}}
-            <div class="flex items-center gap-3">
-                <a href="{{ route('laporan.index') }}"
-                   class="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-colors shrink-0">
-                    <i class="fas fa-arrow-left text-gray-600 text-sm"></i>
-                </a>
-                <div>
-                    <h1 class="text-xl font-bold text-gray-900 leading-tight">Laporan Anggota</h1>
-                    <p class="text-sm text-gray-500 mt-0.5">
-                        Total:
-                        <span class="font-semibold text-blue-600">{{ $totalAnggota }}</span> anggota
-                        @if(request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','kelas_id']))
-                        <span class="filter-badge ml-2"><i class="fas fa-filter text-[10px]"></i> Difilter</span>
-                        @endif
-                    </p>
-                </div>
-            </div>
-
-            {{-- Action Buttons --}}
-            <div class="flex flex-wrap items-center gap-2">
-                {{-- Filter Modal Trigger --}}
-                <button onclick="openFilterModal()"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all
-                               {{ request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','kelas_id'])
-                                  ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200'
-                                  : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-600' }}">
-                    <i class="fas fa-sliders-h"></i>
-                    Filter
-                    @if(request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','kelas_id']))
-                    <span class="w-5 h-5 rounded-full bg-white/30 text-xs font-bold flex items-center justify-center">
-                        {{ collect(['tanggal_mulai','jenis_anggota','status','kelas_id'])->filter(fn($k)=>request()->filled($k))->count() }}
-                    </span>
-                    @endif
-                </button>
-
-                {{-- Reset Filter --}}
-                @if(request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','kelas_id']))
-                <a href="{{ route('admin.laporan.anggota') }}"
-                   class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 transition-all">
-                    <i class="fas fa-times"></i> Reset
-                </a>
-                @endif
-
-                {{-- Export Excel --}}
-                <a href="{{ route('admin.laporan.anggota', array_merge(request()->query(), ['export' => 'excel'])) }}"
-                   class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-green-600 shadow-md hover:shadow-lg hover:opacity-90 transition-all">
-                    <i class="fas fa-file-excel"></i> Excel
-                </a>
-
-                {{-- Export PDF --}}
-                <a href="{{ route('admin.laporan.anggota', array_merge(request()->query(), ['export' => 'pdf'])) }}"
-                   class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-red-500 to-rose-600 shadow-md hover:shadow-lg hover:opacity-90 transition-all">
-                    <i class="fas fa-file-pdf"></i> PDF
-                </a>
-            </div>
-        </div>
-
-        {{-- Active filter pills --}}
-        @if(request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','kelas_id']))
-        <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100">
-            @if(request('tanggal_mulai') && request('tanggal_akhir'))
-            <span class="filter-badge"><i class="fas fa-calendar-alt text-[10px]"></i> {{ request('tanggal_mulai') }} – {{ request('tanggal_akhir') }}</span>
-            @endif
-            @if(request('jenis_anggota'))
-            <span class="filter-badge"><i class="fas fa-id-badge text-[10px]"></i> {{ ucfirst(request('jenis_anggota')) }}</span>
-            @endif
-            @if(request('status'))
-            <span class="filter-badge"><i class="fas fa-circle text-[10px]"></i> {{ ucfirst(request('status')) }}</span>
-            @endif
-            @if(request('kelas_id'))
-            <span class="filter-badge"><i class="fas fa-door-open text-[10px]"></i> {{ $kelas->firstWhere('id', request('kelas_id'))?->nama_kelas ?? 'Kelas' }}</span>
-            @endif
-        </div>
-        @endif
-    </div>
-
-    {{-- ══════════════════════════════════════════
-         STATS CARDS
-    ══════════════════════════════════════════ --}}
-    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+    <div class="hidden md:grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
         @foreach([
             ['icon'=>'fas fa-users',              'color'=>'blue',  'label'=>'Total',      'val'=>$totalAnggota,  'delay'=>'0s'],
             ['icon'=>'fas fa-user-graduate',       'color'=>'blue',    'label'=>'Siswa',      'val'=>$siswa,         'delay'=>'.05s'],
@@ -166,6 +124,43 @@
     {{-- ══════════════════════════════════════════
          DATA TABLE
     ══════════════════════════════════════════ --}}
+
+    {{-- Hidden action buttons — moved into DT toolbar by initComplete --}}
+    <div id="tableActions" class="hidden flex flex-wrap items-center gap-2">
+        <button onclick="openFilterModal()"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all
+                       {{ request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','kelas_id'])
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:text-blue-600' }}">
+            <i class="fas fa-sliders-h"></i>
+            Filter
+            @if(request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','kelas_id']))
+            <span class="w-5 h-5 rounded-full bg-white/30 text-xs font-bold flex items-center justify-center">
+                {{ collect(['tanggal_mulai','jenis_anggota','status','kelas_id'])->filter(fn($k)=>request()->filled($k))->count() }}
+            </span>
+            @endif
+        </button>
+
+        @if(request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','kelas_id']))
+        <a href="{{ route('admin.laporan.anggota') }}"
+           class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 transition-all">
+            <i class="fas fa-times"></i> Reset
+        </a>
+        @endif
+
+        <a href="{{ request()->fullUrlWithQuery(['export' => 'excel']) }}"
+           data-spa-ignore
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-green-600 shadow-md hover:shadow-lg hover:opacity-90 transition-all">
+            <i class="fas fa-file-excel"></i> Excel
+        </a>
+
+        <a href="{{ request()->fullUrlWithQuery(['export' => 'pdf']) }}"
+           data-spa-ignore
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-red-500 to-rose-600 shadow-md hover:shadow-lg hover:opacity-90 transition-all">
+            <i class="fas fa-file-pdf"></i> PDF
+        </a>
+    </div>
+
     <div class="glass-card rounded-2xl shadow-lg overflow-hidden animate-fade" style="animation-delay:.3s">
         <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
             <div class="flex items-center gap-2">
@@ -177,7 +172,7 @@
             <span class="text-xs text-gray-400">{{ now()->format('d M Y') }}</span>
         </div>
 
-        <div class="p-4 overflow-x-auto">
+        <div class="p-4">
             <table id="tabelAnggota" class="w-full no-footer" style="width:100%">
                 <thead>
                     <tr class="bg-gradient-to-r from-blue-50 to-blue-100">
@@ -230,7 +225,7 @@
         </div>
 
         {{-- Modal Form --}}
-        <form method="GET" action="{{ route('admin.laporan.anggota') }}" id="filterForm">
+        <form method="GET" action="{{ route('admin.laporan.anggota') }}" id="filterForm" data-spa-ignore>
             <div class="px-6 py-5 space-y-4">
 
                 {{-- Rentang Tanggal --}}
@@ -294,8 +289,8 @@
                     </div>
                 </div>
 
+                @if(isset($kelas) && $kelas->count())
                 {{-- Kelas --}}
-                @if($kelas->count())
                 <div>
                     <label class="block text-xs font-semibold text-gray-900 mb-2">
                         <i class="fas fa-door-open text-blue-500 mr-1"></i> Kelas
@@ -328,6 +323,7 @@
         </form>
     </div>
 </div>
+
 @endsection
 
 @push('scripts')
@@ -370,15 +366,21 @@ $(document).ready(function () {
             infoEmpty: 'Tidak ada data',
             infoFiltered: '(difilter dari _MAX_)',
             lengthMenu: '_MENU_',
-            search: 'Cari:',
+            search: '',
+            searchPlaceholder: 'Cari...',
             zeroRecords: 'Tidak ada data ditemukan',
             emptyTable: 'Tidak ada data',
         },
+        scrollX: true,
+        autoWidth: false,
         pagingType: 'simple_numbers',
         pageLength: 25,
         lengthMenu: [10, 25, 50, 100],
         order: [[1, 'asc']],
-        dom: '<"flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4"lf>t<"flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4"<"text-xs text-gray-400"i><"dt-pager"p>>',
+        dom: '<"flex flex-row items-center justify-between gap-2 mb-4 dt-toolbar"<"dt-length-wrap"l><"flex flex-row items-center gap-2 dt-actions"<"dt-search-wrap"f><"dt-buttons-wrap">>><"overflow-x-auto dt-table-scroll"t><"flex flex-row items-center justify-between gap-2 mt-4 dt-bottom"<"text-xs text-gray-400"i><"dt-pager"p>>',
+        initComplete: function() {
+            $('#tableActions').children().appendTo('.dt-buttons-wrap');
+        },
         drawCallback: function () {
             var api = this.api();
             var info = api.page.info();
@@ -394,32 +396,44 @@ $(document).ready(function () {
                 });
         },
     });
+
+    // Auto-open modal if filter was active but returned empty
+    @if(request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','kelas_id']) && $totalAnggota < 1)
+    openFilterModal();
+    @endif
 });
 
 // ── Modal helpers ──
 function openFilterModal() {
     const modal = document.getElementById('filterModal');
     const box   = document.getElementById('filterModalBox');
+    if (!modal || !box) return;
     modal.classList.remove('opacity-0', 'pointer-events-none');
     box.classList.remove('scale-95', 'opacity-0');
     document.body.style.overflow = 'hidden';
 
-    var akhirInput = document.querySelector('[name="tanggal_akhir"]');
-    if (akhirInput && !akhirInput.value) {
-        var today = new Date();
-        var yyyy = today.getFullYear();
-        var mm = String(today.getMonth() + 1).padStart(2, '0');
-        var dd = String(today.getDate()).padStart(2, '0');
-        akhirInput.value = yyyy + '-' + mm + '-' + dd;
+    try {
+        var akhirInput = document.querySelector('[name="tanggal_akhir"]');
+        if (akhirInput && !akhirInput.value) {
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            var iso = today.toISOString().slice(0, 10);
+            akhirInput.value = iso;
+        }
+    } catch(e) {
+        console.warn('openFilterModal:', e);
     }
 }
 
 function closeFilterModal() {
     const modal = document.getElementById('filterModal');
     const box   = document.getElementById('filterModalBox');
+    if (!modal || !box) return;
     box.classList.add('scale-95', 'opacity-0');
     modal.classList.add('opacity-0');
-    setTimeout(() => modal.classList.add('pointer-events-none'), 260);
+    setTimeout(function() {
+        if (modal) modal.classList.add('pointer-events-none');
+    }, 260);
     document.body.style.overflow = '';
 }
 
@@ -428,12 +442,8 @@ function closeFilterModalOutside(e) {
 }
 
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeFilterModal();
+    if (e.key === 'Escape') { closeFilterModal(); }
 });
 
-// Auto-open modal if filter was active but returned empty
-@if(request()->hasAny(['tanggal_mulai','tanggal_akhir','jenis_anggota','status','kelas_id']) && $totalAnggota < 1)
-openFilterModal();
-@endif
 </script>
 @endpush
