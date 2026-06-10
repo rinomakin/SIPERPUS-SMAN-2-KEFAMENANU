@@ -121,7 +121,8 @@
     }
     .dt-toolbar .dt-actions { flex-shrink: 0; }
     .dt-toolbar .dt-buttons-wrap { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
-    .dt-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .dt-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
+    #peminjaman-table_wrapper table.dataTable { width: 100% !important; }
     .dt-bottom .dt-info { white-space: nowrap; }
     .dt-bottom .dt-pager { white-space: nowrap; }
     @media (max-width: 480px) {

@@ -555,7 +555,7 @@
         <div class="flex-1 flex flex-col overflow-hidden main-content">
             <!-- Top Header -->
             <header class="header-bar border-b border-gray-200/80 flex-shrink-0 z-20">
-                <div class="max-w-full mx-auto px-3 sm:px-4 lg:px-6">
+                <div class="max-w-full mx-auto px-0 sm:px-4 lg:px-6">
                     <div class="flex justify-between items-center h-12">
                         <!-- Left: Toggle + Title -->
                         <div class="flex items-center gap-2">
@@ -666,7 +666,6 @@
                                             </button>
                                         </form>
                                     </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -675,7 +674,7 @@
 
             <!-- Breadcrumb Navigation -->
             <div class="bg-white/60 border-b border-gray-200/60 flex-shrink-0" style="backdrop-filter:blur(8px);">
-                <div class="max-w-full mx-auto px-3 sm:px-4 lg:px-6">
+                <div class="max-w-full mx-auto px-0 sm:px-4 lg:px-6">
                     <div class="py-1.5">
                         <nav class="flex" aria-label="Breadcrumb">
                             <ol class="inline-flex items-center space-x-1">
@@ -754,7 +753,7 @@
 
             <!-- Page Content -->
             <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
-                <div class="container mx-auto px-3 sm:px-4 lg:px-6 py-4">
+                <div class="container mx-auto px-0 sm:px-4 lg:px-6 py-4">
                     @yield('content')
                 </div>
             </main>

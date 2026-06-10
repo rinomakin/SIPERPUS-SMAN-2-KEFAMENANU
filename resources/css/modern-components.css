@@ -4,24 +4,24 @@
 /* Design System Variables */
 /* =================================== */
 :root {
-    /* Primary Colors */
-    --primary-50: #f0fdf4;
-    --primary-100: #dcfce7;
-    --primary-500: #22c55e;
-    --primary-600: #16a34a;
-    --primary-700: #15803d;
-    --primary-900: #14532d;
+    /* Primary Colors - Blue */
+    --primary-50: #eff6ff;
+    --primary-100: #dbeafe;
+    --primary-500: #3b82f6;
+    --primary-600: #2563eb;
+    --primary-700: #1d4ed8;
+    --primary-900: #1e3a8a;
 
     /* Secondary Colors */
-    --secondary-50: #eff6ff;
-    --secondary-100: #dbeafe;
-    --secondary-500: #3b82f6;
-    --secondary-600: #2563eb;
-    --secondary-700: #1d4ed8;
+    --secondary-50: #f0fdf4;
+    --secondary-100: #dcfce7;
+    --secondary-500: #22c55e;
+    --secondary-600: #16a34a;
+    --secondary-700: #15803d;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    --gradient-secondary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    --gradient-secondary: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
     --gradient-success: linear-gradient(135deg, #10b981 0%, #047857 100%);
     --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);

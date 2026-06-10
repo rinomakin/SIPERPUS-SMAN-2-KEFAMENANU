@@ -54,8 +54,9 @@
     /* ── Sticky toolbar & pagination ── */
     .dt-toolbar { position: sticky; left: 0; z-index: 5; }
     .dt-bottom  { position: sticky; left: 0; z-index: 5; }
-    .dt-table-scroll { -webkit-overflow-scrolling: touch; }
+    .dt-table-scroll { -webkit-overflow-scrolling: touch; width: 100%; }
     #tabelAnggota_wrapper { max-width: 100%; width: 100%; }
+    #tabelAnggota_wrapper table.dataTable { width: 100% !important; }
     .dt-length-wrap, .dt-search-wrap { flex-shrink: 0; }
     .dt-actions { gap: 6px; }
     .dt-buttons-wrap { display: flex; align-items: center; gap: 6px; white-space: nowrap; }

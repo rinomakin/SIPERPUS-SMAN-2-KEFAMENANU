@@ -244,7 +244,8 @@
     .dt-toolbar .dt-search-wrap .dataTables_filter { float: none; text-align: inherit; }
     .dt-toolbar .dt-actions { flex-shrink: 0; }
     .dt-toolbar .dt-buttons-wrap { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
-    .anggota-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .anggota-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
+    #anggota-table_wrapper table.dataTable { width: 100% !important; }
     .dt-bottom .dt-info { white-space: nowrap; }
     .dt-bottom .dt-pager { white-space: nowrap; }
 
@@ -340,7 +341,7 @@
     <!-- Table Card -->
     <div class="glass-card rounded-2xl shadow-sm border border-gray-100 w-full transform transition-all duration-300">
         <div class="w-full">
-            <table id="anggota-table" class="w-full" style="min-width: 850px;">
+            <table id="anggota-table" class="w-full" style="width:100%;">
                 <thead>
                     <tr>
                         @if(Auth::user()->hasPermission('anggota.delete') || Auth::user()->isAdmin() || Auth::user()->hasPermission('anggota.cetak-kartu') || Auth::user()->isAdmin())

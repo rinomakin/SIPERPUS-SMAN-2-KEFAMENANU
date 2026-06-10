@@ -13,7 +13,7 @@
     --text-tertiary: #94a3b8;
 
     /* Dark Gradients */
-    --gradient-primary-dark: linear-gradient(135deg, #065f46 0%, #064e3b 100%);
+    --gradient-primary-dark: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
     --gradient-secondary-dark: linear-gradient(
         135deg,
         #1e40af 0%,
