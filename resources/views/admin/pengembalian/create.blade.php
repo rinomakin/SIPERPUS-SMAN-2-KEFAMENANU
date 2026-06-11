@@ -561,7 +561,7 @@ function loadPeminjamanData(peminjamanList) {
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="text-xs font-semibold text-blue-900 truncate">${d.judul_buku || 'N/A'}</p>
-                            <p class="text-[10px] text-blue-500">Jumlah: ${d.jumlah || 1} buku</p>
+                            <p class="text-[10px] text-blue-500 mt-1">Jumlah: ${d.jumlah || 1} buku</p>
                         </div>
                         <div class="flex-shrink-0">
                             <i class="fas fa-book text-blue-300 text-lg"></i>
@@ -624,7 +624,7 @@ function toggleBook(bookKey, peminjamanId, detailId, judul, jumlah, tglKembali) 
         checkIcon.style.background = 'transparent';
     } else {
         // Select
-        selectedBooks[bookKey] = { peminjamanId, detailId, judul, jumlah, tanggal_harus_kembali: tglKembali || null };
+        selectedBooks[bookKey] = { peminjamanId, detailId, judul, jumlah, tanggal_harus_kembali: tglKembali || null, kondisi: 'baik', jumlahHilang: 0 };
         card.classList.add('selected');
         checkIcon.innerHTML = '<i class="fas fa-check text-white text-[9px]"></i>';
         checkIcon.style.borderColor = '#add8e6';
@@ -659,7 +659,7 @@ function toggleSelectAll(peminjamanId, event) {
         // Select all
         peminjaman.detail_peminjaman.forEach(d => {
             const key = `${peminjamanId}_${d.id}`;
-            selectedBooks[key] = { peminjamanId, detailId: d.id, judul: d.judul_buku || 'N/A', jumlah: d.jumlah || 1, tanggal_harus_kembali: d.tanggal_harus_kembali_raw || null };
+            selectedBooks[key] = { peminjamanId, detailId: d.id, judul: d.judul_buku || 'N/A', jumlah: d.jumlah || 1, tanggal_harus_kembali: d.tanggal_harus_kembali_raw || null, kondisi: 'baik', jumlahHilang: 0 };
             const card = document.getElementById(`bookCard_${key}`);
             const check = document.getElementById(`checkIcon_${key}`);
             if (card) card.classList.add('selected');
@@ -738,7 +738,10 @@ function renderDendaBuku(selected) {
             if (diff > 0) { daysLate = diff; dendaLate = diff * 1000; }
         }
 
-        const subTotal = dendaLate;
+        const kondisi = (selectedBooks[key] && selectedBooks[key].kondisi) || 'baik';
+        const jumlahHilang = (selectedBooks[key] && selectedBooks[key].jumlahHilang) || 0;
+        const dendaHilang = kondisi === 'hilang' ? jumlahHilang * 100000 : 0;
+        const subTotal = dendaLate + dendaHilang;
 
         const lateChip = daysLate > 0
             ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[9px] font-bold"><i class="fas fa-clock"></i>Terlambat ${daysLate} hari</span>`
@@ -750,6 +753,10 @@ function renderDendaBuku(selected) {
 
         const subTotalClass = subTotal > 0 ? 'text-red-600 font-extrabold' : 'text-black font-bold';
         const subTotalText  = subTotal > 0 ? `Rp ${subTotal.toLocaleString('id-ID')}` : 'Tidak ada denda';
+
+        const kondisiSelectedBaik   = kondisi === 'baik' ? 'selected' : '';
+        const kondisiSelectedHilang = kondisi === 'hilang' ? 'selected' : '';
+        const hilangHidden = kondisi === 'hilang' ? '' : 'style="display:none"';
 
         html += `
         <div class="bg-white border border-blue-200 rounded-xl overflow-hidden shadow-sm" id="dendaCard_${key}">
@@ -772,7 +779,7 @@ function renderDendaBuku(selected) {
                         <i class="fas fa-sort-amount-up-alt text-blue-400"></i>Jumlah Dikembalikan
                     </div>
                     <input type="number" name="jumlah_dikembalikan[${s.detailId}]"
-                           value="${s.jumlah}" min="1" max="${s.jumlah}"
+                           value="${s.jumlahDikembalikan || s.jumlah}" min="1" max="${s.jumlah}"
                            class="text-xs px-3 py-1.5 border border-blue-200 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none bg-white w-20 text-center"
                            onchange="updateBookJumlah('${key}', this.value)">
                 </div>
@@ -782,6 +789,28 @@ function renderDendaBuku(selected) {
                     <span id="dendaLate_${key}" class="${daysLate > 0 ? 'text-red-600 font-semibold' : 'text-blue-400'}">
                         ${daysLate > 0 ? `${daysLate} hari &times; Rp 1.000 = Rp ${dendaLate.toLocaleString('id-ID')}` : 'Rp 0'}
                     </span>
+                </div>
+                <!-- Kondisi buku -->
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-blue-500 flex items-center gap-1.5"><i class="fas fa-clipboard-check text-yellow-400 text-[10px]"></i>Kondisi buku</span>
+                    <select name="kondisi_buku[${s.detailId}]" onchange="updateKondisiBuku('${key}', this.value)"
+                            class="text-[10px] px-2 py-1 border border-gray-200 rounded focus:ring-1 focus:ring-blue-300 outline-none bg-white">
+                        <option value="baik" ${kondisiSelectedBaik}>Baik</option>
+                        <option value="hilang" ${kondisiSelectedHilang}>Hilang</option>
+                    </select>
+                </div>
+                <!-- Jumlah Hilang (hidden if baik) -->
+                <div class="flex items-center justify-between text-xs" id="hilangRow_${key}" ${hilangHidden}>
+                    <span class="text-red-500 flex items-center gap-1.5"><i class="fas fa-times-circle text-red-400 text-[10px]"></i>Jumlah Hilang</span>
+                    <input type="number" name="jumlah_hilang[${s.detailId}]"
+                           value="${jumlahHilang}" min="0" max="${s.jumlah}"
+                           class="text-xs px-3 py-1.5 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-400 outline-none bg-white w-20 text-center"
+                           onchange="updateJumlahHilang('${key}', this.value)">
+                </div>
+                <!-- Denda hilang -->
+                <div class="flex items-center justify-between text-xs" id="dendaHilangRow_${key}" ${hilangHidden}>
+                    <span class="text-red-500 flex items-center gap-1.5"><i class="fas fa-money-bill-wave text-red-400 text-[10px]"></i>Denda hilang (Rp 100.000/buku)</span>
+                    <span id="dendaHilang_${key}" class="text-red-600 font-semibold">${dendaHilang > 0 ? `Rp ${dendaHilang.toLocaleString('id-ID')}` : 'Rp 0'}</span>
                 </div>
                 <!-- Sub-total -->
                 <div class="flex items-center justify-between pt-2 border-t border-blue-100 text-xs">
@@ -798,6 +827,129 @@ function updateBookJumlah(key, value) {
     if (selectedBooks[key]) {
         selectedBooks[key].jumlahDikembalikan = parseInt(value) || 1;
     }
+}
+
+function updateKondisiBuku(key, value) {
+    if (selectedBooks[key]) {
+        selectedBooks[key].kondisi = value;
+        if (value === 'baik') {
+            selectedBooks[key].jumlahHilang = 0;
+        } else if (value === 'hilang' && !selectedBooks[key].jumlahHilang) {
+            selectedBooks[key].jumlahHilang = 1;
+        }
+    }
+    // Re-render the denda card for this book
+    const selected = Object.values(selectedBooks);
+    const cardHtml = renderDendaCard(key, selected.find(s => `${s.peminjamanId}_${s.detailId}` === key));
+    const existingCard = document.getElementById(`dendaCard_${key}`);
+    if (existingCard && cardHtml) {
+        existingCard.outerHTML = cardHtml;
+    }
+    recalculateDenda();
+}
+
+function updateJumlahHilang(key, value) {
+    const num = parseInt(value) || 0;
+    if (selectedBooks[key]) {
+        const s = selectedBooks[key];
+        const max = s.jumlah || 1;
+        selectedBooks[key].jumlahHilang = Math.min(num, max);
+    }
+    // Update display
+    const dendaHilangEl = document.getElementById(`dendaHilang_${key}`);
+    const subEl = document.getElementById(`subTotal_${key}`);
+    const dendaHilang = selectedBooks[key] ? (selectedBooks[key].jumlahHilang || 0) * 100000 : 0;
+    if (dendaHilangEl) {
+        dendaHilangEl.textContent = dendaHilang > 0 ? `Rp ${dendaHilang.toLocaleString('id-ID')}` : 'Rp 0';
+    }
+    recalculateDenda();
+}
+
+function renderDendaCard(key, s) {
+    if (!s) return '';
+    const _now1 = new Date();
+    const _todayLocal = `${_now1.getFullYear()}-${String(_now1.getMonth()+1).padStart(2,'0')}-${String(_now1.getDate()).padStart(2,'0')}`;
+    const tanggalKembali = document.getElementById('tanggal_kembali')?.value || _todayLocal;
+
+    let daysLate = 0;
+    let dendaLate = 0;
+    if (s.tanggal_harus_kembali) {
+        const due  = new Date(s.tanggal_harus_kembali);
+        const ret  = new Date(tanggalKembali);
+        const diff = Math.floor((ret - due) / (1000 * 60 * 60 * 24));
+        if (diff > 0) { daysLate = diff; dendaLate = diff * 1000; }
+    }
+
+    const kondisi = s.kondisi || 'baik';
+    const jumlahHilang = s.jumlahHilang || 0;
+    const dendaHilang = kondisi === 'hilang' ? jumlahHilang * 100000 : 0;
+    const subTotal = dendaLate + dendaHilang;
+
+    const lateChip = daysLate > 0
+        ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[9px] font-bold"><i class="fas fa-clock"></i>Terlambat ${daysLate} hari</span>`
+        : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[9px] font-bold"><i class="fas fa-check"></i>Tepat Waktu</span>`;
+
+    const dueDateDisplay = s.tanggal_harus_kembali
+        ? new Date(s.tanggal_harus_kembali).toLocaleDateString('id-ID', {day:'2-digit',month:'short',year:'numeric'})
+        : '-';
+
+    const subTotalClass = subTotal > 0 ? 'text-red-600 font-extrabold' : 'text-black font-bold';
+    const subTotalText  = subTotal > 0 ? `Rp ${subTotal.toLocaleString('id-ID')}` : 'Tidak ada denda';
+    const hilangHidden = kondisi === 'hilang' ? '' : 'style="display:none"';
+
+    return `
+    <div class="bg-white border border-blue-200 rounded-xl overflow-hidden shadow-sm" id="dendaCard_${key}">
+        <div class="flex items-center gap-3 px-4 py-3 bg-blue-50 border-b border-blue-100">
+            <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-book text-purple-500 text-xs"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-blue-900 truncate">${s.judul}</p>
+                <p class="text-[10px] text-blue-500">Qty: ${s.jumlah} &bull; Batas: ${dueDateDisplay}</p>
+            </div>
+            ${lateChip}
+        </div>
+        <div class="px-4 py-3 space-y-2.5">
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2 text-[10px] text-blue-500 font-semibold uppercase tracking-wide">
+                    <i class="fas fa-sort-amount-up-alt text-blue-400"></i>Jumlah Dikembalikan
+                </div>
+                <input type="number" name="jumlah_dikembalikan[${s.detailId}]"
+                       value="${s.jumlahDikembalikan || s.jumlah}" min="1" max="${s.jumlah}"
+                       class="text-xs px-3 py-1.5 border border-blue-200 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none bg-white w-20 text-center"
+                       onchange="updateBookJumlah('${key}', this.value)">
+            </div>
+            <div class="flex items-center justify-between text-xs">
+                <span class="text-blue-500 flex items-center gap-1.5"><i class="fas fa-calendar-times text-red-400 text-[10px]"></i>Denda keterlambatan</span>
+                <span id="dendaLate_${key}" class="${daysLate > 0 ? 'text-red-600 font-semibold' : 'text-blue-400'}">
+                    ${daysLate > 0 ? `${daysLate} hari &times; Rp 1.000 = Rp ${dendaLate.toLocaleString('id-ID')}` : 'Rp 0'}
+                </span>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+                <span class="text-blue-500 flex items-center gap-1.5"><i class="fas fa-clipboard-check text-yellow-400 text-[10px]"></i>Kondisi buku</span>
+                <select name="kondisi_buku[${s.detailId}]" onchange="updateKondisiBuku('${key}', this.value)"
+                        class="text-[10px] px-2 py-1 border border-gray-200 rounded focus:ring-1 focus:ring-blue-300 outline-none bg-white">
+                    <option value="baik" ${kondisi === 'baik' ? 'selected' : ''}>Baik</option>
+                    <option value="hilang" ${kondisi === 'hilang' ? 'selected' : ''}>Hilang</option>
+                </select>
+            </div>
+            <div class="flex items-center justify-between text-xs" id="hilangRow_${key}" ${hilangHidden}>
+                <span class="text-red-500 flex items-center gap-1.5"><i class="fas fa-times-circle text-red-400 text-[10px]"></i>Jumlah Hilang</span>
+                <input type="number" name="jumlah_hilang[${s.detailId}]"
+                       value="${jumlahHilang}" min="0" max="${s.jumlah}"
+                       class="text-xs px-3 py-1.5 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-400 outline-none bg-white w-20 text-center"
+                       onchange="updateJumlahHilang('${key}', this.value)">
+            </div>
+            <div class="flex items-center justify-between text-xs" id="dendaHilangRow_${key}" ${hilangHidden}>
+                <span class="text-red-500 flex items-center gap-1.5"><i class="fas fa-money-bill-wave text-red-400 text-[10px]"></i>Denda hilang (Rp 100.000/buku)</span>
+                <span id="dendaHilang_${key}" class="text-red-600 font-semibold">${dendaHilang > 0 ? `Rp ${dendaHilang.toLocaleString('id-ID')}` : 'Rp 0'}</span>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-blue-100 text-xs">
+                <span class="font-semibold text-blue-700">Sub-total buku ini</span>
+                <span id="subTotal_${key}" class="${subTotalClass}">${subTotalText}</span>
+            </div>
+        </div>
+    </div>`;
 }
 
 function recalculateDenda() {
@@ -828,18 +980,33 @@ function recalculateDenda() {
         }
         if (daysLate > maxDaysLate) maxDaysLate = daysLate;
 
-        const subTotal = dendaLate;
+        const kondisi = s.kondisi || 'baik';
+        const jumlahHilang = s.jumlahHilang || 0;
+        const dendaHilang = kondisi === 'hilang' ? jumlahHilang * 100000 : 0;
+        const subTotal = dendaLate + dendaHilang;
         totalDenda += subTotal;
 
         // Update per-book display if card exists
         const lateEl = document.getElementById(`dendaLate_${key}`);
         const subEl  = document.getElementById(`subTotal_${key}`);
+        const dendaHilangEl = document.getElementById(`dendaHilang_${key}`);
+        const hilangRow = document.getElementById(`hilangRow_${key}`);
+        const dendaHilangRow = document.getElementById(`dendaHilangRow_${key}`);
 
         if (lateEl) {
             lateEl.className = daysLate > 0 ? 'text-red-600 font-semibold' : 'text-gray-400';
             lateEl.innerHTML = daysLate > 0
                 ? `${daysLate} hari &times; Rp 1.000 = Rp ${dendaLate.toLocaleString('id-ID')}`
                 : 'Rp 0';
+        }
+        if (dendaHilangEl) {
+            dendaHilangEl.textContent = dendaHilang > 0 ? `Rp ${dendaHilang.toLocaleString('id-ID')}` : 'Rp 0';
+        }
+        if (hilangRow) {
+            hilangRow.style.display = kondisi === 'hilang' ? '' : 'none';
+        }
+        if (dendaHilangRow) {
+            dendaHilangRow.style.display = kondisi === 'hilang' ? '' : 'none';
         }
         if (subEl) {
             subEl.className = subTotal > 0 ? 'text-red-600 font-extrabold' : 'text-black font-bold';

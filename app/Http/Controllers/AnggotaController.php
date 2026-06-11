@@ -13,6 +13,8 @@ use App\Exports\AnggotaExport;
 use App\Exports\AnggotaTemplateExport;
 use App\Imports\AnggotaImport;
 use Yajra\DataTables\Facades\DataTables;
+use App\Models\User;
+use App\Models\Role;
 
 class AnggotaController extends Controller
 {
@@ -157,8 +159,26 @@ class AnggotaController extends Controller
             'nama_lengkap' => 'required|string|max:255',
             'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
             'alamat' => 'required|string',
-            'nomor_telepon' => 'required|string|max:20',
-            'email' => 'nullable|email|max:255',
+            'nomor_telepon' => [
+                'required',
+                'string',
+                'max:20',
+                function ($attribute, $value, $fail) {
+                    if (User::where('nomor_telepon', $value)->exists() || Anggota::where('nomor_telepon', $value)->exists()) {
+                        $fail('Nomor telepon sudah terdaftar di sistem.');
+                    }
+                },
+            ],
+            'email' => [
+                'nullable',
+                'email',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    if ($value && (User::where('email', $value)->exists() || Anggota::where('email', $value)->exists())) {
+                        $fail('Email sudah terdaftar di sistem.');
+                    }
+                },
+            ],
             'kelas_id' => 'nullable|exists:kelas,id',
             'jabatan' => 'nullable|string|max:255',
             'jenis_anggota' => 'required|in:siswa,guru,staff',
@@ -184,7 +204,28 @@ class AnggotaController extends Controller
                 $data['foto'] = $fotoName;
             }
 
-            Anggota::create($data);
+            $anggota = Anggota::create($data);
+
+            // Auto-create User account for anggota
+            if ($request->filled('email')) {
+                $roleAnggota = Role::where('kode_peran', 'ANGGOTA')->first();
+                if ($roleAnggota && !User::where('email', $request->email)->exists()) {
+                    $password = $request->filled('tanggal_lahir')
+                        ? bcrypt($request->tanggal_lahir)
+                        : bcrypt('password123');
+
+                    User::create([
+                        'nama_lengkap' => $request->nama_lengkap,
+                        'email' => $request->email,
+                        'password' => $password,
+                        'peran_id' => $roleAnggota->id,
+                        'nomor_telepon' => $request->nomor_telepon,
+                        'alamat' => $request->alamat,
+                        'status' => 'aktif',
+                    ]);
+                }
+            }
+
             DB::commit();
 
             return redirect()->route('anggota.index')
@@ -216,8 +257,32 @@ class AnggotaController extends Controller
             'nama_lengkap' => 'required|string|max:255',
             'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
             'alamat' => 'required|string',
-            'nomor_telepon' => 'required|string|max:20',
-            'email' => 'nullable|email|max:255',
+            'nomor_telepon' => [
+                'required',
+                'string',
+                'max:20',
+                function ($attribute, $value, $fail) use ($id) {
+                    $existsInUsers = User::where('nomor_telepon', $value)->exists();
+                    $existsInAnggota = Anggota::where('nomor_telepon', $value)->where('id', '!=', $id)->exists();
+                    if ($existsInUsers || $existsInAnggota) {
+                        $fail('Nomor telepon sudah terdaftar di sistem.');
+                    }
+                },
+            ],
+            'email' => [
+                'nullable',
+                'email',
+                'max:255',
+                function ($attribute, $value, $fail) use ($id) {
+                    if ($value) {
+                        $existsInUsers = User::where('email', $value)->exists();
+                        $existsInAnggota = Anggota::where('email', $value)->where('id', '!=', $id)->exists();
+                        if ($existsInUsers || $existsInAnggota) {
+                            $fail('Email sudah terdaftar di sistem.');
+                        }
+                    }
+                },
+            ],
             'kelas_id' => 'nullable|exists:kelas,id',
             'jabatan' => 'nullable|string|max:255',
             'jenis_anggota' => 'required|in:siswa,guru,staff',
@@ -250,6 +315,36 @@ class AnggotaController extends Controller
             }
 
             $anggota->update($data);
+
+            // Sync User account
+            $oldEmail = $anggota->email;
+            $newEmail = $request->email;
+
+            if ($oldEmail) {
+                $user = User::where('email', $oldEmail)->first();
+                if ($user) {
+                    $user->update([
+                        'nama_lengkap' => $request->nama_lengkap,
+                        'email' => $newEmail,
+                        'nomor_telepon' => $request->nomor_telepon,
+                        'alamat' => $request->alamat,
+                    ]);
+                }
+            } elseif ($newEmail) {
+                $roleAnggota = Role::where('kode_peran', 'ANGGOTA')->first();
+                if ($roleAnggota && !User::where('email', $newEmail)->exists()) {
+                    User::create([
+                        'nama_lengkap' => $request->nama_lengkap,
+                        'email' => $newEmail,
+                        'password' => bcrypt('password123'),
+                        'peran_id' => $roleAnggota->id,
+                        'nomor_telepon' => $request->nomor_telepon,
+                        'alamat' => $request->alamat,
+                        'status' => 'aktif',
+                    ]);
+                }
+            }
+
             DB::commit();
 
             return redirect()->route('anggota.index')
@@ -271,7 +366,14 @@ class AnggotaController extends Controller
             if ($anggota->foto && file_exists(public_path('storage/anggota/' . $anggota->foto))) {
                 unlink(public_path('storage/anggota/' . $anggota->foto));
             }
-            
+
+            // Delete linked User account
+            if ($anggota->email) {
+                User::where('email', $anggota->email)
+                    ->whereHas('role', fn($q) => $q->where('kode_peran', 'ANGGOTA'))
+                    ->delete();
+            }
+
             $anggota->delete();
             
             return redirect()->route('anggota.index')
@@ -296,6 +398,12 @@ class AnggotaController extends Controller
             foreach ($anggota as $item) {
                 if ($item->foto && file_exists(public_path('storage/anggota/' . $item->foto))) {
                     unlink(public_path('storage/anggota/' . $item->foto));
+                }
+                // Delete linked User accounts
+                if ($item->email) {
+                    User::where('email', $item->email)
+                        ->whereHas('role', fn($q) => $q->where('kode_peran', 'ANGGOTA'))
+                        ->delete();
                 }
             }
             

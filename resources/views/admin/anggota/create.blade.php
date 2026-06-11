@@ -842,8 +842,8 @@ function removePhotoPreview() {
 }
 
 // Camera
-let cameraStream = null;
-let facingMode = 'environment';
+var cameraStream = null;
+var facingMode = 'environment';
 
 function openCamera() {
     document.getElementById('cameraOverlay').classList.add('active');

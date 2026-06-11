@@ -357,10 +357,10 @@
 
                         <div id="masterDropdown" class="dropdown-menu {{ $masterDataActive ? 'open' : '' }} space-y-0.5 mt-1">
                             @if(Auth::user()->hasAnyPermission(['role.view']) || Auth::user()->isAdmin())
-                            <!-- <a href="{{ route('role.index') }}"
+                            <a href="{{ route('role.index') }}"
                                class="dropdown-item {{ request()->routeIs('role.*') ? 'active' : '' }}">
                                 Data Role
-                            </a> -->
+                            </a>
                             @endif
 
                             @if(Auth::user()->hasAnyPermission(['permission.view']) || Auth::user()->isAdmin())

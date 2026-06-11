@@ -31,6 +31,12 @@ class RoleSeeder extends Seeder
                 'kode_peran' => 'PETUGAS',
                 'deskripsi' => 'Role untuk petugas perpustakaan dengan akses terbatas',
                 'status' => 'aktif'
+            ],
+            [
+                'nama_peran' => 'Anggota',
+                'kode_peran' => 'ANGGOTA',
+                'deskripsi' => 'Role untuk anggota perpustakaan dengan akses terbatas',
+                'status' => 'aktif'
             ]
         ];
 

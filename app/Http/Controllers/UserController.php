@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Anggota;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -18,10 +19,26 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('role')->orderBy('nama_lengkap')->paginate(10);
-        return view('admin.user.index', compact('users'));
+        $perPage = $request->input('length', 10);
+        $filter = $request->input('filter', 'staff');
+
+        $users = User::with('role')->orderBy('nama_lengkap');
+        if ($filter === 'anggota') {
+            $users->whereHas('role', fn($q) => $q->where('kode_peran', 'ANGGOTA'));
+        } else {
+            $users->whereHas('role', fn($q) => $q->where('kode_peran', '!=', 'ANGGOTA'));
+        }
+        $users = $users->paginate($perPage);
+        $users->appends(['length' => $perPage, 'filter' => $filter]);
+
+        $anggotaMap = Anggota::whereNotNull('email')
+            ->where('email', '!=', '')
+            ->get()
+            ->keyBy('email');
+
+        return view('admin.user.index', compact('users', 'anggotaMap', 'filter'));
     }
 
     /**
@@ -40,10 +57,29 @@ class UserController extends Controller
     {
         $request->validate([
             'nama_lengkap' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    if (User::where('email', $value)->exists() || Anggota::where('email', $value)->exists()) {
+                        $fail('Email sudah terdaftar di sistem.');
+                    }
+                },
+            ],
             'password' => 'required|string|min:8|confirmed',
             'peran_id' => 'required|exists:peran,id',
-            'nomor_telepon' => 'nullable|string|max:20',
+            'nomor_telepon' => [
+                'nullable',
+                'string',
+                'max:20',
+                function ($attribute, $value, $fail) {
+                    if ($value && (User::where('nomor_telepon', $value)->exists() || Anggota::where('nomor_telepon', $value)->exists())) {
+                        $fail('Nomor telepon sudah terdaftar di sistem.');
+                    }
+                },
+            ],
             'alamat' => 'nullable|string',
             'status' => 'required|in:aktif,nonaktif'
         ]);
@@ -86,10 +122,35 @@ class UserController extends Controller
     {
         $request->validate([
             'nama_lengkap' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                function ($attribute, $value, $fail) use ($user) {
+                    $existsInUsers = User::where('email', $value)->where('id', '!=', $user->id)->exists();
+                    $existsInAnggota = Anggota::where('email', $value)->exists();
+                    if ($existsInUsers || $existsInAnggota) {
+                        $fail('Email sudah terdaftar di sistem.');
+                    }
+                },
+            ],
             'password' => 'nullable|string|min:8|confirmed',
             'peran_id' => 'required|exists:peran,id',
-            'nomor_telepon' => 'nullable|string|max:20',
+            'nomor_telepon' => [
+                'nullable',
+                'string',
+                'max:20',
+                function ($attribute, $value, $fail) use ($user) {
+                    if ($value) {
+                        $existsInUsers = User::where('nomor_telepon', $value)->where('id', '!=', $user->id)->exists();
+                        $existsInAnggota = Anggota::where('nomor_telepon', $value)->exists();
+                        if ($existsInUsers || $existsInAnggota) {
+                            $fail('Nomor telepon sudah terdaftar di sistem.');
+                        }
+                    }
+                },
+            ],
             'alamat' => 'nullable|string',
             'status' => 'required|in:aktif,nonaktif'
         ]);

@@ -778,6 +778,23 @@ class PengembalianController extends Controller
             $finalTotalDenda = $totalDendaTerlambat;
             $isLate = $maxDaysLate > 0;
 
+            // Read kondisi + jumlah_hilang from form
+            $kondisiBuku = $request->input('kondisi_buku', []);
+            $jumlahHilangInput = $request->input('jumlah_hilang', []);
+
+            // Hitung denda kondisi (hilang)
+            $totalDendaKondisi = 0;
+            $jumlahBukuHilang = 0;
+            foreach ($detailsToProcess as $detail) {
+                $kondisi = $kondisiBuku[$detail->id] ?? 'baik';
+                $jmlHilang = (int) ($jumlahHilangInput[$detail->id] ?? 0);
+                if ($kondisi === 'hilang' && $jmlHilang > 0) {
+                    $totalDendaKondisi += $jmlHilang * 100000;
+                    $jumlahBukuHilang += $jmlHilang;
+                }
+            }
+            $finalTotalDenda += $totalDendaKondisi;
+
             // Create pengembalian record
             $pengembalian = Pengembalian::create([
                 'nomor_pengembalian'    => Pengembalian::generateNomorPengembalian(),
@@ -785,11 +802,11 @@ class PengembalianController extends Controller
                 'anggota_id'            => $peminjaman->anggota_id,
                 'user_id'               => auth()->id(),
                 'tanggal_pengembalian'  => $tanggalKembali,
-                'jam_pengembalian'      => $jamKembali,
+                'jam_kembali'           => $jamKembali,
                 'jumlah_hari_terlambat' => $maxDaysLate,
                 'total_denda'           => $finalTotalDenda,
                 'status_denda'          => $finalTotalDenda > 0 ? 'belum_dibayar' : 'tidak_ada',
-                'catatan'               => $request->catatan_pengembalian . ($isPartialReturn ? ' [Pengembalian sebagian]' : ''),
+                'catatan'               => $request->catatan_pengembalian . ($isPartialReturn ? ' [Pengembalian sebagian]' : '') . ($totalDendaKondisi > 0 ? " [{$jumlahBukuHilang} buku hilang]" : ''),
                 'status'                => 'selesai'
             ]);
 
@@ -804,19 +821,29 @@ class PengembalianController extends Controller
                     throw new \Exception("Jumlah dikembalikan untuk buku {$detail->buku->judul_buku} melebihi sisa pinjaman ({$maxReturnable}).");
                 }
 
+                $kondisi = $kondisiBuku[$detail->id] ?? 'baik';
+                $jmlHilang = (int) ($jumlahHilangInput[$detail->id] ?? 0);
+                $biayaHilang = ($kondisi === 'hilang') ? $jmlHilang * 100000 : 0;
+                $catatanBuku = ($kondisi === 'hilang' && $jmlHilang > 0) ? "{$jmlHilang} buku hilang" : 'Buku dalam kondisi baik';
+
                 DetailPengembalian::create([
                     'pengembalian_id'      => $pengembalian->id,
                     'buku_id'              => $detail->buku_id,
                     'detail_peminjaman_id' => $detail->id,
-                    'kondisi_kembali'      => 'baik',
+                    'kondisi_kembali'      => $kondisi,
                     'jumlah_dikembalikan'  => $jumlahDikembalikan,
-                    'denda_buku'           => $bookDenda['total'],
-                    'catatan_buku'         => 'Buku dalam kondisi baik'
+                    'denda_buku'           => $bookDenda['total'] + $biayaHilang,
+                    'catatan_buku'         => $catatanBuku,
                 ]);
 
-                $detail->update(['kondisi_kembali' => 'baik']);
+                $detail->update(['kondisi_kembali' => $kondisi]);
 
-                $detail->buku->increment('stok_tersedia', $jumlahDikembalikan);
+                if ($kondisi !== 'hilang' || $jmlHilang < $jumlahDikembalikan) {
+                    $stokKembali = $jumlahDikembalikan - ($kondisi === 'hilang' ? $jmlHilang : 0);
+                    if ($stokKembali > 0) {
+                        $detail->buku->increment('stok_tersedia', $stokKembali);
+                    }
+                }
             }
 
             // Update peminjaman status based on quantity returned
@@ -880,6 +907,9 @@ class PengembalianController extends Controller
             if ($isPartialReturn) {
                 $remaining = $totalBorrowedQty - $totalReturningQty;
                 $message = "Pengembalian sebagian berhasil ({$totalReturningQty} buku dikembalikan, {$remaining} buku masih dipinjam).";
+            }
+            if ($totalDendaKondisi > 0) {
+                $message .= " {$jumlahBukuHilang} buku hilang, dikenakan denda Rp " . number_format($totalDendaKondisi, 0, ',', '.');
             }
             if ($isLate) {
                 $message .= " Anggota terlambat {$maxDaysLate} hari dan dikenakan denda Rp " . number_format($finalTotalDenda, 0, ',', '.');

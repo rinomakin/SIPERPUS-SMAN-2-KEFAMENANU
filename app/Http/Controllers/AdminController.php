@@ -85,10 +85,8 @@ class AdminController extends Controller
             ->sortByDesc('created_at')
             ->take(6);
 
-        // 5. Buku Terpopuler (Sering Dipinjam)
-        $bukuTerpopuler = Buku::withCount(['detailPeminjaman as total_dipinjam' => function($query) {
-                $query->select(DB::raw('sum(jumlah)'));
-            }])
+        // 5. Buku Terpopuler (Sering Dipinjam) — hitung jumlah kali dipinjam, bukan jumlah buku
+        $bukuTerpopuler = Buku::withCount(['detailPeminjaman as total_dipinjam'])
             ->orderByDesc('total_dipinjam')
             ->limit(5)
             ->get();

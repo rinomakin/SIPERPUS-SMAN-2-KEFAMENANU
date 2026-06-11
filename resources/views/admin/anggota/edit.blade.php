@@ -579,7 +579,7 @@
                 <div>
                     <label for="nomor_telepon" class="form-label">Nomor Telepon <span class="required">*</span></label>
                     <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]"><i class="fas fa-phone"></i></span>
+                        <!-- <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]"><i class="fas fa-phone"></i></span> -->
                         <input type="text" name="nomor_telepon" id="nomor_telepon"
                                class="form-input pl-9 @error('nomor_telepon') is-invalid @enderror"
                                value="{{ old('nomor_telepon', $anggota->nomor_telepon) }}"
@@ -595,7 +595,7 @@
                 <div>
                     <label for="email" class="form-label">Email</label>
                     <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]"><i class="fas fa-envelope"></i></span>
+                        <!-- <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]"><i class="fas fa-envelope"></i></span> -->
                         <input type="email" name="email" id="email"
                                class="form-input pl-9 @error('email') is-invalid @enderror"
                                value="{{ old('email', $anggota->email) }}"
@@ -699,7 +699,7 @@
                 <div>
                     <label for="tanggal_bergabung" class="form-label">Tanggal Bergabung <span class="required">*</span></label>
                     <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]"><i class="fas fa-calendar-alt"></i></span>
+                        <!-- <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]"><i class="fas fa-calendar-alt"></i></span> -->
                         <input type="date" name="tanggal_bergabung" id="tanggal_bergabung"
                                class="form-input pl-9 @error('tanggal_bergabung') is-invalid @enderror"
                                value="{{ old('tanggal_bergabung', $anggota->tanggal_bergabung->format('Y-m-d')) }}" required>
@@ -871,8 +871,8 @@ function previewPhoto(input) {
 }
 
 // Camera
-let cameraStream = null;
-let facingMode = 'environment';
+var cameraStream = null;
+var facingMode = 'environment';
 
 function openCamera() {
     document.getElementById('cameraOverlay').classList.add('active');

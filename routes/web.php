@@ -24,6 +24,7 @@ use App\Http\Controllers\RiwayatPengembalianController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\AnggotaDashboardController;
 
 
 /*
@@ -55,6 +56,8 @@ Route::get('/', function () {
             return app(\App\Http\Controllers\KepsekController::class)->dashboard();
         case 'PETUGAS':
             return redirect('/petugas/dashboard');
+        case 'ANGGOTA':
+            return app(\App\Http\Controllers\AnggotaDashboardController::class)->dashboard();
         default:
             return redirect('/login');
     }
@@ -81,6 +84,8 @@ Route::get('/dashboard', function () {
             return redirect('/'); // Redirect ke root untuk kepala sekolah
         case 'PETUGAS':
             return redirect('/petugas/dashboard');
+        case 'ANGGOTA':
+            return redirect('/'); // Redirect ke root untuk anggota
         default:
             return redirect('/login');
     }
@@ -321,6 +326,14 @@ Route::middleware(['auth', 'role:PETUGAS'])->prefix('petugas')->group(function (
     ]);
     Route::post('/buku-tamu/scan-barcode', [BukuTamuController::class, 'scanBarcode'])->name('petugas.buku-tamu.scan-barcode');
     Route::get('/buku-tamu/search-members', [BukuTamuController::class, 'searchMembers'])->name('petugas.buku-tamu.search-members');
+});
+
+// Anggota Routes
+Route::middleware(['auth', 'role:ANGGOTA'])->prefix('anggota')->group(function () {
+    Route::get('/dashboard', [AnggotaDashboardController::class, 'dashboard'])->name('anggota.dashboard');
+    Route::get('/profil', [AnggotaDashboardController::class, 'profil'])->name('anggota.profil');
+    Route::post('/profil/update', [AnggotaDashboardController::class, 'updateProfil'])->name('anggota.profil.update');
+    Route::post('/profil/ganti-password', [AnggotaDashboardController::class, 'gantiPassword'])->name('anggota.profil.ganti-password');
 });
 
 // Kepala Sekolah Routes
