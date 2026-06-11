@@ -253,6 +253,8 @@ class AnggotaController extends Controller
 
     public function update(Request $request, $id)
     {
+        $anggota = Anggota::findOrFail($id);
+
         $request->validate([
             'nama_lengkap' => 'required|string|max:255',
             'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
@@ -261,10 +263,16 @@ class AnggotaController extends Controller
                 'required',
                 'string',
                 'max:20',
-                function ($attribute, $value, $fail) use ($id) {
-                    $existsInUsers = User::where('nomor_telepon', $value)->exists();
-                    $existsInAnggota = Anggota::where('nomor_telepon', $value)->where('id', '!=', $id)->exists();
-                    if ($existsInUsers || $existsInAnggota) {
+                function ($attribute, $value, $fail) use ($anggota) {
+                    $userQuery = User::where('nomor_telepon', $value);
+                    if ($anggota->nomor_telepon) {
+                        $linkedUser = User::where('nomor_telepon', $anggota->nomor_telepon)->first();
+                        if ($linkedUser) {
+                            $userQuery->where('id', '!=', $linkedUser->id);
+                        }
+                    }
+                    $existsInAnggota = Anggota::where('nomor_telepon', $value)->where('id', '!=', $anggota->id)->exists();
+                    if ($userQuery->exists() || $existsInAnggota) {
                         $fail('Nomor telepon sudah terdaftar di sistem.');
                     }
                 },
@@ -273,11 +281,17 @@ class AnggotaController extends Controller
                 'nullable',
                 'email',
                 'max:255',
-                function ($attribute, $value, $fail) use ($id) {
+                function ($attribute, $value, $fail) use ($anggota) {
                     if ($value) {
-                        $existsInUsers = User::where('email', $value)->exists();
-                        $existsInAnggota = Anggota::where('email', $value)->where('id', '!=', $id)->exists();
-                        if ($existsInUsers || $existsInAnggota) {
+                        $userQuery = User::where('email', $value);
+                        if ($anggota->email) {
+                            $linkedUser = User::where('email', $anggota->email)->first();
+                            if ($linkedUser) {
+                                $userQuery->where('id', '!=', $linkedUser->id);
+                            }
+                        }
+                        $existsInAnggota = Anggota::where('email', $value)->where('id', '!=', $anggota->id)->exists();
+                        if ($userQuery->exists() || $existsInAnggota) {
                             $fail('Email sudah terdaftar di sistem.');
                         }
                     }
@@ -293,7 +307,6 @@ class AnggotaController extends Controller
 
         DB::beginTransaction();
         try {
-            $anggota = Anggota::findOrFail($id);
             $data = $request->all();
 
             // Handle barcode - if empty, keep current barcode

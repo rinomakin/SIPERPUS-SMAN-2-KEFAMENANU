@@ -129,8 +129,14 @@ class UserController extends Controller
                 'max:255',
                 function ($attribute, $value, $fail) use ($user) {
                     $existsInUsers = User::where('email', $value)->where('id', '!=', $user->id)->exists();
-                    $existsInAnggota = Anggota::where('email', $value)->exists();
-                    if ($existsInUsers || $existsInAnggota) {
+                    $anggotaQuery = Anggota::where('email', $value);
+                    if ($user->email) {
+                        $linkedAnggota = Anggota::where('email', $user->email)->first();
+                        if ($linkedAnggota) {
+                            $anggotaQuery->where('id', '!=', $linkedAnggota->id);
+                        }
+                    }
+                    if ($existsInUsers || $anggotaQuery->exists()) {
                         $fail('Email sudah terdaftar di sistem.');
                     }
                 },
@@ -144,8 +150,14 @@ class UserController extends Controller
                 function ($attribute, $value, $fail) use ($user) {
                     if ($value) {
                         $existsInUsers = User::where('nomor_telepon', $value)->where('id', '!=', $user->id)->exists();
-                        $existsInAnggota = Anggota::where('nomor_telepon', $value)->exists();
-                        if ($existsInUsers || $existsInAnggota) {
+                        $anggotaQuery = Anggota::where('nomor_telepon', $value);
+                        if ($user->nomor_telepon) {
+                            $linkedAnggota = Anggota::where('nomor_telepon', $user->nomor_telepon)->first();
+                            if ($linkedAnggota) {
+                                $anggotaQuery->where('id', '!=', $linkedAnggota->id);
+                            }
+                        }
+                        if ($existsInUsers || $anggotaQuery->exists()) {
                             $fail('Nomor telepon sudah terdaftar di sistem.');
                         }
                     }
