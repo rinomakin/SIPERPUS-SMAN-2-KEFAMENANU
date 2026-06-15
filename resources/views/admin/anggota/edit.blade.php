@@ -437,7 +437,7 @@
                 <div class="flex flex-col items-center gap-2">
                     <div class="photo-upload-area has-photo" id="photoArea" onclick="document.getElementById('foto').click()" data-default-male="{{ asset('images/template_foto_laki_laki.jpg') }}" data-default-female="{{ asset('images/teplate_foto_perpempuan.jpg') }}">
                         @if($anggota->foto)
-                            <img id="photoPreview" src="{{ asset('storage/anggota/' . $anggota->foto) }}" alt="Foto {{ $anggota->nama_lengkap }}">
+                            <img id="photoPreview" src="{{ asset('storage/anggota/' . $anggota->foto) }}?v={{ $anggota->updated_at->timestamp }}" alt="Foto {{ $anggota->nama_lengkap }}">
                         @else
                             <img id="photoPreview" src="{{ $anggota->jenis_kelamin == 'Laki-laki' ? asset('images/template_foto_laki_laki.jpg') : asset('images/teplate_foto_perpempuan.jpg') }}" alt="Foto Default">
                         @endif

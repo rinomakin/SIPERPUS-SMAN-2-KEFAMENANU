@@ -67,8 +67,8 @@
 
         /* ============ SIDEBAR ============ */
         .sidebar {
-            width: 264px;
-            min-width: 264px;
+            width: 200px;
+            min-width: 200px;
             transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
                         transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             will-change: margin-left, transform;
@@ -81,7 +81,7 @@
                 z-index: 30;
             }
             .app-wrapper.sidebar-collapsed .sidebar {
-                margin-left: -264px;
+                margin-left: -200px;
             }
         }
 
@@ -111,13 +111,15 @@
 
         /* ============ SIDEBAR NAV ============ */
         .nav-section-label {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
             letter-spacing: 0.06em;
             text-transform: uppercase;
             color: rgba(255,255,255,0.35);
+            display: flex;
+            gap: 10px
             padding: 0 16px;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .nav-link {
@@ -125,8 +127,8 @@
             align-items: center;
             padding: 6px 12px;
             border-radius: 8px;
-            font-size: 10px;
-            font-weight: 500;
+            font-size: 9px;
+            font-weight: 700;
             color: rgba(255,255,255,0.7);
             transition: all 0.2s ease;
             position: relative;

@@ -388,7 +388,7 @@
 // ─────────────────────────────────────────────────
 // Initialize current peminjaman data
 // ─────────────────────────────────────────────────
-let currentPeminjamanData = null;
+var currentPeminjamanData = null;
 @if($denda->peminjaman)
     @php
         $p = $denda->peminjaman;
@@ -404,18 +404,18 @@ let currentPeminjamanData = null;
 // ─────────────────────────────────────────────────
 // Scanner
 // ─────────────────────────────────────────────────
-let html5QrcodeScanner = null;
-let nativeBarcodeDetector = null;
-let nativeScanStream = null;
-let nativeScanInterval = null;
-let torchEnabled = false;
-let lastScannedCode = '';
-let lastScanTime = 0;
-const scanCooldown = 1500;
-let isProcessingBarcode = false;
-let cameraDevices = [];
-let currentCameraIndex = 0;
-const hasNativeBarcodeAPI = ('BarcodeDetector' in window);
+var html5QrcodeScanner = null;
+var nativeBarcodeDetector = null;
+var nativeScanStream = null;
+var nativeScanInterval = null;
+var torchEnabled = false;
+var lastScannedCode = '';
+var lastScanTime = 0;
+var scanCooldown = 1500;
+var isProcessingBarcode = false;
+var cameraDevices = [];
+var currentCameraIndex = 0;
+var hasNativeBarcodeAPI = ('BarcodeDetector' in window);
 
 async function openScannerModal() {
     document.getElementById('scannerModal').classList.remove('hidden');
@@ -715,7 +715,7 @@ function searchByBarcode(barcode) {
 // ─────────────────────────────────────────────────
 // Search
 // ─────────────────────────────────────────────────
-let searchTimeout;
+var searchTimeout;
 
 document.getElementById('searchInput').addEventListener('input', function() {
     clearTimeout(searchTimeout);

@@ -541,27 +541,27 @@ function debounce(func, wait) {
     };
 }
 
-const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
                   document.querySelector('input[name="_token"]')?.value;
 
-let selectedIndex  = -1;
-let currentDropdown = null;
+var selectedIndex  = -1;
+var currentDropdown = null;
 
-let html5QrcodeScanner = null;
-let currentScanType    = null;
-let nativeBarcodeDetector = null;
-let nativeScanStream   = null;
-let nativeScanInterval = null;
-let nativeScanCanvas   = null;
-let torchEnabled       = false;
-let lastScannedCode    = '';
-let lastScanTime       = 0;
-const scanCooldown     = 1500;
-let isProcessingBarcode = false;
-let cameraDevices      = [];   // semua videoinput yang terdeteksi
-let currentCameraIndex = 0;    // indeks kamera aktif
+var html5QrcodeScanner = null;
+var currentScanType    = null;
+var nativeBarcodeDetector = null;
+var nativeScanStream   = null;
+var nativeScanInterval = null;
+var nativeScanCanvas   = null;
+var torchEnabled       = false;
+var lastScannedCode    = '';
+var lastScanTime       = 0;
+var scanCooldown       = 1500;
+var isProcessingBarcode = false;
+var cameraDevices      = [];
+var currentCameraIndex = 0;
 
-const hasNativeBarcodeAPI = ('BarcodeDetector' in window);
+var hasNativeBarcodeAPI = ('BarcodeDetector' in window);
 
 // ─────────────────────────────────────────────────
 // Step indicator — no-op (removed from UI, kept for safety)
@@ -624,7 +624,7 @@ function updateEmptyState() {
 // ─────────────────────────────────────────────────
 // Submit button state
 // ─────────────────────────────────────────────────
-let anggotaHasOverdue = false;
+var anggotaHasOverdue = false;
 
 function updateSubmitButton() {
     const btn   = document.getElementById('submitBtn');
@@ -1216,7 +1216,7 @@ function processScannedBarcode(barcode) {
 // ─────────────────────────────────────────────────
 // Search Anggota
 // ─────────────────────────────────────────────────
-const searchAnggota = debounce(function (query) {
+var searchAnggota = debounce(function (query) {
     const dropdown = document.getElementById('anggotaDropdown');
     currentDropdown = dropdown; selectedIndex = -1;
     if (query.length < 2) { dropdown.classList.add('hidden'); return; }
@@ -1385,7 +1385,7 @@ document.getElementById('clearAnggota').addEventListener('click', function () {
 // ─────────────────────────────────────────────────
 // Search Buku
 // ─────────────────────────────────────────────────
-const searchBuku = debounce(function (query) {
+var searchBuku = debounce(function (query) {
     const dropdown = document.getElementById('bukuDropdown');
     currentDropdown = dropdown; selectedIndex = -1;
     if (query.length < 2) { dropdown.classList.add('hidden'); return; }

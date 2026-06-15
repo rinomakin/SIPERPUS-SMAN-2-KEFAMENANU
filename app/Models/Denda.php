@@ -17,6 +17,8 @@ class Denda extends Model
         'anggota_id',
         'jumlah_hari_terlambat',
         'jumlah_denda',
+        'jumlah_denda_asal',
+        'stok_restored',
         'status_pembayaran',
         'tanggal_pembayaran',
         'catatan',
@@ -25,6 +27,8 @@ class Denda extends Model
     protected $casts = [
         'tanggal_pembayaran' => 'date',
         'jumlah_denda' => 'decimal:2',
+        'jumlah_denda_asal' => 'decimal:2',
+        'stok_restored' => 'integer',
     ];
 
     public function peminjaman()

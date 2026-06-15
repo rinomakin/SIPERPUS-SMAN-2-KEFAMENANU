@@ -149,7 +149,7 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS'])->prefix('admin'
     Route::get('/buku/{id}/cetak-barcode', [BukuController::class, 'cetakBarcode'])->name('buku.cetak-barcode');
     Route::post('/buku/print-multiple-barcode', [BukuController::class, 'printMultipleBarcode'])->name('buku.print-multiple-barcode');
     Route::post('/buku/scan-barcode', [BukuController::class, 'scanBarcode'])->name('buku.scan-barcode');
-    Route::delete('/buku/destroy-multiple', [BukuController::class, 'destroyMultiple'])->name('buku.destroy-multiple');
+    Route::post('/buku/destroy-multiple', [BukuController::class, 'destroyMultiple'])->name('buku.destroy-multiple');
     
     // Resource route harus di bawah routes khusus
     Route::resource('buku', BukuController::class);
@@ -242,6 +242,7 @@ Route::middleware(['auth', 'role:ADMIN,KEPALA_SEKOLAH,PETUGAS'])->prefix('admin'
     Route::get('/denda/riwayat', [DendaController::class, 'riwayat'])->name('admin.denda.riwayat');
     Route::post('/denda/riwayat/bulk-destroy', [DendaController::class, 'bulkDestroyRiwayat'])->name('admin.denda.riwayat.bulk-destroy');
     Route::post('/denda/{id}/bayar-lunas', [DendaController::class, 'bayarLunas'])->name('admin.denda.bayar-lunas');
+    Route::post('/denda/pulihkan-stok', [DendaController::class, 'pulihkanStokBukuHilang'])->name('admin.denda.pulihkan-stok');
     Route::post('/denda/hitung-denda', [DendaController::class, 'hitungDenda'])->name('admin.denda.hitung');
     Route::post('/denda/{id}/update-status', [DendaController::class, 'updateStatusPembayaran'])->name('admin.denda.update-status');
     Route::post('/denda/search', [DendaController::class, 'searchDenda'])->name('admin.denda.search');

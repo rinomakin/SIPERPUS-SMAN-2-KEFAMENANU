@@ -133,7 +133,7 @@
     </div>
     @endif
 
-    <form action="{{ route('admin.denda.store') }}" method="POST">
+    <form action="{{ route('admin.denda.store') }}" method="POST" data-spa-ignore onsubmit="return confirmSubmit(event)">
         @csrf
 
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
@@ -211,11 +211,11 @@
                             <i class="fas fa-money-bill-wave mr-1"></i>
                             Jumlah Denda (Rp)
                         </label>
-                        <input type="number" id="jumlah_denda" name="jumlah_denda"
-                               value="{{ old('jumlah_denda') }}"
-                               min="0"
+                        <input type="text" id="jumlah_denda" name="jumlah_denda"
+                               value="{{ old('jumlah_denda') ? number_format((int) (preg_match('/\.\d{1,2}$/', old('jumlah_denda')) ? round((float) old('jumlah_denda')) : str_replace('.', '', old('jumlah_denda'))), 0, ',', '.') : '' }}"
+                               inputmode="numeric"
                                placeholder="Otomatis terisi, bisa diubah manual"
-                               class="w-full px-4 py-3 text-xs bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all">
+                               class="w-full px-4 py-3 text-xs bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all rupiah-input">
                     </div>
 
                     {{-- Jumlah Bayar --}}
@@ -224,38 +224,14 @@
                             <i class="fas fa-hand-holding-usd mr-1"></i>
                             Jumlah Dibayar (Rp)
                         </label>
-                        <input type="number" id="jumlah_bayar" name="jumlah_bayar"
-                               value="{{ old('jumlah_bayar', 0) }}"
-                               min="0" max="0"
+                        <input type="text" id="jumlah_bayar" name="jumlah_bayar"
+                               value="{{ old('jumlah_bayar') ? number_format((int) (preg_match('/\.\d{1,2}$/', old('jumlah_bayar')) ? round((float) old('jumlah_bayar')) : str_replace('.', '', old('jumlah_bayar'))), 0, ',', '.') : '0' }}"
+                               inputmode="numeric"
                                placeholder="0 — bayar sebagian atau lunas"
-                               class="w-full px-4 py-3 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all">
+                               class="w-full px-4 py-3 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all rupiah-input">
                         <p id="bayarWarning" class="text-[10px] text-red-500 mt-1 hidden">
                             <i class="fas fa-exclamation-circle mr-0.5"></i>Jumlah dibayar tidak boleh melebihi jumlah denda
                         </p>
-                    </div>
-
-                    {{-- Status Pembayaran --}}
-                    <div>
-                        <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">
-                            <i class="fas fa-credit-card mr-1"></i>
-                            Status Pembayaran
-                        </label>
-                        <select id="status_pembayaran" name="status_pembayaran"
-                                class="w-full px-4 py-3 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all">
-                            <option value="belum_dibayar" {{ old('status_pembayaran') == 'belum_dibayar' ? 'selected' : '' }}>Belum Dibayar</option>
-                            <option value="sudah_dibayar" {{ old('status_pembayaran') == 'sudah_dibayar' ? 'selected' : '' }}>Sudah Dibayar</option>
-                        </select>
-                    </div>
-
-                    {{-- Tanggal Pembayaran --}}
-                    <div id="tanggal_pembayaran_div" class="hidden">
-                        <label class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">
-                            <i class="fas fa-calendar-check mr-1"></i>
-                            Tanggal Pembayaran
-                        </label>
-                        <input type="date" id="tanggal_pembayaran" name="tanggal_pembayaran"
-                               value="{{ old('tanggal_pembayaran', date('Y-m-d')) }}"
-                               class="w-full px-4 py-3 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all">
                     </div>
 
                     {{-- Catatan --}}
@@ -373,22 +349,48 @@
 @endsection
 
 @push('scripts')
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
 // ─────────────────────────────────────────────────
 // Scanner
 // ─────────────────────────────────────────────────
-let html5QrcodeScanner = null;
-let nativeBarcodeDetector = null;
-let nativeScanStream = null;
-let nativeScanInterval = null;
-let torchEnabled = false;
-let lastScannedCode = '';
-let lastScanTime = 0;
-const scanCooldown = 1500;
-let isProcessingBarcode = false;
-let cameraDevices = [];
-let currentCameraIndex = 0;
-const hasNativeBarcodeAPI = ('BarcodeDetector' in window);
+var html5QrcodeScanner = null;
+var nativeBarcodeDetector = null;
+var nativeScanStream = null;
+var nativeScanInterval = null;
+var torchEnabled = false;
+var lastScannedCode = '';
+var lastScanTime = 0;
+var scanCooldown = 1500;
+var isProcessingBarcode = false;
+var cameraDevices = [];
+var currentCameraIndex = 0;
+var hasNativeBarcodeAPI = ('BarcodeDetector' in window);
+
+// ── Re-enumerate after permission granted ──
+async function refreshCameraLabels() {
+    if (!navigator.mediaDevices?.enumerateDevices) return;
+    try {
+        const all  = await navigator.mediaDevices.enumerateDevices();
+        let vids   = all.filter(d => d.kind === 'videoinput');
+        if (!vids.length || vids[0].label === '') return;
+
+        vids.sort((a, b) => {
+            const rA = /back|rear|environment|belakang/i.test(a.label) ? 1 : 0;
+            const rB = /back|rear|environment|belakang/i.test(b.label) ? 1 : 0;
+            return rB - rA;
+        });
+
+        if (nativeScanStream) {
+            const activeId = nativeScanStream.getVideoTracks()[0]?.getSettings()?.deviceId;
+            const idx = vids.findIndex(d => d.deviceId === activeId);
+            if (idx >= 0) currentCameraIndex = idx;
+        }
+
+        cameraDevices = vids;
+        document.getElementById('switchCameraBtn').classList.toggle('hidden', vids.length < 2);
+    } catch (e) {}
+}
 
 async function openScannerModal() {
     document.getElementById('scannerModal').classList.remove('hidden');
@@ -688,7 +690,7 @@ function searchByBarcode(barcode) {
 // ─────────────────────────────────────────────────
 // Search
 // ─────────────────────────────────────────────────
-let searchTimeout;
+var searchTimeout;
 
 document.getElementById('searchInput').addEventListener('input', function() {
     clearTimeout(searchTimeout);
@@ -770,7 +772,7 @@ function performSearch(query) {
 
                         document.getElementById('peminjaman_id').value = peminjamanId;
                         document.getElementById('jumlah_hari_terlambat').value = hariTerlambat;
-                        document.getElementById('jumlah_denda').value = dendaVal;
+                        document.getElementById('jumlah_denda').value = formatRupiah(dendaVal);
                         if (window.syncBayarMax) window.syncBayarMax();
 
                         const infoCard = document.getElementById('selectedPeminjamanCard');
@@ -842,7 +844,7 @@ function selectPeminjaman(card, pinjam) {
 
     document.getElementById('peminjaman_id').value = pinjam.id;
     document.getElementById('jumlah_hari_terlambat').value = pinjam.hari_terlambat;
-    document.getElementById('jumlah_denda').value = pinjam.denda;
+    document.getElementById('jumlah_denda').value = formatRupiah(pinjam.denda);
     if (window.syncBayarMax) window.syncBayarMax();
 
     const infoCard = document.getElementById('selectedPeminjamanCard');
@@ -851,16 +853,29 @@ function selectPeminjaman(card, pinjam) {
 }
 
 // ─────────────────────────────────────────────────
-// Toggle Tanggal Pembayaran
+// Rupiah Formatting (global)
 // ─────────────────────────────────────────────────
-document.getElementById('status_pembayaran').addEventListener('change', function() {
-    const div = document.getElementById('tanggal_pembayaran_div');
-    if (this.value === 'sudah_dibayar') {
-        div.classList.remove('hidden');
-    } else {
-        div.classList.add('hidden');
+function stripCommas(val) {
+    return (val || '').replace(/\./g, '');
+}
+
+function formatRupiah(val) {
+    let str = String(val).trim();
+    // Detect decimal format "100000.00" (trailing . + 1-2 digits)
+    const lastDotIdx = str.lastIndexOf('.');
+    if (lastDotIdx > 0) {
+        const afterLastDot = str.slice(lastDotIdx + 1);
+        if (/^\d{1,2}$/.test(afterLastDot)) {
+            const num = Math.round(parseFloat(str));
+            if (isNaN(num)) return '';
+            return num.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
     }
-});
+    // Handle formatted "100.000" or plain "100000" → strip dots, parseInt
+    const num = parseInt(str.replace(/\./g, ''));
+    if (isNaN(num)) return '';
+    return num.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
 
 // ─────────────────────────────────────────────────
 // Scanner Button Listeners
@@ -894,6 +909,28 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target === this) closeScanner();
     });
 
+    document.querySelectorAll('.rupiah-input').forEach(function(input) {
+        input.addEventListener('input', function() {
+            const cursor = this.selectionStart;
+            const raw = stripCommas(this.value);
+            const digitsOnly = raw.replace(/\D/g, '');
+            const formatted = formatRupiah(digitsOnly);
+            if (formatted !== this.value) {
+                this.value = formatted;
+            }
+        });
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Backspace' || e.key === 'Delete') {
+                const raw = stripCommas(this.value);
+                const digitsOnly = raw.replace(/\D/g, '');
+                if (digitsOnly.length <= 1) {
+                    this.value = '';
+                }
+            }
+        });
+    });
+
     // ─────────────────────────────────────────────
     // Jumlah Bayar validation
     // ─────────────────────────────────────────────
@@ -901,13 +938,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const dendaInput = document.getElementById('jumlah_denda');
         const bayarInput = document.getElementById('jumlah_bayar');
         const bayarWarning = document.getElementById('bayarWarning');
-        const maxVal = parseInt(dendaInput.value) || 0;
-        bayarInput.max = maxVal;
-        if (parseInt(bayarInput.value) > maxVal) {
-            bayarInput.value = maxVal;
+        const dendaVal = parseInt(stripCommas(dendaInput.value)) || 0;
+        const bayarVal = parseInt(stripCommas(bayarInput.value)) || 0;
+        if (bayarVal > dendaVal) {
+            bayarInput.value = formatRupiah(String(dendaVal));
         }
         if (bayarWarning) {
-            bayarWarning.classList.toggle('hidden', parseInt(bayarInput.value) <= maxVal);
+            bayarWarning.classList.toggle('hidden', bayarVal <= dendaVal);
         }
     };
 
@@ -918,4 +955,79 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function confirmSubmit(event) {
+    event.preventDefault();
+
+    const form = event.target;
+    const jumlahDenda = stripCommas(document.getElementById('jumlah_denda')?.value || '0');
+    const jumlahBayar = stripCommas(document.getElementById('jumlah_bayar')?.value || '0');
+
+    Swal.fire({
+        title: 'Konfirmasi Pembayaran Denda',
+        html: `
+            <div style="text-align: left; font-size: 13px;">
+                <p style="margin-bottom: 8px;">Apakah anda yakin ingin menyimpan data denda ini?</p>
+                <div style="background: #f8fafc; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                    <p style="margin: 4px 0;"><strong>Jumlah Denda:</strong> Rp ${parseInt(jumlahDenda).toLocaleString('id-ID')}</p>
+                    <p style="margin: 4px 0;"><strong>Dibayar:</strong> Rp ${parseInt(jumlahBayar).toLocaleString('id-ID')}</p>
+                </div>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-check mr-1"></i>Ya, Simpan',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+    }).then(result => {
+        if (result.isConfirmed) {
+            const btn = form.querySelector('button[type="submit"]');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...'; }
+
+            document.querySelectorAll('.rupiah-input').forEach(function(el) {
+                el.value = stripCommas(el.value);
+            });
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+            })
+            .then(res => {
+                if (res.redirected) {
+                    window.location.href = res.url;
+                    return null;
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data === null) return;
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Berhasil!',
+                        text: data.message || 'Data denda berhasil disimpan.',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false,
+                    }).then(() => {
+                        window.location.href = '{{ route("admin.denda.index") }}';
+                    });
+                } else {
+                    Swal.fire('Error!', data.message || 'Terjadi kesalahan.', 'error');
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i><span> Simpan Denda</span>'; }
+                }
+            })
+            .catch(err => {
+                Swal.fire('Error!', 'Terjadi kesalahan jaringan. Coba lagi.', 'error');
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i><span> Simpan Denda</span>'; }
+            });
+        }
+    });
+
+    return false;
+}
+</script>
 @endpush

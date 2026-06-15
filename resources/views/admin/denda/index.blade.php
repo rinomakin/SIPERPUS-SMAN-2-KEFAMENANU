@@ -202,58 +202,104 @@
 
 /* ===== Glass Card ===== */
 .glass-card {
-    background: rgba(255,255,255,0.97); backdrop-filter: blur(20px);
-    border-radius: 16px; border: 1px solid rgba(255,255,255,0.8);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.06); overflow: hidden;
+    background: rgba(255,255,255,0.97); 
+    backdrop-filter: blur(20px);
+    border-radius: 16px; 
+    border: 1px solid rgba(255,255,255,0.8);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06); 
+    overflow: hidden;
 }
 
 /* ===== Table ===== */
 .denda-table { border-collapse: separate; border-spacing: 0; width: 100%; }
 .denda-table thead th {
-    background: #f8fafc; font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.8px; color: #94a3b8; padding: 12px 16px; border-bottom: 2px solid #f1f5f9;
+    background: #f8fafc; 
+    font-size: 10px; 
+    font-weight: 700; 
+    text-transform: uppercase;
+    letter-spacing: 0.8px; 
+    color: #94a3b8; 
+    padding: 12px 16px; 
+    border-bottom: 2px solid #f1f5f9;
     white-space: nowrap;
 }
 .denda-table thead th.sorting:after,
 .denda-table thead th.sorting_asc:after,
 .denda-table thead th.sorting_desc:after { color: #94a3b8 !important; }
 .denda-table tbody tr { transition: all 0.15s ease; }
-.denda-table tbody tr:hover { background: #fefce8; }
+
 .denda-table tbody td { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
 
 /* ===== Avatar ===== */
 .avatar-circle {
-    width: 40px; height: 40px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 700; color: white; flex-shrink: 0;
+    width: 40px; 
+    height: 40px; 
+    border-radius: 12px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    font-size: 14px; 
+    font-weight: 700; 
+    color: white; 
+    flex-shrink: 0;
     background: linear-gradient(135deg, #f97316, #ef4444);
 }
 .avatar-img {
-    width: 40px; height: 40px; border-radius: 12px; object-fit: cover;
-    flex-shrink: 0; border: 2px solid #f1f5f9;
+    width: 40px; 
+    height: 40px; 
+    border-radius: 12px; 
+    object-fit: cover;
+    flex-shrink: 0; 
+    border: 2px solid #f1f5f9;
 }
 
 /* ===== Badges ===== */
 .badge-late {
-    display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px;
-    border-radius: 20px; font-size: 11px; font-weight: 700;
-    background: linear-gradient(135deg, #fef2f2, #fee2e2); color: #dc2626;
-    border: 1px solid #fecaca;
+    display: inline-flex; 
+    align-items: center; 
+    gap: 4px; 
+    padding: 3px 10px;
+    border-radius: 20px; 
+    font-size: 11px; 
+    font-weight: 400;
+    color: #ef4444;
 }
-.badge-amount { font-size: 13px; font-weight: 700; color: #dc2626; }
-
+.badge-amount { 
+    font-size: 13px; 
+    font-weight: 400; 
+    color: #ef4444;
+    }
 /* ===== Action Buttons ===== */
 .action-btn {
-    width: 32px; height: 32px; border-radius: 8px;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 12px; transition: all 0.2s; border: 1px solid transparent;
+    width: 32px; 
+    height: 32px; 
+    border-radius: 8px;
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center;
+    font-size: 12px; 
+    transition: all 0.2s; 
+    border: 1px solid transparent;
+
 }
-.action-btn.view { color: #3b82f6; background: #eff6ff; border-color: #dbeafe; }
-.action-btn.view:hover { background: #3b82f6; color: white; }
+.action-btn.view { 
+    color: #3b82f6; 
+    font-size:9px;
+    }
+.action-btn.view:hover { 
+    background: #3b82c789; 
+    color: white;
+    }
 .pay-btn {
-    display: inline-flex; align-items: center; gap: 4px; padding: 5px 14px;
-    border-radius: 8px; font-size: 11px; font-weight: 700;
-    background: linear-gradient(135deg, #10b981, #059669); color: white;
+    display: inline-flex; 
+    align-items: center; 
+    gap: 4px; 
+    padding: 5px 14px;
+    border-radius: 8px; 
+    font-size: 11px; 
+    font-weight: 700;
+    background: linear-gradient(135deg, #10b981, #059669); 
+    color: white;
     border: none; cursor: pointer; transition: all 0.2s;
     box-shadow: 0 2px 4px rgba(16,185,129,0.3);
 }
@@ -564,10 +610,10 @@
                     <tr>
                         <th class="text-left">Anggota</th>
                         <th class="text-left">Peminjaman</th>
-                        <th class="text-center">Terlambat</th>
-                        <th class="text-right">Jumlah Denda</th>
-                        <th class="text-center">Tanggal</th>
-                        <th class="text-center" style="width:110px;">Aksi</th>
+                        <th class="text-left">Terlambat</th>
+                        <th class="text-left">Jumlah Denda</th>
+                        <th class="text-left">Tanggal</th>
+                        <th class="text-left" style="width:110px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -595,9 +641,9 @@
                                 @endif
                                 <div class="min-w-0">
                                     <p class="text-xs font-bold text-gray-900 truncate">{{ $item->anggota->nama_lengkap ?? 'N/A' }}</p>
-                                    <p class="text-[10px] text-gray-400">{{ $item->anggota->nomor_anggota ?? 'N/A' }}</p>
+                                    <!-- <p class="text-[10px] text-gray-400">{{ $item->anggota->nomor_anggota ?? 'N/A' }}</p> -->
                                     @if($item->anggota && $item->anggota->kelas)
-                                        <p class="text-[10px] text-gray-400">{{ $item->anggota->kelas->nama_kelas }}</p>
+                                        <!-- <p class="text-[10px] text-gray-400">{{ $item->anggota->kelas->nama_kelas }}</p> -->
                                     @endif
                                 </div>
                             </div>
@@ -607,16 +653,16 @@
                         <td data-order="{{ $item->peminjaman ? ($item->peminjaman->tanggal_peminjaman ?? '') : '' }}">
                             @if($item->peminjaman)
                                 <p class="text-xs font-semibold text-gray-800">{{ $item->peminjaman->nomor_peminjaman ?? ('ID: ' . $item->peminjaman_id) }}</p>
-                                <p class="text-[10px] text-gray-400">
+                                <!-- <p class="text-[10px] text-gray-400">
                                     <i class="far fa-calendar-alt mr-0.5"></i>{{ $item->peminjaman->tanggal_peminjaman ? $item->peminjaman->tanggal_peminjaman->format('d M Y') : '-' }}
-                                </p>
+                                </p> -->
                             @else
                                 <span class="text-xs text-gray-300">N/A</span>
                             @endif
                         </td>
 
                         {{-- Hari Terlambat --}}
-                        <td class="text-center" data-order="{{ $item->jumlah_hari_terlambat }}">
+                        <td class="text-left" data-order="{{ $item->jumlah_hari_terlambat }}">
                             <span class="badge-late">
                                 <i class="fas fa-clock text-[9px]"></i>
                                 {{ $item->jumlah_hari_terlambat }} hari
@@ -624,19 +670,19 @@
                         </td>
 
                         {{-- Jumlah Denda --}}
-                        <td class="text-right" data-order="{{ $item->jumlah_denda }}">
+                        <td class="text-left" data-order="{{ $item->jumlah_denda }}">
                             <span class="badge-amount">Rp {{ number_format($item->jumlah_denda, 0, ',', '.') }}</span>
                         </td>
 
                         {{-- Tanggal --}}
-                        <td class="text-center" data-order="{{ $item->created_at->format('Y-m-d H:i:s') }}">
+                        <td class="text-left" data-order="{{ $item->created_at->format('Y-m-d H:i:s') }}">
                             <p class="text-xs text-gray-600">{{ $item->created_at->format('d M Y') }}</p>
-                            <p class="text-[10px] text-gray-400">{{ $item->created_at->format('H:i') }}</p>
+                            <!-- <p class="text-[10px] text-gray-400">{{ $item->created_at->format('H:i') }}</p> -->
                         </td>
 
                         {{-- Aksi --}}
-                        <td class="text-center">
-                            <div class="flex items-center justify-center gap-1.5">
+                        <td class="text-left">
+                            <div class="">
                                 <a href="{{ route('admin.denda.show', $item->id) }}"
                                    class="action-btn view" title="Detail">
                                     <i class="fas fa-eye"></i>
@@ -954,7 +1000,7 @@ $(document).ready(function () {
             infoFiltered: '(difilter dari _MAX_ total data)',
             emptyTable: `<div style="padding:40px 24px;text-align:center;">
                 <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#ecfdf5,#d1fae5);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
-                    <i class="fas fa-check-circle" style="font-size:28px;color:#10b981;"></i>
+                    <i class="fas fa-check-circle" style="font-size:28px;color:#10b981;"></i> 
                 </div>
                 <p style="font-size:13px;font-weight:700;color:#374151;margin-bottom:4px;">Semua denda sudah dibayar!</p>
                 <p style="font-size:11px;color:#9ca3af;">Tidak ada anggota dengan denda yang belum dibayar</p>
@@ -1071,9 +1117,9 @@ $(document).ready(function () {
 // ─────────────────────────────────────────────────
 // Denda result modal state
 // ─────────────────────────────────────────────────
-let dendaFoundMemberId    = 0;
-let dendaFoundTotalDenda  = 0;
+var dendaFoundMemberId    = 0;
 
+var dendaFoundTotalDenda  = 0;
 function resetResultModal() {
     document.getElementById('barcodeInput').value = '';
     document.getElementById('barcodeLoading').classList.add('hidden');
@@ -1185,18 +1231,18 @@ function doBayarLunas() {
 // ─────────────────────────────────────────────────
 // Scanner — Device-Aware (html5-qrcode + BarcodeDetector)
 // ─────────────────────────────────────────────────
-let html5QrcodeScanner    = null;
-let nativeBarcodeDetector = null;
-let nativeScanStream      = null;
-let nativeScanInterval    = null;
-let torchEnabled          = false;
-let lastScannedCode       = '';
-let lastScanTime          = 0;
-const scanCooldown        = 1500;
-let isProcessingBarcode   = false;
-let cameraDevices         = [];
-let currentCameraIndex    = 0;
-const hasNativeBarcodeAPI = ('BarcodeDetector' in window);
+var html5QrcodeScanner    = null;
+var nativeBarcodeDetector = null;
+var nativeScanStream      = null;
+var nativeScanInterval    = null;
+var torchEnabled          = false;
+var lastScannedCode       = '';
+var lastScanTime          = 0;
+var scanCooldown          = 1500;
+var isProcessingBarcode   = false;
+var cameraDevices         = [];
+var currentCameraIndex    = 0;
+var hasNativeBarcodeAPI   = ('BarcodeDetector' in window);
 
 async function openScannerModal() {
     document.getElementById('scannerModal').classList.remove('hidden');

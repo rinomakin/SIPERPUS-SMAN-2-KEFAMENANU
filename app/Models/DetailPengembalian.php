@@ -18,6 +18,7 @@ class DetailPengembalian extends Model
         'detail_peminjaman_id',
         'kondisi_kembali',
         'jumlah_dikembalikan',
+        'jumlah_hilang',
         'denda_buku',
         'catatan_buku'
     ];

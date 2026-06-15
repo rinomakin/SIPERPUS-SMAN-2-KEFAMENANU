@@ -222,9 +222,6 @@ class PengembalianController extends Controller
             'jumlah_dikembalikan.*' => 'nullable|integer|min:1',
             'catatan_buku' => 'nullable|array',
             'catatan_buku.*' => 'nullable|string',
-            'status_pembayaran_denda' => 'nullable|in:belum_dibayar,sudah_dibayar,tidak_ada',
-            'tanggal_pembayaran_denda' => 'nullable|date',
-            'catatan_pembayaran_denda' => 'nullable|string',
         ]);
 
         DB::beginTransaction();
@@ -248,6 +245,7 @@ class PengembalianController extends Controller
             foreach ($pengembalian->detailPengembalian as $detail) {
                 $kondisi = $request->kondisi_kembali[$detail->id] ?? 'baik';
                 $jumlahDikembalikan = (int) ($request->jumlah_dikembalikan[$detail->id] ?? $detail->jumlah_dikembalikan);
+                $jmlHilang = (int) ($request->jumlah_hilang[$detail->id] ?? $detail->jumlah_hilang ?? 0);
                 $catatanBuku = $request->catatan_buku[$detail->id] ?? null;
 
                 $dendaKondisi = match ($kondisi) {
@@ -274,49 +272,52 @@ class PengembalianController extends Controller
 
                 $oldKondisi = $detail->kondisi_kembali;
                 $oldJumlah = $detail->jumlah_dikembalikan;
+                $oldJmlHilang = $detail->jumlah_hilang ?? 0;
 
                 $detail->update([
                     'kondisi_kembali' => $kondisi,
                     'jumlah_dikembalikan' => $jumlahDikembalikan,
+                    'jumlah_hilang' => $jmlHilang,
                     'denda_buku' => $subTotal,
                     'catatan_buku' => $catatanBuku ?? $this->getCatatanBuku($kondisi),
                 ]);
 
-                // Sync stock: revert old, apply new
-                if ($detail->buku && $oldKondisi !== 'hilang') {
-                    $detail->buku->decrement('stok_tersedia', $oldJumlah);
-                }
-                if ($detail->buku && $kondisi !== 'hilang') {
-                    $detail->buku->increment('stok_tersedia', $jumlahDikembalikan);
+                // Sync stock: revert old stock, apply new stock
+                if ($detail->buku) {
+                    $oldNonHilang = $oldJumlah - ($oldKondisi === 'hilang' ? $oldJmlHilang : 0);
+                    $newNonHilang = $jumlahDikembalikan - ($kondisi === 'hilang' ? $jmlHilang : 0);
+                    $adjustment = $newNonHilang - $oldNonHilang;
+                    if ($adjustment !== 0) {
+                        $detail->buku->increment('stok_tersedia', $adjustment);
+                    }
                 }
             }
 
             // Update pengembalian totals
-            $statusDenda = $request->status_pembayaran_denda ?? $pengembalian->status_denda;
+            $statusDenda = $pengembalian->status_denda;
             if ($totalDenda <= 0) $statusDenda = 'tidak_ada';
+
+            $tanggalPembayaran = $totalDenda > 0 ? now() : $pengembalian->tanggal_pembayaran_denda;
 
             $pengembalian->update([
                 'jumlah_hari_terlambat' => $maxDaysLate,
                 'total_denda' => $totalDenda,
                 'status_denda' => $statusDenda,
-                'tanggal_pembayaran_denda' => $statusDenda === 'sudah_dibayar' ? ($request->tanggal_pembayaran_denda ?? now()) : ($statusDenda === 'belum_dibayar' ? null : $pengembalian->tanggal_pembayaran_denda),
+                'tanggal_pembayaran_denda' => $tanggalPembayaran,
             ]);
 
             // Sync denda record
             $denda = Denda::where('pengembalian_id', $pengembalian->id)->first();
             if ($totalDenda > 0) {
-                $catatanDenda = $request->catatan_pembayaran_denda;
-                if (!$catatanDenda) {
-                    $catatanDenda = $maxDaysLate > 0
-                        ? "Keterlambatan pengembalian {$maxDaysLate} hari"
-                        : "Denda kerusakan/kehilangan buku";
-                }
+                $catatanDenda = $maxDaysLate > 0
+                    ? "Keterlambatan pengembalian {$maxDaysLate} hari"
+                    : "Denda kerusakan/kehilangan buku";
                 if ($denda) {
                     $denda->update([
                         'jumlah_hari_terlambat' => $maxDaysLate,
                         'jumlah_denda' => $totalDenda,
-                        'status_pembayaran' => $statusDenda === 'sudah_dibayar' ? 'sudah_dibayar' : 'belum_dibayar',
-                        'tanggal_pembayaran' => $statusDenda === 'sudah_dibayar' ? ($request->tanggal_pembayaran_denda ?? now()) : null,
+                        'status_pembayaran' => 'sudah_dibayar',
+                        'tanggal_pembayaran' => now(),
                         'catatan' => $catatanDenda,
                     ]);
                 } else {
@@ -326,8 +327,9 @@ class PengembalianController extends Controller
                         'anggota_id' => $pengembalian->anggota_id,
                         'jumlah_hari_terlambat' => $maxDaysLate,
                         'jumlah_denda' => $totalDenda,
-                        'status_pembayaran' => $statusDenda === 'sudah_dibayar' ? 'sudah_dibayar' : 'belum_dibayar',
-                        'tanggal_pembayaran' => $statusDenda === 'sudah_dibayar' ? ($request->tanggal_pembayaran_denda ?? now()) : null,
+                        'jumlah_denda_asal' => $totalDenda,
+                        'status_pembayaran' => 'sudah_dibayar',
+                        'tanggal_pembayaran' => now(),
                         'catatan' => $catatanDenda,
                     ]);
                 }
@@ -691,19 +693,12 @@ class PengembalianController extends Controller
             'jam_kembali' => 'nullable|date_format:H:i',
             'catatan_pengembalian' => 'nullable|string',
             'selected_detail_ids' => 'nullable|string',
-            'status_pembayaran_denda' => 'nullable|in:belum_dibayar,sudah_dibayar',
-            'tanggal_pembayaran_denda' => 'nullable|date',
             'jumlah_dikembalikan' => 'nullable|array',
             'jumlah_dikembalikan.*' => 'nullable|integer|min:1',
-            'catatan_pembayaran_denda' => 'nullable|string',
         ]);
 
         DB::beginTransaction();
         try {
-            // Validasi tambahan untuk pembayaran denda
-            if ($request->status_pembayaran_denda === 'sudah_dibayar' && !$request->tanggal_pembayaran_denda) {
-                throw new \Exception('Tanggal pembayaran harus diisi jika status sudah dibayar.');
-            }
 
             $peminjaman = Peminjaman::with('detailPeminjaman.buku')->findOrFail($request->peminjaman_id);
 
@@ -832,6 +827,7 @@ class PengembalianController extends Controller
                     'detail_peminjaman_id' => $detail->id,
                     'kondisi_kembali'      => $kondisi,
                     'jumlah_dikembalikan'  => $jumlahDikembalikan,
+                    'jumlah_hilang'        => $jmlHilang,
                     'denda_buku'           => $bookDenda['total'] + $biayaHilang,
                     'catatan_buku'         => $catatanBuku,
                 ]);
@@ -843,6 +839,11 @@ class PengembalianController extends Controller
                     if ($stokKembali > 0) {
                         $detail->buku->increment('stok_tersedia', $stokKembali);
                     }
+                }
+
+                // Kembalikan stok untuk buku yang hilang
+                if ($kondisi === 'hilang' && $jmlHilang > 0) {
+                    $detail->buku->increment('stok_tersedia', $jmlHilang);
                 }
             }
 
@@ -870,17 +871,9 @@ class PengembalianController extends Controller
 
             // Buat record denda dan sinkronkan status jika ada denda (terlambat)
             if ($finalTotalDenda > 0) {
-                $statusPembayaran = $request->status_pembayaran_denda ?? 'belum_dibayar';
-                $tanggalPembayaran = ($statusPembayaran === 'sudah_dibayar')
-                    ? ($request->tanggal_pembayaran_denda ?? now()->format('Y-m-d'))
-                    : null;
-
-                $catatanDenda = $request->catatan_pembayaran_denda;
-                if (!$catatanDenda) {
-                    $catatanDenda = $maxDaysLate > 0
-                        ? "Keterlambatan pengembalian {$maxDaysLate} hari"
-                        : "Denda keterlambatan";
-                }
+                $catatanDenda = $maxDaysLate > 0
+                    ? "Keterlambatan pengembalian {$maxDaysLate} hari"
+                    : "Denda keterlambatan";
 
                 Denda::create([
                     'peminjaman_id'        => $peminjaman->id,
@@ -888,16 +881,17 @@ class PengembalianController extends Controller
                     'anggota_id'           => $peminjaman->anggota_id,
                     'jumlah_hari_terlambat'=> $maxDaysLate,
                     'jumlah_denda'         => $finalTotalDenda,
-                    'status_pembayaran'    => $statusPembayaran,
-                    'tanggal_pembayaran'   => $tanggalPembayaran,
+                    'jumlah_denda_asal'    => $finalTotalDenda,
+                    'status_pembayaran'    => 'sudah_dibayar',
+                    'tanggal_pembayaran'   => now(),
                     'catatan'              => $catatanDenda,
                 ]);
 
-                // Sinkronkan status_denda di pengembalian dengan input form
+                // Sinkronkan status_denda di pengembalian
                 $pengembalian->update([
                     'total_denda'             => $finalTotalDenda,
-                    'status_denda'            => $statusPembayaran,
-                    'tanggal_pembayaran_denda'=> $tanggalPembayaran,
+                    'status_denda'            => 'sudah_dibayar',
+                    'tanggal_pembayaran_denda'=> now(),
                 ]);
             }
 
@@ -985,7 +979,7 @@ class PengembalianController extends Controller
         ]);
 
         try {
-            $pengembalian = Pengembalian::findOrFail($id);
+            $pengembalian = Pengembalian::with('detailPengembalian.buku')->findOrFail($id);
             
             // Update status denda di pengembalian
             $pengembalian->status_denda = $request->status_pembayaran;
@@ -1014,10 +1008,20 @@ class PengembalianController extends Controller
                     'anggota_id' => $pengembalian->anggota_id,
                     'jumlah_hari_terlambat' => $pengembalian->jumlah_hari_terlambat,
                     'jumlah_denda' => $pengembalian->total_denda,
+                    'jumlah_denda_asal' => $pengembalian->total_denda,
                     'status_pembayaran' => $request->status_pembayaran,
                     'tanggal_pembayaran' => $request->tanggal_pembayaran,
                     'catatan' => 'Denda dari pengembalian terlambat'
                 ]);
+            }
+
+            // Kembalikan stok buku yang hilang jika denda sudah dibayar
+            if ($request->status_pembayaran === 'sudah_dibayar') {
+                foreach ($pengembalian->detailPengembalian as $detail) {
+                    if ($detail->kondisi_kembali === 'hilang' && $detail->jumlah_hilang > 0 && $detail->buku) {
+                        $detail->buku->increment('stok_tersedia', $detail->jumlah_hilang);
+                    }
+                }
             }
 
             return response()->json([

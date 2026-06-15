@@ -170,7 +170,10 @@ class DendaController extends Controller
         ]);
 
         // Update status denda di pengembalian terkait
-        $this->syncPengembalianStatus($denda, 'sudah_dibayar', now(), 0);
+        $this->syncPengembalianStatus($denda, 'sudah_dibayar', now(), $denda->jumlah_denda);
+
+        // Kembalikan stok buku yang hilang
+        $this->restoreStockForLostBooks($denda);
 
         if (request()->wantsJson() || request()->ajax()) {
             return response()->json(['success' => true, 'message' => 'Denda berhasil dibayar lunas.']);
@@ -237,12 +240,10 @@ class DendaController extends Controller
     {
         $request->validate([
             'peminjaman_id' => 'required|exists:peminjaman,id',
-            'jumlah_hari_terlambat' => 'required|integer|min:1',
+            'jumlah_hari_terlambat' => 'required|integer|min:0',
             'jumlah_denda' => 'required|numeric|min:0',
             'jumlah_bayar' => 'nullable|numeric|min:0|max:' . ($request->jumlah_denda ?? 0),
             'catatan' => 'nullable|string|max:500',
-            'status_pembayaran' => 'required|in:belum_dibayar,sudah_dibayar',
-            'tanggal_pembayaran' => 'nullable|date|required_if:status_pembayaran,sudah_dibayar',
         ]);
 
         $peminjaman = Peminjaman::findOrFail($request->peminjaman_id);
@@ -253,11 +254,15 @@ class DendaController extends Controller
         if ($jumlahBayar >= $jumlahDenda) {
             $sisaDenda = 0;
             $status = 'sudah_dibayar';
-            $tglBayar = $request->tanggal_pembayaran ?? now();
-        } else {
+            $tglBayar = now();
+        } elseif ($jumlahBayar > 0) {
             $sisaDenda = $jumlahDenda - $jumlahBayar;
-            $status = $request->status_pembayaran;
-            $tglBayar = $status === 'sudah_dibayar' ? $request->tanggal_pembayaran : null;
+            $status = 'sudah_dibayar';
+            $tglBayar = now();
+        } else {
+            $sisaDenda = $jumlahDenda;
+            $status = 'belum_dibayar';
+            $tglBayar = null;
         }
 
         // Cek apakah sudah ada denda untuk peminjaman ini
@@ -265,18 +270,26 @@ class DendaController extends Controller
 
         if ($existingDenda) {
             $sisaDenda = max(0, $existingDenda->jumlah_denda - $jumlahBayar);
+            $lunas = $sisaDenda == 0;
+
+            if ($jumlahBayar > 0) {
+                $asal = $existingDenda->jumlah_denda_asal ?? ($existingDenda->jumlah_denda + $jumlahBayar);
+                $ratio = min(1, $jumlahBayar / max($asal, 1));
+                $this->restoreStockForLostBooks($existingDenda, $ratio);
+            }
+
             $existingDenda->update([
-                'jumlah_denda' => $sisaDenda,
-                'status_pembayaran' => $sisaDenda == 0 ? 'sudah_dibayar' : 'belum_dibayar',
-                'tanggal_pembayaran' => $sisaDenda == 0 ? ($request->tanggal_pembayaran ?? now()) : null,
+                'jumlah_denda' => $lunas ? $existingDenda->jumlah_denda : $sisaDenda,
+                'status_pembayaran' => $lunas ? 'sudah_dibayar' : 'belum_dibayar',
+                'tanggal_pembayaran' => $lunas ? now() : null,
                 'catatan' => $request->catatan,
             ]);
 
             $this->syncPengembalianStatus(
                 $existingDenda,
-                $sisaDenda == 0 ? 'sudah_dibayar' : 'belum_dibayar',
-                $sisaDenda == 0 ? ($request->tanggal_pembayaran ?? now()) : null,
-                $sisaDenda
+                $lunas ? 'sudah_dibayar' : 'belum_dibayar',
+                $lunas ? now() : null,
+                $lunas ? $existingDenda->jumlah_denda : $sisaDenda
             );
 
             return redirect()->route('admin.denda.index')
@@ -287,13 +300,19 @@ class DendaController extends Controller
             'peminjaman_id' => $request->peminjaman_id,
             'anggota_id' => $peminjaman->anggota_id,
             'jumlah_hari_terlambat' => $request->jumlah_hari_terlambat,
-            'jumlah_denda' => $sisaDenda,
+            'jumlah_denda' => $status === 'sudah_dibayar' ? $jumlahDenda : $sisaDenda,
+            'jumlah_denda_asal' => $jumlahDenda,
             'status_pembayaran' => $status,
             'tanggal_pembayaran' => $tglBayar,
             'catatan' => $request->catatan,
         ]);
 
-        $this->syncPengembalianStatus($dendaBaru, $status, $tglBayar, $sisaDenda);
+        if ($jumlahBayar > 0) {
+            $ratio = min(1, $jumlahBayar / max($jumlahDenda, 1));
+            $this->restoreStockForLostBooks($dendaBaru, $ratio);
+        }
+
+        $this->syncPengembalianStatus($dendaBaru, $status, $tglBayar, $status === 'sudah_dibayar' ? $jumlahDenda : $sisaDenda);
 
         $msg = 'Data denda berhasil ditambahkan.';
         if ($jumlahBayar > 0) {
@@ -342,7 +361,7 @@ class DendaController extends Controller
         
         $request->validate([
             'peminjaman_id' => 'required|exists:peminjaman,id',
-            'jumlah_hari_terlambat' => 'required|integer|min:1',
+            'jumlah_hari_terlambat' => 'required|integer|min:0',
             'jumlah_denda' => 'required|numeric|min:0',
             'jumlah_bayar' => 'nullable|numeric|min:0|max:' . ($request->jumlah_denda ?? 0),
             'catatan' => 'nullable|string|max:500',
@@ -366,13 +385,17 @@ class DendaController extends Controller
         $denda->update([
             'peminjaman_id' => $request->peminjaman_id,
             'jumlah_hari_terlambat' => $request->jumlah_hari_terlambat,
-            'jumlah_denda' => $sisaDenda,
+            'jumlah_denda' => $status === 'sudah_dibayar' ? $jumlahDenda : $sisaDenda,
             'status_pembayaran' => $status,
             'tanggal_pembayaran' => $tglBayar,
             'catatan' => $request->catatan,
         ]);
 
-        $this->syncPengembalianStatus($denda, $status, $tglBayar, $sisaDenda);
+        $this->syncPengembalianStatus($denda, $status, $tglBayar, $status === 'sudah_dibayar' ? $jumlahDenda : $sisaDenda);
+
+        if ($status === 'sudah_dibayar') {
+            $this->restoreStockForLostBooks($denda);
+        }
 
         $msg = 'Data denda berhasil diperbarui.';
         if ($jumlahBayar > 0) {
@@ -559,7 +582,11 @@ class DendaController extends Controller
 
         // Update status denda di pengembalian terkait
         $tanggalBayar = $request->status_pembayaran === 'sudah_dibayar' ? ($request->tanggal_pembayaran ?? now()) : null;
-        $this->syncPengembalianStatus($denda, $request->status_pembayaran, $tanggalBayar);
+        $this->syncPengembalianStatus($denda, $request->status_pembayaran, $tanggalBayar, $denda->jumlah_denda);
+
+        if ($request->status_pembayaran === 'sudah_dibayar') {
+            $this->restoreStockForLostBooks($denda);
+        }
 
         return response()->json([
             'success' => true,
@@ -627,7 +654,8 @@ class DendaController extends Controller
                 'status_pembayaran' => 'sudah_dibayar',
                 'tanggal_pembayaran' => now(),
             ]);
-            $this->syncPengembalianStatus($denda, 'sudah_dibayar', now(), 0);
+            $this->syncPengembalianStatus($denda, 'sudah_dibayar', now(), $denda->jumlah_denda);
+            $this->restoreStockForLostBooks($denda);
         }
 
         return response()->json([
@@ -635,6 +663,109 @@ class DendaController extends Controller
             'message' => $dendas->count() . ' denda berhasil dilunasi.',
             'count'   => $dendas->count(),
         ]);
+    }
+
+    /**
+     * Pulihkan stok buku hilang untuk semua denda yang sudah dibayar lunas.
+     * Digunakan untuk retroactive fix data lama.
+     */
+    public function pulihkanStokBukuHilang()
+    {
+        $totalBuku = 0;
+        $totalDenda = 0;
+
+        $dendas = Denda::where('status_pembayaran', 'sudah_dibayar')->get();
+
+        foreach ($dendas as $denda) {
+            $pengembalian = null;
+
+            if ($denda->pengembalian_id) {
+                $pengembalian = Pengembalian::with('detailPengembalian.buku')->find($denda->pengembalian_id);
+            }
+
+            if (!$pengembalian && $denda->peminjaman_id) {
+                $pengembalian = Pengembalian::with('detailPengembalian.buku')
+                    ->where('peminjaman_id', $denda->peminjaman_id)
+                    ->first();
+            }
+
+            if ($pengembalian) {
+                foreach ($pengembalian->detailPengembalian as $detail) {
+                    if ($detail->kondisi_kembali === 'hilang' && $detail->jumlah_hilang > 0 && $detail->buku) {
+                        $detail->buku->increment('stok_tersedia', $detail->jumlah_hilang);
+                        $totalBuku += $detail->jumlah_hilang;
+                        $totalDenda++;
+                    }
+                }
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Stok berhasil dipulihkan: {$totalBuku} buku dari {$totalDenda} transaksi denda."
+        ]);
+    }
+
+    /**
+     * Restore stok buku yang hilang ketika denda dibayar.
+     * $ratio: proporsi dari total denda asal yang dibayar (default 1.0 = lunas).
+     * Stok dipulihkan secara proporsional dan dicatat di denda.stok_restored.
+     */
+    private function restoreStockForLostBooks(Denda $denda, float $ratio = 1.0)
+    {
+        $pengembalian = null;
+
+        if ($denda->pengembalian_id) {
+            $pengembalian = Pengembalian::with('detailPengembalian.buku')->find($denda->pengembalian_id);
+        }
+
+        if (!$pengembalian && $denda->peminjaman_id) {
+            $pengembalian = Pengembalian::with('detailPengembalian.buku')
+                ->where('peminjaman_id', $denda->peminjaman_id)
+                ->first();
+        }
+
+        if (!$pengembalian) return;
+
+        $totalHilang = 0;
+        foreach ($pengembalian->detailPengembalian as $detail) {
+            if ($detail->kondisi_kembali === 'hilang') {
+                $totalHilang += $detail->jumlah_hilang;
+            }
+        }
+
+        if ($totalHilang <= 0) return;
+
+        $targetRestored = (int) ceil($totalHilang * max(0, min(1, $ratio)));
+        $sudahRestored = (int) ($denda->stok_restored ?? 0);
+        $restoreNow = max(0, $targetRestored - $sudahRestored);
+
+        if ($restoreNow <= 0) return;
+
+        $remaining = $restoreNow;
+        foreach ($pengembalian->detailPengembalian as $detail) {
+            if ($detail->kondisi_kembali === 'hilang' && $detail->jumlah_hilang > 0 && $detail->buku && $remaining > 0) {
+                $proporsi = $detail->jumlah_hilang / $totalHilang;
+                $qty = (int) floor($restoreNow * $proporsi);
+                $qty = min($qty, $remaining, $detail->jumlah_hilang);
+                if ($qty > 0) {
+                    $detail->buku->increment('stok_tersedia', $qty);
+                    $remaining -= $qty;
+                }
+            }
+        }
+
+        // Sisa karena pembulatan floor, distribusi 1 per detail
+        if ($remaining > 0) {
+            foreach ($pengembalian->detailPengembalian as $detail) {
+                if ($detail->kondisi_kembali === 'hilang' && $detail->buku && $remaining > 0) {
+                    $detail->buku->increment('stok_tersedia', 1);
+                    $remaining--;
+                }
+            }
+        }
+
+        $denda->update(['stok_restored' => $targetRestored]);
     }
 
     /**

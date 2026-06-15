@@ -324,6 +324,14 @@ html[data-theme="dark"] .border-emerald-100 { border-color: rgba(16,185,129,0.2)
                     <span class="inline-flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white/20 text-white text-[8px] sm:text-[10px] font-extrabold">{{ $activeFilterCount }}</span>
                 @endif
             </button>
+            @if(Auth::user()->isAdmin() || Auth::user()->isPetugas())
+            <button type="button" id="pulihkanStokBtn"
+                    class="riwayat-btn riwayat-btn-filter"
+                    title="Pulihkan stok buku hilang yang sudah dibayar">
+                <i class="fas fa-boxes"></i>
+                <span class="hidden sm:inline">Pulihkan Stok</span>
+            </button>
+            @endif
         </div>
     </div>
 
@@ -376,8 +384,8 @@ html[data-theme="dark"] .border-emerald-100 { border-color: rgba(16,185,129,0.2)
         @endif
 
         {{-- DataTables Table --}}
-        <div class="table-scroll-wrap">
-            <table id="riwayat-table" class="riwayat-table">
+        <div class="overflow-x-auto">
+            <table id="riwayat-table" class="riwayat-table" style="width:100%;table-layout:auto;">
                 <thead>
                     <tr>
                         <th style="width:40px;text-align:center;">
@@ -473,10 +481,20 @@ html[data-theme="dark"] .border-emerald-100 { border-color: rgba(16,185,129,0.2)
 
                         {{-- Aksi --}}
                         <td class="text-center">
-                            <a href="{{ route('admin.denda.show', $item->id) }}"
-                               class="action-btn view" title="Detail">
-                                <i class="fas fa-eye"></i>
-                            </a>
+                            <div class="flex items-center justify-center gap-1.5">
+                                <a href="{{ route('admin.denda.show', $item->id) }}"
+                                   class="action-btn view" title="Detail">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                @if($canDelete)
+                                <button type="button"
+                                        class="action-btn delete"
+                                        title="Hapus"
+                                        onclick="confirmDelete({{ $item->id }}, '{{ addslashes($item->anggota->nama_lengkap ?? 'N/A') }}')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @endforeach
@@ -490,6 +508,12 @@ html[data-theme="dark"] .border-emerald-100 { border-color: rgba(16,185,129,0.2)
 
 
 @if($canDelete)
+{{-- ===== Individual Delete Form (hidden) ===== --}}
+<form id="deleteForm" method="POST" style="display:none;">
+    @csrf
+    @method('DELETE')
+</form>
+
 {{-- ===== Bulk Delete Form (hidden) ===== --}}
 <form id="bulkDeleteForm" action="{{ route('admin.denda.riwayat.bulk-destroy') }}" method="POST">
     @csrf
@@ -641,11 +665,14 @@ $(document).ready(function () {
                 <p style="font-size:11px;color:#9ca3af;">Coba ubah kata kunci atau filter pencarian</p>
             </div>`,
         },
-        scrollX: true,
+        scrollX: false,
+        scrollCollapse: false,
         pagingType: 'simple_numbers',
         pageLength: 10,
         order: [[5, 'desc']],
+        autoWidth: true,
         drawCallback: function () {
+            var paginateBtns = $(this).closest('.dataTables_wrapper').find('.paginate_button');
             if (window.innerWidth < 640) {
                 var api = this.api();
                 var info = api.page.info();
@@ -653,24 +680,22 @@ $(document).ready(function () {
                 var total = info.pages;
                 var start = current;
                 var end = Math.min(current + 1, total);
-                api.paginate().container.find('.paginate_button')
-                    .not('.previous, .next')
-                    .each(function () {
-                        var num = parseInt($(this).text());
-                        $(this).toggle(num >= start && num <= end);
-                    });
+                paginateBtns.not('.previous, .next').each(function () {
+                    var num = parseInt($(this).text());
+                    $(this).toggle(num >= start && num <= end);
+                });
             } else {
-                $(this.api().paginate().container).find('.paginate_button').not('.previous, .next').show();
+                paginateBtns.not('.previous, .next').show();
             }
         },
         columns: [
-            { orderable: false, searchable: false }, // checkbox
-            { orderable: true  },                    // anggota
-            { orderable: true  },                    // peminjaman
-            { orderable: true  },                    // terlambat
-            { orderable: true  },                    // jumlah denda
-            { orderable: true  },                    // tgl pembayaran
-            { orderable: false, searchable: false },  // aksi
+            { orderable: false, searchable: false, width: '40px' },  // checkbox
+            { orderable: true  },                                     // anggota
+            { orderable: true  },                                     // peminjaman
+            { orderable: true , className: 'text-center' },           // terlambat
+            { orderable: true , className: 'text-right' },            // jumlah denda
+            { orderable: true , className: 'text-center' },           // tgl pembayaran
+            { orderable: false, searchable: false, width: '120px', className: 'text-center' }, // aksi
         ],
     });
 
@@ -784,6 +809,71 @@ $(document).ready(function () {
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') filterModal.classList.remove('active');
+    });
+
+    // ========================
+    // Individual Delete
+    // ========================
+    window.confirmDelete = function(id, nama) {
+        Swal.fire({
+            title: 'Hapus Riwayat Denda?',
+            html: `Hapus riwayat denda <b>#${id}</b> milik ${nama}?<br>
+                   <small style="color:#9ca3af;">Tindakan ini tidak dapat dibatalkan.</small>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: '<i class="fas fa-trash-alt mr-1"></i>Ya, Hapus',
+            cancelButtonText: 'Batal',
+        }).then(result => {
+            if (result.isConfirmed) {
+                const form = document.getElementById('deleteForm');
+                form.action = '{{ route('admin.denda.destroy', '') }}/' + id;
+                form.submit();
+            }
+        });
+    };
+
+    // ========================
+    // Pulihkan Stok Buku Hilang
+    // ========================
+    document.getElementById('pulihkanStokBtn')?.addEventListener('click', function() {
+        Swal.fire({
+            title: 'Pulihkan Stok Buku Hilang?',
+            html: `Akan memulihkan stok untuk semua buku hilang<br>
+                   yang dendanya sudah dibayar lunas.<br>
+                   <small style="color:#9ca3af;">Hanya buku dengan kondisi "hilang" yang akan dipulihkan.</small>`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: '<i class="fas fa-check mr-1"></i>Ya, Pulihkan',
+            cancelButtonText: 'Batal',
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                return fetch('{{ route('admin.denda.pulihkan-stok') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    }
+                }).then(response => {
+                    if (!response.ok) throw new Error('Gagal memulihkan stok');
+                    return response.json();
+                }).catch(error => {
+                    Swal.showValidationMessage(error.message);
+                });
+            }
+        }).then(result => {
+            if (result.isConfirmed && result.value) {
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: result.value.message,
+                    icon: 'success',
+                    confirmButtonColor: '#10b981',
+                });
+            }
+        });
     });
 
     // ========================

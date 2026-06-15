@@ -203,7 +203,7 @@ html[data-theme="dark"] #anggotaSearchResults > * {
         </div>
 
         <!-- Section 2: Pilih Buku & Pengembalian -->
-        <form id="pengembalianForm" action="{{ route('pengembalian.store') }}" method="POST" onsubmit="return validateAndSubmit(event)">
+        <form id="pengembalianForm" action="{{ route('pengembalian.store') }}" method="POST" onsubmit="return validateAndSubmit(event)" data-spa-ignore>
             @csrf
             <input type="hidden" name="peminjaman_id" id="selectedPeminjamanId">
             <input type="hidden" name="selected_detail_ids" id="selectedDetailIds">
@@ -248,39 +248,7 @@ html[data-theme="dark"] #anggotaSearchResults > * {
                                 </div>
                                 <span id="totalDendaDisplay" class="text-sm font-extrabold text-red-600">Rp 0</span>
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                                        <i class="fas fa-check-circle mr-1 text-blue-400"></i>Status Pembayaran
-                                    </label>
-                                    <select name="status_pembayaran_denda" id="status_pembayaran_denda"
-                                            onchange="toggleTanggalPembayaran(this.value)"
-                                            class="w-full text-xs px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none">
-                                        <option value="belum_dibayar">Belum Dibayar</option>
-                                        <option value="sudah_dibayar">Sudah Dibayar</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div id="tanggalPembayaranSection" class="hidden mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                                            <i class="fas fa-calendar-check mr-1 text-blue-500"></i>Tanggal Pembayaran Denda <span class="text-red-500">*</span>
-                                        </label>
-                                        <input type="date" name="tanggal_pembayaran_denda" id="tanggal_pembayaran_denda"
-                                               value="{{ date('Y-m-d') }}"
-                                               class="w-full text-xs px-3 py-2.5 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none bg-white">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                                            <i class="fas fa-sticky-note mr-1 text-blue-400"></i>Catatan Pembayaran (opsional)
-                                        </label>
-                                        <input type="text" name="catatan_pembayaran_denda" id="catatan_pembayaran_denda"
-                                               placeholder="Keterangan pembayaran denda..."
-                                               class="w-full text-xs px-3 py-2.5 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none bg-white">
-                                    </div>
-                                </div>
-                            </div>
+
                         </div>
 
                         <!-- Catatan -->
@@ -703,10 +671,6 @@ function updateFormState() {
         // Show return content
         document.getElementById('returnFormContent').classList.remove('hidden');
 
-        // Reset status pembayaran ke default saat peminjaman pertama dipilih
-        const statusSelect = document.getElementById('status_pembayaran_denda');
-        if (statusSelect) { statusSelect.value = 'belum_dibayar'; toggleTanggalPembayaran('belum_dibayar'); }
-
         renderDendaBuku(selected);
         recalculateDenda();
     } else {
@@ -1029,13 +993,8 @@ function recalculateDenda() {
 
     if (totalDenda > 0) {
         document.getElementById('dendaFieldsSection').classList.remove('hidden');
-        const statusSelect = document.getElementById('status_pembayaran_denda');
-        if (statusSelect && !statusSelect.dataset.userChanged) {
-            statusSelect.value = 'belum_dibayar';
-        }
     } else {
         document.getElementById('dendaFieldsSection').classList.add('hidden');
-        document.getElementById('tanggalPembayaranSection').classList.add('hidden');
     }
 }
 
@@ -1054,15 +1013,6 @@ function validateAndSubmit(event) {
     const pIds = [...new Set(selected.map(s => s.peminjamanId))];
     if (pIds.length > 1) {
         showNotification('Hanya bisa memproses 1 peminjaman per transaksi!', 'error');
-        return false;
-    }
-
-    // Validate tanggal pembayaran denda jika status sudah_dibayar
-    const statusDenda = document.getElementById('status_pembayaran_denda');
-    const tanggalPembayaran = document.getElementById('tanggal_pembayaran_denda');
-    if (statusDenda && statusDenda.value === 'sudah_dibayar' && tanggalPembayaran && !tanggalPembayaran.value) {
-        showNotification('Tanggal pembayaran denda harus diisi jika status sudah dibayar!', 'error');
-        tanggalPembayaran.focus();
         return false;
     }
 
@@ -1096,8 +1046,10 @@ function validateAndSubmit(event) {
             if (result.isConfirmed) {
                 isSubmitting = true;
                 const btn = document.getElementById('submitBtn');
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Memproses...';
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Memproses...';
+                }
                 document.getElementById('pengembalianForm').submit();
             }
         });
@@ -1105,31 +1057,14 @@ function validateAndSubmit(event) {
         if (confirm('Proses pengembalian buku?')) {
             isSubmitting = true;
             const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Memproses...';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Memproses...';
+            }
             document.getElementById('pengembalianForm').submit();
         }
     }
     return false;
-}
-
-// ==================== DENDA PAYMENT TOGGLE ====================
-function toggleTanggalPembayaran(value) {
-    const section = document.getElementById('tanggalPembayaranSection');
-    const tanggalInput = document.getElementById('tanggal_pembayaran_denda');
-    if (value === 'sudah_dibayar') {
-        section.classList.remove('hidden');
-        tanggalInput.setAttribute('required', 'required');
-        // Auto-fill hari ini jika kosong
-        if (!tanggalInput.value) {
-            const _n = new Date();
-            tanggalInput.value = `${_n.getFullYear()}-${String(_n.getMonth()+1).padStart(2,'0')}-${String(_n.getDate()).padStart(2,'0')}`;
-        }
-    } else {
-        section.classList.add('hidden');
-        tanggalInput.removeAttribute('required');
-        tanggalInput.value = '';
-    }
 }
 
 function resetForm() {
